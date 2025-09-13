@@ -20,7 +20,19 @@ async function bootstrap() {
     .setTitle('Sky-S API')
     .setDescription('API documentation for the Sky-S application')
     .setVersion('1.0')
-    .addTag('auth')
+    .addTag('auth', 'Authentication endpoints')
+    .addTag('users', 'User management endpoints')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth', // This name here is important for matching up with @ApiBearerAuth() in your controller!
+    )
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, documentFactory);
