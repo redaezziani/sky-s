@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { CreateCategoryDialog } from "@/components/category/create-category-dialog";
 import { EditCategoryDialog } from "@/components/category/edit-category-dialog";
 import PaginationTable from "@/components/pagination-table";
+import { IconCircleCheckFilled } from "@tabler/icons-react";
 
 interface EnhancedCategoryTableProps {
   // Remove the callback props since we'll handle them internally
@@ -170,8 +171,9 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
       label: "Status",
       render: (category) => (
         <div className="flex items-center gap-2">
-          <Badge variant={category.isActive ? "secondary" : "outline"}>
-            {category.isActive ? "Active" : "Inactive"}
+          <Badge variant={"secondary"}>
+            {category.isActive ? <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" /> : <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" /> }
+          {category.isActive  ? "Active" : "Inactive"}
           </Badge>
         </div>
       ),

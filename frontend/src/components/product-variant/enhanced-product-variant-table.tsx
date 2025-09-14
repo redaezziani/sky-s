@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { CreateProductVariantDialog } from "@/components/product-variant/create-product-variant-dialog";
 import { EditProductVariantDialog } from "@/components/product-variant/edit-product-variant-dialog";
 import PaginationTable from "@/components/pagination-table";
+import { IconCircleCheckFilled } from "@tabler/icons-react";
 
 interface EnhancedProductVariantTableProps {
   // Remove the callback props since we'll handle them internally
@@ -37,15 +38,13 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
     products,
     loading,
     error,
-    currentPage,
-    itemsPerPage,
-    totalPages,
-    totalItems,
     fetchProducts,
     deleteVariant,
-    setCurrentPage,
-    setPageSize,
   } = useProductVariantsStore();
+
+  // Local pagination state for variants
+  const [variantCurrentPage, setVariantCurrentPage] = useState(1);
+  const [variantItemsPerPage, setVariantItemsPerPage] = useState(8);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingProductVariant, setEditingProductVariant] = useState<(ProductVariant & { productName: string; productId: string }) | null>(null);
@@ -71,6 +70,23 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
     });
     return variants;
   }, [products]);
+
+  // Calculate pagination for variants
+  const variantTotalItems = allVariants.length;
+  const variantTotalPages = Math.ceil(variantTotalItems / variantItemsPerPage);
+  const startIndex = (variantCurrentPage - 1) * variantItemsPerPage;
+  const endIndex = startIndex + variantItemsPerPage;
+  const paginatedVariants = allVariants.slice(startIndex, endIndex);
+
+  // Pagination handlers
+  const handlePageChange = (page: number) => {
+    setVariantCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (pageSize: number) => {
+    setVariantItemsPerPage(pageSize);
+    setVariantCurrentPage(1); // Reset to first page when page size changes
+  };
 
   // Fetch products with variants on component mount
   useEffect(() => {
@@ -176,7 +192,7 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
       render: (variant) => {
         const count = variant.skus?.length || 0;
         return (
-          <Badge variant={count > 0 ? "default" : "secondary"}>
+          <Badge variant={"secondary"}>
             {count} SKU{count !== 1 ? 's' : ''}
           </Badge>
         );
@@ -188,9 +204,10 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
       render: (variant) => {
         const isActive = variant.isActive;
         return (
-          <Badge variant={isActive ? "default" : "secondary"}>
-            {isActive ? "Active" : "Inactive"}
-          </Badge>
+          <Badge variant={"secondary"}>
+            {isActive ? <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" /> : <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" /> }
+          {isActive ? "Active" : "Inactive"}
+        </Badge>
         );
       },
     },
@@ -214,17 +231,17 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
       <DataTable
           title="Product Variants"
           columns={columns}
-          data={allVariants}
+          data={paginatedVariants}
           searchKeys={["name", "productName"]}
           searchPlaceholder="Search variants..."
           customHeader={
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
+            <div className="flex gap-2 items-center justify-between">
+              <div className="flex items-center gap-2 space-x-2">
                 <Checkbox
-                  checked={selectedVariantIds.length === allVariants.length && allVariants.length > 0}
+                  checked={selectedVariantIds.length === paginatedVariants.length && paginatedVariants.length > 0}
                   onCheckedChange={(value) => {
                     if (value) {
-                      setSelectedVariantIds(allVariants.map(v => v.id));
+                      setSelectedVariantIds(paginatedVariants.map(v => v.id));
                     } else {
                       setSelectedVariantIds([]);
                     }
@@ -237,7 +254,6 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
                 {selectedVariantIds.length > 0 && (
                   <Button
                     variant="destructive"
-                    size="sm"
                     onClick={() => setBulkDeleteDialogOpen(true)}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
@@ -277,12 +293,12 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
         />
 
       <PaginationTable
-        currentPage={currentPage}
-        totalPages={totalPages}
-        pageSize={itemsPerPage}
-        totalItems={totalItems}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={setPageSize}
+        currentPage={variantCurrentPage}
+        totalPages={variantTotalPages}
+        pageSize={variantItemsPerPage}
+        totalItems={variantTotalItems}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
       />
 
       {/* Delete Confirmation Dialog */}

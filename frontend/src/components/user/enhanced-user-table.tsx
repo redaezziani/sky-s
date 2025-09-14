@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { CreateUserDialog } from "@/components/user/create-user-dialog";
 import { EditUserDialog } from "@/components/user/edit-user-dialog";
 import PaginationTable from "@/components/pagination-table";
+import { IconCircleCheckFilled } from "@tabler/icons-react";
 
 interface EnhancedUserTableProps {
   // Remove the callback props since we'll handle them internally
@@ -168,9 +169,10 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
             {user.isActive ? "Active" : "Inactive"}
           </Badge>
           {user.isEmailVerified && (
-            <Badge variant="outline" className="text-xs">
-              ✓ Verified
-            </Badge>
+             <Badge variant={"secondary"}>
+            {user.isEmailVerified ? <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" /> : <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" /> }
+          {user.isEmailVerified ? "Email Verified" : "Email Unverified"}
+        </Badge>
           )}
         </div>
       ),

@@ -101,7 +101,7 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
   
   // Pagination state
   currentPage: 1,
-  pageSize: 13,
+  pageSize: 9,
   totalPages: 0,
 
   // Fetch categories with filtering

@@ -238,7 +238,7 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
         const totalStock = getTotalStock(product);
         return (
           <div className="text-sm">
-            <span className={totalStock > 0 ? "text-green-600" : "text-red-600"}>
+            <span className={totalStock > 0 ? "text-amber-600" : "text-red-600"}>
               {totalStock} units
             </span>
           </div>
@@ -263,10 +263,11 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
             {product.isActive ? "Active" : "Inactive"}
           </Badge>
           {product.isFeatured && (
-            <Badge variant="default" className="text-xs">
-              <Star className="w-3 h-3 mr-1" />
+            <Badge variant="secondary" className="text-xs">
+              <Star className="w-3 h-3 mr-1 stroke-amber-300 fill-amber-300 dark:fill-amber-300" />
               Featured
             </Badge>
+            
           )}
         </div>
       ),
