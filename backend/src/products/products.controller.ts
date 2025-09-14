@@ -11,7 +11,11 @@ import {
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFiles,
+  UploadedFile,
 } from '@nestjs/common';
+import { FilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiOperation,
@@ -19,6 +23,8 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiQuery,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import {
@@ -39,17 +45,105 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../../generated/prisma';
+import { ImageKitService } from '../common/services/imagekit.service';
 
 @ApiTags('Products')
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly imageKitService: ImageKitService,
+  ) {}
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MODERATOR)
   @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('coverImage'), FilesInterceptor('additionalImages', 10))
   @ApiOperation({ summary: 'Create a new product' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Product data with optional image files',
+    schema: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          description: 'Product name',
+          example: 'Wireless Bluetooth Headphones',
+        },
+        slug: {
+          type: 'string',
+          description: 'Product URL slug (optional)',
+          example: 'wireless-bluetooth-headphones',
+        },
+        description: {
+          type: 'string',
+          description: 'Product description',
+          example: 'High-quality wireless headphones...',
+        },
+        shortDesc: {
+          type: 'string',
+          description: 'Short description',
+          example: 'Premium wireless headphones',
+        },
+        isActive: {
+          type: 'boolean',
+          description: 'Whether product is active',
+          default: true,
+        },
+        isFeatured: {
+          type: 'boolean',
+          description: 'Whether product is featured',
+          default: false,
+        },
+        metaTitle: {
+          type: 'string',
+          description: 'SEO meta title',
+        },
+        metaDesc: {
+          type: 'string',
+          description: 'SEO meta description',
+        },
+        sortOrder: {
+          type: 'number',
+          description: 'Sort order',
+          default: 0,
+        },
+        categoryIds: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Category IDs',
+        },
+        coverImage: {
+          type: 'string',
+          format: 'binary',
+          description: 'Cover image file (optional)',
+        },
+        additionalImages: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+          description: 'Additional image files (optional)',
+        },
+        imageFolder: {
+          type: 'string',
+          description: 'Image upload folder',
+          example: 'products',
+          default: 'products',
+        },
+        imageTags: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Image tags',
+          example: ['product', 'electronics'],
+        },
+      },
+      required: ['name'],
+    },
+  })
   @ApiResponse({
     status: 201,
     description: 'Product created successfully',
@@ -67,8 +161,12 @@ export class ProductsController {
     status: 403,
     description: 'Forbidden - insufficient permissions',
   })
-  async create(@Body() createProductDto: CreateProductDto): Promise<ProductResponseDto> {
-    return this.productsService.create(createProductDto);
+  async create(
+    @Body() createProductDto: CreateProductDto,
+    @UploadedFile() coverImage?: Express.Multer.File,
+    @UploadedFiles() additionalImages?: Express.Multer.File[],
+  ): Promise<ProductResponseDto> {
+    return this.productsService.create(createProductDto, coverImage, additionalImages);
   }
 
   @Post('with-variants')

@@ -8,6 +8,9 @@ interface Secrets {
   JwtRefreshExpiresIn: string;
   DatabaseUrl: string;
   BcryptSaltRounds: number;
+  ImageKitPublicKey: string;
+  ImageKitPrivateKey: string;
+  ImageKitUrlEndpoint: string;
 }
 
 export const secrets: Secrets = {
@@ -18,4 +21,7 @@ export const secrets: Secrets = {
   JwtRefreshExpiresIn: env.JWT_REFRESH_EXPIRES_IN || '7d',
   DatabaseUrl: env.DATABASE_URL!,
   BcryptSaltRounds: parseInt(env.BCRYPT_SALT_ROUNDS || '12'),
+  ImageKitPublicKey: env.IMAGEKIT_PUBLIC_KEY || '',
+  ImageKitPrivateKey: env.IMAGEKIT_PRIVATE_KEY || '',
+  ImageKitUrlEndpoint: env.IMAGEKIT_URL_ENDPOINT || '',
 }

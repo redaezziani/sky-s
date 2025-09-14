@@ -15,10 +15,14 @@ import {
   ProductSKUResponseDto 
 } from './dto/response.dto';
 import { Prisma } from '../../generated/prisma';
+import { ImageKitService } from '../common/services/imagekit.service';
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private imageKitService: ImageKitService,
+  ) {}
 
   private generateSlug(name: string): string {
     return name
@@ -49,7 +53,11 @@ export class ProductsService {
     }
   }
 
-  async create(createProductDto: CreateProductDto): Promise<ProductResponseDto> {
+  async create(
+    createProductDto: CreateProductDto, 
+    coverImageFile?: Express.Multer.File,
+    additionalImageFiles?: Express.Multer.File[]
+  ): Promise<ProductResponseDto> {
     const slug = createProductDto.slug || this.generateSlug(createProductDto.name);
     const uniqueSlug = await this.ensureUniqueSlug(slug);
 
@@ -67,13 +75,30 @@ export class ProductsService {
       }
     }
 
+    let coverImageUrl = createProductDto.coverImage;
+
+    // Upload cover image if provided
+    if (coverImageFile) {
+      try {
+        const uploadResult = await this.imageKitService.uploadImage(coverImageFile, {
+          folder: createProductDto.imageFolder || 'products',
+          tags: createProductDto.imageTags || ['product'],
+          fileName: `${uniqueSlug}-cover`,
+        });
+        coverImageUrl = uploadResult.url;
+      } catch (error) {
+        throw new BadRequestException('Failed to upload cover image');
+      }
+    }
+
+    // Create the product
     const product = await this.prisma.product.create({
       data: {
         name: createProductDto.name,
         slug: uniqueSlug,
         description: createProductDto.description,
         shortDesc: createProductDto.shortDesc,
-        coverImage: createProductDto.coverImage,
+        coverImage: coverImageUrl,
         isActive: createProductDto.isActive ?? true,
         isFeatured: createProductDto.isFeatured ?? false,
         metaTitle: createProductDto.metaTitle,
@@ -96,6 +121,19 @@ export class ProductsService {
         },
       },
     });
+
+    // Upload additional images if provided
+    if (additionalImageFiles && additionalImageFiles.length > 0) {
+      try {
+        await this.imageKitService.uploadMultipleImages(additionalImageFiles, {
+          folder: createProductDto.imageFolder || 'products',
+          tags: [...(createProductDto.imageTags || ['product']), product.slug],
+        });
+      } catch (error) {
+        // Don't fail the product creation if additional images fail
+        console.error('Failed to upload additional product images:', error);
+      }
+    }
 
     return this.formatProductResponse(product);
   }
@@ -696,6 +734,125 @@ export class ProductsService {
       where: { id: skuId },
       data: { deletedAt: new Date() },
     });
+  }
+
+  // Image upload methods
+  async uploadProductImages(productId: string, files: Express.Multer.File[]) {
+    const product = await this.prisma.product.findFirst({
+      where: { id: productId, deletedAt: null },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    if (!files || files.length === 0) {
+      throw new BadRequestException('No files provided');
+    }
+
+    try {
+      const uploadResults = await this.imageKitService.uploadMultipleImages(files, {
+        folder: 'products',
+        tags: ['product', product.slug],
+      });
+
+      // If this is the first image and product doesn't have a cover image, set it
+      if (!product.coverImage && uploadResults.length > 0) {
+        await this.prisma.product.update({
+          where: { id: productId },
+          data: { coverImage: uploadResults[0].url },
+        });
+      }
+
+      return {
+        message: `Successfully uploaded ${uploadResults.length} images`,
+        images: uploadResults,
+      };
+    } catch (error) {
+      throw new BadRequestException('Failed to upload images');
+    }
+  }
+
+  async uploadSKUImages(skuId: string, files: Express.Multer.File[]) {
+    const sku = await this.prisma.productSKU.findFirst({
+      where: { id: skuId, deletedAt: null },
+      include: {
+        variant: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+
+    if (!sku) {
+      throw new NotFoundException('SKU not found');
+    }
+
+    if (!files || files.length === 0) {
+      throw new BadRequestException('No files provided');
+    }
+
+    try {
+      const uploadResults = await this.imageKitService.uploadMultipleImages(files, {
+        folder: 'products/skus',
+        tags: ['sku', sku.sku, sku.variant.product.slug],
+      });
+
+      // Create SKU image records
+      const imagePromises = uploadResults.map((result, index) =>
+        this.prisma.productSKUImage.create({
+          data: {
+            skuId: skuId,
+            url: result.url,
+            altText: `${sku.variant.product.name} - ${sku.sku}`,
+            position: index,
+          },
+        })
+      );
+
+      const createdImages = await Promise.all(imagePromises);
+
+      // If this is the first image and SKU doesn't have a cover image, set it
+      if (!sku.coverImage && uploadResults.length > 0) {
+        await this.prisma.productSKU.update({
+          where: { id: skuId },
+          data: { coverImage: uploadResults[0].url },
+        });
+      }
+
+      return {
+        message: `Successfully uploaded ${uploadResults.length} images`,
+        images: uploadResults,
+        skuImages: createdImages,
+      };
+    } catch (error) {
+      throw new BadRequestException('Failed to upload SKU images');
+    }
+  }
+
+  async deleteImage(imageId: string): Promise<void> {
+    const image = await this.prisma.productSKUImage.findUnique({
+      where: { id: imageId },
+    });
+
+    if (!image) {
+      throw new NotFoundException('Image not found');
+    }
+
+    try {
+      // Extract file ID from URL or use a stored fileId if available
+      // For now, we'll just delete the database record
+      // In a real implementation, you'd store the ImageKit fileId in the database
+      await this.prisma.productSKUImage.delete({
+        where: { id: imageId },
+      });
+
+      // Note: To properly delete from ImageKit, you'd need to store the fileId
+      // and then call: await this.imageKitService.deleteImage(fileId);
+    } catch (error) {
+      throw new BadRequestException('Failed to delete image');
+    }
   }
 
   private formatProductResponse(product: any): ProductResponseDto {

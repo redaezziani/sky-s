@@ -88,6 +88,25 @@ export class CreateProductDto {
   @IsArray()
   @IsUUID('4', { each: true })
   categoryIds?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Image upload folder',
+    example: 'products',
+    default: 'products'
+  })
+  @IsOptional()
+  @IsString()
+  imageFolder?: string;
+
+  @ApiPropertyOptional({
+    description: 'Image tags for organization',
+    type: [String],
+    example: ['product', 'electronics']
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  imageTags?: string[];
 }
 
 export class CreateProductVariantDto {

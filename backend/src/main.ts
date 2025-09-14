@@ -41,7 +41,7 @@ async function bootstrap() {
   app.enableVersioning();
   app.setGlobalPrefix('api');
   
-  await app.listen(secrets.Port);
+  await app.listen(8080);
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();
