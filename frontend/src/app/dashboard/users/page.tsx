@@ -21,7 +21,6 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* <EnhancedUserTable /> */}
       <EnhancedUserTable />
     </section>
   );

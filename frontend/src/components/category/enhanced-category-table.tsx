@@ -21,50 +21,50 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Trash2, Edit, UserPlus, Users } from "lucide-react";
-import { useUsersStore, type User } from "@/stores/users-store";
+import { MoreHorizontal, Trash2, Edit, Plus, Tag } from "lucide-react";
+import { useCategoriesStore, type Category } from "@/stores/categories-store";
 import { toast } from "sonner";
-import { CreateUserDialog } from "@/components/user/create-user-dialog";
-import { EditUserDialog } from "@/components/user/edit-user-dialog";
+import { CreateCategoryDialog } from "@/components/category/create-category-dialog";
+import { EditCategoryDialog } from "@/components/category/edit-category-dialog";
 import PaginationTable from "@/components/pagination-table";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
 
-interface EnhancedUserTableProps {
+interface EnhancedCategoryTableProps {
   // Remove the callback props since we'll handle them internally
 }
 
-export function EnhancedUserTable({}: EnhancedUserTableProps) {
+export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
   const {
-    users,
+    categories,
     loading,
     error,
-    selectedUsers,
+    selectedCategories,
     total,
     currentPage,
     pageSize,
     totalPages,
-    fetchUsers,
-    deleteUser,
-    bulkDeleteUsers,
-    selectUser,
+    fetchCategories,
+    deleteCategory,
+    bulkDeleteCategories,
+    selectCategory,
     clearSelection,
     clearError,
     setPage,
     setPageSize,
-    toggleUserStatus,
-  } = useUsersStore();
+    toggleCategoryStatus,
+  } = useCategoriesStore();
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
 
-  // Fetch users on component mount
+  // Fetch categories on component mount
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    fetchCategories();
+  }, [fetchCategories]);
 
   // Show error toast
   useEffect(() => {
@@ -74,47 +74,47 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
     }
   }, [error, clearError]);
 
-  const handleDeleteUser = async (id: string) => {
+  const handleDeleteCategory = async (id: string) => {
     try {
-      await deleteUser(id);
-      toast.success("User deleted successfully");
+      await deleteCategory(id);
+      toast.success("Category deleted successfully");
       setDeleteDialogOpen(false);
-      setUserToDelete(null);
+      setCategoryToDelete(null);
     } catch (error) {
-      toast.error("Failed to delete user");
+      toast.error("Failed to delete category");
     }
   };
 
   const handleToggleStatus = async (id: string) => {
     try {
-      await toggleUserStatus(id);
-      toast.success("User status updated successfully");
+      await toggleCategoryStatus(id);
+      toast.success("Category status updated successfully");
     } catch (error) {
-      toast.error("Failed to update user status");
+      toast.error("Failed to update category status");
     }
   };
 
   const handleBulkDelete = async () => {
     try {
-      await bulkDeleteUsers(selectedUsers);
-      toast.success(`${selectedUsers.length} users deleted successfully`);
+      await bulkDeleteCategories(selectedCategories);
+      toast.success(`${selectedCategories.length} categories deleted successfully`);
       setBulkDeleteDialogOpen(false);
     } catch (error) {
-      toast.error("Failed to delete users");
+      toast.error("Failed to delete categories");
     }
   };
 
-  const handleEditUser = (user: User) => {
-    setEditingUser(user);
+  const handleEditCategory = (category: Category) => {
+    setEditingCategory(category);
     setIsEditDialogOpen(true);
   };
 
   const handleCloseEditDialog = () => {
-    setEditingUser(null);
+    setEditingCategory(null);
     setIsEditDialogOpen(false);
   };
 
-  const handleCreateUser = () => {
+  const handleCreateCategory = () => {
     setIsCreateDialogOpen(true);
   };
 
@@ -122,91 +122,94 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
     setIsCreateDialogOpen(false);
   };
 
-  const columns: TableColumn<User>[] = [
+  const columns: TableColumn<Category>[] = [
     {
       key: "select",
       label: "Select",
-      render: (user) => (
+      render: (category) => (
         <Checkbox
-          checked={selectedUsers.includes(user.id)}
-          onCheckedChange={() => selectUser(user.id)}
-          aria-label="Select user"
+          checked={selectedCategories.includes(category.id)}
+          onCheckedChange={() => selectCategory(category.id)}
+          aria-label="Select category"
         />
       ),
     },
     {
       key: "name",
       label: "Name",
-      render: (user) => <div className="font-medium">{user.name}</div>,
-    },
-    {
-      key: "email",
-      label: "Email",
-      render: (user) => (
-        <div className="text-sm text-muted-foreground">{user.email}</div>
+      render: (category) => (
+        <div className="flex items-center gap-2">
+          <div className="font-medium">{category.name}</div>
+          {category.parent && (
+            <Badge variant="outline" className="text-xs">
+              Sub-category
+            </Badge>
+          )}
+        </div>
       ),
     },
     {
-      key: "role",
-      label: "Role",
-      render: (user) => (
-        <Badge
-          variant={
-            user.role === "ADMIN" ? "secondary" : 
-            user.role === "MODERATOR" ? "secondary" : "secondary"
-          }
-        >
-          {user.role}
-        </Badge>
+      key: "slug",
+      label: "Slug",
+      render: (category) => (
+        <div className="text-sm text-muted-foreground font-mono">
+          {category.slug}
+        </div>
+      ),
+    },
+    {
+      key: "parent",
+      label: "Parent",
+      render: (category) => (
+        <div className="text-sm text-muted-foreground">
+          {category.parent ? category.parent.name : "Root Category"}
+        </div>
       ),
     },
     {
       key: "status",
       label: "Status",
-      render: (user) => (
+      render: (category) => (
         <div className="flex items-center gap-2">
-          <Badge variant={user.isActive ? "secondary" : "secondary"}>
-            {user.isActive ? "Active" : "Inactive"}
+          <Badge variant={"secondary"}>
+            {category.isActive ? <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" /> : <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" /> }
+          {category.isActive  ? "Active" : "Inactive"}
           </Badge>
-          {user.isEmailVerified && (
-             <Badge variant={"secondary"}>
-            {user.isEmailVerified ? <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" /> : <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" /> }
-          {user.isEmailVerified ? "Email Verified" : "Email Unverified"}
-        </Badge>
-          )}
         </div>
       ),
     },
     {
-      key: "stats",
-      label: "Activity",
-      render: (user) => (
-        <div className="text-xs text-muted-foreground">
-          {user._count && (
-            <div>
-              Orders: {user._count.orders} | Reviews: {user._count.reviews}
-            </div>
-          )}
+      key: "products",
+      label: "Products",
+      render: (category) => (
+        <div className="text-sm text-muted-foreground">
+          {category.productCount ?? 0} products
         </div>
       ),
     },
     {
-      key: "lastLogin",
-      label: "Last Login",
-      render: (user) => {
-        const date = user.lastLoginAt ? new Date(user.lastLoginAt) : null;
-        return (
-          <div className="text-sm text-muted-foreground">
-            {date ? date.toLocaleDateString() : "Never"}
-          </div>
-        );
-      },
+      key: "children",
+      label: "Sub-categories",
+      render: (category) => (
+        <div className="text-sm text-muted-foreground">
+          {category.children ? category.children.length : 0} sub-categories
+        </div>
+      ),
+    },
+    {
+      key: "sortOrder",
+      label: "Order",
+      render: (category) => (
+        <div className="text-sm text-muted-foreground">
+          {category.sortOrder}
+        </div>
+      ),
     },
     {
       key: "createdAt",
       label: "Created",
-      render: (user) => {
-        const date = new Date(user.createdAt);
+      render: (category) => {
+        const date = new Date(category.createdAt);
         return (
           <div className="text-sm text-muted-foreground">
             {date.toLocaleDateString()}
@@ -217,7 +220,7 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
     {
       key: "actions",
       label: "Actions",
-      render: (user) => (
+      render: (category) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -226,17 +229,16 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-             <EditUserDialog
-                user={editingUser}
-              />
+            <DropdownMenuItem onClick={() => handleEditCategory(category)}>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleToggleStatus(user.id)}>
-              {user.isActive ? "Deactivate" : "Activate"}
+            <DropdownMenuItem onClick={() => handleToggleStatus(category.id)}>
+              {category.isActive ? "Deactivate" : "Activate"}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
-                setUserToDelete(user.id);
+                setCategoryToDelete(category.id);
                 setDeleteDialogOpen(true);
               }}
               className="text-destructive"
@@ -253,29 +255,37 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
   return (
     <div className="space-y-4">
       <DataTable
-        title="User Management"
-        data={users}
+        title="Category Management"
+        data={categories}
         columns={columns}
-        searchKeys={["name", "email", "role"]}
-        searchPlaceholder="Search users by name, email, or role..."
-        emptyMessage="No users found"
+        searchKeys={["name", "slug", "description"]}
+        searchPlaceholder="Search categories by name, slug, or description..."
+        emptyMessage="No categories found"
         showCount={true}
         customHeader={
           <div className="flex items-center gap-2">
-            {selectedUsers.length > 0 && (
+            {selectedCategories.length > 0 && (
               <Button
                 variant="destructive"
                 onClick={() => setBulkDeleteDialogOpen(true)}
                 className="flex items-center gap-2"
               >
                 <Trash2 className="h-4 w-4" />
-                Delete Selected ({selectedUsers.length})
+                Delete Selected ({selectedCategories.length})
               </Button>
             )}
-            <CreateUserDialog />
+            <CreateCategoryDialog />
           </div>
         }
       />
+
+      {/* Edit Category Dialog */}
+      <EditCategoryDialog
+        category={editingCategory}
+        open={isEditDialogOpen}
+        onClose={handleCloseEditDialog}
+      />
+
       {/* Single Delete Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
@@ -283,13 +293,13 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the
-              user.
+              category and all its subcategories.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => userToDelete && handleDeleteUser(userToDelete)}
+              onClick={() => categoryToDelete && handleDeleteCategory(categoryToDelete)}
             >
               Delete
             </AlertDialogAction>
@@ -305,11 +315,11 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Delete {selectedUsers.length} users?
+              Delete {selectedCategories.length} categories?
             </AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the
-              selected users.
+              selected categories and all their subcategories.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
