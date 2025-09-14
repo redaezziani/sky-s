@@ -110,16 +110,9 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
       set({ loading: true, error: null });
 
       const { currentPage, pageSize } = get();
-      const offset = Math.max(0, (currentPage - 1) * pageSize);
-
-      // Always send default values to ensure integers
-      const finalOffset = Math.max(0, Math.floor(params.offset ?? offset));
-      const finalLimit = Math.max(1, Math.floor(params.limit ?? pageSize));
       
-      // Use axios params instead of URLSearchParams for better type handling
+      // Use axios params for backend filtering (no offset/limit since backend returns all)
       const apiParams: any = {
-        offset: finalOffset,
-        limit: finalLimit,
         includeChildren: params.includeChildren ?? true,
         includeProductCount: params.includeProductCount ?? true,
       };
@@ -144,13 +137,12 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
         params: apiParams
       });
 
-      // Since the backend doesn't return paginated data for categories,
-      // we'll simulate pagination on the frontend
+      // Backend returns all categories, we handle pagination on frontend
       const allCategories = response.data;
       const total = allCategories.length;
       const totalPages = Math.ceil(total / pageSize);
-      const startIndex = finalOffset;
-      const endIndex = Math.min(startIndex + finalLimit, total);
+      const startIndex = Math.max(0, (currentPage - 1) * pageSize);
+      const endIndex = Math.min(startIndex + pageSize, total);
       const paginatedCategories = allCategories.slice(startIndex, endIndex);
 
       set({
