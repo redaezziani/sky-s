@@ -1,7 +1,34 @@
 import { PrismaClient } from '../../generated/prisma';
 import { seedUsers, clearUsers } from './seeders/user.seeder';
+import { seedCategories } from './seeders/category.seeder';
+import { seedProducts } from './seeders/product.seeder';
 
 const prisma = new PrismaClient();
+
+async function clearAll() {
+  console.log('🧹 Clearing existing data...');
+  
+  // Clear in reverse dependency order
+  await prisma.productSKUImage.deleteMany();
+  await prisma.productSKU.deleteMany();
+  await prisma.productVariant.deleteMany();
+  await prisma.product.deleteMany();
+  await prisma.category.deleteMany();
+  await clearUsers();
+  
+  console.log('✅ All data cleared');
+}
+
+async function seedAll() {
+  console.log('🌱 Seeding all data...');
+  
+  // Seed in dependency order
+  await seedUsers();
+  await seedCategories();
+  await seedProducts();
+  
+  console.log('✅ All data seeded');
+}
 
 async function main() {
   console.log('🚀 Starting database seeding...');
@@ -13,13 +40,11 @@ async function main() {
     const shouldSeed = args.includes('--seed') || args.includes('-s') || args.length === 0;
 
     if (shouldClear) {
-      console.log('🧹 Clearing existing data...');
-      await clearUsers();
+      await clearAll();
     }
 
     if (shouldSeed) {
-      console.log('🌱 Seeding data...');
-      await seedUsers();
+      await seedAll();
     }
 
     console.log('🎉 Database seeding completed successfully!');
