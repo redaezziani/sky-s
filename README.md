@@ -1,5 +1,11 @@
 # 🌟 Sky S - Modern E-commerce Platform
 
+<div align="center">
+  <img src="project-cover.png" alt="Sky S - Modern E-commerce Platform" width="800" />
+</div>
+
+<div align="center">
+
 [![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
