@@ -173,59 +173,49 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
     {
       key: "product",
       label: "Product",
-      render: (product) => (
-        <div className="flex items-center gap-3">
-          {product.coverImage ? (
-            <img
-              src={product.coverImage}
-              alt={product.name}
-              className="w-12 h-12 object-cover rounded-md"
-            />
-          ) : (
-            <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center">
-              <Package className="h-6 w-6 text-muted-foreground" />
+      render: (product) => {
+        // Get first SKU from first variant
+        const firstVariant = product.variants?.[0];
+        const firstSKU = firstVariant?.skus?.[0];
+        return (
+          <div className="flex items-center max-w-80 gap-3">
+            {product.coverImage ? (
+              <img
+                src={product.coverImage}
+                alt={product.name}
+                className="w-12 h-12 object-cover rounded-md"
+              />
+            ) : (
+              <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center">
+                <Package className="h-6 w-6 text-muted-foreground" />
+              </div>
+            )}
+            <div className="flex flex-col w-full">
+              <div className="font-medium line-clamp-1 truncate">{product.name}</div>
+              <div className="text-sm text-muted-foreground">{product.slug}</div>
+              {firstSKU && (
+                <div className="text-xs text-muted-foreground">SKU: {firstSKU.sku}</div>
+              )}
             </div>
-          )}
-          <div className="flex flex-col">
-            <div className="font-medium">{product.name}</div>
-            <div className="text-sm text-muted-foreground">{product.slug}</div>
           </div>
-        </div>
-      ),
-    },
-    {
-      key: "categories",
-      label: "Categories",
-      render: (product) => (
-        <div className="flex flex-wrap gap-1">
-          {product.categories && product.categories.length > 0 ? (
-            product.categories.slice(0, 2).map((category) => (
-              <Badge key={category.id} variant="outline" className="text-xs">
-                {category.name}
-              </Badge>
-            ))
-          ) : (
-            <span className="text-sm text-muted-foreground">No categories</span>
-          )}
-          {product.categories && product.categories.length > 2 && (
-            <Badge variant="outline" className="text-xs">
-              +{product.categories.length - 2}
-            </Badge>
-          )}
-        </div>
-      ),
+        );
+      },
     },
     {
       key: "price",
       label: "Price",
       render: (product) => {
-        const lowestPrice = getLowestPrice(product);
+        // Show price from first SKU if available
+        const firstVariant = product.variants?.[0];
+        const firstSKU = firstVariant?.skus?.[0];
+        console.log(firstVariant)
+        const price = firstSKU?.price;
         return (
           <div className="text-sm">
-            {lowestPrice !== undefined ? (
-              <span className="font-medium">{formatPrice(lowestPrice)}</span>
+         {price !== undefined ? (
+              <span className="font-medium">{formatPrice(price)}</span>
             ) : (
-              <span className="text-muted-foreground">No pricing</span>
+              <span className="text-muted-foreground">no pricing</span>
             )}
           </div>
         );
@@ -235,12 +225,19 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
       key: "stock",
       label: "Stock",
       render: (product) => {
-        const totalStock = getTotalStock(product);
+        // Show stock from first SKU if available
+        const firstVariant = product.variants?.[0];
+        const firstSKU = firstVariant?.skus?.[0];
+        const stock = firstSKU?.stock;
         return (
           <div className="text-sm">
-            <span className={totalStock > 0 ? "text-amber-600" : "text-red-600"}>
-              {totalStock} units
-            </span>
+            {stock !== undefined ? (
+              <span className={stock > 0 ? "text-amber-600" : "text-red-600"}>
+                {stock} units
+              </span>
+            ) : (
+              <span className="text-muted-foreground">no stock</span>
+            )}
           </div>
         );
       },

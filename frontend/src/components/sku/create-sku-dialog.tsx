@@ -47,6 +47,7 @@ const createSKUSchema = z.object({
   weight: z.number().optional(),
   dimensions: z.string().optional(),
   isActive: z.boolean(),
+  images: z.any().optional(), // Add images field
 });
 
 type CreateSKUFormData = z.infer<typeof createSKUSchema>;
@@ -61,6 +62,7 @@ export function CreateSKUDialog({
   onOpenChange,
 }: CreateSKUDialogProps) {
   const { createSKU, loading, products } = useProductVariantsStore();
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
   const form = useForm<CreateSKUFormData>({
     resolver: zodResolver(createSKUSchema),
@@ -76,6 +78,7 @@ export function CreateSKUDialog({
       weight: undefined,
       dimensions: "",
       isActive: true,
+      images: undefined,
     },
   });
 
@@ -93,22 +96,27 @@ export function CreateSKUDialog({
       const dimensionsData = data.dimensions ? 
         JSON.parse(data.dimensions) : undefined;
 
-      await createSKU(data.variantId, {
-        sku: data.sku,
-        barcode: data.barcode || undefined,
-        price: data.price,
-        comparePrice: data.comparePrice,
-        costPrice: data.costPrice,
-        stock: data.stock,
-        lowStockAlert: data.lowStockAlert,
-        weight: data.weight,
-        dimensions: dimensionsData,
-        isActive: data.isActive,
-      });
+      // Prepare FormData for multipart upload
+      const formData = new FormData();
+      formData.append("variantId", data.variantId);
+      formData.append("sku", data.sku);
+      if (data.barcode) formData.append("barcode", data.barcode);
+      formData.append("price", String(data.price));
+      if (data.comparePrice !== undefined) formData.append("comparePrice", String(data.comparePrice));
+      if (data.costPrice !== undefined) formData.append("costPrice", String(data.costPrice));
+      formData.append("stock", String(data.stock));
+      formData.append("lowStockAlert", String(data.lowStockAlert));
+      if (data.weight !== undefined) formData.append("weight", String(data.weight));
+      if (dimensionsData) formData.append("dimensions", JSON.stringify(dimensionsData));
+      formData.append("isActive", String(data.isActive));
+      selectedImages.forEach((file) => formData.append("images", file));
+
+      await createSKU(data.variantId, formData); // Update store to accept FormData
 
       toast.success("SKU created successfully");
       onOpenChange(false);
       form.reset();
+      setSelectedImages([]);
     } catch (error) {
       toast.error("Failed to create SKU");
     }
@@ -391,6 +399,27 @@ export function CreateSKUDialog({
                 </FormItem>
               )}
             />
+
+            {/* Image upload field */}
+            <FormItem>
+              <FormLabel>SKU Images (optional)</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={e => {
+                    if (e.target.files) {
+                      setSelectedImages(Array.from(e.target.files));
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormDescription>
+                Upload one or more images for this SKU.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
 
             <DialogFooter>
               <Button

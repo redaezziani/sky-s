@@ -122,8 +122,8 @@ export interface ProductVariantsState {
   deleteVariant: (variantId: string) => Promise<void>;
 
   // SKU management
-  createSKU: (variantId: string, data: CreateProductSKUDto) => Promise<ProductSKU>;
-  updateSKU: (skuId: string, data: Partial<CreateProductSKUDto>) => Promise<ProductSKU>;
+  createSKU: (variantId: string, data: CreateProductSKUDto | FormData) => Promise<ProductSKU>;
+  updateSKU: (skuId: string, data: Partial<CreateProductSKUDto> | FormData) => Promise<ProductSKU>;
   deleteSKU: (skuId: string) => Promise<void>;
 
   // Utilities
@@ -324,9 +324,17 @@ const useProductVariantsStore = create<ProductVariantsState>()(
       },
 
       // Create SKU
-      createSKU: async (variantId: string, data: CreateProductSKUDto) => {
+      createSKU: async (variantId: string, data: CreateProductSKUDto | FormData) => {
         try {
-          const response = await axiosInstance.post(`/products/variants/${variantId}/skus`, data);
+          let response;
+          // Accept both FormData and CreateProductSKUDto
+          if (data instanceof FormData) {
+            response = await axiosInstance.post(`/products/variants/${variantId}/skus`, data, {
+              headers: {}, // Let browser set Content-Type
+            });
+          } else {
+            response = await axiosInstance.post(`/products/variants/${variantId}/skus`, data);
+          }
           const sku = response.data;
 
           // Update products list and selected entities
@@ -381,9 +389,16 @@ const useProductVariantsStore = create<ProductVariantsState>()(
       },
 
       // Update SKU
-      updateSKU: async (skuId: string, data: Partial<CreateProductSKUDto>) => {
+      updateSKU: async (skuId: string, data: Partial<CreateProductSKUDto> | FormData) => {
         try {
-          const response = await axiosInstance.patch(`/products/skus/${skuId}`, data);
+          let response;
+          if (data instanceof FormData) {
+            response = await axiosInstance.patch(`/products/skus/${skuId}`, data, {
+              headers: {}, // Let browser set Content-Type
+            });
+          } else {
+            response = await axiosInstance.patch(`/products/skus/${skuId}`, data);
+          }
           const updatedSKU = response.data;
 
           // Update products list and selected entities

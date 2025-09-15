@@ -389,11 +389,13 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
   setPage: (page: number) => {
     const validPage = Math.max(1, Math.floor(page));
     set({ currentPage: validPage });
+    // Always fetch with the updated currentPage
     get().fetchProducts();
   },
 
   setPageSize: (pageSize: number) => {
     const validPageSize = Math.max(1, Math.floor(pageSize));
+    // Reset to first page and update pageSize, then fetch
     set({ pageSize: validPageSize, currentPage: 1 });
     get().fetchProducts();
   },

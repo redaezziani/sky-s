@@ -609,7 +609,11 @@ export class ProductsService {
   }
 
   // SKU operations
-  async addSKU(variantId: string, createSKUDto: CreateProductSKUDto): Promise<ProductSKUResponseDto> {
+  async addSKU(
+    variantId: string,
+    createSKUDto: CreateProductSKUDto,
+    imageFiles?: Express.Multer.File[]
+  ): Promise<ProductSKUResponseDto> {
     const variant = await this.prisma.productVariant.findFirst({
       where: { id: variantId, deletedAt: null },
     });
@@ -666,10 +670,55 @@ export class ProductsService {
       },
     });
 
-    return this.formatSKUResponse(sku);
+    // Handle image upload and SKU image creation
+    if (imageFiles && imageFiles.length > 0) {
+      try {
+        const uploadResults = await this.imageKitService.uploadMultipleImages(imageFiles, {
+          folder: 'products/skus',
+          tags: ['sku', sku.sku],
+        });
+
+        const imagePromises = uploadResults.map((result, index) =>
+          this.prisma.productSKUImage.create({
+            data: {
+              skuId: sku.id,
+              url: result.url,
+              altText: `${variant.name || ''} - ${sku.sku}`,
+              position: index,
+            },
+          })
+        );
+        await Promise.all(imagePromises);
+
+        // Set cover image if not already set
+        if (!sku.coverImage && uploadResults.length > 0) {
+          await this.prisma.productSKU.update({
+            where: { id: sku.id },
+            data: { coverImage: uploadResults[0].url },
+          });
+        }
+      } catch (error) {
+        // Don't fail SKU creation if image upload fails
+        console.error('Failed to upload SKU images:', error);
+      }
+    }
+
+    // Fetch updated SKU with images
+    const updatedSKU = await this.prisma.productSKU.findFirst({
+      where: { id: sku.id },
+      include: {
+        images: { orderBy: { position: 'asc' as const } },
+      },
+    });
+
+    return this.formatSKUResponse(updatedSKU);
   }
 
-  async updateSKU(skuId: string, updateSKUDto: Partial<CreateProductSKUDto>): Promise<ProductSKUResponseDto> {
+  async updateSKU(
+    skuId: string,
+    updateSKUDto: Partial<CreateProductSKUDto>,
+    imageFiles?: Express.Multer.File[]
+  ): Promise<ProductSKUResponseDto> {
     const sku = await this.prisma.productSKU.findFirst({
       where: { id: skuId, deletedAt: null },
     });
@@ -718,7 +767,48 @@ export class ProductsService {
       },
     });
 
-    return this.formatSKUResponse(updatedSKU);
+    // Handle image upload and SKU image creation
+    if (imageFiles && imageFiles.length > 0) {
+      try {
+        const uploadResults = await this.imageKitService.uploadMultipleImages(imageFiles, {
+          folder: 'products/skus',
+          tags: ['sku', updatedSKU.sku],
+        });
+
+        const imagePromises = uploadResults.map((result, index) =>
+          this.prisma.productSKUImage.create({
+            data: {
+              skuId: updatedSKU.id,
+              url: result.url,
+              altText: `${updatedSKU.sku}`,
+              position: index,
+            },
+          })
+        );
+        await Promise.all(imagePromises);
+
+        // Set cover image if not already set
+        if (!updatedSKU.coverImage && uploadResults.length > 0) {
+          await this.prisma.productSKU.update({
+            where: { id: updatedSKU.id },
+            data: { coverImage: uploadResults[0].url },
+          });
+        }
+      } catch (error) {
+        // Don't fail SKU update if image upload fails
+        console.error('Failed to upload SKU images:', error);
+      }
+    }
+
+    // Fetch updated SKU with images
+    const refreshedSKU = await this.prisma.productSKU.findFirst({
+      where: { id: updatedSKU.id },
+      include: {
+        images: { orderBy: { position: 'asc' as const } },
+      },
+    });
+
+    return this.formatSKUResponse(refreshedSKU);
   }
 
   async removeSKU(skuId: string): Promise<void> {

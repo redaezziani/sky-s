@@ -46,6 +46,7 @@ const editSKUSchema = z.object({
   weight: z.number().optional(),
   dimensions: z.string().optional(),
   isActive: z.boolean(),
+  images: z.any().optional(), // Add images field
 });
 
 type EditSKUFormData = z.infer<typeof editSKUSchema>;
@@ -62,6 +63,7 @@ export function EditSKUDialog({
   sku,
 }: EditSKUDialogProps) {
   const { updateSKU, loading, products } = useProductVariantsStore();
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
   const form = useForm<EditSKUFormData>({
     resolver: zodResolver(editSKUSchema),
@@ -77,6 +79,7 @@ export function EditSKUDialog({
       weight: undefined,
       dimensions: "",
       isActive: true,
+      images: undefined,
     },
   });
 
@@ -114,21 +117,25 @@ export function EditSKUDialog({
       const dimensionsData = data.dimensions ? 
         JSON.parse(data.dimensions) : undefined;
 
-      await updateSKU(sku.id, {
-        sku: data.sku,
-        barcode: data.barcode || undefined,
-        price: data.price,
-        comparePrice: data.comparePrice,
-        costPrice: data.costPrice,
-        stock: data.stock,
-        lowStockAlert: data.lowStockAlert,
-        weight: data.weight,
-        dimensions: dimensionsData,
-        isActive: data.isActive,
-      });
+      // Prepare FormData for multipart upload
+      const formData = new FormData();
+      formData.append("sku", data.sku);
+      if (data.barcode) formData.append("barcode", data.barcode);
+      formData.append("price", String(data.price));
+      if (data.comparePrice !== undefined) formData.append("comparePrice", String(data.comparePrice));
+      if (data.costPrice !== undefined) formData.append("costPrice", String(data.costPrice));
+      formData.append("stock", String(data.stock));
+      formData.append("lowStockAlert", String(data.lowStockAlert));
+      if (data.weight !== undefined) formData.append("weight", String(data.weight));
+      if (dimensionsData) formData.append("dimensions", JSON.stringify(dimensionsData));
+      formData.append("isActive", String(data.isActive));
+      selectedImages.forEach((file) => formData.append("images", file));
+
+      await updateSKU(sku.id, formData); // Update store to accept FormData
 
       toast.success("SKU updated successfully");
       onOpenChange(false);
+      setSelectedImages([]);
     } catch (error) {
       toast.error("Failed to update SKU");
     }
@@ -413,6 +420,27 @@ export function EditSKUDialog({
                 </FormItem>
               )}
             />
+
+            {/* Image upload field */}
+            <FormItem>
+              <FormLabel>SKU Images (optional)</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={e => {
+                    if (e.target.files) {
+                      setSelectedImages(Array.from(e.target.files));
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormDescription>
+                Upload one or more images for this SKU.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
 
             <DialogFooter>
               <Button

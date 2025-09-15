@@ -523,84 +523,95 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MODERATOR)
   @ApiBearerAuth()
+  @UseInterceptors(FilesInterceptor('images', 10))
   @ApiOperation({ summary: 'Add a SKU to a variant' })
-  @ApiParam({
-    name: 'variantId',
-    description: 'Variant UUID',
-    example: '550e8400-e29b-41d4-a716-446655440000',
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'SKU data with optional image files',
+    schema: {
+      type: 'object',
+      properties: {
+        sku: { type: 'string', example: 'WBH-001-LG-BLK' },
+        barcode: { type: 'string', example: '1234567890123' },
+        price: { type: 'number', example: 199.99 },
+        comparePrice: { type: 'number', example: 249.99 },
+        costPrice: { type: 'number', example: 89.99 },
+        stock: { type: 'number', example: 10 },
+        lowStockAlert: { type: 'number', example: 5 },
+        weight: { type: 'number', example: 250 },
+        dimensions: { type: 'object', example: { length: 20, width: 15, height: 8 } },
+        coverImage: { type: 'string', example: 'https://example.com/image.jpg' },
+        isActive: { type: 'boolean', example: true },
+        images: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+          description: 'SKU image files (optional)',
+        },
+      },
+      required: ['sku', 'price'],
+    },
   })
   @ApiResponse({
     status: 201,
     description: 'SKU created successfully',
     type: ProductSKUResponseDto,
   })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid input data',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized',
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'Forbidden - insufficient permissions',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Variant not found',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'SKU or barcode already exists',
-  })
+  @ApiResponse({ status: 400, description: 'Invalid input data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  @ApiResponse({ status: 404, description: 'Variant not found' })
+  @ApiResponse({ status: 409, description: 'SKU or barcode already exists' })
   async addSKU(
     @Param('variantId', ParseUUIDPipe) variantId: string,
     @Body() createSKUDto: CreateProductSKUDto,
+    @UploadedFiles() images?: Express.Multer.File[],
   ): Promise<ProductSKUResponseDto> {
-    return this.productsService.addSKU(variantId, createSKUDto);
+    return this.productsService.addSKU(variantId, createSKUDto, images);
   }
 
   @Patch('skus/:skuId')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MODERATOR)
   @ApiBearerAuth()
+  @UseInterceptors(FilesInterceptor('images', 10))
   @ApiOperation({ summary: 'Update a product SKU' })
-  @ApiParam({
-    name: 'skuId',
-    description: 'SKU UUID',
-    example: '550e8400-e29b-41d4-a716-446655440000',
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'SKU update data with optional image files',
+    schema: {
+      type: 'object',
+      properties: {
+        sku: { type: 'string', example: 'WBH-001-LG-BLK' },
+        barcode: { type: 'string', example: '1234567890123' },
+        price: { type: 'number', example: 199.99 },
+        comparePrice: { type: 'number', example: 249.99 },
+        costPrice: { type: 'number', example: 89.99 },
+        stock: { type: 'number', example: 10 },
+        lowStockAlert: { type: 'number', example: 5 },
+        weight: { type: 'number', example: 250 },
+        dimensions: { type: 'object', example: { length: 20, width: 15, height: 8 } },
+        coverImage: { type: 'string', example: 'https://example.com/image.jpg' },
+        isActive: { type: 'boolean', example: true },
+        images: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+          description: 'SKU image files (optional)',
+        },
+      },
+    },
   })
-  @ApiResponse({
-    status: 200,
-    description: 'SKU updated successfully',
-    type: ProductSKUResponseDto,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid input data',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized',
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'Forbidden - insufficient permissions',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'SKU not found',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'SKU or barcode already exists',
-  })
+  @ApiResponse({ status: 200, description: 'SKU updated successfully', type: ProductSKUResponseDto })
+  @ApiResponse({ status: 400, description: 'Invalid input data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  @ApiResponse({ status: 404, description: 'SKU not found' })
+  @ApiResponse({ status: 409, description: 'SKU or barcode already exists' })
   async updateSKU(
     @Param('skuId', ParseUUIDPipe) skuId: string,
     @Body() updateSKUDto: Partial<CreateProductSKUDto>,
+    @UploadedFiles() images?: Express.Multer.File[],
   ): Promise<ProductSKUResponseDto> {
-    return this.productsService.updateSKU(skuId, updateSKUDto);
+    return this.productsService.updateSKU(skuId, updateSKUDto, images);
   }
 
   @Delete('skus/:skuId')
