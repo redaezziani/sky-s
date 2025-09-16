@@ -3,7 +3,7 @@
 import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { ResetPasswordForm } from "@/components/reset-password-form";
+import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 import { Loader } from "@/components/loader";
 
 function ResetPasswordContent() {
@@ -62,7 +62,8 @@ function ResetPasswordContent() {
                 </h3>
                 <div className="mt-2 text-sm text-red-700">
                   <p>
-                    This password reset link is invalid or expired. Please request a new one.
+                    This password reset link is invalid or expired. Please
+                    request a new one.
                   </p>
                 </div>
               </div>
@@ -84,14 +85,16 @@ function ResetPasswordContent() {
 
 export default function Page() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-svh w-full items-center justify-center">
-        <div className="text-center flex items-center gap-2">
-          <Loader size={16} />
-          <p className="text-sm text-gray-600">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="flex min-h-svh w-full items-center justify-center">
+          <div className="text-center flex items-center gap-2">
+            <Loader size={16} />
+            <p className="text-sm text-gray-600">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ResetPasswordContent />
     </Suspense>
   );

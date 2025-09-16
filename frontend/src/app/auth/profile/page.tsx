@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { ProfileView } from "@/components/profile-view";
+import { ProfileView } from "@/components/auth/profile-view";
 import { Loader } from "@/components/loader";
 
 export default function Page() {

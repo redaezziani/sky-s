@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthService } from "@/services/auth.service";
 import { useAuth } from "@/hooks/use-auth";
-import { Loader } from "./loader";
+import { Loader } from "../loader";
 import { loginSchema, LoginFormData } from "@/types/validation.types";
 import Link from "next/link";
 
@@ -136,11 +136,11 @@ export const LoginForm = memo<LoginFormProps>(({ className }) => {
 
               <div className="flex flex-col gap-3">
                 <SubmitButton isSubmitting={isSubmitting} />
-                
+
                 <div className="text-center text-sm text-gray-600">
-                  <Link 
-                    href="/auth/forgot-password" 
-                    className="text-blue-600 hover:underline"
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-primary hover:underline"
                   >
                     Forgot your password?
                   </Link>
@@ -148,9 +148,9 @@ export const LoginForm = memo<LoginFormProps>(({ className }) => {
 
                 <div className="text-center text-sm text-gray-600">
                   Don't have an account?{" "}
-                  <Link 
-                    href="/auth/register" 
-                    className="text-blue-600 hover:underline"
+                  <Link
+                    href="/auth/register"
+                    className="text-primary hover:underline"
                   >
                     Sign up
                   </Link>

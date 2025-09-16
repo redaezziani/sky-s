@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { RegisterForm } from "@/components/register-form";
+import { RegisterForm } from "@/components/auth/register-form";
 import { Loader } from "@/components/loader";
 
 export default function Page() {

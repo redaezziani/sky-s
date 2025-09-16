@@ -27,12 +27,13 @@ import { toast } from "sonner";
 import { CreateProductDialog } from "@/components/product/create-product-dialog";
 import { EditProductDialog } from "@/components/product/edit-product-dialog";
 import PaginationTable from "@/components/pagination-table";
-
+import { useSearchQuery } from "@/hooks/use-search-query";
 interface EnhancedProductTableProps {
   // Remove the callback props since we'll handle them internally
 }
 
 export function EnhancedProductTable({}: EnhancedProductTableProps) {
+  const [search, setSearch] = useSearchQuery("q", 400);
   const {
     products,
     loading,
@@ -123,31 +124,12 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
     setIsEditDialogOpen(false);
   };
 
-  const handleCreateProduct = () => {
-    setIsCreateDialogOpen(true);
-  };
-
-  const handleCloseCreateDialog = () => {
-    setIsCreateDialogOpen(false);
-  };
-
   const formatPrice = (price: number | undefined) => {
     if (price === undefined) return "N/A";
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD'
     }).format(price);
-  };
-
-  const getLowestPrice = (product: Product) => {
-    if (!product.variants || product.variants.length === 0) return undefined;
-    
-    const prices = product.variants
-      .flatMap(variant => variant.skus || [])
-      .map(sku => sku.price)
-      .filter(price => price !== undefined);
-    
-    return prices.length > 0 ? Math.min(...prices) : undefined;
   };
 
   const getTotalStock = (product: Product) => {
@@ -332,6 +314,9 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
       ),
     },
   ];
+  useEffect(() => {
+    fetchProducts({ search });
+  }, [search, fetchProducts]);
 
   return (
     <div className="space-y-4">
@@ -343,6 +328,8 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
         searchPlaceholder="Search products by name, slug, or description..."
         emptyMessage="No products found"
         showCount={true}
+        searchValue={search}
+        onSearchChange={setSearch}
         customHeader={
           <div className="flex items-center gap-2">
             {selectedProducts.length > 0 && (
@@ -380,7 +367,9 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => productToDelete && handleDeleteProduct(productToDelete)}
+              onClick={() =>
+                productToDelete && handleDeleteProduct(productToDelete)
+              }
             >
               Delete
             </AlertDialogAction>

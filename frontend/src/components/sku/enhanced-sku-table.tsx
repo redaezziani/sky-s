@@ -37,6 +37,7 @@ import PaginationTable from "@/components/pagination-table";
 import { CreateSKUDialog } from "./create-sku-dialog";
 import { EditSKUDialog } from "./edit-sku-dialog";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
+import Link from "next/link";
 
 interface EnhancedSKUTableProps {
   // Remove the callback props since we'll handle them internally
@@ -225,7 +226,12 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
       render: (sku) => (
         <div>
           <div className="font-medium truncate max-w-80  text-sm">
-            {sku.productName}
+            <Link
+              className="hover:underline transition-all duration-500 ease-in-out"
+              href={`/dashboard/products?q=${sku.productName}`}
+            >
+              {sku.productName}
+            </Link>
           </div>
           <div className="text-xs text-muted-foreground">{sku.variantName}</div>
         </div>

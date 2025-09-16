@@ -3,7 +3,7 @@
 import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { VerifyEmailForm } from "@/components/verify-email-form";
+import { VerifyEmailForm } from "@/components/auth/verify-email-form";
 import { Loader } from "@/components/loader";
 
 function VerifyEmailContent() {
@@ -57,7 +57,8 @@ function VerifyEmailContent() {
                 </h3>
                 <div className="mt-2 text-sm text-red-700">
                   <p>
-                    This email verification link is invalid or expired. Please request a new one.
+                    This email verification link is invalid or expired. Please
+                    request a new one.
                   </p>
                 </div>
               </div>
@@ -79,14 +80,16 @@ function VerifyEmailContent() {
 
 export default function Page() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-svh w-full items-center justify-center">
-        <div className="text-center flex items-center gap-2">
-          <Loader size={16} />
-          <p className="text-sm text-gray-600">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="flex min-h-svh w-full items-center justify-center">
+          <div className="text-center flex items-center gap-2">
+            <Loader size={16} />
+            <p className="text-sm text-gray-600">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <VerifyEmailContent />
     </Suspense>
   );

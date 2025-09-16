@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
-import { Loader } from "./loader";
+import { Loader } from "../loader";
 import Link from "next/link";
 
 interface ProfileViewProps {
@@ -56,9 +56,7 @@ export const ProfileView = memo<ProfileViewProps>(({ className }) => {
       <Card>
         <CardHeader>
           <CardTitle>Profile Information</CardTitle>
-          <CardDescription>
-            Your account details and settings
-          </CardDescription>
+          <CardDescription>Your account details and settings</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-6">
@@ -70,20 +68,21 @@ export const ProfileView = memo<ProfileViewProps>(({ className }) => {
                 <div className="flex items-center gap-2">
                   <p className="text-sm text-gray-900">{user.email}</p>
                   {user.isEmailVerified ? (
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    <Badge
+                      variant="secondary"
+                      className="bg-green-100 text-green-800"
+                    >
                       Verified
                     </Badge>
                   ) : (
-                    <Badge variant="destructive">
-                      Not Verified
-                    </Badge>
+                    <Badge variant="destructive">Not Verified</Badge>
                   )}
                 </div>
                 {!user.isEmailVerified && (
                   <p className="text-xs text-gray-500">
-                    <Link 
-                      href="/auth/resend-verification" 
-                      className="text-blue-600 hover:underline"
+                    <Link
+                      href="/auth/resend-verification"
+                      className="text-primary hover:underline"
                     >
                       Resend verification email
                     </Link>
@@ -105,9 +104,11 @@ export const ProfileView = memo<ProfileViewProps>(({ className }) => {
                   Role
                 </label>
                 <div>
-                  <Badge 
+                  <Badge
                     variant={user.role === "ADMIN" ? "default" : "secondary"}
-                    className={user.role === "ADMIN" ? "bg-blue-100 text-blue-800" : ""}
+                    className={
+                      user.role === "ADMIN" ? "bg-blue-100 text-blue-800" : ""
+                    }
                   >
                     {user.role}
                   </Badge>
@@ -118,9 +119,7 @@ export const ProfileView = memo<ProfileViewProps>(({ className }) => {
                 <label className="text-sm font-medium text-gray-700">
                   User ID
                 </label>
-                <p className="text-sm text-gray-500 font-mono">
-                  {user.id}
-                </p>
+                <p className="text-sm text-gray-500 font-mono">{user.id}</p>
               </div>
             </div>
           </div>
@@ -160,8 +159,8 @@ export const ProfileView = memo<ProfileViewProps>(({ className }) => {
                     Sign out of this device only
                   </p>
                 </div>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={handleLogout}
                   disabled={isLoggingOut}
@@ -184,8 +183,8 @@ export const ProfileView = memo<ProfileViewProps>(({ className }) => {
                     Sign out of all devices and sessions
                   </p>
                 </div>
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   size="sm"
                   onClick={handleLogoutAll}
                   disabled={isLoggingOutAll}
@@ -206,9 +205,9 @@ export const ProfileView = memo<ProfileViewProps>(({ className }) => {
       </Card>
 
       <div className="text-center">
-        <Link 
-          href="/dashboard" 
-          className="text-blue-600 hover:underline text-sm"
+        <Link
+          href="/dashboard"
+          className="text-primary hover:underline text-sm"
         >
           ← Back to Dashboard
         </Link>

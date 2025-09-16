@@ -30,6 +30,7 @@ import { CreateProductVariantDialog } from "@/components/product-variant/create-
 import { EditProductVariantDialog } from "@/components/product-variant/edit-product-variant-dialog";
 import PaginationTable from "@/components/pagination-table";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
+import Link from "next/link";
 
 interface EnhancedProductVariantTableProps {
   // Remove the callback props since we'll handle them internally
@@ -173,7 +174,12 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
               {variant.name || `Variant ${variant.id.slice(-8)}`}
             </div>
             <div className="text-sm truncate max-w-80 text-muted-foreground">
-              {variant.productName || "Unknown Product"}
+              <Link
+                className="hover:underline transition-all duration-500 ease-in-out"
+                href={`/dashboard/products?q=${variant.productName}`}
+              >
+                {variant.productName || "Unknown Product"}
+              </Link>
             </div>
           </div>
         </div>

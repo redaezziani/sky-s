@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { ForgotPasswordForm } from "@/components/forgot-password-form";
+import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 import { Loader } from "@/components/loader";
 
 export default function Page() {

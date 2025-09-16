@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { LoginForm } from "@/components/login-form";
+import { LoginForm } from "@/components/auth/login-form";
 import { Loader } from "@/components/loader";
 
 export default function Page() {
@@ -23,7 +23,7 @@ export default function Page() {
       <div className="flex min-h-svh w-full items-center justify-center">
         <div className="text-center flex  items-center gap-2">
           <Loader size={16} />
-                    <p className=" text-sm text-gray-600">Loading...</p>
+          <p className=" text-sm text-gray-600">Loading...</p>
         </div>
       </div>
     );

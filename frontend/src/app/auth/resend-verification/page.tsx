@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { ResendVerificationForm } from "@/components/resend-verification-form";
+import { ResendVerificationForm } from "@/components/auth/resend-verification-form";
 import { Loader } from "@/components/loader";
 
 export default function Page() {

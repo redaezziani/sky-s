@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { IconSearch, IconX } from "@tabler/icons-react";
 
 export interface TableColumn<T> {
@@ -45,11 +45,15 @@ export interface DataTableProps<T> {
   filters?: FilterOption<T>[];
   onRowClick?: (item: T) => void;
   actions?: (item: T) => ReactNode;
-  
+
   showCount?: boolean;
   emptyMessage?: string;
   className?: string;
   customHeader?: ReactNode;
+
+  /** 👇 external control */
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
 }
 
 export function DataTable<T extends object>({
@@ -65,8 +69,13 @@ export function DataTable<T extends object>({
   emptyMessage,
   className = "",
   customHeader,
+  searchValue,
+  onSearchChange,
 }: DataTableProps<T>) {
-  const [searchTerm, setSearchTerm] = useState("");
+  // fallback internal state if not controlled
+  const [internalSearch, setInternalSearch] = useState("");
+  const searchTerm = searchValue ?? internalSearch;
+
   const [filterValues, setFilterValues] = useState<Record<string, string>>(
     filters.reduce((acc, filter) => ({ ...acc, [filter.key]: "all" }), {})
   );
@@ -101,7 +110,12 @@ export function DataTable<T extends object>({
   }, [data, searchTerm, filterValues, searchKeys, filters, getNestedValue]);
 
   const clearFilters = () => {
-    setSearchTerm("");
+    if (!searchValue) {
+      setInternalSearch("");
+    } else {
+      onSearchChange?.("");
+    }
+
     setFilterValues(
       filters.reduce((acc, filter) => ({ ...acc, [filter.key]: "all" }), {})
     );
@@ -126,13 +140,17 @@ export function DataTable<T extends object>({
       <CardHeader>
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex  flex-1 flex-wrap gap-2">
+            <div className="flex flex-1 flex-wrap gap-2">
               <div className="relative flex-1 max-w-xl min-w-[200px]">
                 <IconSearch className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder={searchPlaceholder}
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) =>
+                    onSearchChange
+                      ? onSearchChange(e.target.value)
+                      : setInternalSearch(e.target.value)
+                  }
                   className="pl-8"
                 />
               </div>
@@ -171,9 +189,7 @@ export function DataTable<T extends object>({
                 </Button>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              {customHeader}
-            </div>
+            <div className="flex items-center gap-2">{customHeader}</div>
           </div>
         </div>
       </CardHeader>

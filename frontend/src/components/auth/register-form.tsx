@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthService } from "@/services/auth.service";
 import { useAuth } from "@/hooks/use-auth";
-import { Loader } from "./loader";
+import { Loader } from "../loader";
 import { registerSchema, RegisterFormData } from "@/types/validation.types";
 import Link from "next/link";
 
@@ -96,7 +96,8 @@ export const RegisterForm = memo<RegisterFormProps>(({ className }) => {
         await login(response);
 
         toast.success("Account created successfully!", {
-          description: "Welcome! Please check your email to verify your account.",
+          description:
+            "Welcome! Please check your email to verify your account.",
         });
 
         // Navigate to dashboard
@@ -104,7 +105,8 @@ export const RegisterForm = memo<RegisterFormProps>(({ className }) => {
       } catch (error: any) {
         console.error("Registration error:", error);
         toast.error("Registration failed", {
-          description: error?.message || "An error occurred while creating your account.",
+          description:
+            error?.message || "An error occurred while creating your account.",
         });
       } finally {
         isSubmittingRef.current = false;
@@ -156,12 +158,12 @@ export const RegisterForm = memo<RegisterFormProps>(({ className }) => {
 
               <div className="flex flex-col gap-3">
                 <SubmitButton isSubmitting={isSubmitting} />
-                
+
                 <div className="text-center text-sm text-gray-600">
                   Already have an account?{" "}
-                  <Link 
-                    href="/auth/login" 
-                    className="text-blue-600 hover:underline"
+                  <Link
+                    href="/auth/login"
+                    className="text-primary hover:underline"
                   >
                     Sign in
                   </Link>
