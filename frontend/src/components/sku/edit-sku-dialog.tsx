@@ -31,7 +31,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import useProductVariantsStore, { type ProductSKU } from "@/stores/product-variants-store";
+import useProductVariantsStore, {
+  type ProductSKU,
+} from "@/stores/product-variants-store";
 import { toast } from "sonner";
 
 const editSKUSchema = z.object({
@@ -54,14 +56,16 @@ type EditSKUFormData = z.infer<typeof editSKUSchema>;
 interface EditSKUDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  sku: (ProductSKU & { productName?: string; variantName?: string; variantId?: string }) | null;
+  sku:
+    | (ProductSKU & {
+        productName?: string;
+        variantName?: string;
+        variantId?: string;
+      })
+    | null;
 }
 
-export function EditSKUDialog({
-  open,
-  onOpenChange,
-  sku,
-}: EditSKUDialogProps) {
+export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
   const { updateSKU, loading, products } = useProductVariantsStore();
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
@@ -84,12 +88,13 @@ export function EditSKUDialog({
   });
 
   // Flatten variants for selection
-  const allVariants = products.flatMap(product => 
-    product.variants?.map(variant => ({
-      id: variant.id,
-      name: variant.name || `Variant ${variant.id.slice(-8)}`,
-      productName: product.name,
-    })) || []
+  const allVariants = products.flatMap(
+    (product) =>
+      product.variants?.map((variant) => ({
+        id: variant.id,
+        name: variant.name || `Variant ${variant.id.slice(-8)}`,
+        productName: product.name,
+      })) || []
   );
 
   useEffect(() => {
@@ -114,20 +119,25 @@ export function EditSKUDialog({
     if (!sku) return;
 
     try {
-      const dimensionsData = data.dimensions ? 
-        JSON.parse(data.dimensions) : undefined;
+      const dimensionsData = data.dimensions
+        ? JSON.parse(data.dimensions)
+        : undefined;
 
       // Prepare FormData for multipart upload
       const formData = new FormData();
       formData.append("sku", data.sku);
       if (data.barcode) formData.append("barcode", data.barcode);
       formData.append("price", String(data.price));
-      if (data.comparePrice !== undefined) formData.append("comparePrice", String(data.comparePrice));
-      if (data.costPrice !== undefined) formData.append("costPrice", String(data.costPrice));
+      if (data.comparePrice !== undefined)
+        formData.append("comparePrice", String(data.comparePrice));
+      if (data.costPrice !== undefined)
+        formData.append("costPrice", String(data.costPrice));
       formData.append("stock", String(data.stock));
       formData.append("lowStockAlert", String(data.lowStockAlert));
-      if (data.weight !== undefined) formData.append("weight", String(data.weight));
-      if (dimensionsData) formData.append("dimensions", JSON.stringify(dimensionsData));
+      if (data.weight !== undefined)
+        formData.append("weight", String(data.weight));
+      if (dimensionsData)
+        formData.append("dimensions", JSON.stringify(dimensionsData));
       formData.append("isActive", String(data.isActive));
       selectedImages.forEach((file) => formData.append("images", file));
 
@@ -161,7 +171,10 @@ export function EditSKUDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 max-w-[700px] overflow-hidden"
+          >
             <FormField
               control={form.control}
               name="variantId"
@@ -170,13 +183,17 @@ export function EditSKUDialog({
                   <FormLabel>Product Variant</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-[645px]">
                         <SelectValue placeholder="Select a product variant" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {allVariants.map((variant) => (
-                        <SelectItem key={variant.id} value={variant.id}>
+                        <SelectItem
+                          className="max-w-[600px] truncate line-clamp-1"
+                          key={variant.id}
+                          value={variant.id}
+                        >
                           {variant.productName} - {variant.name}
                         </SelectItem>
                       ))}
@@ -245,12 +262,12 @@ export function EditSKUDialog({
                         min="0"
                         placeholder="0.00"
                         {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                          field.onChange(parseFloat(e.target.value) || 0)
+                        }
                       />
                     </FormControl>
-                    <FormDescription>
-                      Selling price in USD
-                    </FormDescription>
+                    <FormDescription>Selling price in USD</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -269,7 +286,11 @@ export function EditSKUDialog({
                         min="0"
                         placeholder="0.00"
                         {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                        onChange={(e) =>
+                          field.onChange(
+                            parseFloat(e.target.value) || undefined
+                          )
+                        }
                       />
                     </FormControl>
                     <FormDescription>
@@ -293,7 +314,11 @@ export function EditSKUDialog({
                         min="0"
                         placeholder="0.00"
                         {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                        onChange={(e) =>
+                          field.onChange(
+                            parseFloat(e.target.value) || undefined
+                          )
+                        }
                       />
                     </FormControl>
                     <FormDescription>
@@ -318,12 +343,12 @@ export function EditSKUDialog({
                         min="0"
                         placeholder="0"
                         {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value) || 0)
+                        }
                       />
                     </FormControl>
-                    <FormDescription>
-                      Current inventory level
-                    </FormDescription>
+                    <FormDescription>Current inventory level</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -341,7 +366,9 @@ export function EditSKUDialog({
                         min="0"
                         placeholder="5"
                         {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value) || 0)
+                        }
                       />
                     </FormControl>
                     <FormDescription>
@@ -367,12 +394,14 @@ export function EditSKUDialog({
                         min="0"
                         placeholder="150"
                         {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                        onChange={(e) =>
+                          field.onChange(
+                            parseFloat(e.target.value) || undefined
+                          )
+                        }
                       />
                     </FormControl>
-                    <FormDescription>
-                      Weight in grams
-                    </FormDescription>
+                    <FormDescription>Weight in grams</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -392,7 +421,8 @@ export function EditSKUDialog({
                       />
                     </FormControl>
                     <FormDescription>
-                      JSON format: {"{"}"length": 10, "width": 5, "height": 2{"}"}
+                      JSON format: {"{"}"length": 10, "width": 5, "height": 2
+                      {"}"}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -429,7 +459,7 @@ export function EditSKUDialog({
                   type="file"
                   multiple
                   accept="image/*"
-                  onChange={e => {
+                  onChange={(e) => {
                     if (e.target.files) {
                       setSelectedImages(Array.from(e.target.files));
                     }

@@ -50,7 +50,6 @@ export default function PaginationTable({
   const handlePageSizeChange = (value: string) => {
     const newPageSize = parseInt(value);
     onPageSizeChange(newPageSize);
-    // Reset to first page when changing page size
     onPageChange(1);
   };
 
@@ -65,7 +64,6 @@ export default function PaginationTable({
 
   return (
     <div className="flex items-center justify-between gap-8">
-      {/* Results per page */}
       <div className="flex items-center gap-3">
         <Label htmlFor={id}>Rows per page</Label>
         <Select

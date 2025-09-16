@@ -21,7 +21,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Trash2, Edit, Plus, Package, Star, Eye } from "lucide-react";
+import {
+  MoreHorizontal,
+  Trash2,
+  Edit,
+  Plus,
+  Package,
+  Star,
+  Eye,
+} from "lucide-react";
 import { useProductsStore, type Product } from "@/stores/products-store";
 import { toast } from "sonner";
 import { CreateProductDialog } from "@/components/product/create-product-dialog";
@@ -126,17 +134,17 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
 
   const formatPrice = (price: number | undefined) => {
     if (price === undefined) return "N/A";
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(price);
   };
 
   const getTotalStock = (product: Product) => {
     if (!product.variants || product.variants.length === 0) return 0;
-    
+
     return product.variants
-      .flatMap(variant => variant.skus || [])
+      .flatMap((variant) => variant.skus || [])
       .reduce((total, sku) => total + (sku.stock || 0), 0);
   };
 
@@ -173,10 +181,16 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
               </div>
             )}
             <div className="flex flex-col w-full">
-              <div className="font-medium line-clamp-1 truncate">{product.name}</div>
-              <div className="text-sm text-muted-foreground">{product.slug}</div>
+              <div className="font-medium line-clamp-1 truncate">
+                {product.name}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {product.slug}
+              </div>
               {firstSKU && (
-                <div className="text-xs text-muted-foreground">SKU: {firstSKU.sku}</div>
+                <div className="text-xs text-muted-foreground">
+                  SKU: {firstSKU.sku}
+                </div>
               )}
             </div>
           </div>
@@ -193,7 +207,7 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
         const price = firstSKU?.price;
         return (
           <div className="text-sm">
-         {price !== undefined ? (
+            {price !== undefined ? (
               <span className="font-medium">{formatPrice(price)}</span>
             ) : (
               <span className="text-muted-foreground">no pricing</span>
@@ -213,7 +227,7 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
         return (
           <div className="text-sm">
             {stock !== undefined ? (
-              <span className={stock > 0 ? "text-amber-600" : "text-red-600"}>
+              <span className={stock > 0 ? "text-orange-600" : "text-red-600"}>
                 {stock} units
               </span>
             ) : (
@@ -242,10 +256,9 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
           </Badge>
           {product.isFeatured && (
             <Badge variant="secondary" className="text-xs">
-              <Star className="w-3 h-3 mr-1 stroke-amber-300 fill-amber-300 dark:fill-amber-300" />
+              <Star className="w-3 h-3 mr-1 stroke-orange-300 fill-orange-300 dark:fill-orange-300" />
               Featured
             </Badge>
-            
           )}
         </div>
       ),
@@ -256,7 +269,13 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
       render: (product) => (
         <div className="text-xs text-muted-foreground">
           <div className="space-y-1">
-            <div>SKUs: {product.variants?.reduce((total, variant) => total + (variant.skus?.length || 0), 0) || 0}</div>
+            <div>
+              SKUs:{" "}
+              {product.variants?.reduce(
+                (total, variant) => total + (variant.skus?.length || 0),
+                0
+              ) || 0}
+            </div>
             <div>Stock: {getTotalStock(product)}</div>
           </div>
         </div>

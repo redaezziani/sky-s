@@ -77,7 +77,11 @@ export function CreateProductVariantDialog({
     setAttributes({ ...attributes, "": "" });
   };
 
-  const handleUpdateAttribute = (oldKey: string, newKey: string, value: string) => {
+  const handleUpdateAttribute = (
+    oldKey: string,
+    newKey: string,
+    value: string
+  ) => {
     const newAttributes = { ...attributes };
     if (oldKey !== newKey && newKey) {
       delete newAttributes[oldKey];
@@ -102,7 +106,10 @@ export function CreateProductVariantDialog({
 
       await createVariant(data.productId, {
         name: data.name,
-        attributes: Object.keys(filteredAttributes).length > 0 ? filteredAttributes : undefined,
+        attributes:
+          Object.keys(filteredAttributes).length > 0
+            ? filteredAttributes
+            : undefined,
         isActive: data.isActive,
         sortOrder: data.sortOrder,
       });
@@ -130,21 +137,28 @@ export function CreateProductVariantDialog({
         <DialogHeader>
           <DialogTitle>Create Product Variant</DialogTitle>
           <DialogDescription>
-            Add a new variant for an existing product. You can specify attributes like size, color, etc.
+            Add a new variant for an existing product. You can specify
+            attributes like size, color, etc.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 max-w-[600px] overflow-hidden"
+          >
             <FormField
               control={form.control}
               name="productId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Product</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-[400px]">
                         <SelectValue placeholder="Select a product" />
                       </SelectTrigger>
                     </FormControl>
@@ -168,13 +182,11 @@ export function CreateProductVariantDialog({
                 <FormItem>
                   <FormLabel>Name (Optional)</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="e.g., Large - Red"
-                      {...field}
-                    />
+                    <Input placeholder="e.g., Large - Red" {...field} />
                   </FormControl>
                   <FormDescription>
-                    A descriptive name for this variant. If not provided, it will be auto-generated.
+                    A descriptive name for this variant. If not provided, it
+                    will be auto-generated.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -201,13 +213,17 @@ export function CreateProductVariantDialog({
                   <Input
                     placeholder="Attribute name (e.g., size)"
                     value={key}
-                    onChange={(e) => handleUpdateAttribute(key, e.target.value, value)}
+                    onChange={(e) =>
+                      handleUpdateAttribute(key, e.target.value, value)
+                    }
                     className="flex-1"
                   />
                   <Input
                     placeholder="Value (e.g., Large)"
                     value={value}
-                    onChange={(e) => handleUpdateAttribute(key, key, e.target.value)}
+                    onChange={(e) =>
+                      handleUpdateAttribute(key, key, e.target.value)
+                    }
                     className="flex-1"
                   />
                   <Button
@@ -233,7 +249,9 @@ export function CreateProductVariantDialog({
                       type="number"
                       min="0"
                       {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                      onChange={(e) =>
+                        field.onChange(parseInt(e.target.value) || 0)
+                      }
                     />
                   </FormControl>
                   <FormDescription>

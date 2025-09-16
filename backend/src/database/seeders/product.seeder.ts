@@ -354,5 +354,123 @@ export async function seedProducts() {
     console.log('✅ Created product: Jordan W AIR JORDAN 1 ZM AIR CMFT 2');
   }
 
+  // Add Vichy Dercos Densi-Solutions Hair Thickening Shampoo product
+  const vichySlug = 'vichy-dercos-densi-solutions-thickening-shampoo';
+  const vichyExists = await prisma.product.findUnique({
+    where: { slug: vichySlug },
+  });
+  if (!vichyExists) {
+    // Images for Vichy Dercos
+    const vichyImageFiles = [
+      '870d0692-0850-4e5c-bdd2-0c870373a351.webp',
+      'fd3afaab-382c-43e9-90a8-ac5dcbf678c2.webp',
+      'eb20e3df-0d70-4da2-a953-c012a3b740c0.webp',
+    ];
+    const vichyImages = await Promise.all(
+      vichyImageFiles.map(async (filename) => {
+        const filePath = path.resolve(__dirname, './dercos', filename);
+        const buffer = fs.readFileSync(filePath);
+        const file = {
+          fieldname: 'file',
+          originalname: filename,
+          encoding: '7bit',
+          mimetype: 'image/webp',
+          size: buffer.length,
+          buffer,
+          destination: '',
+          filename,
+          path: filePath,
+          stream: undefined as any, // Not used, but required by type
+        };
+        const result = await imageKit.uploadImage(file, {
+          fileName: filename,
+          folder: 'products/vichy-dercos-densi-solutions',
+        });
+        return result.url;
+      }),
+    );
+
+    // Find or create shampoo category
+    const shampooCategorySlug = 'shampoo';
+    let shampooCategory = await prisma.category.findUnique({
+      where: { slug: shampooCategorySlug },
+    });
+    if (!shampooCategory) {
+      shampooCategory = await prisma.category.create({
+        data: {
+          name: 'Shampoo',
+          slug: shampooCategorySlug,
+          isActive: true,
+        },
+      });
+      console.log('✅ Created category: Shampoo');
+    }
+
+    await prisma.product.create({
+      data: {
+        name: 'Vichy Dercos Densi-Solutions Hair Thickening Shampoo for Weak and Thinning hair 250ml',
+        slug: vichySlug,
+        description:
+          'Vichy Dercos Densi-Solutions Thickening Shampoo gently cleanses, softens strands and removes impurities from the scalp, and revitalizes hair from the root, whilst strengthening hair fibers for thicker, healthier-looking hair. Powered by both Filoxane and Rhamnose, the lightweight, body-enhancing formula effectively eliminates impurities from the hair and scalp, whilst reinforcing the hair fiber to reveal a denser, healthier head of hair. Restores natural volume, and shine. Boosts volume by 40% after first use. No parabens. No silicone. No colorants.',
+        shortDesc: 'Thickening shampoo for weak and thinning hair',
+        coverImage: vichyImages[0],
+        isFeatured: true,
+        metaTitle: 'Vichy Dercos Densi-Solutions Thickening Shampoo',
+        metaDesc:
+          'Shop Vichy Dercos Densi-Solutions Hair Thickening Shampoo for Weak and Thinning hair 250ml.',
+        isActive: true,
+        sortOrder: 0,
+        categories: {
+          connect: { id: shampooCategory.id },
+        },
+        variants: {
+          create: [
+            {
+              name: 'Clear',
+              attributes: {
+                color: 'Clear',
+                gender: 'Female',
+                sizeType: 'Full Size',
+                treatment: 'Thinning and Hairfall',
+                targetHairType: 'All Hair Types',
+                capacity: '250.0 Milliliter',
+                ingredientPreferences: 'Silicon Free',
+                styleNo: 'Mb038422',
+                style: 'Casual',
+                skuConfig: '86864Ac28Nmp',
+              },
+              isActive: true,
+              sortOrder: 0,
+              skus: {
+                create: [
+                  {
+                    sku: 'VICHY-DERCOS-THICKENING-250ML',
+                    price: 22.0,
+                    stock: 30,
+                    weight: 300,
+                    dimensions: { length: 18, width: 6, height: 6 },
+                    coverImage: vichyImages[0],
+                    lowStockAlert: 3,
+                    isActive: true,
+                    images: {
+                      create: vichyImages.map((url, idx) => ({
+                        url,
+                        altText: `Vichy Dercos Densi-Solutions Shampoo view ${idx + 1}`,
+                        position: idx,
+                      })),
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    });
+    console.log(
+      '✅ Created product: Vichy Dercos Densi-Solutions Thickening Shampoo',
+    );
+  }
+
   console.log('✅ Product seeding complete');
 }
