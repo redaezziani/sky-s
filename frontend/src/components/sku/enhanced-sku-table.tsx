@@ -346,7 +346,6 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
             {selectedSKUIds.length > 0 && (
               <Button
                 variant="destructive"
-                size="sm"
                 onClick={() => setBulkDeleteDialogOpen(true)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
