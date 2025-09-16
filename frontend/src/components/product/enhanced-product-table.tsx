@@ -190,7 +190,6 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
         // Show price from first SKU if available
         const firstVariant = product.variants?.[0];
         const firstSKU = firstVariant?.skus?.[0];
-        console.log(firstVariant)
         const price = firstSKU?.price;
         return (
           <div className="text-sm">
