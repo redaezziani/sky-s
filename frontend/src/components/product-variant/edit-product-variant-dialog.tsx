@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import useProductVariantsStore, { type ProductVariant } from "@/stores/product-variants-store";
+import useProductVariantsStore, {
+  type ProductVariant,
+} from "@/stores/product-variants-store";
 import { useProductsStore } from "@/stores/products-store";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,7 +49,9 @@ type EditProductVariantFormData = z.infer<typeof editProductVariantSchema>;
 interface EditProductVariantDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  productVariant: (ProductVariant & { productName?: string; productId?: string }) | null;
+  productVariant:
+    | (ProductVariant & { productName?: string; productId?: string })
+    | null;
 }
 
 export function EditProductVariantDialog({
@@ -91,7 +95,11 @@ export function EditProductVariantDialog({
     setAttributes({ ...attributes, "": "" });
   };
 
-  const handleUpdateAttribute = (oldKey: string, newKey: string, value: string) => {
+  const handleUpdateAttribute = (
+    oldKey: string,
+    newKey: string,
+    value: string
+  ) => {
     const newAttributes = { ...attributes };
     if (oldKey !== newKey && newKey) {
       delete newAttributes[oldKey];
@@ -118,7 +126,10 @@ export function EditProductVariantDialog({
 
       await updateVariant(productVariant.id, {
         name: data.name,
-        attributes: Object.keys(filteredAttributes).length > 0 ? filteredAttributes : undefined,
+        attributes:
+          Object.keys(filteredAttributes).length > 0
+            ? filteredAttributes
+            : undefined,
         isActive: data.isActive,
         sortOrder: data.sortOrder,
       });
@@ -151,7 +162,10 @@ export function EditProductVariantDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 w-full "
+          >
             <FormField
               control={form.control}
               name="productId"
@@ -160,13 +174,17 @@ export function EditProductVariantDialog({
                   <FormLabel>Product</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full max-w-[600px] truncate">
                         <SelectValue placeholder="Select a product" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {products.map((product) => (
-                        <SelectItem key={product.id} value={product.id}>
+                        <SelectItem
+                          className="max-w-[500px] truncate"
+                          key={product.id}
+                          value={product.id}
+                        >
                           {product.name}
                         </SelectItem>
                       ))}
@@ -184,13 +202,11 @@ export function EditProductVariantDialog({
                 <FormItem>
                   <FormLabel>Name (Optional)</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="e.g., Large - Red"
-                      {...field}
-                    />
+                    <Input placeholder="e.g., Large - Red" {...field} />
                   </FormControl>
                   <FormDescription>
-                    A descriptive name for this variant. If not provided, it will be auto-generated.
+                    A descriptive name for this variant. If not provided, it
+                    will be auto-generated.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -217,13 +233,17 @@ export function EditProductVariantDialog({
                   <Input
                     placeholder="Attribute name (e.g., size)"
                     value={key}
-                    onChange={(e) => handleUpdateAttribute(key, e.target.value, value)}
+                    onChange={(e) =>
+                      handleUpdateAttribute(key, e.target.value, value)
+                    }
                     className="flex-1"
                   />
                   <Input
                     placeholder="Value (e.g., Large)"
                     value={value}
-                    onChange={(e) => handleUpdateAttribute(key, key, e.target.value)}
+                    onChange={(e) =>
+                      handleUpdateAttribute(key, key, e.target.value)
+                    }
                     className="flex-1"
                   />
                   <Button
@@ -249,7 +269,9 @@ export function EditProductVariantDialog({
                       type="number"
                       min="0"
                       {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                      onChange={(e) =>
+                        field.onChange(parseInt(e.target.value) || 0)
+                      }
                     />
                   </FormControl>
                   <FormDescription>

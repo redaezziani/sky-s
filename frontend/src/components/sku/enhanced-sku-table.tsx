@@ -21,8 +21,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Trash2, Edit, Plus, Package, AlertTriangle } from "lucide-react";
-import useProductVariantsStore, { type ProductSKU } from "@/stores/product-variants-store";
+import {
+  MoreHorizontal,
+  Trash2,
+  Edit,
+  Plus,
+  Package,
+  AlertTriangle,
+} from "lucide-react";
+import useProductVariantsStore, {
+  type ProductSKU,
+} from "@/stores/product-variants-store";
 import { toast } from "sonner";
 import PaginationTable from "@/components/pagination-table";
 import { CreateSKUDialog } from "./create-sku-dialog";
@@ -34,20 +43,22 @@ interface EnhancedSKUTableProps {
 }
 
 export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
-  const {
-    products,
-    loading,
-    error,
-    fetchProducts,
-    deleteSKU,
-  } = useProductVariantsStore();
+  const { products, loading, error, fetchProducts, deleteSKU } =
+    useProductVariantsStore();
 
   // Local pagination state for SKUs
   const [skuCurrentPage, setSkuCurrentPage] = useState(1);
   const [skuItemsPerPage, setSkuItemsPerPage] = useState(7);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [editingSKU, setEditingSKU] = useState<(ProductSKU & { productName: string; variantName: string; variantId: string }) | null>(null);
+  const [editingSKU, setEditingSKU] = useState<
+    | (ProductSKU & {
+        productName: string;
+        variantName: string;
+        variantId: string;
+      })
+    | null
+  >(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
@@ -56,18 +67,18 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
 
   // Flatten all SKUs from all products and variants
   const allSKUs = useMemo(() => {
-    const skus: (ProductSKU & { 
-      productName: string; 
-      productId: string; 
-      variantName: string; 
+    const skus: (ProductSKU & {
+      productName: string;
+      productId: string;
+      variantName: string;
       variantId: string;
     })[] = [];
-    
-    products.forEach(product => {
+
+    products.forEach((product) => {
       if (product.variants) {
-        product.variants.forEach(variant => {
+        product.variants.forEach((variant) => {
           if (variant.skus) {
-            variant.skus.forEach(sku => {
+            variant.skus.forEach((sku) => {
               skus.push({
                 ...sku,
                 productName: product.name,
@@ -125,7 +136,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
 
   const handleBulkDelete = async () => {
     try {
-      await Promise.all(selectedSKUIds.map(id => deleteSKU(id)));
+      await Promise.all(selectedSKUIds.map((id) => deleteSKU(id)));
       toast.success(`${selectedSKUIds.length} SKUs deleted successfully`);
       setBulkDeleteDialogOpen(false);
       setSelectedSKUIds([]);
@@ -134,7 +145,13 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
     }
   };
 
-  const handleEditSKU = (sku: ProductSKU & { productName: string; variantName: string; variantId: string }) => {
+  const handleEditSKU = (
+    sku: ProductSKU & {
+      productName: string;
+      variantName: string;
+      variantId: string;
+    }
+  ) => {
     setEditingSKU(sku);
     setIsEditDialogOpen(true);
   };
@@ -145,19 +162,27 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(price);
   };
 
   const getStockStatus = (stock: number, lowStockAlert: number) => {
-    if (stock === 0) return { status: 'out-of-stock', label: 'Out of Stock', color: 'destructive' };
-    if (stock <= lowStockAlert) return { status: 'low-stock', label: 'Low Stock', color: 'default' };
-    return { status: 'in-stock', label: 'In Stock', color: 'secondary' };
+    if (stock === 0)
+      return {
+        status: "out-of-stock",
+        label: "Out of Stock",
+        color: "destructive",
+      };
+    if (stock <= lowStockAlert)
+      return { status: "low-stock", label: "Low Stock", color: "default" };
+    return { status: "in-stock", label: "In Stock", color: "secondary" };
   };
 
-  const columns: TableColumn<ProductSKU & { productName: string; variantName: string; variantId: string }>[] = [
+  const columns: TableColumn<
+    ProductSKU & { productName: string; variantName: string; variantId: string }
+  >[] = [
     {
       key: "select",
       label: "",
@@ -166,9 +191,9 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
           checked={selectedSKUIds.includes(sku.id)}
           onCheckedChange={(value) => {
             if (value) {
-              setSelectedSKUIds(prev => [...prev, sku.id]);
+              setSelectedSKUIds((prev) => [...prev, sku.id]);
             } else {
-              setSelectedSKUIds(prev => prev.filter(id => id !== sku.id));
+              setSelectedSKUIds((prev) => prev.filter((id) => id !== sku.id));
             }
           }}
           aria-label="Select row"
@@ -186,7 +211,9 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
           <div>
             <div className="font-medium font-mono text-sm">{sku.sku}</div>
             {sku.barcode && (
-              <div className="text-xs text-muted-foreground font-mono">{sku.barcode}</div>
+              <div className="text-xs text-muted-foreground font-mono">
+                {sku.barcode}
+              </div>
             )}
           </div>
         </div>
@@ -197,7 +224,9 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
       label: "Product & Variant",
       render: (sku) => (
         <div>
-          <div className="font-medium text-sm">{sku.productName}</div>
+          <div className="font-medium truncate max-w-80  text-sm">
+            {sku.productName}
+          </div>
           <div className="text-xs text-muted-foreground">{sku.variantName}</div>
         </div>
       ),
@@ -234,7 +263,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
               <Badge variant={stockStatus.color as any}>
                 {stockStatus.label}
               </Badge>
-              {stockStatus.status === 'low-stock' && (
+              {stockStatus.status === "low-stock" && (
                 <AlertTriangle className="h-3 w-3 text-orange-500" />
               )}
             </div>
@@ -255,14 +284,8 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
       label: "Details",
       render: (sku) => (
         <div className="text-xs text-muted-foreground space-y-1">
-          {sku.weight && (
-            <div>Weight: {sku.weight}g</div>
-          )}
-          {sku.dimensions && (
-            <div>
-              Dims: {JSON.stringify(sku.dimensions)}
-            </div>
-          )}
+          {sku.weight && <div>Weight: {sku.weight}g</div>}
+          {sku.dimensions && <div>Dims: {JSON.stringify(sku.dimensions)}</div>}
         </div>
       ),
     },
@@ -271,7 +294,11 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
       label: "Status",
       render: (sku) => (
         <Badge variant={"secondary"}>
-            {sku.isActive ? <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" /> : <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" /> }
+          {sku.isActive ? (
+            <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+          ) : (
+            <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" />
+          )}
           {sku.isActive ? "Active" : "Inactive"}
         </Badge>
       ),
@@ -358,8 +385,8 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              SKU and all associated data.
+              This action cannot be undone. This will permanently delete the SKU
+              and all associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -375,7 +402,10 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
       </AlertDialog>
 
       {/* Bulk Delete Confirmation Dialog */}
-      <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
+      <AlertDialog
+        open={bulkDeleteDialogOpen}
+        onOpenChange={setBulkDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Selected SKUs</AlertDialogTitle>

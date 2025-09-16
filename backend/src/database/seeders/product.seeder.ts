@@ -6,16 +6,27 @@ import * as fs from 'fs';
 const prisma = new PrismaClient();
 const imageKit = new ImageKitService();
 
-const sneakerImageFiles = [
-  '36d9d2a2-7b23-4af3-b921-683f45ce5788.webp',
-  '50aa8a1d-d966-4c7c-946a-7e0cc990aaa3.webp',
-  'ac3faf28-e6fa-46c8-9aae-dd8ac84eddb7.webp',
-  'd7a66636-3b7d-4a32-a930-7eaf44cc5982.webp',
+const nb9060ImageFiles = [
+  '55b4a69c-525c-46e8-93ea-6debcec3a6e7.webp',
+  '74337dad-e890-4b3f-99e1-c583451a30e5.webp',
+  '9167fe04-9558-4be2-8eb9-45fe94b2e019.webp',
+  'bc19fea5-188e-417a-bbc9-cf5de713cca5.webp',
+  'c463d4b8-0192-4fea-85d9-a7caab286bfb.webp',
 ];
 
-async function uploadImages() {
-  const uploadPromises = sneakerImageFiles.map(async (filename) => {
-    const filePath = path.resolve(__dirname, './img-product', filename);
+const bonaImageFiles = [
+  '785a0d84-5ca2-4c75-967f-abc6b84563c2.webp',
+  '8cef2f7f-9c18-430d-91ec-32add263709a.webp',
+  'b8dfb729-d487-4112-87da-0692271be21c.webp',
+  'c76bb525-bee6-4053-9116-1e161b6754e9.webp',
+  'ded799b5-aade-49bf-b6a6-01f525467d19.webp',
+  'e34e8b21-73cb-44d2-8a4a-9883c2f24cc7.webp',
+  'f2b1242f-5d93-4add-9f1a-76ab145bad7e.webp',
+];
+
+async function uploadNB9060Images() {
+  const uploadPromises = nb9060ImageFiles.map(async (filename) => {
+    const filePath = path.resolve(__dirname, './new-balance', filename);
     const buffer = fs.readFileSync(filePath);
     const file: any = {
       buffer,
@@ -25,19 +36,13 @@ async function uploadImages() {
     };
     const result = await imageKit.uploadImage(file, {
       fileName: filename,
-      folder: 'products/new-balance-530',
+      folder: 'products/new-balance-9060',
     });
     return result.url;
   });
   return Promise.all(uploadPromises);
 }
 
-// Upload Bona Leggings images
-const bonaImageFiles = [
-  'ba39a749-04d9-4b98-8cb6-78a9c5786104.webp',
-  'c4417f39-b6ef-46fe-b311-89e06b4a2971.webp',
-  'dda3eeff-5ea0-436d-9612-c5bc54836dc1.webp',
-];
 async function uploadBonaImages() {
   const uploadPromises = bonaImageFiles.map(async (filename) => {
     const filePath = path.resolve(__dirname, './bona', filename);
@@ -57,44 +62,21 @@ async function uploadBonaImages() {
   return Promise.all(uploadPromises);
 }
 
-export async function uploadEllaImages() {
-  const ellaImageFiles = [
-    '7787aba3-fced-4718-ab9b-e913d4b4e162.webp',
-    '9cc025a6-3064-42a0-ad25-adf420d53b27.webp',
-    'b879e6b5-85e5-4bd8-86ce-9bb87673dc92.webp',
-    'f0c00c86-11df-46e5-a7ba-3ae36f565437.webp',
-  ];
-  const uploadPromises = ellaImageFiles.map(async (filename) => {
-    const filePath = path.resolve(__dirname, './ella', filename);
-    const buffer = fs.readFileSync(filePath);
-    const file: any = {
-      buffer,
-      originalname: filename,
-      mimetype: 'image/webp',
-      size: buffer.length,
-    };
-    const result = await imageKit.uploadImage(file, {
-      fileName: filename,
-      folder: 'products/ella',
-    });
-    return result.url;
-  });
-  return Promise.all(uploadPromises);
-}
-
 export async function seedProducts() {
-  console.log('🌱 Seeding products...');
+  console.log('🌱 Seeding New Balance 9060 product...');
 
-  // Remove deletion of all products and related data
+  // Optionally clear previous products (uncomment if needed)
+  // await prisma.product.deleteMany({});
 
-  // Upload images and get URLs for existing products
-  const sneakerImages = await uploadImages();
+  // Upload images
+  const nb9060Images = await uploadNB9060Images();
   const bonaImages = await uploadBonaImages();
-  const ellaImages = await uploadEllaImages();
 
-  // Find or create categories
+  // Find or create sneakers category
   const categorySlug = 'sneakers';
-  let category = await prisma.category.findUnique({ where: { slug: categorySlug } });
+  let category = await prisma.category.findUnique({
+    where: { slug: categorySlug },
+  });
   if (!category) {
     category = await prisma.category.create({
       data: {
@@ -106,8 +88,11 @@ export async function seedProducts() {
     console.log('✅ Created category: Sneakers');
   }
 
+  // Find or create leggings category
   const leggingsCategorySlug = 'leggings';
-  let leggingsCategory = await prisma.category.findUnique({ where: { slug: leggingsCategorySlug } });
+  let leggingsCategory = await prisma.category.findUnique({
+    where: { slug: leggingsCategorySlug },
+  });
   if (!leggingsCategory) {
     leggingsCategory = await prisma.category.create({
       data: {
@@ -119,169 +104,122 @@ export async function seedProducts() {
     console.log('✅ Created category: Leggings');
   }
 
-  const shortsCategorySlug = 'shorts';
-  let shortsCategory = await prisma.category.findUnique({ where: { slug: shortsCategorySlug } });
-  if (!shortsCategory) {
-    shortsCategory = await prisma.category.create({
-      data: {
-        name: 'Shorts',
-        slug: shortsCategorySlug,
-        isActive: true,
-      },
-    });
-    console.log('✅ Created category: Shorts');
-  }
-
-  // Create products only if not exists
-  const sneakerExists = await prisma.product.findUnique({ where: { slug: 'new-balance-530-sneakers' } });
-  if (!sneakerExists) {
+  // Create New Balance 9060 product only
+  const productSlug = 'new-balance-9060';
+  const productExists = await prisma.product.findUnique({
+    where: { slug: productSlug },
+  });
+  if (!productExists) {
     await prisma.product.create({
       data: {
-        name: 'New Balance 530 Sneakers',
-        slug: 'new-balance-530-sneakers',
-        description: 'Classic New Balance 530 sneakers in blue, available in multiple sizes.',
-        shortDesc: 'Blue New Balance 530 sneakers',
-        coverImage: sneakerImages[0],
+        name: 'New Balance 9060',
+        slug: productSlug,
+        description: 'New Balance 9060 in white, available in sizes 38-44.',
+        shortDesc: 'White New Balance 9060',
+        coverImage: nb9060Images[0],
         isFeatured: true,
-        metaTitle: 'New Balance 530 Sneakers - Blue',
-        metaDesc: 'Shop New Balance 530 sneakers in blue, sizes 38-42.',
+        metaTitle: 'New Balance 9060 - White',
+        metaDesc: 'Shop New Balance 9060 in white, sizes 38-44.',
         isActive: true,
         sortOrder: 0,
         categories: {
           connect: { id: category.id },
         },
         variants: {
-          create: [{
-            name: 'Blue',
-            attributes: { color: 'Blue' },
-            isActive: true,
-            sortOrder: 0,
-            skus: {
-              create: [38, 39, 40, 41, 42].map((size, idx) => ({
-                sku: `NB530-BLUE-${size}`,
-                price: 120.00,
-                stock: 10,
-                weight: 350,
-                dimensions: { length: 30, width: 20, height: 12, size },
-                coverImage: sneakerImages[idx % sneakerImages.length],
-                lowStockAlert: 2,
-                isActive: true,
-                images: {
-                  create: [
-                    {
-                      url: sneakerImages[idx % sneakerImages.length],
-                      altText: `New Balance 530 Blue size ${size}`,
-                      position: 0,
+          create: [
+            {
+              name: 'White',
+              attributes: { color: 'White' },
+              isActive: true,
+              sortOrder: 0,
+              skus: {
+                create: Array.from({ length: 7 }, (_, i) => {
+                  const size = 38 + i;
+                  return {
+                    sku: `NB9060-WHITE-${size}`,
+                    price: 120.0,
+                    stock: 10,
+                    weight: 350,
+                    dimensions: { length: 30, width: 20, height: 12, size },
+                    coverImage: nb9060Images[i % nb9060Images.length],
+                    lowStockAlert: 2,
+                    isActive: true,
+                    images: {
+                      create: nb9060Images.map((url, idx) => ({
+                        url,
+                        altText: `New Balance 9060 White size ${size} view ${idx + 1}`,
+                        position: idx,
+                      })),
                     },
-                  ],
-                },
-              })),
+                  };
+                }),
+              },
             },
-          }],
+          ],
         },
       },
     });
-    console.log('✅ Created product: New Balance 530 Sneakers');
+    console.log('✅ Created product: New Balance 9060');
   }
 
-  const bonaExists = await prisma.product.findUnique({ where: { slug: 'bona-fide-premium-leggings' } });
+  // Add Bona Fide Premium Quality Leggings product
+  const bonaSlug = 'bona-fide-premium-leggings';
+  const bonaExists = await prisma.product.findUnique({
+    where: { slug: bonaSlug },
+  });
   if (!bonaExists) {
     await prisma.product.create({
       data: {
         name: 'Bona Fide Premium Quality Leggings for Women with Unique Design and Push Up - High Waisted Tummy Control Legging',
-        slug: 'bona-fide-premium-leggings',
-        description: 'Premium quality leggings for women with unique design, push up effect, and high waisted tummy control.',
+        slug: bonaSlug,
+        description:
+          'Premium quality leggings for women with unique design, push up effect, and high waisted tummy control.',
         shortDesc: 'High waisted, tummy control, push up leggings',
         coverImage: bonaImages[0],
         isFeatured: true,
         metaTitle: 'Bona Fide Premium Leggings - Black',
-        metaDesc: 'Shop Bona Fide premium quality leggings for women, black color, unique design.',
+        metaDesc:
+          'Shop Bona Fide premium quality leggings for women, black color, unique design.',
         isActive: true,
         sortOrder: 0,
         categories: {
           connect: { id: leggingsCategory.id },
         },
         variants: {
-          create: [{
-            name: 'Black',
-            attributes: { color: 'Black' },
-            isActive: true,
-            sortOrder: 0,
-            skus: {
-              create: [{
-                sku: 'BONA-BLACK-ONE',
-                price: 49.99,
-                stock: 50,
-                weight: 250,
-                dimensions: { length: 90, width: 30, height: 2 },
-                coverImage: bonaImages[0],
-                lowStockAlert: 5,
-                isActive: true,
-                images: {
-                  create: bonaImages.map((url, idx) => ({
-                    url,
-                    altText: `Bona Fide Leggings Black view ${idx + 1}`,
-                    position: idx,
-                  })),
-                },
-              }],
+          create: [
+            {
+              name: 'Black',
+              attributes: { color: 'Black' },
+              isActive: true,
+              sortOrder: 0,
+              skus: {
+                create: [
+                  {
+                    sku: 'BONA-BLACK-ONE',
+                    price: 49.99,
+                    stock: 50,
+                    weight: 250,
+                    dimensions: { length: 90, width: 30, height: 2 },
+                    coverImage: bonaImages[0],
+                    lowStockAlert: 5,
+                    isActive: true,
+                    images: {
+                      create: bonaImages.map((url, idx) => ({
+                        url,
+                        altText: `Bona Fide Leggings Black view ${idx + 1}`,
+                        position: idx,
+                      })),
+                    },
+                  },
+                ],
+              },
             },
-          }],
+          ],
         },
       },
     });
     console.log('✅ Created product: Bona Fide Premium Leggings');
   }
 
-  // Add ELLA product
-  const ellaExists = await prisma.product.findUnique({ where: { slug: 'ella-sculpt-high-waisted-shorts' } });
-  if (!ellaExists) {
-    await prisma.product.create({
-      data: {
-        name: 'ELLA Sculpt High-Waisted Shorts',
-        slug: 'ella-sculpt-high-waisted-shorts',
-        description: 'Sculpting high-waisted shorts for women, perfect for workouts and everyday wear.',
-        shortDesc: 'High-waisted sculpt shorts',
-        coverImage: ellaImages[0],
-        isFeatured: true,
-        metaTitle: 'ELLA Sculpt High-Waisted Shorts',
-        metaDesc: 'Shop ELLA sculpt high-waisted shorts for women.',
-        isActive: true,
-        sortOrder: 0,
-        categories: {
-          connect: { id: shortsCategory.id },
-        },
-        variants: {
-          create: [{
-            name: 'Black',
-            attributes: { color: 'Black' },
-            isActive: true,
-            sortOrder: 0,
-            skus: {
-              create: [{
-                sku: 'ELLA-BLACK-ONE',
-                price: 39.99,
-                stock: 30,
-                weight: 200,
-                dimensions: { length: 60, width: 25, height: 2 },
-                coverImage: ellaImages[0],
-                lowStockAlert: 5,
-                isActive: true,
-                images: {
-                  create: ellaImages.map((url, idx) => ({
-                    url,
-                    altText: `ELLA Shorts Black view ${idx + 1}`,
-                    position: idx,
-                  })),
-                },
-              }],
-            },
-          }],
-        },
-      },
-    });
-    console.log('✅ Created product: ELLA Sculpt High-Waisted Shorts');
-  }
-
-  console.log('✅ Products seeded successfully');
+  console.log('✅ Product seeding complete');
 }
