@@ -34,6 +34,9 @@ export interface Order {
   createdAt: string;
   updatedAt: string;
   items: OrderItem[];
+  deliveryLat?: null | number;
+  deliveryLng?: null | number;
+  deliveryPlace?: null | string;
 }
 
 export interface OrdersResponse {

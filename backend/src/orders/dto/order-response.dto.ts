@@ -93,4 +93,19 @@ export class OrderResponseDto {
     type: [OrderItemResponseDto],
   })
   items: OrderItemResponseDto[];
+
+  @ApiPropertyOptional({
+    description: 'Delivery latitude coordinate',
+    example: 40.7128,
+  })
+  deliveryLat?: number;
+
+  @ApiPropertyOptional({
+    description: 'Delivery longitude coordinate',
+    example: -74.006,
+  })
+  deliveryLng?: number;
+
+  @ApiPropertyOptional({ description: 'Delivery place description' })
+  deliveryPlace?: string;
 }

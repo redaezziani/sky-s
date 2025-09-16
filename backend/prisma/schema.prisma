@@ -249,6 +249,11 @@ model Order {
   shippingPhone   String?       @db.VarChar(20)
   shippingAddress Json // Full address object
   
+  // Delivery Coordinates
+  deliveryLat     Float?
+  deliveryLng     Float?
+  deliveryPlace   String?  
+
   // Billing Information
   billingName     String?       @db.VarChar(100)
   billingEmail    String?       @db.VarChar(255)

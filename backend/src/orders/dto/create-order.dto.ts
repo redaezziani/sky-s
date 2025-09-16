@@ -13,7 +13,20 @@ export class OrderItemDto {
   @ApiProperty({ description: 'SKU ID of the product' })
   @IsUUID()
   skuId: string;
+  @ApiPropertyOptional({ description: 'Delivery latitude', example: 40.7128 })
+  @IsOptional()
+  @IsNumber()
+  deliveryLat?: number;
 
+  @ApiPropertyOptional({ description: 'Delivery longitude', example: -74.006 })
+  @IsOptional()
+  @IsNumber()
+  deliveryLng?: number;
+
+  @ApiPropertyOptional({ description: 'Delivery place description', example: 'Warehouse 5' })
+  @IsOptional()
+  @IsString()
+  deliveryPlace?: string;
   @ApiProperty({ description: 'Quantity of this SKU', example: 1 })
   @IsNumber()
   quantity: number;

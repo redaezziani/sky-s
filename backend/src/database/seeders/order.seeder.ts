@@ -69,6 +69,10 @@ export async function seedOrders() {
         trackingNumber: `TRACK-${Date.now()}-${i}`,
         shippedAt: new Date(),
         deliveredAt: new Date(),
+        // Delivery Coordinates
+        deliveryLat: 35.751206,
+        deliveryLng: -5.800534,
+        deliveryPlace: 'no 3, Rue 20, Tangier 90060',
         items: {
           create: [
             {

@@ -195,14 +195,18 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
             <Separator />
 
             {/* Delivery Map */}
-            <section>
-              <h3 className="text-lg font-semibold mb-2">Delivery Location</h3>
-              <DeliveryMapPicker
-                deliveryLat={order.shippingAddress?.latitude || 35.7629952}
-                deliveryLng={order.shippingAddress?.longitude || -5.81632}
-                readonly
-              />
-            </section>
+            {order.deliveryLat && order.deliveryLng && (
+              <section>
+                <h3 className="text-lg font-semibold mb-2">
+                  Delivery Location
+                </h3>
+                <DeliveryMapPicker
+                  deliveryLat={order.deliveryLat}
+                  deliveryLng={order.deliveryLng}
+                  readonly
+                />
+              </section>
+            )}
           </div>
         </SheetContent>
       </Sheet>

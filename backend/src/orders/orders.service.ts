@@ -194,6 +194,9 @@ export class OrdersService {
       trackingNumber: order.trackingNumber,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
+      deliveryLat: order.deliveryLat ?? null,
+      deliveryLng: order.deliveryLng ?? null,
+      deliveryPlace: order.deliveryPlace ?? null,
       items: order.items.map((item) => ({
         id: item.id,
         skuId: item.skuId,
