@@ -31,7 +31,7 @@ import { EditProductVariantDialog } from "@/components/product-variant/edit-prod
 import PaginationTable from "@/components/pagination-table";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
 import Link from "next/link";
-
+import { useSearchQuery } from "@/hooks/use-search-query";
 interface EnhancedProductVariantTableProps {
   // Remove the callback props since we'll handle them internally
 }
@@ -54,6 +54,7 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
   const [productVariantToDelete, setProductVariantToDelete] = useState<
     string | null
   >(null);
+  const [search, setSearch] = useSearchQuery("q", 400);
   const [selectedVariantIds, setSelectedVariantIds] = useState<string[]>([]);
 
   // Flatten all variants from all products
@@ -248,6 +249,10 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
     },
   ];
 
+  useEffect(() => {
+    fetchProducts({ search });
+  }, [search, fetchProducts]);
+
   return (
     <div className="space-y-4">
       <DataTable
@@ -255,6 +260,8 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
         columns={columns}
         data={paginatedVariants}
         searchKeys={["name", "productName"]}
+        searchValue={search}
+        onSearchChange={setSearch}
         searchPlaceholder="Search variants..."
         customHeader={
           <div className="flex gap-2 items-center justify-between">

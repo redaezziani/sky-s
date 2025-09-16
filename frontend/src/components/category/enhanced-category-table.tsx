@@ -28,12 +28,14 @@ import { CreateCategoryDialog } from "@/components/category/create-category-dial
 import { EditCategoryDialog } from "@/components/category/edit-category-dialog";
 import PaginationTable from "@/components/pagination-table";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
+import { useSearchQuery } from "@/hooks/use-search-query";
 
 interface EnhancedCategoryTableProps {
   // Remove the callback props since we'll handle them internally
 }
 
 export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
+   const [search, setSearch] = useSearchQuery("q", 400);
   const {
     categories,
     loading,
@@ -112,14 +114,6 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
   const handleCloseEditDialog = () => {
     setEditingCategory(null);
     setIsEditDialogOpen(false);
-  };
-
-  const handleCreateCategory = () => {
-    setIsCreateDialogOpen(true);
-  };
-
-  const handleCloseCreateDialog = () => {
-    setIsCreateDialogOpen(false);
   };
 
   const columns: TableColumn<Category>[] = [
@@ -251,7 +245,9 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
       ),
     },
   ];
-
+  useEffect(() => {
+    fetchCategories({ search });
+  }, [search, fetchCategories]);
   return (
     <div className="space-y-4">
       <DataTable
@@ -259,6 +255,8 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
         data={categories}
         columns={columns}
         searchKeys={["name", "slug", "description"]}
+        searchValue={search}
+        onSearchChange={setSearch}
         searchPlaceholder="Search categories by name, slug, or description..."
         emptyMessage="No categories found"
         showCount={true}
@@ -299,7 +297,9 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => categoryToDelete && handleDeleteCategory(categoryToDelete)}
+              onClick={() =>
+                categoryToDelete && handleDeleteCategory(categoryToDelete)
+              }
             >
               Delete
             </AlertDialogAction>

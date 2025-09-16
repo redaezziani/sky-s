@@ -38,12 +38,14 @@ import { CreateSKUDialog } from "./create-sku-dialog";
 import { EditSKUDialog } from "./edit-sku-dialog";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
 import Link from "next/link";
+import { useSearchQuery } from "@/hooks/use-search-query";
 
 interface EnhancedSKUTableProps {
   // Remove the callback props since we'll handle them internally
 }
 
 export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
+  const [search, setSearch] = useSearchQuery("q", 400);
   const { products, loading, error, fetchProducts, deleteSKU } =
     useProductVariantsStore();
 
@@ -323,12 +325,18 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
     },
   ];
 
+  useEffect(() => {
+    fetchProducts({ search });
+  }, [search, fetchProducts]);
+
   return (
     <div className="space-y-4">
       <DataTable
         title="SKU Management"
         data={paginatedSKUs}
         columns={columns}
+        searchValue={search}
+        onSearchChange={setSearch}
         searchKeys={["sku", "barcode", "productName", "variantName"]}
         searchPlaceholder="Search by SKU, barcode, product or variant..."
         emptyMessage="No SKUs found"

@@ -28,12 +28,14 @@ import { CreateUserDialog } from "@/components/user/create-user-dialog";
 import { EditUserDialog } from "@/components/user/edit-user-dialog";
 import PaginationTable from "@/components/pagination-table";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
+import { useSearchQuery } from "@/hooks/use-search-query";
 
 interface EnhancedUserTableProps {
   // Remove the callback props since we'll handle them internally
 }
 
 export function EnhancedUserTable({}: EnhancedUserTableProps) {
+     const [search, setSearch] = useSearchQuery("q", 400);
   const {
     users,
     loading,
@@ -102,24 +104,6 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
     } catch (error) {
       toast.error("Failed to delete users");
     }
-  };
-
-  const handleEditUser = (user: User) => {
-    setEditingUser(user);
-    setIsEditDialogOpen(true);
-  };
-
-  const handleCloseEditDialog = () => {
-    setEditingUser(null);
-    setIsEditDialogOpen(false);
-  };
-
-  const handleCreateUser = () => {
-    setIsCreateDialogOpen(true);
-  };
-
-  const handleCloseCreateDialog = () => {
-    setIsCreateDialogOpen(false);
   };
 
   const columns: TableColumn<User>[] = [
@@ -249,6 +233,9 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
       ),
     },
   ];
+  useEffect(() => {
+    fetchUsers({ search });
+  }, [search, fetchUsers]);
 
   return (
     <div className="space-y-4">
@@ -257,6 +244,8 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
         data={users}
         columns={columns}
         searchKeys={["name", "email", "role"]}
+        searchValue={search}
+        onSearchChange={setSearch}
         searchPlaceholder="Search users by name, email, or role..."
         emptyMessage="No users found"
         showCount={true}
