@@ -62,6 +62,7 @@ interface OrdersStore {
   fetchOrders: (params?: Record<string, any>) => Promise<void>;
   deleteOrder: (id: string) => Promise<void>;
   bulkDeleteOrders: (orderIds: string[]) => Promise<void>;
+  createOrder: (orderData: any) => Promise<void>;
 
   // Pagination
   setPage: (page: number) => void;
@@ -147,6 +148,21 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
         error: err.response?.data?.message || "Failed to delete orders",
         loading: false,
       });
+    }
+  },
+
+  createOrder: async (orderData: any) => {
+    try {
+      set({ loading: true, error: null });
+      await axiosInstance.post("/orders", orderData);
+      await get().fetchOrders();
+      set({ loading: false });
+    } catch (err: any) {
+      set({
+        error: err.response?.data?.message || "Failed to create order",
+        loading: false,
+      });
+      throw err;
     }
   },
 

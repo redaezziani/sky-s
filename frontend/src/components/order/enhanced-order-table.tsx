@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import PaginationTable from "@/components/pagination-table";
 import { useSearchQuery } from "@/hooks/use-search-query";
 import OrderDetails from "./order-details";
+import { CreateOrderDialog } from "./create-order-dialog";
 
 export function EnhancedOrderTable() {
   const [search, setSearch] = useSearchQuery("q", 400);
@@ -219,6 +220,7 @@ export function EnhancedOrderTable() {
                 Delete Selected ({selectedOrders.length})
               </Button>
             )}
+            <CreateOrderDialog/>
           </div>
         }
       />

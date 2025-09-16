@@ -170,6 +170,7 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
         includeCategories: params.includeCategories ?? true,
         includeVariants: params.includeVariants ?? true,
         includeImages: params.includeImages ?? false,
+        includeSKUs: params.includeVariants ?? true,
       };
       
       if (params.search && params.search.trim()) {

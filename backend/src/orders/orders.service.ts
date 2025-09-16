@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrderResponseDto } from './dto/order-response.dto';
-import { CreateOrderDto } from './dto/create-order.dto';
+import { CreateOrderDto, OrderItemDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { ProductSKU } from 'generated/prisma';
 import { Decimal } from 'generated/prisma/runtime/index-browser';
@@ -12,48 +12,54 @@ export class OrdersService {
   constructor(private prisma: PrismaService) {}
 
   private async generateOrderNumber(): Promise<string> {
-    const count = await this.prisma.order.count();
-    return `ORD-${(count + 1).toString().padStart(6, '0')}`;
+    // Using timestamp + random to avoid conflicts
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `ORD-${timestamp}-${random}`;
   }
 
-  async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
+async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
     const orderNumber = await this.generateOrderNumber();
 
-    let subtotal = 0;
-    const itemsData: {
-      skuId: string;
-      quantity: number;
-      unitPrice: Decimal;
-      totalPrice: number;
-      productName: string;
-      skuCode: string;
-    }[] = [];
+    // Batch fetch SKUs
+    const skuIds = createOrderDto.items.map((i) => i.skuId);
+    const skus = await this.prisma.productSKU.findMany({
+      where: { id: { in: skuIds } },
+      include: { variant: { include: { product: true } } },
+    });
 
-    for (const item of createOrderDto.items) {
-      const sku = await this.prisma.productSKU.findUnique({
-        where: { id: item.skuId },
-        include: { variant: { include: { product: true } } },
-      });
+    if (skus.length !== skuIds.length) {
+      const foundIds = skus.map((s) => s.id);
+      const missingIds = skuIds.filter((id) => !foundIds.includes(id));
+      throw new NotFoundException(`SKU(s) not found: ${missingIds.join(', ')}`);
+    }
 
-      if (!sku) throw new NotFoundException(`SKU ${item.skuId} not found`);
+    let subtotal = new Decimal(0);
 
-      const totalPrice = sku.price.toNumber() * item.quantity;
-      subtotal += totalPrice;
+    const itemsData = createOrderDto.items.map((item: OrderItemDto) => {
+      const sku = skus.find((s) => s.id === item.skuId)!;
+      const unitPrice = new Decimal(sku.price.toString());
+      const totalPrice = unitPrice.mul(item.quantity);
+      subtotal = subtotal.plus(totalPrice);
 
-      itemsData.push({
+      return {
         skuId: sku.id,
         quantity: item.quantity,
-        unitPrice: sku.price,
+        unitPrice,
         totalPrice,
         productName: sku.variant.product.name,
         skuCode: sku.sku,
-      });
-    }
+        deliveryLat: item.deliveryLat ?? null,
+        deliveryLng: item.deliveryLng ?? null,
+        deliveryPlace: item.deliveryPlace ?? null,
+      };
+    });
 
-    const taxAmount = 0;
-    const shippingAmount = 0;
-    const discountAmount = 0;
-    const totalAmount = subtotal + taxAmount + shippingAmount - discountAmount;
+    // Placeholder: calculate tax, shipping, discounts as needed
+    const taxAmount = new Decimal(0);
+    const shippingAmount = new Decimal(0);
+    const discountAmount = new Decimal(0);
+    const totalAmount = subtotal.plus(taxAmount).plus(shippingAmount).minus(discountAmount);
 
     const order = await this.prisma.order.create({
       data: {
@@ -65,15 +71,15 @@ export class OrdersService {
         discountAmount,
         totalAmount,
         currency: 'USD',
-        shippingName: createOrderDto.shippingName ?? '',
-        shippingEmail: createOrderDto.shippingEmail ?? '',
-        shippingPhone: createOrderDto.shippingPhone ?? '',
-        shippingAddress: createOrderDto.shippingAddress ?? '',
-        billingName: createOrderDto.billingName ?? '',
-        billingEmail: createOrderDto.billingEmail ?? '',
-        billingAddress: createOrderDto.billingAddress ?? '',
-        notes: createOrderDto.notes ?? '',
-        trackingNumber: createOrderDto.trackingNumber ?? '',
+        shippingName: createOrderDto.shippingName?? "n/a",
+        shippingEmail: createOrderDto.shippingEmail ?? "n/a",
+        shippingPhone: createOrderDto.shippingPhone ?? "n/a",
+        shippingAddress: createOrderDto.shippingAddress ?? "n/a",
+        billingName: createOrderDto.billingName ?? null,
+        billingEmail: createOrderDto.billingEmail ?? null,
+        billingAddress: createOrderDto.billingAddress ?? undefined,
+        notes: createOrderDto.notes ?? null,
+        trackingNumber: createOrderDto.trackingNumber ?? null,
         items: {
           create: itemsData,
         },
@@ -83,6 +89,7 @@ export class OrdersService {
 
     return this.formatOrderResponse(order);
   }
+
 
   async findAll(query: QueryOrderDto): Promise<{
     data: OrderResponseDto[];
