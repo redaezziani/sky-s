@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Eye } from "lucide-react";
 import { Order } from "@/stores/orders-store";
-
+import DeliveryMapPicker from "../delivery-map-picker";
 interface OrderDetailsProps {
   order: Order;
 }
@@ -191,6 +191,17 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                   </span>
                 </div>
               </div>
+            </section>
+            <Separator />
+
+            {/* Delivery Map */}
+            <section>
+              <h3 className="text-lg font-semibold mb-2">Delivery Location</h3>
+              <DeliveryMapPicker
+                deliveryLat={order.shippingAddress?.latitude || 35.7629952}
+                deliveryLng={order.shippingAddress?.longitude || -5.81632}
+                readonly
+              />
             </section>
           </div>
         </SheetContent>
