@@ -6,6 +6,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import { ModeToggle } from "./theme-btn";
+import { LocaleSwitcher } from "./local-lang-swither";
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -39,6 +40,7 @@ export function SiteHeader() {
       </div>
       <div className="ml-auto flex px-2 items-center gap-2">
         <ModeToggle />
+        <LocaleSwitcher/>
       </div>
     </header>
   );

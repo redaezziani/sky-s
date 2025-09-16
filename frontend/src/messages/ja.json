@@ -1,0 +1,81 @@
+{
+  "sidebar": {
+    "storeManager": "ストアマネージャー",
+    "user": "ユーザー",
+    "links": {
+      "dashboard": "ダッシュボード",
+      "users": "ユーザー管理",
+      "roles": "役割",
+      "categories": "カテゴリ",
+      "products": "商品",
+      "productVariants": "商品バリエーション",
+      "skus": "SKUと在庫",
+      "orders": "注文",
+      "orderItems": "注文アイテム",
+      "reviews": "レビュー",
+      "analytics": "分析"
+    },
+    "navUser": {
+      "logout": "ログアウト",
+      "logoutWarningTitle": "ログアウト警告",
+      "logoutWarningDesc": "ローカルではログアウトしましたが、サーバー側のログアウトに失敗した可能性があります。"
+    }
+  },
+  "pages": {
+    "skus": {
+      "title": "SKUと在庫管理",
+      "description": "製品SKU、価格、在庫レベルを管理します"
+    },
+     "components": {
+      "skus": {
+        "title": "SKU管理",
+        "toast": {
+          "skuDeleted": "SKUが正常に削除されました",
+          "skuDeleteFailed": "SKUの削除に失敗しました",
+          "bulkDeleted": "{0} 件のSKUを正常に削除しました",
+          "bulkDeleteFailed": "選択したSKUの削除に失敗しました"
+        },
+
+        "table": {
+          "sku": "SKU",
+          "productVariant": "商品とバリアント",
+          "pricing": "価格",
+          "stock": "在庫",
+          "details": "詳細",
+          "status": "ステータス",
+          "created": "作成日",
+          "cost": "原価",
+          "units": "個",
+          "alert": "アラート",
+          "active": "有効",
+          "inactive": "無効",
+          "searchPlaceholder": "SKU、バーコード、商品名、バリアントで検索...",
+          "empty": "SKUが見つかりません",
+          "selectRow": "行を選択",
+          "addSKU": "SKUを追加",
+          "deleteSelected": "選択したSKUを削除 ({0})",
+          "edit": "編集",
+          "delete": "削除",
+          "openMenu": "メニューを開く",
+          "weight": "重量",
+          "dimensions": "寸法"
+        },
+        "stock": {
+          "inStock": "在庫あり",
+          "lowStock": "在庫少",
+          "outOfStock": "在庫なし"
+        },
+        "dialogs": {
+          "deleteTitle": "本当に削除しますか？",
+          "deleteDesc": "この操作は元に戻せません。このSKUと関連データは完全に削除されます。",
+          "bulkDeleteTitle": "選択したSKUを削除",
+          "bulkDeleteDesc": "{0} 件のSKUを削除してもよろしいですか？この操作は元に戻せません。",
+          "cancel": "キャンセル",
+          "delete": "削除"
+          
+        }
+      }
+    }
+  }
+  
+}

@@ -1,7 +1,6 @@
 "use client";
 
 import { IconDotsVertical, IconLogout } from "@tabler/icons-react";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -22,18 +21,21 @@ import { AuthService } from "@/services/auth.service";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
+import { getMessages } from "@/lib/locale";
+import { useLocale } from "@/components/local-lang-swither"; // <-- your LocaleProvider
+
 export function NavUser({
   user,
 }: {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
+  user: { name: string; email: string; avatar: string };
 }) {
   const { isMobile } = useSidebar();
   const { logout } = useAuth();
   const router = useRouter();
+
+  // ✅ reactive locale from context
+  const { locale } = useLocale();
+  const t = getMessages(locale);
 
   const handleLogout = async () => {
     try {
@@ -43,8 +45,8 @@ export function NavUser({
     } catch (error) {
       logout();
       router.push("/");
-      toast.error("Logout warning", {
-        description: "Logged out locally, but server logout may have failed.",
+      toast.error(t.sidebar.navUser.logoutWarningTitle, {
+        description: t.sidebar.navUser.logoutWarningDesc,
       });
     }
   };
@@ -71,6 +73,7 @@ export function NavUser({
               <IconDotsVertical className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
@@ -91,11 +94,12 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
+
             <DropdownMenuSeparator />
 
             <DropdownMenuItem onClick={handleLogout}>
               <IconLogout />
-              Log out
+              {t.sidebar.navUser.logout}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

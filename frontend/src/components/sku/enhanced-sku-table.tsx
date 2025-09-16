@@ -39,27 +39,22 @@ import { EditSKUDialog } from "./edit-sku-dialog";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
 import Link from "next/link";
 import { useSearchQuery } from "@/hooks/use-search-query";
+import { useLocale } from "@/components/local-lang-swither"; // your LocaleProvider hook
+import { getMessages } from "@/lib/locale";
 
-interface EnhancedSKUTableProps {
-  // Remove the callback props since we'll handle them internally
-}
+interface EnhancedSKUTableProps {}
 
 export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
   const [search, setSearch] = useSearchQuery("q", 400);
   const { products, loading, error, fetchProducts, deleteSKU } =
     useProductVariantsStore();
 
-  // Local pagination state for SKUs
   const [skuCurrentPage, setSkuCurrentPage] = useState(1);
   const [skuItemsPerPage, setSkuItemsPerPage] = useState(7);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingSKU, setEditingSKU] = useState<
-    | (ProductSKU & {
-        productName: string;
-        variantName: string;
-        variantId: string;
-      })
+    | (ProductSKU & { productName: string; variantName: string; variantId: string })
     | null
   >(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -68,7 +63,10 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
   const [skuToDelete, setSKUToDelete] = useState<string | null>(null);
   const [selectedSKUIds, setSelectedSKUIds] = useState<string[]>([]);
 
-  // Flatten all SKUs from all products and variants
+  const { locale } = useLocale();
+  const t = getMessages(locale);
+
+  // Flatten all SKUs
   const allSKUs = useMemo(() => {
     const skus: (ProductSKU & {
       productName: string;
@@ -76,85 +74,70 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
       variantName: string;
       variantId: string;
     })[] = [];
-
     products.forEach((product) => {
-      if (product.variants) {
-        product.variants.forEach((variant) => {
-          if (variant.skus) {
-            variant.skus.forEach((sku) => {
-              skus.push({
-                ...sku,
-                productName: product.name,
-                productId: product.id,
-                variantName: variant.name || `Variant ${variant.id.slice(-8)}`,
-                variantId: variant.id,
-              });
-            });
-          }
+      product.variants?.forEach((variant) => {
+        variant.skus?.forEach((sku) => {
+          skus.push({
+            ...sku,
+            productName: product.name,
+            productId: product.id,
+            variantName: variant.name || `Variant ${variant.id.slice(-8)}`,
+            variantId: variant.id,
+          });
         });
-      }
+      });
     });
     return skus;
   }, [products]);
 
-  // Calculate pagination for SKUs
   const skuTotalItems = allSKUs.length;
   const skuTotalPages = Math.ceil(skuTotalItems / skuItemsPerPage);
   const startIndex = (skuCurrentPage - 1) * skuItemsPerPage;
   const endIndex = startIndex + skuItemsPerPage;
   const paginatedSKUs = allSKUs.slice(startIndex, endIndex);
 
-  // Pagination handlers
-  const handlePageChange = (page: number) => {
-    setSkuCurrentPage(page);
-  };
-
+  const handlePageChange = (page: number) => setSkuCurrentPage(page);
   const handlePageSizeChange = (pageSize: number) => {
     setSkuItemsPerPage(pageSize);
-    setSkuCurrentPage(1); // Reset to first page when page size changes
+    setSkuCurrentPage(1);
   };
 
-  // Fetch products with variants and SKUs on component mount
   useEffect(() => {
     fetchProducts({ includeVariants: true, includeSKUs: true });
   }, [fetchProducts]);
 
-  // Show error toast
   useEffect(() => {
-    if (error) {
-      toast.error(error);
-    }
+    if (error) toast.error(error);
   }, [error]);
 
   const handleDeleteSKU = async (id: string) => {
     try {
       await deleteSKU(id);
-      toast.success("SKU deleted successfully");
+      toast.success(t.pages.components.skus.toast.skuDeleted);
       setDeleteDialogOpen(false);
       setSKUToDelete(null);
     } catch (error) {
-      toast.error("Failed to delete SKU");
+      toast.error(t.pages.components.skus.toast.skuDeleteFailed);
     }
   };
 
   const handleBulkDelete = async () => {
     try {
       await Promise.all(selectedSKUIds.map((id) => deleteSKU(id)));
-      toast.success(`${selectedSKUIds.length} SKUs deleted successfully`);
+      toast.success(
+        t.pages.components.skus.toast.bulkDeleted.replace(
+          "{0}",
+          selectedSKUIds.length.toString()
+        )
+      );
       setBulkDeleteDialogOpen(false);
       setSelectedSKUIds([]);
     } catch (error) {
-      toast.error("Failed to delete selected SKUs");
+      toast.error(t.pages.components.skus.toast.bulkDeleteFailed);
     }
   };
 
-  const handleEditSKU = (
-    sku: ProductSKU & {
-      productName: string;
-      variantName: string;
-      variantId: string;
-    }
-  ) => {
+  const handleEditSKU = (sku: ProductSKU & { productName: string; variantName: string; variantId: string }) => {
     setEditingSKU(sku);
     setIsEditDialogOpen(true);
   };
@@ -164,23 +147,30 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
     setDeleteDialogOpen(true);
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat(locale === "ja" ? "ja-JP" : "en-US", {
       style: "currency",
       currency: "USD",
     }).format(price);
-  };
 
   const getStockStatus = (stock: number, lowStockAlert: number) => {
     if (stock === 0)
       return {
         status: "out-of-stock",
-        label: "Out of Stock",
+        label: t.pages.components.skus.stock.outOfStock,
         color: "destructive",
       };
     if (stock <= lowStockAlert)
-      return { status: "low-stock", label: "Low Stock", color: "default" };
-    return { status: "in-stock", label: "In Stock", color: "secondary" };
+      return {
+        status: "low-stock",
+        label: t.pages.components.skus.stock.lowStock,
+        color: "default",
+      };
+    return {
+      status: "in-stock",
+      label: t.pages.components.skus.stock.inStock,
+      color: "secondary",
+    };
   };
 
   const columns: TableColumn<
@@ -192,20 +182,18 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
       render: (sku) => (
         <Checkbox
           checked={selectedSKUIds.includes(sku.id)}
-          onCheckedChange={(value) => {
-            if (value) {
-              setSelectedSKUIds((prev) => [...prev, sku.id]);
-            } else {
-              setSelectedSKUIds((prev) => prev.filter((id) => id !== sku.id));
-            }
-          }}
-          aria-label="Select row"
+          onCheckedChange={(value) =>
+            value
+              ? setSelectedSKUIds((prev) => [...prev, sku.id])
+              : setSelectedSKUIds((prev) => prev.filter((id) => id !== sku.id))
+          }
+          aria-label={t.pages.components.skus.table.selectRow}
         />
       ),
     },
     {
       key: "sku",
-      label: "SKU",
+      label: t.pages.components.skus.table.sku,
       render: (sku) => (
         <div className="flex items-center space-x-2">
           <div className="flex items-center justify-center w-8 h-8 bg-muted rounded">
@@ -224,10 +212,10 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
     },
     {
       key: "product",
-      label: "Product & Variant",
+      label: t.pages.components.skus.table.productVariant,
       render: (sku) => (
         <div>
-          <div className="font-medium truncate max-w-80  text-sm">
+          <div className="font-medium truncate max-w-80 text-sm">
             <Link
               className="hover:underline transition-all duration-500 ease-in-out"
               href={`/dashboard/products?q=${sku.productName}`}
@@ -241,7 +229,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
     },
     {
       key: "pricing",
-      label: "Pricing",
+      label: t.pages.components.skus.table.pricing,
       render: (sku) => (
         <div className="space-y-1">
           <div className="flex items-center space-x-1">
@@ -254,7 +242,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
           )}
           {sku.costPrice && (
             <div className="text-xs text-muted-foreground">
-              Cost: {formatPrice(sku.costPrice)}
+              {t.pages.components.skus.table.cost}: {formatPrice(sku.costPrice)}
             </div>
           )}
         </div>
@@ -262,24 +250,23 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
     },
     {
       key: "stock",
-      label: "Stock",
+      label: t.pages.components.skus.table.stock,
       render: (sku) => {
         const stockStatus = getStockStatus(sku.stock, sku.lowStockAlert);
         return (
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
-              <Badge variant={stockStatus.color as any}>
-                {stockStatus.label}
-              </Badge>
+              <Badge variant={stockStatus.color as any}>{stockStatus.label}</Badge>
               {stockStatus.status === "low-stock" && (
                 <AlertTriangle className="h-3 w-3 text-orange-500" />
               )}
             </div>
             <div className="text-sm">
-              <span className="font-medium">{sku.stock}</span> units
+              <span className="font-medium">{sku.stock}</span>{" "}
+              {t.pages.components.skus.table.units}
               {sku.lowStockAlert && (
                 <span className="text-xs text-muted-foreground ml-1">
-                  (Alert: {sku.lowStockAlert})
+                  ({t.pages.components.skus.table.alert}: {sku.lowStockAlert})
                 </span>
               )}
             </div>
@@ -289,17 +276,26 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
     },
     {
       key: "dimensions",
-      label: "Details",
+      label: t.pages.components.skus.table.details,
       render: (sku) => (
         <div className="text-xs text-muted-foreground space-y-1">
-          {sku.weight && <div>Weight: {sku.weight}g</div>}
-          {sku.dimensions && <div>Dims: {JSON.stringify(sku.dimensions)}</div>}
+          {sku.weight && (
+            <div>
+              {t.pages.components.skus.table.weight}: {sku.weight}g
+            </div>
+          )}
+          {sku.dimensions && (
+            <div>
+              {t.pages.components.skus.table.dimensions}:{" "}
+              {JSON.stringify(sku.dimensions)}
+            </div>
+          )}
         </div>
       ),
     },
     {
       key: "status",
-      label: "Status",
+      label: t.pages.components.skus.table.status,
       render: (sku) => (
         <Badge variant={"secondary"}>
           {sku.isActive ? (
@@ -307,18 +303,20 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
           ) : (
             <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" />
           )}
-          {sku.isActive ? "Active" : "Inactive"}
+          {sku.isActive
+            ? t.pages.components.skus.table.active
+            : t.pages.components.skus.table.inactive}
         </Badge>
       ),
     },
     {
       key: "createdAt",
-      label: "Created",
+      label: t.pages.components.skus.table.created,
       render: (sku) => {
         const date = new Date(sku.createdAt);
         return (
           <div className="text-sm text-muted-foreground">
-            {date.toLocaleDateString()}
+            {date.toLocaleDateString(locale)}
           </div>
         );
       },
@@ -332,15 +330,15 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
   return (
     <div className="space-y-4">
       <DataTable
-        title="SKU Management"
+        title={t.pages.components.skus.title}
         data={paginatedSKUs}
         columns={columns}
         searchValue={search}
         onSearchChange={setSearch}
         searchKeys={["sku", "barcode", "productName", "variantName"]}
-        searchPlaceholder="Search by SKU, barcode, product or variant..."
-        emptyMessage="No SKUs found"
-        showCount={true}
+        searchPlaceholder={t.pages.components.skus.table.searchPlaceholder}
+        emptyMessage={t.pages.components.skus.table.empty}
+        showCount
         customHeader={
           <div className="flex items-center gap-2">
             {selectedSKUIds.length > 0 && (
@@ -349,12 +347,15 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
                 onClick={() => setBulkDeleteDialogOpen(true)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete Selected ({selectedSKUIds.length})
+                {t.pages.components.skus.table.deleteSelected.replace(
+                  "{0}",
+                  selectedSKUIds.length.toString()
+                )}
               </Button>
             )}
             <Button onClick={() => setIsCreateDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              Add SKU
+              {t.pages.components.skus.table.addSKU}
             </Button>
           </div>
         }
@@ -362,21 +363,23 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
+                <span className="sr-only">
+                  {t.pages.components.skus.table.openMenu}
+                </span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => handleEditSKU(sku)}>
                 <Edit className="mr-2 h-4 w-4" />
-                Edit
+                {t.pages.components.skus.table.edit}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => openDeleteDialog(sku.id)}
                 className="text-red-600"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                {t.pages.components.skus.table.delete}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -392,60 +395,68 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
         onPageSizeChange={handlePageSizeChange}
       />
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t.pages.components.skus.dialogs.deleteTitle}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the SKU
-              and all associated data.
+              {t.pages.components.skus.dialogs.deleteDesc}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>
+              {t.pages.components.skus.dialogs.cancel}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => skuToDelete && handleDeleteSKU(skuToDelete)}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              {t.pages.components.skus.dialogs.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Bulk Delete Confirmation Dialog */}
+      {/* Bulk Delete */}
       <AlertDialog
         open={bulkDeleteDialogOpen}
         onOpenChange={setBulkDeleteDialogOpen}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Selected SKUs</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t.pages.components.skus.dialogs.bulkDeleteTitle}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {selectedSKUIds.length} SKU(s)?
-              This action cannot be undone.
+              {t.pages.components.skus.dialogs.bulkDeleteDesc.replace(
+                "{0}",
+                selectedSKUIds.length.toString()
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>
+              {t.pages.components.skus.dialogs.cancel}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleBulkDelete}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete {selectedSKUIds.length} SKU(s)
+              {t.pages.components.skus.dialogs.delete}{" "}
+              {selectedSKUIds.length}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Create SKU Dialog */}
+      {/* Create & Edit */}
       <CreateSKUDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
       />
-
-      {/* Edit SKU Dialog */}
       <EditSKUDialog
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}

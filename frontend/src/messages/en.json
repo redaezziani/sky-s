@@ -1,0 +1,79 @@
+{
+  "sidebar": {
+    "storeManager": "Store Manager",
+    "user": "User",
+    "links": {
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "roles": "Roles",
+      "categories": "Categories",
+      "products": "Products",
+      "productVariants": "Product Variants",
+      "skus": "SKUs & Inventory",
+      "orders": "Orders",
+      "orderItems": "Order Items",
+      "reviews": "Reviews",
+      "analytics": "Analytics"
+    },
+    "navUser": {
+      "logout": "Log out",
+      "logoutWarningTitle": "Logout warning",
+      "logoutWarningDesc": "Logged out locally, but server logout may have failed."
+    }
+  },
+
+  "pages": {
+    "skus": {
+      "title": "SKUs & Inventory Management",
+      "description": "Manage product SKUs, pricing, and inventory levels"
+    },
+    "components": {
+      "skus": {
+        "title": "SKU Management",
+        "toast": {
+          "skuDeleted": "SKU deleted successfully",
+          "skuDeleteFailed": "Failed to delete SKU",
+          "bulkDeleted": "Deleted {0} SKUs successfully",
+          "bulkDeleteFailed": "Failed to delete selected SKUs"
+        },
+        "table": {
+          "sku": "SKU",
+          "productVariant": "Product & Variant",
+          "pricing": "Pricing",
+          "stock": "Stock",
+          "details": "Details",
+          "status": "Status",
+          "created": "Created",
+          "cost": "Cost",
+          "units": "units",
+          "alert": "Alert",
+          "active": "Active",
+          "inactive": "Inactive",
+          "searchPlaceholder": "Search by SKU, barcode, product or variant...",
+          "empty": "No SKUs found",
+          "selectRow": "Select row",
+          "addSKU": "Add SKU",
+          "deleteSelected": "Delete Selected ({0})",
+          "edit": "Edit",
+          "delete": "Delete",
+          "openMenu": "Open menu",
+          "weight": "Weight",
+          "dimensions": "Dimensions"
+        },
+        "stock": {
+          "inStock": "In Stock",
+          "lowStock": "Low Stock",
+          "outOfStock": "Out of Stock"
+        },
+        "dialogs": {
+          "deleteTitle": "Are you sure?",
+          "deleteDesc": "This action cannot be undone. This will permanently delete the SKU and all associated data.",
+          "bulkDeleteTitle": "Delete Selected SKUs",
+          "bulkDeleteDesc": "Are you sure you want to delete {0} SKU(s)? This action cannot be undone.",
+          "cancel": "Cancel",
+          "delete": "Delete"
+        }
+      }
+    }
+  }
+}
