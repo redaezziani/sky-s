@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
+import { ModeToggle } from "./theme-btn";
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -35,6 +36,9 @@ export function SiteHeader() {
           className="mx-2 data-[orientation=vertical]:h-4"
         />
         <h1 className="text-base font-medium">{title}</h1>
+      </div>
+      <div className="ml-auto flex px-2 items-center gap-2">
+        <ModeToggle />
       </div>
     </header>
   );

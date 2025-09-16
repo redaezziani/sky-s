@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
 
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth();
 
@@ -116,7 +117,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           user={
             user
               ? {
-                  name: user.name,
+                  name: user.name ?? "User",
                   email: user.email,
                   avatar: "/avatars/default.jpg",
                 }

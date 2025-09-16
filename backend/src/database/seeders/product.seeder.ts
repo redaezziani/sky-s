@@ -28,11 +28,17 @@ async function uploadNB9060Images() {
   const uploadPromises = nb9060ImageFiles.map(async (filename) => {
     const filePath = path.resolve(__dirname, './new-balance', filename);
     const buffer = fs.readFileSync(filePath);
-    const file: any = {
-      buffer,
+    const file: Express.Multer.File = {
+      fieldname: 'file',
       originalname: filename,
+      encoding: '7bit',
       mimetype: 'image/webp',
       size: buffer.length,
+      buffer,
+      destination: '',
+      filename,
+      path: filePath,
+      stream: undefined as any, // Not used, but required by type
     };
     const result = await imageKit.uploadImage(file, {
       fileName: filename,
@@ -47,15 +53,54 @@ async function uploadBonaImages() {
   const uploadPromises = bonaImageFiles.map(async (filename) => {
     const filePath = path.resolve(__dirname, './bona', filename);
     const buffer = fs.readFileSync(filePath);
-    const file: any = {
-      buffer,
+    const file: Express.Multer.File = {
+      fieldname: 'file',
       originalname: filename,
+      encoding: '7bit',
       mimetype: 'image/webp',
       size: buffer.length,
+      buffer,
+      destination: '',
+      filename,
+      path: filePath,
+      stream: undefined as any, // Not used, but required by type
     };
     const result = await imageKit.uploadImage(file, {
       fileName: filename,
       folder: 'products/bona-leggings',
+    });
+    return result.url;
+  });
+  return Promise.all(uploadPromises);
+}
+
+async function uploadJordanImages() {
+  const jordanImageFiles = [
+    '1acd84f2-02f0-4090-8ab1-6eea9d8b55b5.webp',
+    '388275f9-edc7-4a83-9794-4ec197bb36eb.webp',
+    '6a5c99ec-15bd-4e79-a657-06d96e95449c.webp',
+    'be3519c6-585a-4b95-8884-bde4174134cf.webp',
+    'e96d1af0-49f4-4283-b49d-ea3f203dd35a.webp',
+    'ecd9a3f5-c45d-484e-acdb-557fe3e61b30.webp',
+  ];
+  const uploadPromises = jordanImageFiles.map(async (filename) => {
+    const filePath = path.resolve(__dirname, './jordan', filename);
+    const buffer = fs.readFileSync(filePath);
+    const file: Express.Multer.File = {
+      fieldname: 'file',
+      originalname: filename,
+      encoding: '7bit',
+      mimetype: 'image/webp',
+      size: buffer.length,
+      buffer,
+      destination: '',
+      filename,
+      path: filePath,
+      stream: undefined as any, // Not used, but required by type
+    };
+    const result = await imageKit.uploadImage(file, {
+      fileName: filename,
+      folder: 'products/jordan-air-jordan-1',
     });
     return result.url;
   });
@@ -71,6 +116,7 @@ export async function seedProducts() {
   // Upload images
   const nb9060Images = await uploadNB9060Images();
   const bonaImages = await uploadBonaImages();
+  const jordanImages = await uploadJordanImages();
 
   // Find or create sneakers category
   const categorySlug = 'sneakers';
@@ -102,6 +148,22 @@ export async function seedProducts() {
       },
     });
     console.log('✅ Created category: Leggings');
+  }
+
+  // Find or create jordan category
+  const jordanCategorySlug = 'jordan';
+  let jordanCategory = await prisma.category.findUnique({
+    where: { slug: jordanCategorySlug },
+  });
+  if (!jordanCategory) {
+    jordanCategory = await prisma.category.create({
+      data: {
+        name: 'Jordan',
+        slug: jordanCategorySlug,
+        isActive: true,
+      },
+    });
+    console.log('✅ Created category: Jordan');
   }
 
   // Create New Balance 9060 product only
@@ -219,6 +281,77 @@ export async function seedProducts() {
       },
     });
     console.log('✅ Created product: Bona Fide Premium Leggings');
+  }
+
+  // Add Jordan W AIR JORDAN 1 ZM AIR CMFT 2 product
+  const jordanSlug = 'w-air-jordan-1-zm-air-cmft-2';
+  const jordanExists = await prisma.product.findUnique({
+    where: { slug: jordanSlug },
+  });
+  if (!jordanExists) {
+    await prisma.product.create({
+      data: {
+        name: 'Jordan W AIR JORDAN 1 ZM AIR CMFT 2',
+        slug: jordanSlug,
+        description: `Soft suede and Jordan Brand's signature Formula 23 foam come together to give you an extra luxurious (and extra cozy) AJ1. You don't need to play "either or" when it comes to choosing style or comfort with this one—which is nice, 'cause you deserve both. Nike Air technology absorbs impact for cushioning with every step. Suede upper and toe breaks in easily and conforms to your feet. Formula 23 foam keeps your feet extra padded.`,
+        shortDesc: 'W AIR JORDAN 1 ZM AIR CMFT 2 - creamy ice cream',
+        coverImage: jordanImages[0],
+        isFeatured: true,
+        metaTitle: 'Jordan W AIR JORDAN 1 ZM AIR CMFT 2',
+        metaDesc:
+          'Shop Jordan W AIR JORDAN 1 ZM AIR CMFT 2, creamy ice cream color.',
+        isActive: true,
+        sortOrder: 0,
+        categories: {
+          connect: { id: jordanCategory.id },
+        },
+        variants: {
+          create: [
+            {
+              name: 'Product Highlights',
+              attributes: {
+                color: 'creamy ice cream',
+                gender: 'Female',
+                fit: 'Regular/Classic Fit',
+                pattern: 'Solid',
+                closure: 'Lace-up',
+                upperMaterial: 'Suede Leather',
+                soleMaterial: 'Rubber',
+                liningMaterial: 'Synthetic Textile',
+                toeStyle: 'Round',
+                sportType: 'Basketball',
+                styleNo: 'Dv1305 101',
+                style: 'Lifestyle',
+              },
+              isActive: true,
+              sortOrder: 0,
+              skus: {
+                create: [
+                  {
+                    sku: 'JORDAN-CMFT2-CREAMY-ICE',
+                    price: 180.0,
+                    stock: 15,
+                    weight: 400,
+                    dimensions: { length: 32, width: 22, height: 13 },
+                    coverImage: jordanImages[0],
+                    lowStockAlert: 2,
+                    isActive: true,
+                    images: {
+                      create: jordanImages.map((url, idx) => ({
+                        url,
+                        altText: `Jordan W AIR JORDAN 1 ZM AIR CMFT 2 creamy ice cream view ${idx + 1}`,
+                        position: idx,
+                      })),
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    });
+    console.log('✅ Created product: Jordan W AIR JORDAN 1 ZM AIR CMFT 2');
   }
 
   console.log('✅ Product seeding complete');
