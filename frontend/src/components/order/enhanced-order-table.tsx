@@ -28,6 +28,7 @@ import PaginationTable from "@/components/pagination-table";
 import { useSearchQuery } from "@/hooks/use-search-query";
 import OrderDetails from "./order-details";
 import { CreateOrderDialog } from "./create-order-dialog";
+import { IconCircleCheckFilled } from "@tabler/icons-react";
 
 export function EnhancedOrderTable() {
   const [search, setSearch] = useSearchQuery("q", 400);
@@ -126,7 +127,21 @@ export function EnhancedOrderTable() {
     {
       key: "status",
       label: "Status",
-      render: (order) => <Badge variant="secondary">{order.status}</Badge>,
+      render: (order) => 
+      <Badge variant="secondary">
+        {order.status === "PENDING" ? (
+          <IconCircleCheckFilled className="fill-yellow-500 dark:fill-yellow-400" />
+        ) : order.status === "SHIPPED" ? (
+          <IconCircleCheckFilled className="fill-blue-500 dark:fill-blue-400" />
+        ) : order.status === "DELIVERED" ? (
+          <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+        ) : order.status === "CANCELLED" ? (
+          <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" />
+        ) : (
+          <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+        )}
+        {order.status}
+      </Badge>,
     },
     {
       key: "paymentStatus",
@@ -141,6 +156,12 @@ export function EnhancedOrderTable() {
               : "secondary"
           }
         >
+           {order.paymentStatus === "PAID" ? (<IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+           ) : order.paymentStatus === "FAILED" ? (
+            <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" />
+           ) : (
+            <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+           )}
           {order.paymentStatus}
         </Badge>
       ),

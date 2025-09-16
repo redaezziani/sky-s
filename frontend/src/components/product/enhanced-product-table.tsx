@@ -36,6 +36,7 @@ import { CreateProductDialog } from "@/components/product/create-product-dialog"
 import { EditProductDialog } from "@/components/product/edit-product-dialog";
 import PaginationTable from "@/components/pagination-table";
 import { useSearchQuery } from "@/hooks/use-search-query";
+import { IconCircleCheckFilled } from "@tabler/icons-react";
 interface EnhancedProductTableProps {
   // Remove the callback props since we'll handle them internally
 }
@@ -227,7 +228,7 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
         return (
           <div className="text-sm">
             {stock !== undefined ? (
-              <span className={stock > 0 ? "text-orange-600" : "text-red-600"}>
+              <span className={stock > 0 ? "" : "text-red-600"}>
                 {stock} units
               </span>
             ) : (
@@ -251,7 +252,12 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
       label: "Status",
       render: (product) => (
         <div className="flex items-center gap-2">
-          <Badge variant={product.isActive ? "secondary" : "outline"}>
+           <Badge variant={"secondary"}>
+            {product.isActive ? (
+              <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+            ) : (
+              <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" />
+            )}
             {product.isActive ? "Active" : "Inactive"}
           </Badge>
           {product.isFeatured && (
