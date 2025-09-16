@@ -331,7 +331,6 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Pagination */}
       {total > 0 && (
         <PaginationTable
           currentPage={currentPage}
