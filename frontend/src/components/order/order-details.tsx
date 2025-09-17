@@ -91,7 +91,7 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
 
             <Separator />
 
-            {/* Shipping Info */}
+
             <section>
               <h3 className="text-lg font-semibold">
                 {t.sections.shippingInfo}
