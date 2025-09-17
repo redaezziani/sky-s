@@ -30,6 +30,14 @@
     "nextPage": "次のページへ",
     "lastPage": "最後のページへ"
   },
+  "multiImageUploader": {
+    "dropHere": "ここに画像をドロップ",
+    "selectImages": "画像を選択",
+    "formats": "SVG、PNG、JPG、GIF (最大 {maxSizeMB}MB)",
+    "errors": {
+      "maxSize": "{name} は最大ファイルサイズを超えています"
+    }
+  },
   "pages": {
     "skus": {
       "title": "SKUと在庫管理",

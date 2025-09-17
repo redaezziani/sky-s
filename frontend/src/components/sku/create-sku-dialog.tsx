@@ -35,7 +35,8 @@ import useProductVariantsStore from "@/stores/product-variants-store";
 import { toast } from "sonner";
 import { useLocale } from "@/components/local-lang-swither";
 import { getMessages } from "@/lib/locale";
-import { Barcode, ScanBarcode } from "lucide-react";
+import { ScanBarcode } from "lucide-react";
+import { MultiImageUploader } from "../multy-image-file";
 
 const createSKUSchema = z.object({
   variantId: z.string().min(1),
@@ -344,18 +345,14 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
               )}
             />
 
-            {/* Images */}
             <FormItem>
               <FormLabel>{t.createSKU.fields.images}</FormLabel>
               <FormControl>
-                <Input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={(e) =>
-                    e.target.files &&
-                    setSelectedImages(Array.from(e.target.files))
-                  }
+                <MultiImageUploader
+                  value={selectedImages}
+                  onChange={setSelectedImages}
+                  maxSizeMB={5}
+                  maxFiles={10}
                 />
               </FormControl>
               <FormDescription>

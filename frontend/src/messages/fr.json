@@ -30,6 +30,14 @@
     "nextPage": "Page suivante",
     "lastPage": "Dernière page"
   },
+        "multiImageUploader": {
+          "dropHere": "Déposez vos images ici",
+          "selectImages": "Sélectionner des images",
+          "formats": "SVG, PNG, JPG ou GIF (max. {maxSizeMB} Mo)",
+          "errors": {
+            "maxSize": "{name} dépasse la taille maximale autorisée"
+          }
+        },
   "pages": {
     "skus": {
       "title": "Gestion des SKU & Stock",

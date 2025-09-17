@@ -30,6 +30,14 @@
     "nextPage": "Next page",
     "lastPage": "Last page"
   },
+  "multiImageUploader": {
+          "dropHere": "Drop your images here",
+          "selectImages": "Select images",
+          "formats": "SVG, PNG, JPG or GIF (max. {maxSizeMB}MB)",
+          "errors": {
+            "maxSize": "{name} exceeds the maximum file size"
+          }
+        },
   "pages": {
     "skus": {
       "title": "SKU & Inventory Management",
@@ -80,6 +88,7 @@
             "outOfStock": "Out of Stock"
           }
         }
+        
       },
       "dialogs": {
         "createSKU": {
