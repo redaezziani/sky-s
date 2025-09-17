@@ -9,70 +9,112 @@
       "categories": "Catégories",
       "products": "Produits",
       "productVariants": "Variantes de produit",
-      "skus": "UGS & Stock",
+      "skus": "SKU & Stock",
       "orders": "Commandes",
       "orderItems": "Articles de commande",
       "reviews": "Avis",
-      "analytics": "Analytique"
+      "analytics": "Analyses"
     },
     "navUser": {
       "logout": "Déconnexion",
       "logoutWarningTitle": "Avertissement de déconnexion",
-      "logoutWarningDesc": "Déconnecté localement, mais la déconnexion du serveur a peut-être échoué."
+      "logoutWarningDesc": "Vous vous êtes déconnecté localement, mais la déconnexion côté serveur a peut-être échoué."
     }
   },
-
+  "pagination": {
+    "rowsPerPage": "Lignes par page",
+    "selectRows": "Sélectionner des lignes",
+    "of": "/",
+    "firstPage": "Première page",
+    "prevPage": "Page précédente",
+    "nextPage": "Page suivante",
+    "lastPage": "Dernière page"
+  },
   "pages": {
     "skus": {
-      "title": "Gestion des UGS & du stock",
-      "description": "Gérer les UGS de produits, les prix et les niveaux de stock"
-    },
-    "components": {
-      "skus": {
-        "title": "Gestion des UGS",
-        "toast": {
-          "skuDeleted": "UGS supprimée avec succès",
-          "skuDeleteFailed": "Échec de la suppression de l’UGS",
-          "bulkDeleted": "{0} UGS supprimées avec succès",
-          "bulkDeleteFailed": "Échec de la suppression des UGS sélectionnées"
-        },
-        "table": {
-          "sku": "UGS",
-          "productVariant": "Produit & Variante",
-          "pricing": "Tarification",
-          "stock": "Stock",
-          "details": "Détails",
-          "status": "Statut",
-          "created": "Créé",
-          "cost": "Coût",
-          "units": "unités",
-          "alert": "Alerte",
-          "active": "Actif",
-          "inactive": "Inactif",
-          "searchPlaceholder": "Rechercher par UGS, code-barres, produit ou variante...",
-          "empty": "Aucune UGS trouvée",
-          "selectRow": "Sélectionner la ligne",
-          "addSKU": "Ajouter une UGS",
-          "deleteSelected": "Supprimer la sélection ({0})",
-          "edit": "Modifier",
-          "delete": "Supprimer",
-          "openMenu": "Ouvrir le menu",
-          "weight": "Poids",
-          "dimensions": "Dimensions"
-        },
-        "stock": {
-          "inStock": "En stock",
-          "lowStock": "Stock faible",
-          "outOfStock": "Rupture de stock"
-        },
-        "dialogs": {
-          "deleteTitle": "Êtes-vous sûr ?",
-          "deleteDesc": "Cette action est irréversible. Cela supprimera définitivement l’UGS et toutes les données associées.",
-          "bulkDeleteTitle": "Supprimer les UGS sélectionnées",
-          "bulkDeleteDesc": "Êtes-vous sûr de vouloir supprimer {0} UGS ? Cette action est irréversible.",
-          "cancel": "Annuler",
-          "delete": "Supprimer"
+      "title": "Gestion des SKU & Stock",
+      "description": "Gérer les SKU, les prix et les niveaux de stock des produits",
+      "components": {
+        "skuTable": {
+          "title": "Liste des SKU",
+          "table": {
+            "selectRow": "Sélectionner cette ligne",
+            "sku": "SKU",
+            "productVariant": "Produit / Variante",
+            "pricing": "Prix",
+            "cost": "Coût",
+            "stock": "Stock",
+            "units": "Unités",
+            "alert": "Alerte",
+            "details": "Détails",
+            "weight": "Poids",
+            "dimensions": "Dimensions",
+            "status": "Statut",
+            "active": "Actif",
+            "inactive": "Inactif",
+            "searchPlaceholder": "Rechercher un SKU...",
+            "empty": "Aucun SKU trouvé",
+            "deleteSelected": "Supprimer {0} sélectionné(s)",
+            "addSKU": "Ajouter SKU",
+            "edit": "Modifier",
+            "delete": "Supprimer",
+            "openMenu": "Ouvrir le menu d'action"
+          },
+          "dialogs": {
+            "deleteTitle": "Supprimer le SKU",
+            "deleteDesc": "Êtes-vous sûr de vouloir supprimer ce SKU ? Cette action est irréversible.",
+            "bulkDeleteTitle": "Supprimer les SKU sélectionnés",
+            "bulkDeleteDesc": "Êtes-vous sûr de vouloir supprimer les {0} SKU sélectionnés ? Cette action est irréversible.",
+            "cancel": "Annuler",
+            "delete": "Supprimer"
+          },
+          "toast": {
+            "skuDeleted": "SKU supprimé",
+            "skuDeleteFailed": "Échec de la suppression du SKU",
+            "bulkDeleted": "{0} SKU supprimés",
+            "bulkDeleteFailed": "Échec de la suppression des SKU sélectionnés"
+          },
+          "stock": {
+            "inStock": "En stock",
+            "lowStock": "Stock faible",
+            "outOfStock": "Rupture de stock"
+          }
         }
+      },
+      "dialogs": {
+        "createSKU": {
+          "title": "Créer un SKU",
+          "description": "Ajouter un nouveau SKU à une variante de produit et définir le prix et le stock.",
+          "fields": {
+            "productVariant": "Variante de produit",
+            "skuCode": "Code SKU",
+            "barcode": "Code-barres (optionnel)",
+            "price": "Prix",
+            "comparePrice": "Prix comparatif (optionnel)",
+            "costPrice": "Coût (optionnel)",
+            "stockQuantity": "Quantité en stock",
+            "lowStockAlert": "Alerte stock faible",
+            "weight": "Poids (optionnel)",
+            "dimensions": "Dimensions (optionnel)",
+            "isActive": "Actif",
+            "images": "Images SKU (optionnel)"
+          },
+          "placeholders": {
+            "skuCode": "ex: TSHIRT-COT-M-BLK",
+            "barcode": "ex: 1234567890123",
+            "dimensions": "{\"length\":10,\"width\":5,\"height\":2}"
+          },
+          "submit": {
+            "creating": "Création...",
+            "create": "Créer SKU",
+            "cancel": "Annuler"
+          }
+        }
+      },
+      "stock": {
+        "inStock": "En stock",
+        "lowStock": "Stock faible",
+        "outOfStock": "Rupture de stock"
       }
     }
   }

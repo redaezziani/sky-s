@@ -21,61 +21,101 @@
       "logoutWarningDesc": "ローカルではログアウトしましたが、サーバー側のログアウトに失敗した可能性があります。"
     }
   },
+  "pagination": {
+    "rowsPerPage": "ページごとの行数",
+    "selectRows": "行数を選択",
+    "of": "/",
+    "firstPage": "最初のページへ",
+    "prevPage": "前のページへ",
+    "nextPage": "次のページへ",
+    "lastPage": "最後のページへ"
+  },
   "pages": {
     "skus": {
       "title": "SKUと在庫管理",
-      "description": "製品SKU、価格、在庫レベルを管理します"
-    },
-     "components": {
-      "skus": {
-        "title": "SKU管理",
-        "toast": {
-          "skuDeleted": "SKUが正常に削除されました",
-          "skuDeleteFailed": "SKUの削除に失敗しました",
-          "bulkDeleted": "{0} 件のSKUを正常に削除しました",
-          "bulkDeleteFailed": "選択したSKUの削除に失敗しました"
-        },
-
-        "table": {
-          "sku": "SKU",
-          "productVariant": "商品とバリアント",
-          "pricing": "価格",
-          "stock": "在庫",
-          "details": "詳細",
-          "status": "ステータス",
-          "created": "作成日",
-          "cost": "原価",
-          "units": "個",
-          "alert": "アラート",
-          "active": "有効",
-          "inactive": "無効",
-          "searchPlaceholder": "SKU、バーコード、商品名、バリアントで検索...",
-          "empty": "SKUが見つかりません",
-          "selectRow": "行を選択",
-          "addSKU": "SKUを追加",
-          "deleteSelected": "選択したSKUを削除 ({0})",
-          "edit": "編集",
-          "delete": "削除",
-          "openMenu": "メニューを開く",
-          "weight": "重量",
-          "dimensions": "寸法"
-        },
-        "stock": {
-          "inStock": "在庫あり",
-          "lowStock": "在庫少",
-          "outOfStock": "在庫なし"
-        },
-        "dialogs": {
-          "deleteTitle": "本当に削除しますか？",
-          "deleteDesc": "この操作は元に戻せません。このSKUと関連データは完全に削除されます。",
-          "bulkDeleteTitle": "選択したSKUを削除",
-          "bulkDeleteDesc": "{0} 件のSKUを削除してもよろしいですか？この操作は元に戻せません。",
-          "cancel": "キャンセル",
-          "delete": "削除"
-          
+      "description": "製品SKU、価格、在庫レベルを管理します",
+      "components": {
+        "skuTable": {
+          "title": "SKU一覧",
+          "table": {
+            "selectRow": "この行を選択",
+            "sku": "SKU",
+            "productVariant": "商品 / バリアント",
+            "pricing": "価格",
+            "cost": "原価",
+            "stock": "在庫",
+            "units": "個",
+            "alert": "アラート",
+            "details": "詳細",
+            "weight": "重量",
+            "dimensions": "寸法",
+            "status": "ステータス",
+            "active": "有効",
+            "inactive": "無効",
+            "searchPlaceholder": "SKUを検索...",
+            "empty": "SKUが見つかりません",
+            "deleteSelected": "{0} 件選択を削除",
+            "addSKU": "SKUを追加",
+            "edit": "編集",
+            "delete": "削除",
+            "openMenu": "操作メニューを開く"
+          },
+          "dialogs": {
+            "deleteTitle": "SKUを削除",
+            "deleteDesc": "このSKUを削除してもよろしいですか？ この操作は元に戻せません。",
+            "bulkDeleteTitle": "選択したSKUを削除",
+            "bulkDeleteDesc": "選択した {0} 件のSKUを削除してもよろしいですか？ この操作は元に戻せません。",
+            "cancel": "キャンセル",
+            "delete": "削除"
+          },
+          "toast": {
+            "skuDeleted": "SKUを削除しました",
+            "skuDeleteFailed": "SKUの削除に失敗しました",
+            "bulkDeleted": "{0} 件のSKUを削除しました",
+            "bulkDeleteFailed": "選択したSKUの削除に失敗しました"
+          },
+          "stock": {
+            "inStock": "在庫あり",
+            "lowStock": "在庫少",
+            "outOfStock": "在庫なし"
+          }
         }
+      },
+      "dialogs": {
+        "createSKU": {
+          "title": "SKUを作成",
+          "description": "商品バリアントに新しいSKUを追加し、価格と在庫情報を設定します。",
+          "fields": {
+            "productVariant": "商品バリアント",
+            "skuCode": "SKUコード",
+            "barcode": "バーコード（任意）",
+            "price": "価格",
+            "comparePrice": "比較価格（任意）",
+            "costPrice": "原価（任意）",
+            "stockQuantity": "在庫数",
+            "lowStockAlert": "在庫アラート",
+            "weight": "重量（任意）",
+            "dimensions": "寸法（任意）",
+            "isActive": "有効",
+            "images": "SKU画像（任意）"
+          },
+          "placeholders": {
+            "skuCode": "例: TSHIRT-COT-M-BLK",
+            "barcode": "例: 1234567890123",
+            "dimensions": "{\"length\":10,\"width\":5,\"height\":2}"
+          },
+          "submit": {
+            "creating": "作成中...",
+            "create": "SKUを作成",
+            "cancel": "キャンセル"
+          }
+        }
+      },
+      "stock": {
+        "inStock": "在庫あり",
+        "lowStock": "在庫少",
+        "outOfStock": "在庫なし"
       }
     }
   }
-  
 }

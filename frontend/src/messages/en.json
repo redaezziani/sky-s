@@ -16,63 +16,105 @@
       "analytics": "Analytics"
     },
     "navUser": {
-      "logout": "Log out",
-      "logoutWarningTitle": "Logout warning",
-      "logoutWarningDesc": "Logged out locally, but server logout may have failed."
+      "logout": "Logout",
+      "logoutWarningTitle": "Logout Warning",
+      "logoutWarningDesc": "You have logged out locally, but the server-side logout may have failed."
     }
   },
-
+  "pagination": {
+    "rowsPerPage": "Rows per page",
+    "selectRows": "Select rows",
+    "of": "/",
+    "firstPage": "First page",
+    "prevPage": "Previous page",
+    "nextPage": "Next page",
+    "lastPage": "Last page"
+  },
   "pages": {
     "skus": {
-      "title": "SKUs & Inventory Management",
-      "description": "Manage product SKUs, pricing, and inventory levels"
-    },
-    "components": {
-      "skus": {
-        "title": "SKU Management",
-        "toast": {
-          "skuDeleted": "SKU deleted successfully",
-          "skuDeleteFailed": "Failed to delete SKU",
-          "bulkDeleted": "Deleted {0} SKUs successfully",
-          "bulkDeleteFailed": "Failed to delete selected SKUs"
-        },
-        "table": {
-          "sku": "SKU",
-          "productVariant": "Product & Variant",
-          "pricing": "Pricing",
-          "stock": "Stock",
-          "details": "Details",
-          "status": "Status",
-          "created": "Created",
-          "cost": "Cost",
-          "units": "units",
-          "alert": "Alert",
-          "active": "Active",
-          "inactive": "Inactive",
-          "searchPlaceholder": "Search by SKU, barcode, product or variant...",
-          "empty": "No SKUs found",
-          "selectRow": "Select row",
-          "addSKU": "Add SKU",
-          "deleteSelected": "Delete Selected ({0})",
-          "edit": "Edit",
-          "delete": "Delete",
-          "openMenu": "Open menu",
-          "weight": "Weight",
-          "dimensions": "Dimensions"
-        },
-        "stock": {
-          "inStock": "In Stock",
-          "lowStock": "Low Stock",
-          "outOfStock": "Out of Stock"
-        },
-        "dialogs": {
-          "deleteTitle": "Are you sure?",
-          "deleteDesc": "This action cannot be undone. This will permanently delete the SKU and all associated data.",
-          "bulkDeleteTitle": "Delete Selected SKUs",
-          "bulkDeleteDesc": "Are you sure you want to delete {0} SKU(s)? This action cannot be undone.",
-          "cancel": "Cancel",
-          "delete": "Delete"
+      "title": "SKU & Inventory Management",
+      "description": "Manage product SKUs, pricing, and stock levels",
+      "components": {
+        "skuTable": {
+          "title": "SKU List",
+          "table": {
+            "selectRow": "Select this row",
+            "sku": "SKU",
+            "productVariant": "Product / Variant",
+            "pricing": "Pricing",
+            "cost": "Cost",
+            "stock": "Stock",
+            "units": "Units",
+            "alert": "Alert",
+            "details": "Details",
+            "weight": "Weight",
+            "dimensions": "Dimensions",
+            "status": "Status",
+            "active": "Active",
+            "inactive": "Inactive",
+            "searchPlaceholder": "Search SKU...",
+            "empty": "No SKUs found",
+            "deleteSelected": "Delete {0} selected",
+            "addSKU": "Add SKU",
+            "edit": "Edit",
+            "delete": "Delete",
+            "openMenu": "Open action menu"
+          },
+          "dialogs": {
+            "deleteTitle": "Delete SKU",
+            "deleteDesc": "Are you sure you want to delete this SKU? This action cannot be undone.",
+            "bulkDeleteTitle": "Delete selected SKUs",
+            "bulkDeleteDesc": "Are you sure you want to delete the selected {0} SKUs? This action cannot be undone.",
+            "cancel": "Cancel",
+            "delete": "Delete"
+          },
+          "toast": {
+            "skuDeleted": "SKU deleted",
+            "skuDeleteFailed": "Failed to delete SKU",
+            "bulkDeleted": "{0} SKUs deleted",
+            "bulkDeleteFailed": "Failed to delete selected SKUs"
+          },
+          "stock": {
+            "inStock": "In Stock",
+            "lowStock": "Low Stock",
+            "outOfStock": "Out of Stock"
+          }
         }
+      },
+      "dialogs": {
+        "createSKU": {
+          "title": "Create SKU",
+          "description": "Add a new SKU to a product variant and set pricing and stock information.",
+          "fields": {
+            "productVariant": "Product Variant",
+            "skuCode": "SKU Code",
+            "barcode": "Barcode (optional)",
+            "price": "Price",
+            "comparePrice": "Compare Price (optional)",
+            "costPrice": "Cost Price (optional)",
+            "stockQuantity": "Stock Quantity",
+            "lowStockAlert": "Low Stock Alert",
+            "weight": "Weight (optional)",
+            "dimensions": "Dimensions (optional)",
+            "isActive": "Active",
+            "images": "SKU Images (optional)"
+          },
+          "placeholders": {
+            "skuCode": "e.g., TSHIRT-COT-M-BLK",
+            "barcode": "e.g., 1234567890123",
+            "dimensions": "{\"length\":10,\"width\":5,\"height\":2}"
+          },
+          "submit": {
+            "creating": "Creating...",
+            "create": "Create SKU",
+            "cancel": "Cancel"
+          }
+        }
+      },
+      "stock": {
+        "inStock": "In Stock",
+        "lowStock": "Low Stock",
+        "outOfStock": "Out of Stock"
       }
     }
   }

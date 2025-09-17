@@ -1,3 +1,5 @@
+"use client";
+
 import { useId } from "react";
 import {
   ChevronFirstIcon,
@@ -5,7 +7,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react";
-
 import { Label } from "@/components/ui/label";
 import {
   Pagination,
@@ -20,6 +21,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+import { getMessages } from "@/lib/locale";
+import { useLocale } from "@/components/local-lang-swither"; // LocaleProvider hook
 
 type PaginationProps = {
   currentPage: number;
@@ -39,6 +43,8 @@ export default function PaginationTable({
   onPageSizeChange,
 }: PaginationProps) {
   const id = useId();
+  const { locale } = useLocale();
+  const t = getMessages(locale); // translation object
 
   // Ensure current pageSize is in the options
   const pageSizeOptions = [10, 25, 50, 100];
@@ -65,13 +71,13 @@ export default function PaginationTable({
   return (
     <div className="flex items-center justify-between gap-8">
       <div className="flex items-center gap-3">
-        <Label htmlFor={id}>Rows per page</Label>
+        <Label htmlFor={id}>{t.pagination.rowsPerPage}</Label>
         <Select
           value={pageSize.toString()}
           onValueChange={handlePageSizeChange}
         >
           <SelectTrigger id={id} className="w-fit whitespace-nowrap">
-            <SelectValue placeholder="Select number of results" />
+            <SelectValue placeholder={t.pagination.selectRows} />
           </SelectTrigger>
           <SelectContent className="[&_*[role=option]]:ps-2 [&_*[role=option]]:pe-8 [&_*[role=option]>span]:start-auto [&_*[role=option]>span]:end-2">
             {pageSizeOptions.map((size) => (
@@ -89,7 +95,8 @@ export default function PaginationTable({
           <span className="text-foreground">
             {startItem}-{endItem}
           </span>{" "}
-          of <span className="text-foreground">{totalItems}</span>
+          {t.pagination.of}{" "}
+          <span className="text-foreground">{totalItems}</span>
         </p>
       </div>
 
@@ -102,7 +109,7 @@ export default function PaginationTable({
               <PaginationLink
                 className="aria-disabled:pointer-events-none aria-disabled:opacity-50 cursor-pointer"
                 onClick={() => handlePageChange(1)}
-                aria-label="Go to first page"
+                aria-label={t.pagination.firstPage}
                 aria-disabled={
                   currentPage === 1 || totalPages <= 1 ? true : undefined
                 }
@@ -116,7 +123,7 @@ export default function PaginationTable({
               <PaginationLink
                 className="aria-disabled:pointer-events-none aria-disabled:opacity-50 cursor-pointer"
                 onClick={() => handlePageChange(currentPage - 1)}
-                aria-label="Go to previous page"
+                aria-label={t.pagination.prevPage}
                 aria-disabled={
                   currentPage === 1 || totalPages <= 1 ? true : undefined
                 }
@@ -130,7 +137,7 @@ export default function PaginationTable({
               <PaginationLink
                 className="aria-disabled:pointer-events-none aria-disabled:opacity-50 cursor-pointer"
                 onClick={() => handlePageChange(currentPage + 1)}
-                aria-label="Go to next page"
+                aria-label={t.pagination.nextPage}
                 aria-disabled={
                   currentPage === totalPages || totalPages <= 1
                     ? true
@@ -146,7 +153,7 @@ export default function PaginationTable({
               <PaginationLink
                 className="aria-disabled:pointer-events-none aria-disabled:opacity-50 cursor-pointer"
                 onClick={() => handlePageChange(totalPages)}
-                aria-label="Go to last page"
+                aria-label={t.pagination.lastPage}
                 aria-disabled={
                   currentPage === totalPages || totalPages <= 1
                     ? true

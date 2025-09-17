@@ -113,11 +113,11 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
   const handleDeleteSKU = async (id: string) => {
     try {
       await deleteSKU(id);
-      toast.success(t.pages.components.skus.toast.skuDeleted);
+      toast.success(t.pages.skus.components.skuTable.toast.skuDeleted);
       setDeleteDialogOpen(false);
       setSKUToDelete(null);
     } catch (error) {
-      toast.error(t.pages.components.skus.toast.skuDeleteFailed);
+      toast.error(t.pages.skus.components.skuTable.toast.skuDeleteFailed);
     }
   };
 
@@ -125,7 +125,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
     try {
       await Promise.all(selectedSKUIds.map((id) => deleteSKU(id)));
       toast.success(
-        t.pages.components.skus.toast.bulkDeleted.replace(
+        t.pages.skus.components.skuTable.toast.bulkDeleted.replace(
           "{0}",
           selectedSKUIds.length.toString()
         )
@@ -133,7 +133,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
       setBulkDeleteDialogOpen(false);
       setSelectedSKUIds([]);
     } catch (error) {
-      toast.error(t.pages.components.skus.toast.bulkDeleteFailed);
+      toast.error(t.pages.skus.components.skuTable.toast.bulkDeleteFailed);
     }
   };
 
@@ -157,18 +157,18 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
     if (stock === 0)
       return {
         status: "out-of-stock",
-        label: t.pages.components.skus.stock.outOfStock,
+        label: t.pages.skus.components.skuTable.stock.outOfStock,
         color: "destructive",
       };
     if (stock <= lowStockAlert)
       return {
         status: "low-stock",
-        label: t.pages.components.skus.stock.lowStock,
+        label: t.pages.skus.components.skuTable.stock.lowStock,
         color: "default",
       };
     return {
       status: "in-stock",
-      label: t.pages.components.skus.stock.inStock,
+      label: t.pages.skus.components.skuTable.stock.inStock,
       color: "secondary",
     };
   };
@@ -187,13 +187,13 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
               ? setSelectedSKUIds((prev) => [...prev, sku.id])
               : setSelectedSKUIds((prev) => prev.filter((id) => id !== sku.id))
           }
-          aria-label={t.pages.components.skus.table.selectRow}
+          aria-label={t.pages.skus.components.skuTable.table.selectRow}
         />
       ),
     },
     {
       key: "sku",
-      label: t.pages.components.skus.table.sku,
+      label: t.pages.skus.components.skuTable.table.sku,
       render: (sku) => (
         <div className="flex items-center space-x-2">
           <div className="flex items-center justify-center w-8 h-8 bg-muted rounded">
@@ -212,7 +212,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
     },
     {
       key: "product",
-      label: t.pages.components.skus.table.productVariant,
+      label: t.pages.skus.components.skuTable.table.productVariant,
       render: (sku) => (
         <div>
           <div className="font-medium truncate max-w-80 text-sm">
@@ -229,7 +229,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
     },
     {
       key: "pricing",
-      label: t.pages.components.skus.table.pricing,
+      label: t.pages.skus.components.skuTable.table.pricing,
       render: (sku) => (
         <div className="space-y-1">
           <div className="flex items-center space-x-1">
@@ -242,7 +242,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
           )}
           {sku.costPrice && (
             <div className="text-xs text-muted-foreground">
-              {t.pages.components.skus.table.cost}: {formatPrice(sku.costPrice)}
+              {t.pages.skus.components.skuTable.table.cost}: {formatPrice(sku.costPrice)}
             </div>
           )}
         </div>
@@ -250,7 +250,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
     },
     {
       key: "stock",
-      label: t.pages.components.skus.table.stock,
+      label: t.pages.skus.components.skuTable.table.stock,
       render: (sku) => {
         const stockStatus = getStockStatus(sku.stock, sku.lowStockAlert);
         return (
@@ -263,10 +263,10 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
             </div>
             <div className="text-sm">
               <span className="font-medium">{sku.stock}</span>{" "}
-              {t.pages.components.skus.table.units}
+              {t.pages.skus.components.skuTable.table.units}
               {sku.lowStockAlert && (
                 <span className="text-xs text-muted-foreground ml-1">
-                  ({t.pages.components.skus.table.alert}: {sku.lowStockAlert})
+                  ({t.pages.skus.components.skuTable.table.alert}: {sku.lowStockAlert})
                 </span>
               )}
             </div>
@@ -276,17 +276,17 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
     },
     {
       key: "dimensions",
-      label: t.pages.components.skus.table.details,
+      label: t.pages.skus.components.skuTable.table.details,
       render: (sku) => (
         <div className="text-xs text-muted-foreground space-y-1">
           {sku.weight && (
             <div>
-              {t.pages.components.skus.table.weight}: {sku.weight}g
+              {t.pages.skus.components.skuTable.table.weight}: {sku.weight}g
             </div>
           )}
           {sku.dimensions && (
             <div>
-              {t.pages.components.skus.table.dimensions}:{" "}
+              {t.pages.skus.components.skuTable.table.dimensions}:{" "}
               {JSON.stringify(sku.dimensions)}
             </div>
           )}
@@ -295,7 +295,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
     },
     {
       key: "status",
-      label: t.pages.components.skus.table.status,
+      label: t.pages.skus.components.skuTable.table.status,
       render: (sku) => (
         <Badge variant={"secondary"}>
           {sku.isActive ? (
@@ -304,14 +304,14 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
             <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" />
           )}
           {sku.isActive
-            ? t.pages.components.skus.table.active
-            : t.pages.components.skus.table.inactive}
+            ? t.pages.skus.components.skuTable.table.active
+            : t.pages.skus.components.skuTable.table.inactive}
         </Badge>
       ),
     },
     {
       key: "createdAt",
-      label: t.pages.components.skus.table.created,
+      label: t.pages.skus.components.skuTable.table.created,
       render: (sku) => {
         const date = new Date(sku.createdAt);
         return (
@@ -330,14 +330,14 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
   return (
     <div className="space-y-4">
       <DataTable
-        title={t.pages.components.skus.title}
+        title={t.pages.skus.components.skuTable.title}
         data={paginatedSKUs}
         columns={columns}
         searchValue={search}
         onSearchChange={setSearch}
         searchKeys={["sku", "barcode", "productName", "variantName"]}
-        searchPlaceholder={t.pages.components.skus.table.searchPlaceholder}
-        emptyMessage={t.pages.components.skus.table.empty}
+        searchPlaceholder={t.pages.skus.components.skuTable.table.searchPlaceholder}
+        emptyMessage={t.pages.skus.components.skuTable.table.empty}
         showCount
         customHeader={
           <div className="flex items-center gap-2">
@@ -347,7 +347,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
                 onClick={() => setBulkDeleteDialogOpen(true)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                {t.pages.components.skus.table.deleteSelected.replace(
+                {t.pages.skus.components.skuTable.table.deleteSelected.replace(
                   "{0}",
                   selectedSKUIds.length.toString()
                 )}
@@ -355,7 +355,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
             )}
             <Button onClick={() => setIsCreateDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              {t.pages.components.skus.table.addSKU}
+              {t.pages.skus.components.skuTable.table.addSKU}
             </Button>
           </div>
         }
@@ -364,7 +364,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
                 <span className="sr-only">
-                  {t.pages.components.skus.table.openMenu}
+                  {t.pages.skus.components.skuTable.table.openMenu}
                 </span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
@@ -372,14 +372,14 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => handleEditSKU(sku)}>
                 <Edit className="mr-2 h-4 w-4" />
-                {t.pages.components.skus.table.edit}
+                {t.pages.skus.components.skuTable.table.edit}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => openDeleteDialog(sku.id)}
                 className="text-red-600"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                {t.pages.components.skus.table.delete}
+                {t.pages.skus.components.skuTable.table.delete}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -400,21 +400,21 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {t.pages.components.skus.dialogs.deleteTitle}
+              {t.pages.skus.components.skuTable.dialogs.deleteTitle}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {t.pages.components.skus.dialogs.deleteDesc}
+              {t.pages.skus.components.skuTable.dialogs.deleteDesc}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>
-              {t.pages.components.skus.dialogs.cancel}
+              {t.pages.skus.components.skuTable.dialogs.cancel}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => skuToDelete && handleDeleteSKU(skuToDelete)}
               className="bg-red-600 hover:bg-red-700"
             >
-              {t.pages.components.skus.dialogs.delete}
+              {t.pages.skus.components.skuTable.dialogs.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -428,10 +428,10 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {t.pages.components.skus.dialogs.bulkDeleteTitle}
+              {t.pages.skus.components.skuTable.dialogs.bulkDeleteTitle}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {t.pages.components.skus.dialogs.bulkDeleteDesc.replace(
+              {t.pages.skus.components.skuTable.dialogs.bulkDeleteDesc.replace(
                 "{0}",
                 selectedSKUIds.length.toString()
               )}
@@ -439,13 +439,13 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>
-              {t.pages.components.skus.dialogs.cancel}
+              {t.pages.skus.components.skuTable.dialogs.cancel}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleBulkDelete}
               className="bg-red-600 hover:bg-red-700"
             >
-              {t.pages.components.skus.dialogs.delete}{" "}
+              {t.pages.skus.components.skuTable.dialogs.delete}{" "}
               {selectedSKUIds.length}
             </AlertDialogAction>
           </AlertDialogFooter>
