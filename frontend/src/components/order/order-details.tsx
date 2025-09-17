@@ -122,7 +122,6 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
 
             <Separator />
 
-            {/* Billing Info */}
             <section>
               <h3 className="text-lg font-semibold">
                 {t.sections.billingInfo}
@@ -149,7 +148,6 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
 
             <Separator />
 
-            {/* Items */}
             <section>
               <h3 className="text-lg font-semibold">{t.sections.items}</h3>
               <div className="mt-2 border rounded-md divide-y">
