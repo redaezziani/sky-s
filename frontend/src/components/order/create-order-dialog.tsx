@@ -15,7 +15,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { useOrdersStore } from "@/stores/orders-store";
 import { useProductsStore } from "@/stores/products-store";
@@ -41,24 +47,30 @@ export function CreateOrderDialog({
   const { users, fetchUsers } = useUsersStore();
   const [internalIsOpen, setInternalIsOpen] = useState(false);
 
-  const { lat, lng, place, loading: locationLoading, error: locationError } = useUserLocation();
+  const {
+    lat,
+    lng,
+    place,
+    loading: locationLoading,
+    error: locationError,
+  } = useUserLocation();
 
-  const isDialogOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const isDialogOpen =
+    externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
   const setIsDialogOpen =
-    externalOnClose !== undefined ? (open: boolean) => { if (!open) externalOnClose(); } : setInternalIsOpen;
+    externalOnClose !== undefined
+      ? (open: boolean) => {
+          if (!open) externalOnClose();
+        }
+      : setInternalIsOpen;
 
   // Form state
   const [formData, setFormData] = useState({
     userId: "",
-    items: [
-      {
-        skuId: "",
-        quantity: 1,
-        deliveryLat: undefined as number | undefined,
-        deliveryLng: undefined as number | undefined,
-        deliveryPlace: "",
-      },
-    ],
+    items: [{ skuId: "", quantity: 1 }],
+    deliveryLat: lat ?? undefined,
+    deliveryLng: lng ?? undefined,
+    deliveryPlace: place || "",
     shippingName: "",
     shippingEmail: "",
     shippingPhone: "",
@@ -85,71 +97,100 @@ export function CreateOrderDialog({
   // Apply default location if available
   useEffect(() => {
     if (lat && lng) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        items: prev.items.map(item => ({
-          ...item,
-          deliveryLat: item.deliveryLat ?? lat,
-          deliveryLng: item.deliveryLng ?? lng,
-          deliveryPlace: item.deliveryPlace || place || "",
-        })),
+        deliveryLat: prev.deliveryLat ?? lat,
+        deliveryLng: prev.deliveryLng ?? lng,
+        deliveryPlace: prev.deliveryPlace || place || "",
       }));
     }
   }, [lat, lng, place]);
 
   const handleItemChange = (idx: number, field: string, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      items: prev.items.map((item, i) => (i === idx ? { ...item, [field]: value } : item)),
+      items: prev.items.map((item, i) =>
+        i === idx ? { ...item, [field]: value } : item
+      ),
     }));
   };
 
   const addOrderItem = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      items: [
-        ...prev.items,
-        { skuId: "", quantity: 1, deliveryLat: lat ?? undefined, deliveryLng: lng ?? undefined, deliveryPlace: place || "" },
-      ],
+      items: [...prev.items, { skuId: "", quantity: 1 }],
     }));
-    setErrors(prev => ({ ...prev, items: [...prev.items, { skuId: "", quantity: "" }] }));
+    setErrors((prev) => ({
+      ...prev,
+      items: [...prev.items, { skuId: "", quantity: "" }],
+    }));
   };
 
   const removeOrderItem = (idx: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       items: prev.items.filter((_, i) => i !== idx),
     }));
-    setErrors(prev => ({ ...prev, items: prev.items.filter((_, i) => i !== idx) }));
+    setErrors((prev) => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== idx),
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     // Basic validation
     const newErrors = {
       userId: "",
-      items: formData.items.map(item => ({ skuId: "", quantity: "" })),
+      items: formData.items.map((item) => ({ skuId: "", quantity: "" })),
     };
     if (!formData.userId) newErrors.userId = "User is required";
     formData.items.forEach((item, idx) => {
       if (!item.skuId) newErrors.items[idx].skuId = "SKU is required";
-      if (!item.quantity || item.quantity < 1) newErrors.items[idx].quantity = "Quantity must be at least 1";
+      if (!item.quantity || item.quantity < 1)
+        newErrors.items[idx].quantity = "Quantity must be at least 1";
     });
     setErrors(newErrors);
-    if (newErrors.userId || newErrors.items.some(itemErr => itemErr.skuId || itemErr.quantity)) return;
+    if (
+      newErrors.userId ||
+      newErrors.items.some((itemErr) => itemErr.skuId || itemErr.quantity)
+    )
+      return;
 
     try {
-      await createOrder(formData);
+      // Create order adapted to backend DTO
+      const payload = {
+        userId: formData.userId,
+        items: formData.items.map((item) => ({
+          skuId: item.skuId,
+          quantity: item.quantity,
+        })),
+        deliveryLat: formData.deliveryLat,
+        deliveryLng: formData.deliveryLng,
+        deliveryPlace: formData.deliveryPlace,
+        shippingName: formData.shippingName,
+        shippingEmail: formData.shippingEmail,
+        shippingPhone: formData.shippingPhone,
+        shippingAddress: formData.shippingAddress,
+        billingName: formData.billingName,
+        billingEmail: formData.billingEmail,
+        billingAddress: formData.billingAddress,
+        notes: formData.notes,
+        trackingNumber: formData.trackingNumber,
+      };
+
+      await createOrder(payload);
+
       toast.success("Order created successfully");
+
+      // Reset form
       setFormData({
         userId: "",
-        items: [{
-          skuId: "",
-          quantity: 1,
-          deliveryLat: lat ?? undefined,
-          deliveryLng: lng ?? undefined,
-          deliveryPlace: place || ""
-        }],
+        items: [{ skuId: "", quantity: 1 }],
+        deliveryLat: lat ?? undefined,
+        deliveryLng: lng ?? undefined,
+        deliveryPlace: place || "",
         shippingName: "",
         shippingEmail: "",
         shippingPhone: "",
@@ -180,7 +221,9 @@ export function CreateOrderDialog({
       <DialogContent className="sm:max-w-[750px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Order</DialogTitle>
-          <DialogDescription>Add a new order. You can add multiple items and delivery details.</DialogDescription>
+          <DialogDescription>
+            Add a new order. You can add multiple items and delivery details.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -189,20 +232,24 @@ export function CreateOrderDialog({
             <Label htmlFor="userId">User</Label>
             <Select
               value={formData.userId}
-              onValueChange={val => setFormData(prev => ({ ...prev, userId: val }))}
+              onValueChange={(val) =>
+                setFormData((prev) => ({ ...prev, userId: val }))
+              }
             >
               <SelectTrigger id="userId">
                 <SelectValue placeholder="Select user" />
               </SelectTrigger>
               <SelectContent>
-                {users.map(user => (
+                {users.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.name || user.email}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors.userId && <p className="text-sm text-destructive">{errors.userId}</p>}
+            {errors.userId && (
+              <p className="text-sm text-destructive">{errors.userId}</p>
+            )}
           </div>
 
           {/* Order Items */}
@@ -214,26 +261,35 @@ export function CreateOrderDialog({
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <Label>SKU</Label>
-                    <Select value={item.skuId} onValueChange={val => handleItemChange(idx, "skuId", val)}>
+                    <Select
+                      value={item.skuId}
+                      onValueChange={(val) =>
+                        handleItemChange(idx, "skuId", val)
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select SKU" />
                       </SelectTrigger>
                       <SelectContent>
                         {products
-                          .map(prod =>
-                            prod.variants?.flatMap(variant =>
-                              variant.skus?.map(sku => (
-                                <SelectItem key={sku.id} value={sku.id}>
-                                  {prod.name} - {sku.sku}
-                                </SelectItem>
-                              )) || []
-                            ) || []
+                          .map(
+                            (prod) =>
+                              prod.variants?.flatMap(
+                                (variant) =>
+                                  variant.skus?.map((sku) => (
+                                    <SelectItem key={sku.id} value={sku.id}>
+                                      {prod.name} - {sku.sku}
+                                    </SelectItem>
+                                  )) || []
+                              ) || []
                           )
                           .flat()}
                       </SelectContent>
                     </Select>
                     {errors.items[idx]?.skuId && (
-                      <p className="text-sm text-destructive">{errors.items[idx].skuId}</p>
+                      <p className="text-sm text-destructive">
+                        {errors.items[idx].skuId}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -242,44 +298,20 @@ export function CreateOrderDialog({
                       type="number"
                       min={1}
                       value={item.quantity}
-                      onChange={e =>
-                        handleItemChange(idx, "quantity", parseInt(e.target.value) || 1)
+                      onChange={(e) =>
+                        handleItemChange(
+                          idx,
+                          "quantity",
+                          parseInt(e.target.value) || 1
+                        )
                       }
                     />
                     {errors.items[idx]?.quantity && (
-                      <p className="text-sm text-destructive">{errors.items[idx].quantity}</p>
+                      <p className="text-sm text-destructive">
+                        {errors.items[idx].quantity}
+                      </p>
                     )}
                   </div>
-                </div>
-
-                {/* Map Picker */}
-                <div>
-                  <Label>Delivery Location</Label>
-                  {locationLoading ? (
-                    <p className="text-sm text-muted-foreground">Detecting location...</p>
-                  ) : locationError ? (
-                    <DeliveryMapPicker
-                      deliveryLat={item.deliveryLat}
-                      deliveryLng={item.deliveryLng}
-                      deliveryPlace={item.deliveryPlace}
-                      onChange={data => {
-                        handleItemChange(idx, "deliveryLat", data.lat);
-                        handleItemChange(idx, "deliveryLng", data.lng);
-                        handleItemChange(idx, "deliveryPlace", data.place);
-                      }}
-                    />
-                  ) : (
-                    <DeliveryMapPicker
-                      deliveryLat={item.deliveryLat}
-                      deliveryLng={item.deliveryLng}
-                      deliveryPlace={item.deliveryPlace}
-                      onChange={data => {
-                        handleItemChange(idx, "deliveryLat", data.lat);
-                        handleItemChange(idx, "deliveryLng", data.lng);
-                        handleItemChange(idx, "deliveryPlace", data.place);
-                      }}
-                    />
-                  )}
                 </div>
 
                 {/* Actions */}
@@ -294,13 +326,55 @@ export function CreateOrderDialog({
                     </Button>
                   )}
                   {idx === formData.items.length - 1 && (
-                    <Button type="button" variant="outline" onClick={addOrderItem}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={addOrderItem}
+                    >
                       Add Item
                     </Button>
                   )}
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Delivery */}
+          <div className="space-y-2">
+            <Label>Delivery Location</Label>
+            {locationLoading ? (
+              <p className="text-sm text-muted-foreground">
+                Detecting location...
+              </p>
+            ) : locationError ? (
+              <DeliveryMapPicker
+                deliveryLat={formData.deliveryLat}
+                deliveryLng={formData.deliveryLng}
+                deliveryPlace={formData.deliveryPlace}
+                onChange={(data) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    deliveryLat: data.lat,
+                    deliveryLng: data.lng,
+                    deliveryPlace: data.place,
+                  }))
+                }
+              />
+            ) : (
+              <DeliveryMapPicker
+                deliveryLat={formData.deliveryLat}
+                deliveryLng={formData.deliveryLng}
+                deliveryPlace={formData.deliveryPlace}
+                onChange={(data) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    deliveryLat: data.lat,
+                    deliveryLng: data.lng,
+                    deliveryPlace: data.place,
+                  }))
+                }
+              />
+            )}
           </div>
 
           {/* Shipping & Billing */}
@@ -310,7 +384,12 @@ export function CreateOrderDialog({
               <Input
                 id="shippingName"
                 value={formData.shippingName}
-                onChange={e => setFormData(prev => ({ ...prev, shippingName: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    shippingName: e.target.value,
+                  }))
+                }
               />
             </div>
             <div className="space-y-2">
@@ -318,7 +397,12 @@ export function CreateOrderDialog({
               <Input
                 id="shippingEmail"
                 value={formData.shippingEmail}
-                onChange={e => setFormData(prev => ({ ...prev, shippingEmail: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    shippingEmail: e.target.value,
+                  }))
+                }
               />
             </div>
             <div className="space-y-2">
@@ -326,7 +410,12 @@ export function CreateOrderDialog({
               <Input
                 id="shippingPhone"
                 value={formData.shippingPhone}
-                onChange={e => setFormData(prev => ({ ...prev, shippingPhone: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    shippingPhone: e.target.value,
+                  }))
+                }
               />
             </div>
             <div className="space-y-2 col-span-2">
@@ -334,8 +423,8 @@ export function CreateOrderDialog({
               <Textarea
                 id="shippingAddress"
                 value={JSON.stringify(formData.shippingAddress)}
-                onChange={e =>
-                  setFormData(prev => ({
+                onChange={(e) =>
+                  setFormData((prev) => ({
                     ...prev,
                     shippingAddress: (() => {
                       try {
@@ -357,7 +446,12 @@ export function CreateOrderDialog({
               <Input
                 id="billingName"
                 value={formData.billingName}
-                onChange={e => setFormData(prev => ({ ...prev, billingName: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    billingName: e.target.value,
+                  }))
+                }
               />
             </div>
             <div className="space-y-2">
@@ -365,7 +459,12 @@ export function CreateOrderDialog({
               <Input
                 id="billingEmail"
                 value={formData.billingEmail}
-                onChange={e => setFormData(prev => ({ ...prev, billingEmail: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    billingEmail: e.target.value,
+                  }))
+                }
               />
             </div>
             <div className="space-y-2 col-span-2">
@@ -373,8 +472,8 @@ export function CreateOrderDialog({
               <Textarea
                 id="billingAddress"
                 value={JSON.stringify(formData.billingAddress)}
-                onChange={e =>
-                  setFormData(prev => ({
+                onChange={(e) =>
+                  setFormData((prev) => ({
                     ...prev,
                     billingAddress: (() => {
                       try {
@@ -395,7 +494,9 @@ export function CreateOrderDialog({
             <Textarea
               id="notes"
               value={formData.notes}
-              onChange={e => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, notes: e.target.value }))
+              }
               rows={2}
             />
           </div>
@@ -404,12 +505,21 @@ export function CreateOrderDialog({
             <Input
               id="trackingNumber"
               value={formData.trackingNumber}
-              onChange={e => setFormData(prev => ({ ...prev, trackingNumber: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  trackingNumber: e.target.value,
+                }))
+              }
             />
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>

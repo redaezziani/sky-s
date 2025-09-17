@@ -4,7 +4,13 @@
 
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { motion } from "motion/react";
-import { useCallback, useEffect, useState, createContext, useContext } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  createContext,
+  useContext,
+} from "react";
 import { cn } from "@/lib/utils";
 import { Locale, DEFAULT_LOCALE } from "@/lib/locale";
 
@@ -12,6 +18,7 @@ import { Locale, DEFAULT_LOCALE } from "@/lib/locale";
 const localesList: { key: Locale; label: string }[] = [
   { key: "en", label: "EN" },
   { key: "ja", label: "JA" },
+  { key: "fr", label: "FR" },
 ];
 
 // ---------- Locale Context ----------

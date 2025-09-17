@@ -3,7 +3,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { OrderResponseDto } from './dto/order-response.dto';
 import { CreateOrderDto, OrderItemDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { ProductSKU } from 'generated/prisma';
 import { Decimal } from 'generated/prisma/runtime/index-browser';
 import { QueryOrderDto } from './dto/query-order.dto';
 
@@ -12,13 +11,14 @@ export class OrdersService {
   constructor(private prisma: PrismaService) {}
 
   private async generateOrderNumber(): Promise<string> {
-    // Using timestamp + random to avoid conflicts
     const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const random = Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, '0');
     return `ORD-${timestamp}-${random}`;
   }
 
-async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
+  async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
     const orderNumber = await this.generateOrderNumber();
 
     // Batch fetch SKUs
@@ -49,9 +49,6 @@ async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
         totalPrice,
         productName: sku.variant.product.name,
         skuCode: sku.sku,
-        deliveryLat: item.deliveryLat ?? null,
-        deliveryLng: item.deliveryLng ?? null,
-        deliveryPlace: item.deliveryPlace ?? null,
       };
     });
 
@@ -59,7 +56,10 @@ async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
     const taxAmount = new Decimal(0);
     const shippingAmount = new Decimal(0);
     const discountAmount = new Decimal(0);
-    const totalAmount = subtotal.plus(taxAmount).plus(shippingAmount).minus(discountAmount);
+    const totalAmount = subtotal
+      .plus(taxAmount)
+      .plus(shippingAmount)
+      .minus(discountAmount);
 
     const order = await this.prisma.order.create({
       data: {
@@ -71,15 +71,21 @@ async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
         discountAmount,
         totalAmount,
         currency: 'USD',
-        shippingName: createOrderDto.shippingName?? "n/a",
-        shippingEmail: createOrderDto.shippingEmail ?? "n/a",
-        shippingPhone: createOrderDto.shippingPhone ?? "n/a",
-        shippingAddress: createOrderDto.shippingAddress ?? "n/a",
+        shippingName: createOrderDto.shippingName ?? 'n/a',
+        shippingEmail: createOrderDto.shippingEmail ?? 'n/a',
+        shippingPhone: createOrderDto.shippingPhone ?? 'n/a',
+        shippingAddress: createOrderDto.shippingAddress ?? 'n/a',
         billingName: createOrderDto.billingName ?? null,
         billingEmail: createOrderDto.billingEmail ?? null,
         billingAddress: createOrderDto.billingAddress ?? undefined,
         notes: createOrderDto.notes ?? null,
         trackingNumber: createOrderDto.trackingNumber ?? null,
+
+        // Delivery info only at order level
+        deliveryLat: createOrderDto.deliveryLat ?? null,
+        deliveryLng: createOrderDto.deliveryLng ?? null,
+        deliveryPlace: createOrderDto.deliveryPlace ?? null,
+
         items: {
           create: itemsData,
         },
@@ -89,7 +95,6 @@ async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
 
     return this.formatOrderResponse(order);
   }
-
 
   async findAll(query: QueryOrderDto): Promise<{
     data: OrderResponseDto[];
@@ -110,7 +115,6 @@ async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
     } = query;
     const skip = (page - 1) * limit;
 
-    // Build where clause
     const where: any = {};
     if (search) {
       where.OR = [
@@ -120,15 +124,25 @@ async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
     }
     if (status) where.status = status;
 
-    // Order by
     const orderBy: any = {};
     orderBy[sortBy] = sortOrder;
 
-    // Fetch orders and total count
     const [orders, total] = await Promise.all([
       this.prisma.order.findMany({
         where,
-        include: { items: true },
+        include: {
+          items: {
+            include: {
+              sku: {
+                include: {
+                  // Include main SKU cover image and all images
+                  images: true,
+                },
+              },
+            },
+          },
+          user: true, // if you want user details
+        },
         orderBy,
         skip,
         take: limit,
@@ -201,9 +215,12 @@ async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
       trackingNumber: order.trackingNumber,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
+
+      // delivery info at order level
       deliveryLat: order.deliveryLat ?? null,
       deliveryLng: order.deliveryLng ?? null,
       deliveryPlace: order.deliveryPlace ?? null,
+
       items: order.items.map((item) => ({
         id: item.id,
         skuId: item.skuId,
@@ -212,7 +229,22 @@ async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
         quantity: item.quantity,
         unitPrice: item.unitPrice.toNumber(),
         totalPrice: item.totalPrice.toNumber(),
-        sku: item.sku,
+
+        // include SKU details and images
+        sku: item.sku
+          ? {
+              id: item.sku.id,
+              sku: item.sku.sku,
+              price: item.sku.price.toNumber(),
+              coverImage: item.sku.coverImage,
+              images:
+                item.sku.images?.map((img) => ({
+                  id: img.id,
+                  url: img.url,
+                  altText: img.altText,
+                })) || [],
+            }
+          : undefined,
       })),
     };
   }

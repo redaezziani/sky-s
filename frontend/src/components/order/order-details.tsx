@@ -142,9 +142,19 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                 {order.items.map((item) => (
                   <div
                     key={item.skuId}
-                    className="flex justify-between items-center p-3 text-sm"
+                    className="flex justify-between items-center p-3 text-sm gap-4"
                   >
-                    <div>
+                    {/* Image */}
+                    <div className="w-16 h-16 flex-shrink-0">
+                      <img
+                        src={item.sku.coverImage || "/placeholder.png"}
+                        alt={item.productName}
+                        className="w-full h-full object-cover rounded"
+                      />
+                    </div>
+
+                    {/* Item Details */}
+                    <div className="flex-1">
                       <p className="font-medium">{item.productName}</p>
                       <p className="text-muted-foreground text-xs">
                         {item.skuCode}
@@ -154,6 +164,8 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                         {formatCurrency(item.unitPrice, order.currency)}
                       </p>
                     </div>
+
+                    {/* Total Price */}
                     <p className="font-medium">
                       {formatCurrency(item.totalPrice, order.currency)}
                     </p>

@@ -1,0 +1,79 @@
+{
+  "sidebar": {
+    "storeManager": "Gestionnaire de magasin",
+    "user": "Utilisateur",
+    "links": {
+      "dashboard": "Tableau de bord",
+      "users": "Utilisateurs",
+      "roles": "Rôles",
+      "categories": "Catégories",
+      "products": "Produits",
+      "productVariants": "Variantes de produit",
+      "skus": "UGS & Stock",
+      "orders": "Commandes",
+      "orderItems": "Articles de commande",
+      "reviews": "Avis",
+      "analytics": "Analytique"
+    },
+    "navUser": {
+      "logout": "Déconnexion",
+      "logoutWarningTitle": "Avertissement de déconnexion",
+      "logoutWarningDesc": "Déconnecté localement, mais la déconnexion du serveur a peut-être échoué."
+    }
+  },
+
+  "pages": {
+    "skus": {
+      "title": "Gestion des UGS & du stock",
+      "description": "Gérer les UGS de produits, les prix et les niveaux de stock"
+    },
+    "components": {
+      "skus": {
+        "title": "Gestion des UGS",
+        "toast": {
+          "skuDeleted": "UGS supprimée avec succès",
+          "skuDeleteFailed": "Échec de la suppression de l’UGS",
+          "bulkDeleted": "{0} UGS supprimées avec succès",
+          "bulkDeleteFailed": "Échec de la suppression des UGS sélectionnées"
+        },
+        "table": {
+          "sku": "UGS",
+          "productVariant": "Produit & Variante",
+          "pricing": "Tarification",
+          "stock": "Stock",
+          "details": "Détails",
+          "status": "Statut",
+          "created": "Créé",
+          "cost": "Coût",
+          "units": "unités",
+          "alert": "Alerte",
+          "active": "Actif",
+          "inactive": "Inactif",
+          "searchPlaceholder": "Rechercher par UGS, code-barres, produit ou variante...",
+          "empty": "Aucune UGS trouvée",
+          "selectRow": "Sélectionner la ligne",
+          "addSKU": "Ajouter une UGS",
+          "deleteSelected": "Supprimer la sélection ({0})",
+          "edit": "Modifier",
+          "delete": "Supprimer",
+          "openMenu": "Ouvrir le menu",
+          "weight": "Poids",
+          "dimensions": "Dimensions"
+        },
+        "stock": {
+          "inStock": "En stock",
+          "lowStock": "Stock faible",
+          "outOfStock": "Rupture de stock"
+        },
+        "dialogs": {
+          "deleteTitle": "Êtes-vous sûr ?",
+          "deleteDesc": "Cette action est irréversible. Cela supprimera définitivement l’UGS et toutes les données associées.",
+          "bulkDeleteTitle": "Supprimer les UGS sélectionnées",
+          "bulkDeleteDesc": "Êtes-vous sûr de vouloir supprimer {0} UGS ? Cette action est irréversible.",
+          "cancel": "Annuler",
+          "delete": "Supprimer"
+        }
+      }
+    }
+  }
+}

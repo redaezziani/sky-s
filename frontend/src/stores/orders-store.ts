@@ -1,21 +1,37 @@
 import { create } from "zustand";
 import { axiosInstance } from "@/lib/utils";
 
+export interface SKUImage {
+  id: string;
+  url: string;
+  altText?: string;
+}
+
+export interface SKU {
+  id: string;
+  sku: string;
+  price: number;
+  coverImage: string;
+  images: SKUImage[];
+}
+
 export interface OrderItem {
+  id: string;
   skuId: string;
   productName: string;
   skuCode: string;
   quantity: number;
   unitPrice: number;
   totalPrice: number;
+  sku: SKU;
 }
 
 export interface Order {
   id: string;
   orderNumber: string;
   userId: string;
-  status: string; // could use enum OrderStatus
-  paymentStatus: string; // could use enum PaymentStatus
+  status: string;
+  paymentStatus: string;
   subtotal: number;
   taxAmount: number;
   shippingAmount: number;
@@ -34,16 +50,16 @@ export interface Order {
   createdAt: string;
   updatedAt: string;
   items: OrderItem[];
-  deliveryLat?: null | number;
-  deliveryLng?: null | number;
-  deliveryPlace?: null | string;
+  deliveryLat?: number | null;
+  deliveryLng?: number | null;
+  deliveryPlace?: string | null;
 }
 
 export interface OrdersResponse {
   data: Order[];
   total: number;
-  offset: number;
-  limit: number;
+  offset?: number;
+  limit?: number;
 }
 
 interface OrdersStore {
@@ -52,28 +68,22 @@ interface OrdersStore {
   loading: boolean;
   error: string | null;
   selectedOrders: string[];
-
-  // Pagination state
   currentPage: number;
   pageSize: number;
   totalPages: number;
 
-  // Actions
   fetchOrders: (params?: Record<string, any>) => Promise<void>;
   deleteOrder: (id: string) => Promise<void>;
   bulkDeleteOrders: (orderIds: string[]) => Promise<void>;
   createOrder: (orderData: any) => Promise<void>;
 
-  // Pagination
   setPage: (page: number) => void;
   setPageSize: (size: number) => void;
 
-  // Selection
   selectOrder: (id: string) => void;
   selectAllOrders: () => void;
   clearSelection: () => void;
 
-  // Utils
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
@@ -93,17 +103,10 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
     try {
       set({ loading: true, error: null });
       const { currentPage, pageSize } = get();
-
-      const apiParams = {
-        page: currentPage,
-        limit: pageSize,
-        ...params,
-      };
-
+      const apiParams = { page: currentPage, limit: pageSize, ...params };
       const res = await axiosInstance.get<OrdersResponse>("/orders", {
         params: apiParams,
       });
-
       set({
         orders: res.data.data,
         total: res.data.total,
@@ -154,9 +157,8 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
   createOrder: async (orderData: any) => {
     try {
       set({ loading: true, error: null });
-      await axiosInstance.post("/orders", orderData);
-      await get().fetchOrders();
-      set({ loading: false });
+      const res = await axiosInstance.post<Order>("/orders", orderData);
+      set({ orders: [res.data, ...get().orders], loading: false });
     } catch (err: any) {
       set({
         error: err.response?.data?.message || "Failed to create order",
