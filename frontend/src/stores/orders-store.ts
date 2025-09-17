@@ -1,6 +1,23 @@
 import { create } from "zustand";
 import { axiosInstance } from "@/lib/utils";
 
+export enum OrderStatus {
+  PENDING,
+  CONFIRMED,
+  PROCESSING,
+  SHIPPED,
+  DELIVERED,
+  CANCELLED,
+  REFUNDED,
+}
+
+export enum PaymentStatus {
+  PENDING,
+  COMPLETED,
+  FAILED,
+  REFUNDED,
+}
+
 export interface SKUImage {
   id: string;
   url: string;

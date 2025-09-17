@@ -22,7 +22,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { MoreHorizontal, Trash2, Eye, Package } from "lucide-react";
-import { useOrdersStore, type Order } from "@/stores/orders-store";
+import {
+  useOrdersStore,
+  type Order,
+  OrderStatus,
+  PaymentStatus,
+} from "@/stores/orders-store";
 import { toast } from "sonner";
 import PaginationTable from "@/components/pagination-table";
 import { useSearchQuery } from "@/hooks/use-search-query";
@@ -95,6 +100,43 @@ export function EnhancedOrderTable() {
       currency,
     }).format(amount);
 
+  // Helper to get enum label from string
+  const getOrderStatusLabel = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "Pending";
+      case "CONFIRMED":
+        return "Confirmed";
+      case "PROCESSING":
+        return "Processing";
+      case "SHIPPED":
+        return "Shipped";
+      case "DELIVERED":
+        return "Delivered";
+      case "CANCELLED":
+        return "Cancelled";
+      case "REFUNDED":
+        return "Refunded";
+      default:
+        return status;
+    }
+  };
+
+  const getPaymentStatusLabel = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "Pending";
+      case "COMPLETED":
+        return "Completed";
+      case "FAILED":
+        return "Failed";
+      case "REFUNDED":
+        return "Refunded";
+      default:
+        return status;
+    }
+  };
+
   const columns: TableColumn<Order>[] = [
     {
       key: "select",
@@ -127,21 +169,22 @@ export function EnhancedOrderTable() {
     {
       key: "status",
       label: "Status",
-      render: (order) => 
-      <Badge variant="secondary">
-        {order.status === "PENDING" ? (
-          <IconCircleCheckFilled className="fill-yellow-500 dark:fill-yellow-400" />
-        ) : order.status === "SHIPPED" ? (
-          <IconCircleCheckFilled className="fill-blue-500 dark:fill-blue-400" />
-        ) : order.status === "DELIVERED" ? (
-          <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-        ) : order.status === "CANCELLED" ? (
-          <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" />
-        ) : (
-          <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-        )}
-        {order.status}
-      </Badge>,
+      render: (order) => (
+        <Badge variant="secondary">
+          {order.status === "PENDING" ? (
+            <IconCircleCheckFilled className="fill-yellow-500 dark:fill-yellow-400" />
+          ) : order.status === "SHIPPED" ? (
+            <IconCircleCheckFilled className="fill-blue-500 dark:fill-blue-400" />
+          ) : order.status === "DELIVERED" ? (
+            <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+          ) : order.status === "CANCELLED" ? (
+            <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" />
+          ) : (
+            <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+          )}
+          {getOrderStatusLabel(order.status)}
+        </Badge>
+      ),
     },
     {
       key: "paymentStatus",
@@ -149,20 +192,21 @@ export function EnhancedOrderTable() {
       render: (order) => (
         <Badge
           variant={
-            order.paymentStatus === "PAID"
+            order.paymentStatus === "COMPLETED"
               ? "secondary"
               : order.paymentStatus === "FAILED"
               ? "secondary"
               : "secondary"
           }
         >
-           {order.paymentStatus === "PAID" ? (<IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-           ) : order.paymentStatus === "FAILED" ? (
-            <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" />
-           ) : (
+          {order.paymentStatus === "COMPLETED" ? (
             <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-           )}
-          {order.paymentStatus}
+          ) : order.paymentStatus === "FAILED" ? (
+            <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" />
+          ) : (
+            <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+          )}
+          {getPaymentStatusLabel(order.paymentStatus)}
         </Badge>
       ),
     },
@@ -241,7 +285,7 @@ export function EnhancedOrderTable() {
                 Delete Selected ({selectedOrders.length})
               </Button>
             )}
-            <CreateOrderDialog/>
+            <CreateOrderDialog />
           </div>
         }
       />
