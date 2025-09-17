@@ -125,6 +125,95 @@
         "lowStock": "Low Stock",
         "outOfStock": "Out of Stock"
       }
+    },
+    "orders": {
+  "title": "Order Management",
+  "description": "Manage customer orders, payments, and shipping information",
+  "dialogs": {
+    "orderDetails": {
+      "title": "Order #{orderNumber} Details",
+      "viewDetails": "View Details",
+      "sections": {
+        "generalInfo": "General Info",
+        "shippingInfo": "Shipping Info",
+        "billingInfo": "Billing Info",
+        "items": "Order Items",
+        "totals": "Totals",
+        "deliveryLocation": "Delivery Location"
+      },
+      "fields": {
+        "status": "Status",
+        "payment": "Payment",
+        "user": "User",
+        "createdAt": "Created At",
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "address": "Address",
+        "subtotal": "Subtotal",
+        "tax": "Tax",
+        "shipping": "Shipping",
+        "discount": "Discount",
+        "total": "Total"
+      },
+      "labels": {
+        "qty": "Qty: {qty}"
+      }
+    },
+    "createOrder": {
+      "trigger": "Add Order",
+      "title": "Create New Order",
+      "description": "Add a new order. You can set multiple products and shipping info.",
+      "sections": {
+        "user": "User",
+        "orderItems": "Order Items",
+        "delivery": "Delivery",
+        "shipping": "Shipping Info",
+        "billing": "Billing Info",
+        "notes": "Notes",
+        "trackingNumber": "Tracking Number"
+      },
+      "fields": {
+        "sku": "SKU",
+        "quantity": "Quantity",
+        "deliveryLat": "Latitude",
+        "deliveryLng": "Longitude",
+        "deliveryPlace": "Place",
+        "shippingName": "Shipping Name",
+        "shippingEmail": "Shipping Email",
+        "shippingPhone": "Shipping Phone",
+        "shippingAddress": "Shipping Address (JSON)",
+        "billingName": "Billing Name",
+        "billingEmail": "Billing Email",
+        "billingAddress": "Billing Address (JSON)"
+      },
+      "actions": {
+        "addItem": "Add Item",
+        "removeItem": "Remove",
+        "cancel": "Cancel",
+        "create": "Create Order",
+        "creating": "Creating..."
+      },
+      "placeholders": {
+        "selectUser": "Select User",
+        "selectSKU": "Select SKU"
+      },
+      "errors": {
+        "userRequired": "Please select a user",
+        "skuRequired": "Please select a SKU",
+        "quantityMin": "Quantity must be at least 1"
+      },
+      "status": {
+        "detectingLocation": "Detecting location...",
+        "locationError": "Failed to get location"
+      },
+      "toast": {
+        "success": "Order created",
+        "failed": "Failed to create order"
+      }
     }
+  }
+}
+
   }
 }

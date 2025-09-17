@@ -124,6 +124,95 @@
         "lowStock": "Stock faible",
         "outOfStock": "Rupture de stock"
       }
+    },
+    "orders": {
+  "title": "Gestion des commandes",
+  "description": "Gérez les commandes des clients, les paiements et les informations de livraison",
+  "dialogs": {
+    "orderDetails": {
+      "title": "Détails de la commande #{orderNumber}",
+      "viewDetails": "Voir les détails",
+      "sections": {
+        "generalInfo": "Informations générales",
+        "shippingInfo": "Informations de livraison",
+        "billingInfo": "Informations de facturation",
+        "items": "Articles de la commande",
+        "totals": "Totaux",
+        "deliveryLocation": "Lieu de livraison"
+      },
+      "fields": {
+        "status": "Statut",
+        "payment": "Paiement",
+        "user": "Utilisateur",
+        "createdAt": "Créé le",
+        "name": "Nom",
+        "email": "Email",
+        "phone": "Téléphone",
+        "address": "Adresse",
+        "subtotal": "Sous-total",
+        "tax": "Taxe",
+        "shipping": "Livraison",
+        "discount": "Remise",
+        "total": "Total"
+      },
+      "labels": {
+        "qty": "Qté: {qty}"
+      }
+    },
+    "createOrder": {
+      "trigger": "Ajouter une commande",
+      "title": "Créer une nouvelle commande",
+      "description": "Ajoutez une nouvelle commande. Vous pouvez définir plusieurs produits et informations de livraison.",
+      "sections": {
+        "user": "Utilisateur",
+        "orderItems": "Articles de la commande",
+        "delivery": "Livraison",
+        "shipping": "Informations de livraison",
+        "billing": "Informations de facturation",
+        "notes": "Notes",
+        "trackingNumber": "Numéro de suivi"
+      },
+      "fields": {
+        "sku": "SKU",
+        "quantity": "Quantité",
+        "deliveryLat": "Latitude",
+        "deliveryLng": "Longitude",
+        "deliveryPlace": "Lieu",
+        "shippingName": "Nom du destinataire",
+        "shippingEmail": "Email du destinataire",
+        "shippingPhone": "Téléphone du destinataire",
+        "shippingAddress": "Adresse de livraison (JSON)",
+        "billingName": "Nom de facturation",
+        "billingEmail": "Email de facturation",
+        "billingAddress": "Adresse de facturation (JSON)"
+      },
+      "actions": {
+        "addItem": "Ajouter un article",
+        "removeItem": "Supprimer",
+        "cancel": "Annuler",
+        "create": "Créer la commande",
+        "creating": "Création..."
+      },
+      "placeholders": {
+        "selectUser": "Sélectionner un utilisateur",
+        "selectSKU": "Sélectionner un SKU"
+      },
+      "errors": {
+        "userRequired": "Veuillez sélectionner un utilisateur",
+        "skuRequired": "Veuillez sélectionner un SKU",
+        "quantityMin": "La quantité doit être au moins de 1"
+      },
+      "status": {
+        "detectingLocation": "Détection de la position...",
+        "locationError": "Échec de la récupération de la position"
+      },
+      "toast": {
+        "success": "Commande créée",
+        "failed": "Échec de la création de la commande"
+      }
     }
+  }
+}
+
   }
 }
