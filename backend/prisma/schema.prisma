@@ -183,6 +183,7 @@ model ProductSKUImage {
   id        String   @id @default(uuid())
   skuId     String
   url       String   @db.VarChar(500)
+  fileId    String?  @db.VarChar(200) // store ImageKit fileId here
   altText   String?  @db.VarChar(200)
   position  Int      @default(0)
   createdAt DateTime @default(now())

@@ -160,7 +160,7 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                   >
                     <div className="w-16 h-16 flex-shrink-0">
                       <img
-                        src={item.sku.coverImage || "/placeholder.png"}
+                        src={item.sku?.coverImage || "/placeholder.png"}
                         alt={item.productName}
                         className="w-full h-full object-cover rounded"
                       />

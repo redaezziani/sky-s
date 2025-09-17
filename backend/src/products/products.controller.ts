@@ -33,6 +33,7 @@ import {
   CreateProductVariantDto,
   CreateProductSKUDto,
   UpdateProductDto,
+  UpdateProductSKUDto,
 } from './dto/create-product.dto';
 import { ProductQueryDto } from './dto/query.dto';
 import {
@@ -608,9 +609,10 @@ export class ProductsController {
   @ApiResponse({ status: 409, description: 'SKU or barcode already exists' })
   async updateSKU(
     @Param('skuId', ParseUUIDPipe) skuId: string,
-    @Body() updateSKUDto: Partial<CreateProductSKUDto>,
+    @Body() updateSKUDto: UpdateProductSKUDto,
     @UploadedFiles() images?: Express.Multer.File[],
   ): Promise<ProductSKUResponseDto> {
+  
     return this.productsService.updateSKU(skuId, updateSKUDto, images);
   }
 
@@ -644,4 +646,27 @@ export class ProductsController {
   async removeSKU(@Param('skuId', ParseUUIDPipe) skuId: string): Promise<void> {
     return this.productsService.removeSKU(skuId);
   }
+
+  @Delete('skus/images/:imageId')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN, UserRole.MODERATOR)
+@ApiBearerAuth()
+@HttpCode(HttpStatus.NO_CONTENT)
+@ApiOperation({ summary: 'Delete a single SKU image' })
+@ApiParam({
+  name: 'imageId',
+  description: 'SKU image UUID',
+  example: '550e8400-e29b-41d4-a716-446655440000',
+})
+@ApiResponse({
+  status: 204,
+  description: 'SKU image deleted successfully',
+})
+@ApiResponse({ status: 401, description: 'Unauthorized' })
+@ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+@ApiResponse({ status: 404, description: 'SKU image not found' })
+async removeSKUImage(@Param('imageId', ParseUUIDPipe) imageId: string): Promise<void> {
+  return this.productsService.removeSKUImage(imageId);
+}
+
 }

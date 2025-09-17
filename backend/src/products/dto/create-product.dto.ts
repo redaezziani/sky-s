@@ -241,3 +241,75 @@ export class UpdateProductDto {
   @IsUUID('4', { each: true })
   categoryIds?: string[];
 }
+
+
+
+
+export class UpdateProductSKUDto {
+  @ApiPropertyOptional({ description: 'SKU code' })
+  @IsOptional()
+  @IsString()
+  sku?: string;
+
+  @ApiPropertyOptional({ description: 'Barcode' })
+  @IsOptional()
+  @IsString()
+  barcode?: string;
+
+  @ApiPropertyOptional({ description: 'Price', example: 99.99 })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  @Type(() => Number)
+  price?: number;
+
+  @ApiPropertyOptional({ description: 'Compare price', example: 129.99 })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  @Type(() => Number)
+  comparePrice?: number;
+
+  @ApiPropertyOptional({ description: 'Cost price', example: 50 })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  @Type(() => Number)
+  costPrice?: number;
+
+  @ApiPropertyOptional({ description: 'Stock quantity' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  stock?: number;
+
+  @ApiPropertyOptional({ description: 'Low stock alert threshold' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  lowStockAlert?: number;
+
+  @ApiPropertyOptional({ description: 'Weight in kg' })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  @Type(() => Number)
+  weight?: number;
+
+  @ApiPropertyOptional({ description: 'Dimensions object' })
+  @IsOptional()
+  dimensions?: Record<string, any>;
+
+  @ApiPropertyOptional({ description: 'SKU active status', default: true })
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  isActive?: boolean;
+
+  @ApiPropertyOptional({ description: 'SKU cover image URL' })
+  @IsOptional()
+  @IsString()
+  coverImage?: string;
+}

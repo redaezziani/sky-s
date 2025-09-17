@@ -5,7 +5,8 @@ import {
   CreateProductWithVariantsDto, 
   CreateProductVariantDto, 
   CreateProductSKUDto,
-  UpdateProductDto 
+  UpdateProductDto, 
+  UpdateProductSKUDto
 } from './dto/create-product.dto';
 import { ProductQueryDto } from './dto/query.dto';
 import { 
@@ -747,105 +748,89 @@ export class ProductsService {
     return this.formatSKUResponse(sku);
   }
 
-  async updateSKU(
-    skuId: string,
-    updateSKUDto: Partial<CreateProductSKUDto>,
-    imageFiles?: Express.Multer.File[],
-  ): Promise<ProductSKUResponseDto> {
-    const sku = await this.prisma.productSKU.findFirst({
-      where: { id: skuId, deletedAt: null },
+async updateSKU(
+  skuId: string,
+  updateSKUDto: UpdateProductSKUDto,
+  imageFiles?: Express.Multer.File[],
+): Promise<ProductSKUResponseDto> {
+  const sku = await this.prisma.productSKU.findFirst({
+    where: { id: skuId, deletedAt: null },
+    include: { images: { orderBy: { position: 'asc' as const } } },
+  });
+
+  if (!sku) throw new NotFoundException('SKU not found');
+
+  // --- Validate uniqueness of SKU ---
+  if (updateSKUDto.sku && updateSKUDto.sku !== sku.sku) {
+    const existing = await this.prisma.productSKU.findFirst({
+      where: { sku: updateSKUDto.sku, id: { not: skuId }, deletedAt: null },
     });
-
-    if (!sku) {
-      throw new NotFoundException('SKU not found');
-    }
-
-    // Check if updated SKU already exists
-    if (updateSKUDto.sku && updateSKUDto.sku !== sku.sku) {
-      const existingSKU = await this.prisma.productSKU.findFirst({
-        where: {
-          sku: updateSKUDto.sku,
-          id: { not: skuId },
-          deletedAt: null,
-        },
-      });
-
-      if (existingSKU) {
-        throw new ConflictException('SKU already exists');
-      }
-    }
-
-    // Check if updated barcode already exists
-    if (updateSKUDto.barcode && updateSKUDto.barcode !== sku.barcode) {
-      const existingBarcode = await this.prisma.productSKU.findFirst({
-        where: {
-          barcode: updateSKUDto.barcode,
-          id: { not: skuId },
-          deletedAt: null,
-        },
-      });
-
-      if (existingBarcode) {
-        throw new ConflictException('Barcode already exists');
-      }
-    }
-
-    const updatedSKU = await this.prisma.productSKU.update({
-      where: { id: skuId },
-      data: updateSKUDto,
-      include: {
-        images: {
-          orderBy: { position: 'asc' as const },
-        },
-      },
-    });
-
-    // Handle image upload and SKU image creation
-    if (imageFiles && imageFiles.length > 0) {
-      try {
-        const uploadResults = await this.imageKitService.uploadMultipleImages(
-          imageFiles,
-          {
-            folder: 'products/skus',
-            tags: ['sku', updatedSKU.sku],
-          },
-        );
-
-        const imagePromises = uploadResults.map((result, index) =>
-          this.prisma.productSKUImage.create({
-            data: {
-              skuId: updatedSKU.id,
-              url: result.url,
-              altText: `${updatedSKU.sku}`,
-              position: index,
-            },
-          }),
-        );
-        await Promise.all(imagePromises);
-
-        // Set cover image if not already set
-        if (!updatedSKU.coverImage && uploadResults.length > 0) {
-          await this.prisma.productSKU.update({
-            where: { id: updatedSKU.id },
-            data: { coverImage: uploadResults[0].url },
-          });
-        }
-      } catch (error) {
-        // Don't fail SKU update if image upload fails
-        console.error('Failed to upload SKU images:', error);
-      }
-    }
-
-    // Fetch updated SKU with images
-    const refreshedSKU = await this.prisma.productSKU.findFirst({
-      where: { id: updatedSKU.id },
-      include: {
-        images: { orderBy: { position: 'asc' as const } },
-      },
-    });
-
-    return this.formatSKUResponse(refreshedSKU);
+    if (existing) throw new ConflictException('SKU already exists');
   }
+
+  // --- Validate uniqueness of barcode ---
+  if (updateSKUDto.barcode && updateSKUDto.barcode !== sku.barcode) {
+    const existing = await this.prisma.productSKU.findFirst({
+      where: { barcode: updateSKUDto.barcode, id: { not: skuId }, deletedAt: null },
+    });
+    if (existing) throw new ConflictException('Barcode already exists');
+  }
+
+  // --- Update SKU ---
+  const updatedSKU = await this.prisma.productSKU.update({
+    where: { id: skuId },
+    data: {
+      sku: updateSKUDto.sku ?? sku.sku,
+      barcode: updateSKUDto.barcode ?? sku.barcode,
+      price: updateSKUDto.price ?? sku.price,
+      comparePrice: updateSKUDto.comparePrice ?? sku.comparePrice,
+      costPrice: updateSKUDto.costPrice ?? sku.costPrice,
+      stock: updateSKUDto.stock ?? sku.stock,
+      lowStockAlert: updateSKUDto.lowStockAlert ?? sku.lowStockAlert,
+      weight: updateSKUDto.weight ?? sku.weight,
+      dimensions: updateSKUDto.dimensions ?? sku.dimensions ??"",
+      isActive: updateSKUDto.isActive ?? sku.isActive,
+      coverImage: updateSKUDto.coverImage ?? sku.coverImage,
+    },
+    include: { images: { orderBy: { position: 'asc' as const } } },
+  });
+
+  // --- Handle new image uploads ---
+  if (imageFiles?.length) {
+    const uploadResults = await this.imageKitService.uploadMultipleImages(imageFiles, {
+      folder: 'products/skus',
+      tags: ['sku', updatedSKU.sku],
+    });
+
+    const imageCreates = uploadResults.map((res, index) =>
+      this.prisma.productSKUImage.create({
+        data: {
+          skuId: updatedSKU.id,
+          url: res.url,
+          altText: `${updatedSKU.sku}`,
+          position: (updatedSKU.images?.length ?? 0) + index,
+        },
+      }),
+    );
+    await Promise.all(imageCreates);
+
+    if (!updatedSKU.coverImage || updateSKUDto.coverImage) {
+      await this.prisma.productSKU.update({
+        where: { id: updatedSKU.id },
+        data: { coverImage: uploadResults[0].url },
+      });
+    }
+  }
+
+  // --- Refetch with images ---
+  const refreshedSKU = await this.prisma.productSKU.findFirst({
+    where: { id: skuId },
+    include: { images: { orderBy: { position: 'asc' as const } } },
+  });
+
+  return this.formatSKUResponse(refreshedSKU);
+}
+
 
   async removeSKU(skuId: string): Promise<void> {
     const sku = await this.prisma.productSKU.findFirst({
@@ -939,6 +924,7 @@ export class ProductsService {
             url: result.url,
             altText: `${sku.variant.product.name} - ${sku.sku}`,
             position: index,
+            fileId: result.fileId,
           },
         }),
       );
@@ -962,6 +948,25 @@ export class ProductsService {
       throw new BadRequestException('Failed to upload SKU images');
     }
   }
+
+  async removeSKUImage(imageId: string): Promise<void> {
+  const image = await this.prisma.productSKUImage.findUnique({
+    where: { id: imageId },
+  });
+
+  if (!image) throw new NotFoundException('SKU image not found');
+
+  // Optionally delete from ImageKit / storage
+  if (image.fileId) {
+    await this.imageKitService.deleteImage(image.fileId);
+  }
+
+  // Delete record from DB
+  await this.prisma.productSKUImage.delete({
+    where: { id: imageId },
+  });
+}
+
 
   async deleteImage(imageId: string): Promise<void> {
     const image = await this.prisma.productSKUImage.findUnique({

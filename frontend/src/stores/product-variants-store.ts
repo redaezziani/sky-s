@@ -132,6 +132,7 @@ export interface ProductVariantsState {
     data: Partial<CreateProductSKUDto> | FormData
   ) => Promise<ProductSKU>;
   deleteSKU: (skuId: string) => Promise<void>;
+  deleteSKUImage: (imageId: string, skuId: string) => Promise<void>;
 
   setSearchTerm: (term: string) => void;
   setCurrentPage: (page: number) => void;
@@ -171,6 +172,7 @@ const useProductVariantsStore = create<ProductVariantsState>()(
             limit: limit.toString(),
             includeVariants: includeVariants.toString(),
             includeSKUs: includeSKUs.toString(),
+            includeImages: "true"
           });
 
           if (search.trim()) {
@@ -417,77 +419,90 @@ const useProductVariantsStore = create<ProductVariantsState>()(
         }
       },
 
-      // ✅ Update SKU with image support
-      updateSKU: async (skuId, data) => {
-        try {
-          let response;
-          if (data instanceof FormData) {
-            response = await axiosInstance.patch(
-              `/products/skus/${skuId}`,
-              data,
-              {
-                headers: { "Content-Type": "multipart/form-data" },
-              }
-            );
-          } else {
-            response = await axiosInstance.patch(
-              `/products/skus/${skuId}`,
-              data
-            );
-          }
+// ✅ Update SKU with image + data normalization support
+updateSKU: async (skuId: string, data: Partial<CreateProductSKUDto> | FormData) => {
+  try {
+    let response;
 
-          const updatedSKU: ProductSKU = response.data;
-          const state = get();
+    if (data instanceof FormData) {
+      // FormData is sent as-is
+      response = await axiosInstance.patch(
+        `/products/skus/${skuId}`,
+        data,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+    } else {
+      // Normalize numbers and booleans to prevent Prisma errors
+      const payload: Partial<CreateProductSKUDto> = {
+        ...data,
+        price: data.price !== undefined ? Number(data.price) : undefined,
+        comparePrice: data.comparePrice !== undefined ? Number(data.comparePrice) : undefined,
+        costPrice: data.costPrice !== undefined ? Number(data.costPrice) : undefined,
+        stock: data.stock !== undefined ? Number(data.stock) : undefined,
+        lowStockAlert: data.lowStockAlert !== undefined ? Number(data.lowStockAlert) : undefined,
+        weight: data.weight !== undefined ? Number(data.weight) : undefined,
+        isActive: data.isActive !== undefined ? Boolean(data.isActive) : undefined,
+      };
 
-          const updatedProducts = state.products.map((product) => ({
-            ...product,
-            variants: product.variants?.map((variant) => ({
-              ...variant,
-              skus: variant.skus?.map((sku) =>
-                sku.id === skuId ? updatedSKU : sku
-              ),
-            })),
-          }));
+      response = await axiosInstance.patch(`/products/skus/${skuId}`, payload);
+    }
 
-          set({ products: updatedProducts });
+    const updatedSKU: ProductSKU = response.data;
+    const state = get();
 
-          if (state.selectedProduct) {
-            set({
-              selectedProduct: {
-                ...state.selectedProduct,
-                variants: state.selectedProduct.variants?.map((variant) => ({
-                  ...variant,
-                  skus: variant.skus?.map((sku) =>
-                    sku.id === skuId ? updatedSKU : sku
-                  ),
-                })),
-              },
-            });
-          }
+    // Update products state
+    const updatedProducts = state.products.map((product) => ({
+      ...product,
+      variants: product.variants?.map((variant) => ({
+        ...variant,
+        skus: variant.skus?.map((sku) =>
+          sku.id === skuId ? updatedSKU : sku
+        ),
+      })),
+    }));
+    set({ products: updatedProducts });
 
-          if (state.selectedVariant) {
-            set({
-              selectedVariant: {
-                ...state.selectedVariant,
-                skus: state.selectedVariant.skus?.map((sku) =>
-                  sku.id === skuId ? updatedSKU : sku
-                ),
-              },
-            });
-          }
+    // Update selectedProduct
+    if (state.selectedProduct) {
+      set({
+        selectedProduct: {
+          ...state.selectedProduct,
+          variants: state.selectedProduct.variants?.map((variant) => ({
+            ...variant,
+            skus: variant.skus?.map((sku) =>
+              sku.id === skuId ? updatedSKU : sku
+            ),
+          })),
+        },
+      });
+    }
 
-          if (state.selectedSKU?.id === skuId) {
-            set({ selectedSKU: updatedSKU });
-          }
+    // Update selectedVariant
+    if (state.selectedVariant) {
+      set({
+        selectedVariant: {
+          ...state.selectedVariant,
+          skus: state.selectedVariant.skus?.map((sku) =>
+            sku.id === skuId ? updatedSKU : sku
+          ),
+        },
+      });
+    }
 
-          return updatedSKU;
-        } catch (error) {
-          const message =
-            error instanceof Error ? error.message : "Failed to update SKU";
-          set({ error: message });
-          throw error;
-        }
-      },
+    // Update selectedSKU
+    if (state.selectedSKU?.id === skuId) {
+      set({ selectedSKU: updatedSKU });
+    }
+
+    return updatedSKU;
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to update SKU";
+    set({ error: message });
+    throw error;
+  }
+},
+
 
       // ✅ Delete SKU
       deleteSKU: async (skuId) => {
@@ -538,6 +553,66 @@ const useProductVariantsStore = create<ProductVariantsState>()(
           throw error;
         }
       },
+
+      // ✅ Delete SKU Image
+deleteSKUImage: async (imageId: string, skuId: string) => {
+  try {
+    await axiosInstance.delete(`/products/skus/images/${imageId}`);
+    const state = get();
+
+    const updateSKUImages = (sku: ProductSKU) => ({
+      ...sku,
+      images: sku.images?.filter((img) => img.id !== imageId),
+    });
+
+    const updatedProducts = state.products.map((product) => ({
+      ...product,
+      variants: product.variants?.map((variant) => ({
+        ...variant,
+        skus: variant.skus?.map((sku) =>
+          sku.id === skuId ? updateSKUImages(sku) : sku
+        ),
+      })),
+    }));
+
+    set({ products: updatedProducts });
+
+    if (state.selectedProduct) {
+      set({
+        selectedProduct: {
+          ...state.selectedProduct,
+          variants: state.selectedProduct.variants?.map((variant) => ({
+            ...variant,
+            skus: variant.skus?.map((sku) =>
+              sku.id === skuId ? updateSKUImages(sku) : sku
+            ),
+          })),
+        },
+      });
+    }
+
+    if (state.selectedVariant) {
+      set({
+        selectedVariant: {
+          ...state.selectedVariant,
+          skus: state.selectedVariant.skus?.map((sku) =>
+            sku.id === skuId ? updateSKUImages(sku) : sku
+          ),
+        },
+      });
+    }
+
+    if (state.selectedSKU?.id === skuId) {
+      set({ selectedSKU: updateSKUImages(state.selectedSKU) });
+    }
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to delete SKU image";
+    set({ error: message });
+    throw error;
+  }
+},
+
 
       setSearchTerm: (term) => set({ searchTerm: term }),
       setCurrentPage: (page) => set({ currentPage: page }),
