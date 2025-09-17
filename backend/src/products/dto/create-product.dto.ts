@@ -1,50 +1,49 @@
-import { IsString, IsOptional, IsBoolean, IsNumber, IsArray, IsUUID, ValidateNested, IsDecimal, Min, Max } from 'class-validator';
-import { Type, Transform } from 'class-transformer';
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsNumber,
+  IsArray,
+  IsUUID,
+  ValidateNested,
+  Min,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateProductDto {
   @ApiProperty({
     description: 'Product name',
-    example: 'Wireless Bluetooth Headphones'
+    example: 'Wireless Bluetooth Headphones',
   })
   @IsString()
   name: string;
 
   @ApiProperty({
-    description: 'Product URL slug (will be auto-generated if not provided)',
-    example: 'wireless-bluetooth-headphones'
+    description: 'Product URL slug (auto-generated if not provided)',
   })
   @IsOptional()
   @IsString()
   slug?: string;
 
-  @ApiPropertyOptional({
-    description: 'Detailed product description',
-    example: 'High-quality wireless headphones with noise cancellation...'
-  })
+  @ApiPropertyOptional({ description: 'Detailed product description' })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({
-    description: 'Short product description',
-    example: 'Premium wireless headphones with 30h battery life'
-  })
+  @ApiPropertyOptional({ description: 'Short product description' })
   @IsOptional()
   @IsString()
   shortDesc?: string;
 
-  @ApiPropertyOptional({
-    description: 'Product cover image URL',
-    example: 'https://example.com/images/headphones.jpg'
-  })
+  @ApiPropertyOptional({ description: 'Product cover image URL' })
   @IsOptional()
   @IsString()
   coverImage?: string;
 
   @ApiPropertyOptional({
     description: 'Whether the product is active',
-    default: true
+    default: true,
   })
   @IsOptional()
   @IsBoolean()
@@ -52,38 +51,28 @@ export class CreateProductDto {
 
   @ApiPropertyOptional({
     description: 'Whether the product is featured',
-    default: false
+    default: false,
   })
   @IsOptional()
   @IsBoolean()
   isFeatured?: boolean;
 
-  @ApiPropertyOptional({
-    description: 'SEO meta title'
-  })
+  @ApiPropertyOptional({ description: 'SEO meta title' })
   @IsOptional()
   @IsString()
   metaTitle?: string;
 
-  @ApiPropertyOptional({
-    description: 'SEO meta description'
-  })
+  @ApiPropertyOptional({ description: 'SEO meta description' })
   @IsOptional()
   @IsString()
   metaDesc?: string;
 
-  @ApiPropertyOptional({
-    description: 'Sort order for displaying products',
-    default: 0
-  })
+  @ApiPropertyOptional({ description: 'Sort order', default: 0 })
   @IsOptional()
   @IsNumber()
   sortOrder?: number;
 
-  @ApiPropertyOptional({
-    description: 'Array of category IDs to assign to this product',
-    type: [String]
-  })
+  @ApiPropertyOptional({ description: 'Array of category IDs', type: [String] })
   @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
@@ -92,17 +81,12 @@ export class CreateProductDto {
   @ApiPropertyOptional({
     description: 'Image upload folder',
     example: 'products',
-    default: 'products'
   })
   @IsOptional()
   @IsString()
   imageFolder?: string;
 
-  @ApiPropertyOptional({
-    description: 'Image tags for organization',
-    type: [String],
-    example: ['product', 'electronics']
-  })
+  @ApiPropertyOptional({ description: 'Image tags', type: [String] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
@@ -112,132 +96,91 @@ export class CreateProductDto {
 export class CreateProductVariantDto {
   @ApiPropertyOptional({
     description: 'Variant name',
-    example: 'Large - Black'
+    example: 'Large - Black',
   })
   @IsOptional()
   @IsString()
   name?: string;
 
-  @ApiPropertyOptional({
-    description: 'Variant attributes as JSON object',
-    example: { size: 'Large', color: 'Black', material: 'Leather' }
-  })
+  @ApiPropertyOptional({ description: 'Variant attributes as JSON object' })
   @IsOptional()
   attributes?: Record<string, any>;
 
   @ApiPropertyOptional({
     description: 'Whether the variant is active',
-    default: true
+    default: true,
   })
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 
-  @ApiPropertyOptional({
-    description: 'Sort order for variants',
-    default: 0
-  })
+  @ApiPropertyOptional({ description: 'Sort order', default: 0 })
   @IsOptional()
   @IsNumber()
   sortOrder?: number;
 }
 
 export class CreateProductSKUDto {
-  @ApiProperty({
-    description: 'Unique SKU code',
-    example: 'WBH-001-LG-BLK'
-  })
+  @IsOptional()
   @IsString()
-  sku: string;
+  sku?: string;
 
-  @ApiPropertyOptional({
-    description: 'Product barcode',
-    example: '1234567890123'
-  })
   @IsOptional()
   @IsString()
   barcode?: string;
 
-  @ApiProperty({
-    description: 'Product price',
-    example: 199.99
-  })
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
+  @Type(() => Number)
   price: number;
 
-  @ApiPropertyOptional({
-    description: 'Compare at price (original price for discounts)',
-    example: 249.99
-  })
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
+  @Type(() => Number)
   comparePrice?: number;
 
-  @ApiPropertyOptional({
-    description: 'Cost price for profit calculation',
-    example: 89.99
-  })
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
+  @Type(() => Number)
   costPrice?: number;
 
-  @ApiPropertyOptional({
-    description: 'Current stock quantity',
-    default: 0
-  })
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   stock?: number;
 
-  @ApiPropertyOptional({
-    description: 'Low stock alert threshold',
-    default: 5
-  })
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   lowStockAlert?: number;
 
-  @ApiPropertyOptional({
-    description: 'Product weight in grams',
-    example: 250
-  })
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
+  @Type(() => Number)
   weight?: number;
 
-  @ApiPropertyOptional({
-    description: 'Product dimensions',
-    example: { length: 20, width: 15, height: 8 }
-  })
   @IsOptional()
   dimensions?: Record<string, any>;
 
-  @ApiPropertyOptional({
-    description: 'SKU cover image URL'
-  })
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  isActive?: boolean;
+  @ApiPropertyOptional({ description: 'SKU cover image URL' })
   @IsOptional()
   @IsString()
   coverImage?: string;
-
-  @ApiPropertyOptional({
-    description: 'Whether the SKU is active',
-    default: true
-  })
-  @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
 }
 
 export class CreateProductWithVariantsDto extends CreateProductDto {
   @ApiPropertyOptional({
     description: 'Product variants',
-    type: [CreateProductVariantDto]
+    type: [CreateProductVariantDto],
   })
   @IsOptional()
   @IsArray()
@@ -247,73 +190,52 @@ export class CreateProductWithVariantsDto extends CreateProductDto {
 }
 
 export class UpdateProductDto {
-  @ApiPropertyOptional({
-    description: 'Product name'
-  })
+  @ApiPropertyOptional({ description: 'Product name' })
   @IsOptional()
   @IsString()
   name?: string;
 
-  @ApiPropertyOptional({
-    description: 'Product description'
-  })
+  @ApiPropertyOptional({ description: 'Product description' })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({
-    description: 'Short product description'
-  })
+  @ApiPropertyOptional({ description: 'Short description' })
   @IsOptional()
   @IsString()
   shortDesc?: string;
 
-  @ApiPropertyOptional({
-    description: 'Product cover image URL'
-  })
+  @ApiPropertyOptional({ description: 'Product cover image URL' })
   @IsOptional()
   @IsString()
   coverImage?: string;
 
-  @ApiPropertyOptional({
-    description: 'Whether the product is active'
-  })
+  @ApiPropertyOptional({ description: 'Whether active' })
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 
-  @ApiPropertyOptional({
-    description: 'Whether the product is featured'
-  })
+  @ApiPropertyOptional({ description: 'Whether featured' })
   @IsOptional()
   @IsBoolean()
   isFeatured?: boolean;
 
-  @ApiPropertyOptional({
-    description: 'SEO meta title'
-  })
+  @ApiPropertyOptional({ description: 'SEO meta title' })
   @IsOptional()
   @IsString()
   metaTitle?: string;
 
-  @ApiPropertyOptional({
-    description: 'SEO meta description'
-  })
+  @ApiPropertyOptional({ description: 'SEO meta description' })
   @IsOptional()
   @IsString()
   metaDesc?: string;
 
-  @ApiPropertyOptional({
-    description: 'Sort order'
-  })
+  @ApiPropertyOptional({ description: 'Sort order' })
   @IsOptional()
   @IsNumber()
   sortOrder?: number;
 
-  @ApiPropertyOptional({
-    description: 'Array of category IDs',
-    type: [String]
-  })
+  @ApiPropertyOptional({ description: 'Category IDs', type: [String] })
   @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })

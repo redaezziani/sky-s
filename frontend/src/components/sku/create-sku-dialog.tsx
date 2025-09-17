@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -33,12 +33,13 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import useProductVariantsStore from "@/stores/product-variants-store";
 import { toast } from "sonner";
-import { useLocale } from "@/components/local-lang-swither"; // your LocaleProvider hook
+import { useLocale } from "@/components/local-lang-swither";
 import { getMessages } from "@/lib/locale";
+import { Barcode, ScanBarcode } from "lucide-react";
 
 const createSKUSchema = z.object({
   variantId: z.string().min(1),
-  sku: z.string().min(1),
+  sku: z.string().optional(),
   barcode: z.string().optional(),
   price: z.number().min(0),
   comparePrice: z.number().optional(),
@@ -94,8 +95,7 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
   const onSubmit = async (data: CreateSKUFormData) => {
     try {
       const formData = new FormData();
-      formData.append("variantId", data.variantId);
-      formData.append("sku", data.sku);
+      if (data.sku) formData.append("sku", data.sku);
       if (data.barcode) formData.append("barcode", data.barcode);
       formData.append("price", String(data.price));
       if (data.comparePrice !== undefined)
@@ -107,7 +107,7 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
       if (data.weight !== undefined)
         formData.append("weight", String(data.weight));
       if (data.dimensions) formData.append("dimensions", data.dimensions);
-      formData.append("isActive", String(data.isActive));
+      formData.append("isActive", data.isActive ? "true" : "false");
       selectedImages.forEach((file) => formData.append("images", file));
 
       await createSKU(data.variantId, formData);
@@ -142,25 +142,33 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t.createSKU.fields.productVariant}</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={t.createSKU.placeholders.selectVariant}
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {allVariants.map((variant) => (
-                        <SelectItem key={variant.id} value={variant.id}>
-                          {variant.productName} - {variant.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <Controller
+                      name="variantId"
+                      control={form.control}
+                      render={({ field: controllerField }) => (
+                        <Select
+                          value={controllerField.value}
+                          onValueChange={controllerField.onChange}
+                        >
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={
+                                t.createSKU.placeholders.selectVariant
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {allVariants.map((variant) => (
+                              <SelectItem key={variant.id} value={variant.id}>
+                                {variant.productName} - {variant.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -168,176 +176,96 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
 
             {/* SKU & Barcode */}
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="sku"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t.createSKU.fields.skuCode}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t.createSKU.placeholders.skuCode}
-                        {...field}
-                        className="font-mono"
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {t.createSKU.fields.skuCode}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="barcode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t.createSKU.fields.barcode}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t.createSKU.placeholders.barcode}
-                        {...field}
-                        className="font-mono"
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {t.createSKU.fields.barcode}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {["sku", "barcode"].map((name) => (
+                <FormField
+                  key={name}
+                  control={form.control}
+                  name={name as keyof CreateSKUFormData}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <ScanBarcode className="inline-block mb-1" size={16} />
+                        {t.createSKU.fields[name]}{" "}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={t.createSKU.placeholders[name]}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {t.createSKU.fields[name]}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
             </div>
 
             {/* Price, Compare, Cost */}
             <div className="grid grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t.createSKU.fields.price}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value) || 0)
-                        }
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {t.createSKU.fields.price}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="comparePrice"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t.createSKU.fields.comparePrice}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(
-                            parseFloat(e.target.value) || undefined
-                          )
-                        }
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {t.createSKU.fields.comparePrice}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="costPrice"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t.createSKU.fields.costPrice}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(
-                            parseFloat(e.target.value) || undefined
-                          )
-                        }
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {t.createSKU.fields.costPrice}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {["price", "comparePrice", "costPrice"].map((name) => (
+                <FormField
+                  key={name}
+                  control={form.control}
+                  name={name as keyof CreateSKUFormData}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t.createSKU.fields[name]}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? undefined
+                                : parseFloat(e.target.value)
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {t.createSKU.fields[name]}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
             </div>
 
             {/* Stock & Alerts */}
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="stock"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t.createSKU.fields.stock}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseInt(e.target.value) || 0)
-                        }
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {t.createSKU.fields.stock}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="lowStockAlert"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t.createSKU.fields.lowStockAlert}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseInt(e.target.value) || 0)
-                        }
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {t.createSKU.fields.lowStockAlert}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {["stock", "lowStockAlert"].map((name) => (
+                <FormField
+                  key={name}
+                  control={form.control}
+                  name={name as keyof CreateSKUFormData}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t.createSKU.fields[name]}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={field.value ?? 0}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value) || 0)
+                          }
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {t.createSKU.fields[name]}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
             </div>
 
             {/* Weight & Dimensions */}
@@ -353,10 +281,12 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
                         type="number"
                         step="0.1"
                         min="0"
-                        {...field}
+                        value={field.value ?? ""}
                         onChange={(e) =>
                           field.onChange(
-                            parseFloat(e.target.value) || undefined
+                            e.target.value === ""
+                              ? undefined
+                              : parseFloat(e.target.value)
                           )
                         }
                       />
@@ -377,8 +307,8 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
                     <FormControl>
                       <Input
                         placeholder={t.createSKU.placeholders.dimensions}
-                        {...field}
-                        className="font-mono text-xs"
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormDescription>

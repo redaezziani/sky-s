@@ -87,12 +87,12 @@
           "description": "Add a new SKU to a product variant and set pricing and stock information.",
           "fields": {
             "productVariant": "Product Variant",
-            "skuCode": "SKU Code",
+            "sku": "SKU Code (optional)",
             "barcode": "Barcode (optional)",
             "price": "Price",
             "comparePrice": "Compare Price (optional)",
             "costPrice": "Cost Price (optional)",
-            "stockQuantity": "Stock Quantity",
+            "stock": "Stock Quantity",
             "lowStockAlert": "Low Stock Alert",
             "weight": "Weight (optional)",
             "dimensions": "Dimensions (optional)",
@@ -100,7 +100,7 @@
             "images": "SKU Images (optional)"
           },
           "placeholders": {
-            "skuCode": "e.g., TSHIRT-COT-M-BLK",
+            "sku": "e.g., TSHIRT-COT-M-BLK",
             "barcode": "e.g., 1234567890123",
             "dimensions": "{\"length\":10,\"width\":5,\"height\":2}"
           },

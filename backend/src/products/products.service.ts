@@ -16,6 +16,9 @@ import {
 } from './dto/response.dto';
 import { Prisma } from '../../generated/prisma';
 import { ImageKitService } from '../common/services/imagekit.service';
+import { customAlphabet } from 'nanoid';
+import { createCanvas } from 'canvas';
+import JsBarcode from 'jsbarcode';
 
 @Injectable()
 export class ProductsService {
@@ -23,7 +26,6 @@ export class ProductsService {
     private prisma: PrismaService,
     private imageKitService: ImageKitService,
   ) {}
-
   private generateSlug(name: string): string {
     return name
       .toLowerCase()
@@ -31,7 +33,10 @@ export class ProductsService {
       .replace(/(^-|-$)/g, '');
   }
 
-  private async ensureUniqueSlug(slug: string, excludeId?: string): Promise<string> {
+  private async ensureUniqueSlug(
+    slug: string,
+    excludeId?: string,
+  ): Promise<string> {
     let uniqueSlug = slug;
     let counter = 1;
 
@@ -44,21 +49,38 @@ export class ProductsService {
         },
       });
 
-      if (!existing) {
-        return uniqueSlug;
-      }
-
+      if (!existing) return uniqueSlug;
       uniqueSlug = `${slug}-${counter}`;
       counter++;
     }
   }
 
+  private generateSKU(length = 8): string {
+    const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const nanoid = customAlphabet(alphabet, length);
+    return nanoid();
+  }
+
+  private generateBarcodeBase64(sku: string): string {
+    const canvasWidth = 300;
+    const canvasHeight = 100;
+    const canvas = createCanvas(canvasWidth, canvasHeight);
+    JsBarcode(canvas, sku, {
+      format: 'CODE128',
+      width: 2,
+      height: canvasHeight,
+      displayValue: true,
+    });
+    return canvas.toDataURL('image/png');
+  }
+
   async create(
-    createProductDto: CreateProductDto, 
+    createProductDto: CreateProductDto,
     coverImageFile?: Express.Multer.File,
-    additionalImageFiles?: Express.Multer.File[]
+    additionalImageFiles?: Express.Multer.File[],
   ): Promise<ProductResponseDto> {
-    const slug = createProductDto.slug || this.generateSlug(createProductDto.name);
+    const slug =
+      createProductDto.slug || this.generateSlug(createProductDto.name);
     const uniqueSlug = await this.ensureUniqueSlug(slug);
 
     // Check if categories exist
@@ -80,11 +102,14 @@ export class ProductsService {
     // Upload cover image if provided
     if (coverImageFile) {
       try {
-        const uploadResult = await this.imageKitService.uploadImage(coverImageFile, {
-          folder: createProductDto.imageFolder || 'products',
-          tags: createProductDto.imageTags || ['product'],
-          fileName: `${uniqueSlug}-cover`,
-        });
+        const uploadResult = await this.imageKitService.uploadImage(
+          coverImageFile,
+          {
+            folder: createProductDto.imageFolder || 'products',
+            tags: createProductDto.imageTags || ['product'],
+            fileName: `${uniqueSlug}-cover`,
+          },
+        );
         coverImageUrl = uploadResult.url;
       } catch (error) {
         throw new BadRequestException('Failed to upload cover image');
@@ -104,9 +129,11 @@ export class ProductsService {
         metaTitle: createProductDto.metaTitle,
         metaDesc: createProductDto.metaDesc,
         sortOrder: createProductDto.sortOrder ?? 0,
-        categories: createProductDto.categoryIds?.length ? {
-          connect: createProductDto.categoryIds.map(id => ({ id })),
-        } : undefined,
+        categories: createProductDto.categoryIds?.length
+          ? {
+              connect: createProductDto.categoryIds.map((id) => ({ id })),
+            }
+          : undefined,
       },
       include: {
         categories: true,
@@ -138,8 +165,11 @@ export class ProductsService {
     return this.formatProductResponse(product);
   }
 
-  async createWithVariants(createProductDto: CreateProductWithVariantsDto): Promise<ProductResponseDto> {
-    const slug = createProductDto.slug || this.generateSlug(createProductDto.name);
+  async createWithVariants(
+    createProductDto: CreateProductWithVariantsDto,
+  ): Promise<ProductResponseDto> {
+    const slug =
+      createProductDto.slug || this.generateSlug(createProductDto.name);
     const uniqueSlug = await this.ensureUniqueSlug(slug);
 
     // Check if categories exist
@@ -168,17 +198,21 @@ export class ProductsService {
         metaTitle: createProductDto.metaTitle,
         metaDesc: createProductDto.metaDesc,
         sortOrder: createProductDto.sortOrder ?? 0,
-        categories: createProductDto.categoryIds?.length ? {
-          connect: createProductDto.categoryIds.map(id => ({ id })),
-        } : undefined,
-        variants: createProductDto.variants?.length ? {
-          create: createProductDto.variants.map(variant => ({
-            name: variant.name,
-            attributes: variant.attributes,
-            isActive: variant.isActive ?? true,
-            sortOrder: variant.sortOrder ?? 0,
-          })),
-        } : undefined,
+        categories: createProductDto.categoryIds?.length
+          ? {
+              connect: createProductDto.categoryIds.map((id) => ({ id })),
+            }
+          : undefined,
+        variants: createProductDto.variants?.length
+          ? {
+              create: createProductDto.variants.map((variant) => ({
+                name: variant.name,
+                attributes: variant.attributes,
+                isActive: variant.isActive ?? true,
+                sortOrder: variant.sortOrder ?? 0,
+              })),
+            }
+          : undefined,
       },
       include: {
         categories: true,
@@ -259,7 +293,11 @@ export class ProductsService {
     }
 
     // Price and stock filters require checking variants/SKUs
-    if (minPrice !== undefined || maxPrice !== undefined || inStock !== undefined) {
+    if (
+      minPrice !== undefined ||
+      maxPrice !== undefined ||
+      inStock !== undefined
+    ) {
       const skuWhere: Prisma.ProductSKUWhereInput = {
         deletedAt: null,
         isActive: true,
@@ -292,7 +330,7 @@ export class ProductsService {
 
     // Build order by clause
     let orderBy: Prisma.ProductOrderByWithRelationInput = {};
-    
+
     if (sortBy === 'price') {
       // For price sorting, we need to order by the minimum price of active SKUs
       orderBy = {
@@ -355,7 +393,7 @@ export class ProductsService {
     const totalPages = Math.ceil(total / limit);
 
     return {
-      data: products.map(product => this.formatProductResponse(product)),
+      data: products.map((product) => this.formatProductResponse(product)),
       total,
       page,
       limit,
@@ -365,36 +403,41 @@ export class ProductsService {
     };
   }
 
-  async findOne(id: string, includeRelations = true): Promise<ProductResponseDto> {
+  async findOne(
+    id: string,
+    includeRelations = true,
+  ): Promise<ProductResponseDto> {
     const product = await this.prisma.product.findFirst({
       where: {
         id,
         deletedAt: null,
       },
-      include: includeRelations ? {
-        categories: {
-          where: { deletedAt: null },
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            description: true,
-          },
-        },
-        variants: {
-          where: { deletedAt: null },
-          include: {
-            skus: {
+      include: includeRelations
+        ? {
+            categories: {
+              where: { deletedAt: null },
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                description: true,
+              },
+            },
+            variants: {
               where: { deletedAt: null },
               include: {
-                images: {
-                  orderBy: { position: 'asc' as const },
+                skus: {
+                  where: { deletedAt: null },
+                  include: {
+                    images: {
+                      orderBy: { position: 'asc' as const },
+                    },
+                  },
                 },
               },
             },
-          },
-        },
-      } : undefined,
+          }
+        : undefined,
     });
 
     if (!product) {
@@ -404,36 +447,41 @@ export class ProductsService {
     return this.formatProductResponse(product);
   }
 
-  async findBySlug(slug: string, includeRelations = true): Promise<ProductResponseDto> {
+  async findBySlug(
+    slug: string,
+    includeRelations = true,
+  ): Promise<ProductResponseDto> {
     const product = await this.prisma.product.findFirst({
       where: {
         slug,
         deletedAt: null,
       },
-      include: includeRelations ? {
-        categories: {
-          where: { deletedAt: null },
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            description: true,
-          },
-        },
-        variants: {
-          where: { deletedAt: null },
-          include: {
-            skus: {
+      include: includeRelations
+        ? {
+            categories: {
+              where: { deletedAt: null },
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                description: true,
+              },
+            },
+            variants: {
               where: { deletedAt: null },
               include: {
-                images: {
-                  orderBy: { position: 'asc' as const },
+                skus: {
+                  where: { deletedAt: null },
+                  include: {
+                    images: {
+                      orderBy: { position: 'asc' as const },
+                    },
+                  },
                 },
               },
             },
-          },
-        },
-      } : undefined,
+          }
+        : undefined,
     });
 
     if (!product) {
@@ -443,7 +491,10 @@ export class ProductsService {
     return this.formatProductResponse(product);
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto): Promise<ProductResponseDto> {
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+  ): Promise<ProductResponseDto> {
     const product = await this.prisma.product.findFirst({
       where: { id, deletedAt: null },
     });
@@ -485,9 +536,11 @@ export class ProductsService {
         metaTitle: updateProductDto.metaTitle,
         metaDesc: updateProductDto.metaDesc,
         sortOrder: updateProductDto.sortOrder,
-        categories: updateProductDto.categoryIds?.length ? {
-          set: updateProductDto.categoryIds.map(id => ({ id })),
-        } : undefined,
+        categories: updateProductDto.categoryIds?.length
+          ? {
+              set: updateProductDto.categoryIds.map((id) => ({ id })),
+            }
+          : undefined,
       },
       include: {
         categories: {
@@ -534,7 +587,10 @@ export class ProductsService {
   }
 
   // Variant operations
-  async addVariant(productId: string, createVariantDto: CreateProductVariantDto): Promise<ProductVariantResponseDto> {
+  async addVariant(
+    productId: string,
+    createVariantDto: CreateProductVariantDto,
+  ): Promise<ProductVariantResponseDto> {
     const product = await this.prisma.product.findFirst({
       where: { id: productId, deletedAt: null },
     });
@@ -566,7 +622,10 @@ export class ProductsService {
     return this.formatVariantResponse(variant);
   }
 
-  async updateVariant(variantId: string, updateVariantDto: Partial<CreateProductVariantDto>): Promise<ProductVariantResponseDto> {
+  async updateVariant(
+    variantId: string,
+    updateVariantDto: Partial<CreateProductVariantDto>,
+  ): Promise<ProductVariantResponseDto> {
     const variant = await this.prisma.productVariant.findFirst({
       where: { id: variantId, deletedAt: null },
     });
@@ -608,51 +667,37 @@ export class ProductsService {
     });
   }
 
-  // SKU operations
   async addSKU(
     variantId: string,
     createSKUDto: CreateProductSKUDto,
-    imageFiles?: Express.Multer.File[]
+    imageFiles?: Express.Multer.File[],
   ): Promise<ProductSKUResponseDto> {
     const variant = await this.prisma.productVariant.findFirst({
       where: { id: variantId, deletedAt: null },
     });
+    if (!variant) throw new NotFoundException('Variant not found');
 
-    if (!variant) {
-      throw new NotFoundException('Variant not found');
-    }
+    // Auto-generate SKU if not provided
+    const skuValue = createSKUDto.sku || this.generateSKU();
+    // Auto-generate barcode if not provided
+    const barcodeValue = createSKUDto.barcode || skuValue;
 
-    // Check if SKU already exists
+    // Check for conflicts
     const existingSKU = await this.prisma.productSKU.findFirst({
-      where: {
-        sku: createSKUDto.sku,
-        deletedAt: null,
-      },
+      where: { sku: skuValue, deletedAt: null },
     });
+    if (existingSKU) throw new ConflictException('SKU already exists');
 
-    if (existingSKU) {
-      throw new ConflictException('SKU already exists');
-    }
-
-    // Check if barcode already exists
-    if (createSKUDto.barcode) {
-      const existingBarcode = await this.prisma.productSKU.findFirst({
-        where: {
-          barcode: createSKUDto.barcode,
-          deletedAt: null,
-        },
-      });
-
-      if (existingBarcode) {
-        throw new ConflictException('Barcode already exists');
-      }
-    }
+    const existingBarcode = await this.prisma.productSKU.findFirst({
+      where: { barcode: barcodeValue, deletedAt: null },
+    });
+    if (existingBarcode) throw new ConflictException('Barcode already exists');
 
     const sku = await this.prisma.productSKU.create({
       data: {
         variantId,
-        sku: createSKUDto.sku,
-        barcode: createSKUDto.barcode,
+        sku: skuValue,
+        barcode: barcodeValue,
         price: createSKUDto.price,
         comparePrice: createSKUDto.comparePrice,
         costPrice: createSKUDto.costPrice,
@@ -663,61 +708,49 @@ export class ProductsService {
         coverImage: createSKUDto.coverImage,
         isActive: createSKUDto.isActive ?? true,
       },
-      include: {
-        images: {
-          orderBy: { position: 'asc' as const },
-        },
-      },
+      include: { images: { orderBy: { position: 'asc' as const } } },
     });
 
-    // Handle image upload and SKU image creation
-    if (imageFiles && imageFiles.length > 0) {
+    // Upload SKU images if provided
+    if (imageFiles?.length) {
       try {
-        const uploadResults = await this.imageKitService.uploadMultipleImages(imageFiles, {
-          folder: 'products/skus',
-          tags: ['sku', sku.sku],
-        });
-
-        const imagePromises = uploadResults.map((result, index) =>
+        const uploadResults = await this.imageKitService.uploadMultipleImages(
+          imageFiles,
+          {
+            folder: 'products/skus',
+            tags: ['sku', sku.sku],
+          },
+        );
+        const imagePromises = uploadResults.map((res, index) =>
           this.prisma.productSKUImage.create({
             data: {
               skuId: sku.id,
-              url: result.url,
-              altText: `${variant.name || ''} - ${sku.sku}`,
+              url: res.url,
+              altText: `${variant.name} - ${sku.sku}`,
               position: index,
             },
-          })
+          }),
         );
         await Promise.all(imagePromises);
 
-        // Set cover image if not already set
         if (!sku.coverImage && uploadResults.length > 0) {
           await this.prisma.productSKU.update({
             where: { id: sku.id },
             data: { coverImage: uploadResults[0].url },
           });
         }
-      } catch (error) {
-        // Don't fail SKU creation if image upload fails
-        console.error('Failed to upload SKU images:', error);
+      } catch (err) {
+        console.error('Failed to upload SKU images:', err);
       }
     }
 
-    // Fetch updated SKU with images
-    const updatedSKU = await this.prisma.productSKU.findFirst({
-      where: { id: sku.id },
-      include: {
-        images: { orderBy: { position: 'asc' as const } },
-      },
-    });
-
-    return this.formatSKUResponse(updatedSKU);
+    return this.formatSKUResponse(sku);
   }
 
   async updateSKU(
     skuId: string,
     updateSKUDto: Partial<CreateProductSKUDto>,
-    imageFiles?: Express.Multer.File[]
+    imageFiles?: Express.Multer.File[],
   ): Promise<ProductSKUResponseDto> {
     const sku = await this.prisma.productSKU.findFirst({
       where: { id: skuId, deletedAt: null },
@@ -770,10 +803,13 @@ export class ProductsService {
     // Handle image upload and SKU image creation
     if (imageFiles && imageFiles.length > 0) {
       try {
-        const uploadResults = await this.imageKitService.uploadMultipleImages(imageFiles, {
-          folder: 'products/skus',
-          tags: ['sku', updatedSKU.sku],
-        });
+        const uploadResults = await this.imageKitService.uploadMultipleImages(
+          imageFiles,
+          {
+            folder: 'products/skus',
+            tags: ['sku', updatedSKU.sku],
+          },
+        );
 
         const imagePromises = uploadResults.map((result, index) =>
           this.prisma.productSKUImage.create({
@@ -783,7 +819,7 @@ export class ProductsService {
               altText: `${updatedSKU.sku}`,
               position: index,
             },
-          })
+          }),
         );
         await Promise.all(imagePromises);
 
@@ -841,10 +877,13 @@ export class ProductsService {
     }
 
     try {
-      const uploadResults = await this.imageKitService.uploadMultipleImages(files, {
-        folder: 'products',
-        tags: ['product', product.slug],
-      });
+      const uploadResults = await this.imageKitService.uploadMultipleImages(
+        files,
+        {
+          folder: 'products',
+          tags: ['product', product.slug],
+        },
+      );
 
       // If this is the first image and product doesn't have a cover image, set it
       if (!product.coverImage && uploadResults.length > 0) {
@@ -884,10 +923,13 @@ export class ProductsService {
     }
 
     try {
-      const uploadResults = await this.imageKitService.uploadMultipleImages(files, {
-        folder: 'products/skus',
-        tags: ['sku', sku.sku, sku.variant.product.slug],
-      });
+      const uploadResults = await this.imageKitService.uploadMultipleImages(
+        files,
+        {
+          folder: 'products/skus',
+          tags: ['sku', sku.sku, sku.variant.product.slug],
+        },
+      );
 
       // Create SKU image records
       const imagePromises = uploadResults.map((result, index) =>
@@ -898,7 +940,7 @@ export class ProductsService {
             altText: `${sku.variant.product.name} - ${sku.sku}`,
             position: index,
           },
-        })
+        }),
       );
 
       const createdImages = await Promise.all(imagePromises);
@@ -960,8 +1002,10 @@ export class ProductsService {
       sortOrder: product.sortOrder,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
-      variants: product.variants?.map(variant => this.formatVariantResponse(variant)),
-      categories: product.categories?.map(category => ({
+      variants: product.variants?.map((variant) =>
+        this.formatVariantResponse(variant),
+      ),
+      categories: product.categories?.map((category) => ({
         id: category.id,
         name: category.name,
         slug: category.slug,
@@ -979,7 +1023,7 @@ export class ProductsService {
       sortOrder: variant.sortOrder,
       createdAt: variant.createdAt,
       updatedAt: variant.updatedAt,
-      skus: variant.skus?.map(sku => this.formatSKUResponse(sku)),
+      skus: variant.skus?.map((sku) => this.formatSKUResponse(sku)),
     };
   }
 
@@ -999,12 +1043,12 @@ export class ProductsService {
       isActive: sku.isActive,
       createdAt: sku.createdAt,
       updatedAt: sku.updatedAt,
-      images: sku.images?.map(image => ({
-        id: image.id,
-        url: image.url,
-        altText: image.altText,
-        position: image.position,
-        createdAt: image.createdAt,
+      images: sku.images?.map((img) => ({
+        id: img.id,
+        url: img.url,
+        altText: img.altText,
+        position: img.position,
+        createdAt: img.createdAt,
       })),
     };
   }

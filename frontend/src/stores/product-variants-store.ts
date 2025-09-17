@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
-import { axiosInstance } from '@/lib/utils';
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
+import { axiosInstance } from "@/lib/utils";
 
 // Types based on backend DTOs
 export interface ProductSKUImage {
@@ -71,38 +71,35 @@ export interface CreateProductVariantDto {
 }
 
 export interface CreateProductSKUDto {
-  sku: string;
+  sku?: string;
   barcode?: string;
-  price: number;
+  price: number; // required
   comparePrice?: number;
   costPrice?: number;
-  stock?: number;
+  stock: number; // ✅ always send number
   lowStockAlert?: number;
   weight?: number;
   dimensions?: Record<string, any>;
   coverImage?: string;
-  isActive?: boolean;
+  isActive: boolean; // ✅ always send boolean
 }
 
+
 export interface ProductVariantsState {
-  // Products with variants
   products: Product[];
   loading: boolean;
   error: string | null;
 
-  // Current product and variant selection
   selectedProduct: Product | null;
   selectedVariant: ProductVariant | null;
   selectedSKU: ProductSKU | null;
 
-  // Pagination and filtering
   currentPage: number;
   totalPages: number;
   totalItems: number;
   itemsPerPage: number;
   searchTerm: string;
 
-  // Actions
   fetchProducts: (params?: {
     page?: number;
     limit?: number;
@@ -110,23 +107,32 @@ export interface ProductVariantsState {
     includeVariants?: boolean;
     includeSKUs?: boolean;
   }) => Promise<void>;
-  
+
   fetchProductById: (id: string) => Promise<void>;
   setSelectedProduct: (product: Product | null) => void;
   setSelectedVariant: (variant: ProductVariant | null) => void;
   setSelectedSKU: (sku: ProductSKU | null) => void;
 
-  // Variant management
-  createVariant: (productId: string, data: CreateProductVariantDto) => Promise<ProductVariant>;
-  updateVariant: (variantId: string, data: Partial<CreateProductVariantDto>) => Promise<ProductVariant>;
+  createVariant: (
+    productId: string,
+    data: CreateProductVariantDto
+  ) => Promise<ProductVariant>;
+  updateVariant: (
+    variantId: string,
+    data: Partial<CreateProductVariantDto>
+  ) => Promise<ProductVariant>;
   deleteVariant: (variantId: string) => Promise<void>;
 
-  // SKU management
-  createSKU: (variantId: string, data: CreateProductSKUDto | FormData) => Promise<ProductSKU>;
-  updateSKU: (skuId: string, data: Partial<CreateProductSKUDto> | FormData) => Promise<ProductSKU>;
+  createSKU: (
+    variantId: string,
+    data: CreateProductSKUDto | FormData
+  ) => Promise<ProductSKU>;
+  updateSKU: (
+    skuId: string,
+    data: Partial<CreateProductSKUDto> | FormData
+  ) => Promise<ProductSKU>;
   deleteSKU: (skuId: string) => Promise<void>;
 
-  // Utilities
   setSearchTerm: (term: string) => void;
   setCurrentPage: (page: number) => void;
   setPageSize: (pageSize: number) => void;
@@ -136,7 +142,6 @@ export interface ProductVariantsState {
 const useProductVariantsStore = create<ProductVariantsState>()(
   devtools(
     (set, get) => ({
-      // Initial state
       products: [],
       loading: false,
       error: null,
@@ -147,9 +152,9 @@ const useProductVariantsStore = create<ProductVariantsState>()(
       totalPages: 1,
       totalItems: 0,
       itemsPerPage: 10,
-      searchTerm: '',
+      searchTerm: "",
 
-      // Fetch products with variants
+      // ✅ Fetch products with variants & SKUs
       fetchProducts: async (params = {}) => {
         set({ loading: true, error: null });
         try {
@@ -169,11 +174,10 @@ const useProductVariantsStore = create<ProductVariantsState>()(
           });
 
           if (search.trim()) {
-            searchParams.append('search', search.trim());
+            searchParams.append("search", search.trim());
           }
 
           const response = await axiosInstance.get(`/products?${searchParams}`);
-          
           const responseData = response.data;
 
           set({
@@ -185,53 +189,53 @@ const useProductVariantsStore = create<ProductVariantsState>()(
           });
         } catch (error) {
           set({
-            error: error instanceof Error ? error.message : 'Failed to fetch products',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to fetch products",
             loading: false,
           });
         }
       },
 
-      // Fetch a single product by ID
       fetchProductById: async (id: string) => {
         set({ loading: true, error: null });
         try {
           const response = await axiosInstance.get(`/products/${id}`);
-          const product = response.data;
-          set({ selectedProduct: product, loading: false });
+          set({ selectedProduct: response.data, loading: false });
         } catch (error) {
           set({
-            error: error instanceof Error ? error.message : 'Failed to fetch product',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to fetch product",
             loading: false,
           });
         }
       },
 
-      // Selection setters
       setSelectedProduct: (product) => set({ selectedProduct: product }),
       setSelectedVariant: (variant) => set({ selectedVariant: variant }),
       setSelectedSKU: (sku) => set({ selectedSKU: sku }),
 
-      // Create variant
-      createVariant: async (productId: string, data: CreateProductVariantDto) => {
+      // ✅ Create Variant
+      createVariant: async (productId, data) => {
         try {
-          const response = await axiosInstance.post(`/products/${productId}/variants`, data);
+          const response = await axiosInstance.post(
+            `/products/${productId}/variants`,
+            data
+          );
           const variant = response.data;
 
-          // Update products list and selected product
           const state = get();
-          const updatedProducts = state.products.map(product => {
-            if (product.id === productId) {
-              return {
-                ...product,
-                variants: [...(product.variants || []), variant],
-              };
-            }
-            return product;
-          });
+          const updatedProducts = state.products.map((product) =>
+            product.id === productId
+              ? { ...product, variants: [...(product.variants || []), variant] }
+              : product
+          );
 
           set({ products: updatedProducts });
 
-          // Update selected product if it matches
           if (state.selectedProduct?.id === productId) {
             set({
               selectedProduct: {
@@ -243,38 +247,41 @@ const useProductVariantsStore = create<ProductVariantsState>()(
 
           return variant;
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Failed to create variant';
+          const message =
+            error instanceof Error ? error.message : "Failed to create variant";
           set({ error: message });
           throw error;
         }
       },
 
-      // Update variant
-      updateVariant: async (variantId: string, data: Partial<CreateProductVariantDto>) => {
+      // ✅ Update Variant
+      updateVariant: async (variantId, data) => {
         try {
-          const response = await axiosInstance.patch(`/products/variants/${variantId}`, data);
+          const response = await axiosInstance.patch(
+            `/products/variants/${variantId}`,
+            data
+          );
           const updatedVariant = response.data;
 
-          // Update products list and selected entities
           const state = get();
-          const updatedProducts = state.products.map(product => ({
+          const updatedProducts = state.products.map((product) => ({
             ...product,
-            variants: product.variants?.map(variant =>
+            variants: product.variants?.map((variant) =>
               variant.id === variantId ? updatedVariant : variant
             ),
           }));
 
           set({ products: updatedProducts });
 
-          // Update selected product and variant
           if (state.selectedProduct) {
-            const updatedSelectedProduct = {
-              ...state.selectedProduct,
-              variants: state.selectedProduct.variants?.map(variant =>
-                variant.id === variantId ? updatedVariant : variant
-              ),
-            };
-            set({ selectedProduct: updatedSelectedProduct });
+            set({
+              selectedProduct: {
+                ...state.selectedProduct,
+                variants: state.selectedProduct.variants?.map((variant) =>
+                  variant.id === variantId ? updatedVariant : variant
+                ),
+              },
+            });
           }
 
           if (state.selectedVariant?.id === variantId) {
@@ -283,92 +290,113 @@ const useProductVariantsStore = create<ProductVariantsState>()(
 
           return updatedVariant;
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Failed to update variant';
+          const message =
+            error instanceof Error ? error.message : "Failed to update variant";
           set({ error: message });
           throw error;
         }
       },
 
-      // Delete variant
-      deleteVariant: async (variantId: string) => {
+      // ✅ Delete Variant
+      deleteVariant: async (variantId) => {
         try {
           await axiosInstance.delete(`/products/variants/${variantId}`);
 
-          // Update products list and clear selected variant if it matches
           const state = get();
-          const updatedProducts = state.products.map(product => ({
+          const updatedProducts = state.products.map((product) => ({
             ...product,
-            variants: product.variants?.filter(variant => variant.id !== variantId),
+            variants: product.variants?.filter((v) => v.id !== variantId),
           }));
 
           set({ products: updatedProducts });
 
-          // Update selected product
           if (state.selectedProduct) {
-            const updatedSelectedProduct = {
-              ...state.selectedProduct,
-              variants: state.selectedProduct.variants?.filter(variant => variant.id !== variantId),
-            };
-            set({ selectedProduct: updatedSelectedProduct });
+            set({
+              selectedProduct: {
+                ...state.selectedProduct,
+                variants: state.selectedProduct.variants?.filter(
+                  (v) => v.id !== variantId
+                ),
+              },
+            });
           }
 
-          // Clear selected variant if it matches
           if (state.selectedVariant?.id === variantId) {
             set({ selectedVariant: null });
           }
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Failed to delete variant';
+          const message =
+            error instanceof Error ? error.message : "Failed to delete variant";
           set({ error: message });
           throw error;
         }
       },
 
-      // Create SKU
-      createSKU: async (variantId: string, data: CreateProductSKUDto | FormData) => {
+      createSKU: async (variantId, data) => {
         try {
-          let response;
-          // Accept both FormData and CreateProductSKUDto
-          if (data instanceof FormData) {
-            response = await axiosInstance.post(`/products/variants/${variantId}/skus`, data, {
-              headers: {}, // Let browser set Content-Type
-            });
-          } else {
-            response = await axiosInstance.post(`/products/variants/${variantId}/skus`, data);
-          }
-          const sku = response.data;
 
-          // Update products list and selected entities
+          console.log("Creating SKU with data:", data);
+          
+          let payload: any;
+          if (data instanceof FormData) {
+            payload = data; // form data is sent as-is
+          } else {
+            // ✅ Ensure numbers and boolean are valid
+            payload = {
+              ...data,
+              price: Number(data.price ?? 0),
+              comparePrice:
+                data.comparePrice !== undefined
+                  ? Number(data.comparePrice)
+                  : undefined,
+              costPrice:
+                data.costPrice !== undefined
+                  ? Number(data.costPrice)
+                  : undefined,
+              stock: Number(data.stock ?? 0),
+              lowStockAlert:
+                data.lowStockAlert !== undefined
+                  ? Number(data.lowStockAlert)
+                  : 0,
+              weight:
+                data.weight !== undefined ? Number(data.weight) : undefined,
+              isActive: data.isActive ?? true,
+            };
+          }
+
+          const response = await axiosInstance.post(
+            `/products/variants/${variantId}/skus`,
+            payload,
+            data instanceof FormData
+              ? { headers: { "Content-Type": "multipart/form-data" } }
+              : undefined
+          );
+
+          const sku: ProductSKU = response.data;
           const state = get();
-          const updatedProducts = state.products.map(product => ({
+
+          const updatedProducts = state.products.map((product) => ({
             ...product,
-            variants: product.variants?.map(variant => {
-              if (variant.id === variantId) {
-                return {
-                  ...variant,
-                  skus: [...(variant.skus || []), sku],
-                };
-              }
-              return variant;
-            }),
+            variants: product.variants?.map((variant) =>
+              variant.id === variantId
+                ? { ...variant, skus: [...(variant.skus || []), sku] }
+                : variant
+            ),
           }));
 
           set({ products: updatedProducts });
 
-          // Update selected product and variant
           if (state.selectedProduct) {
-            const updatedSelectedProduct = {
-              ...state.selectedProduct,
-              variants: state.selectedProduct.variants?.map(variant => {
-                if (variant.id === variantId) {
-                  return {
-                    ...variant,
-                    skus: [...(variant.skus || []), sku],
-                  };
-                }
-                return variant;
-              }),
-            };
-            set({ selectedProduct: updatedSelectedProduct });
+            set({
+              selectedProduct: {
+                ...state.selectedProduct,
+                variants: state.selectedProduct.variants?.map((variant) =>
+                  variant.id === variantId
+                    ? { ...variant, skus: [...(variant.skus || []), sku] }
+                    : variant
+                ),
+              },
+            });
           }
 
           if (state.selectedVariant?.id === variantId) {
@@ -382,32 +410,40 @@ const useProductVariantsStore = create<ProductVariantsState>()(
 
           return sku;
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Failed to create SKU';
+          const message =
+            error instanceof Error ? error.message : "Failed to create SKU";
           set({ error: message });
           throw error;
         }
       },
 
-      // Update SKU
-      updateSKU: async (skuId: string, data: Partial<CreateProductSKUDto> | FormData) => {
+      // ✅ Update SKU with image support
+      updateSKU: async (skuId, data) => {
         try {
           let response;
           if (data instanceof FormData) {
-            response = await axiosInstance.patch(`/products/skus/${skuId}`, data, {
-              headers: {}, // Let browser set Content-Type
-            });
+            response = await axiosInstance.patch(
+              `/products/skus/${skuId}`,
+              data,
+              {
+                headers: { "Content-Type": "multipart/form-data" },
+              }
+            );
           } else {
-            response = await axiosInstance.patch(`/products/skus/${skuId}`, data);
+            response = await axiosInstance.patch(
+              `/products/skus/${skuId}`,
+              data
+            );
           }
-          const updatedSKU = response.data;
 
-          // Update products list and selected entities
+          const updatedSKU: ProductSKU = response.data;
           const state = get();
-          const updatedProducts = state.products.map(product => ({
+
+          const updatedProducts = state.products.map((product) => ({
             ...product,
-            variants: product.variants?.map(variant => ({
+            variants: product.variants?.map((variant) => ({
               ...variant,
-              skus: variant.skus?.map(sku =>
+              skus: variant.skus?.map((sku) =>
                 sku.id === skuId ? updatedSKU : sku
               ),
             })),
@@ -415,28 +451,29 @@ const useProductVariantsStore = create<ProductVariantsState>()(
 
           set({ products: updatedProducts });
 
-          // Update selected product, variant, and SKU
           if (state.selectedProduct) {
-            const updatedSelectedProduct = {
-              ...state.selectedProduct,
-              variants: state.selectedProduct.variants?.map(variant => ({
-                ...variant,
-                skus: variant.skus?.map(sku =>
-                  sku.id === skuId ? updatedSKU : sku
-                ),
-              })),
-            };
-            set({ selectedProduct: updatedSelectedProduct });
+            set({
+              selectedProduct: {
+                ...state.selectedProduct,
+                variants: state.selectedProduct.variants?.map((variant) => ({
+                  ...variant,
+                  skus: variant.skus?.map((sku) =>
+                    sku.id === skuId ? updatedSKU : sku
+                  ),
+                })),
+              },
+            });
           }
 
           if (state.selectedVariant) {
-            const updatedSelectedVariant = {
-              ...state.selectedVariant,
-              skus: state.selectedVariant.skus?.map(sku =>
-                sku.id === skuId ? updatedSKU : sku
-              ),
-            };
-            set({ selectedVariant: updatedSelectedVariant });
+            set({
+              selectedVariant: {
+                ...state.selectedVariant,
+                skus: state.selectedVariant.skus?.map((sku) =>
+                  sku.id === skuId ? updatedSKU : sku
+                ),
+              },
+            });
           }
 
           if (state.selectedSKU?.id === skuId) {
@@ -445,64 +482,67 @@ const useProductVariantsStore = create<ProductVariantsState>()(
 
           return updatedSKU;
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Failed to update SKU';
+          const message =
+            error instanceof Error ? error.message : "Failed to update SKU";
           set({ error: message });
           throw error;
         }
       },
 
-      // Delete SKU
-      deleteSKU: async (skuId: string) => {
+      // ✅ Delete SKU
+      deleteSKU: async (skuId) => {
         try {
           await axiosInstance.delete(`/products/skus/${skuId}`);
 
-          // Update products list and clear selected SKU if it matches
           const state = get();
-          const updatedProducts = state.products.map(product => ({
+          const updatedProducts = state.products.map((product) => ({
             ...product,
-            variants: product.variants?.map(variant => ({
+            variants: product.variants?.map((variant) => ({
               ...variant,
-              skus: variant.skus?.filter(sku => sku.id !== skuId),
+              skus: variant.skus?.filter((sku) => sku.id !== skuId),
             })),
           }));
 
           set({ products: updatedProducts });
 
-          // Update selected product and variant
           if (state.selectedProduct) {
-            const updatedSelectedProduct = {
-              ...state.selectedProduct,
-              variants: state.selectedProduct.variants?.map(variant => ({
-                ...variant,
-                skus: variant.skus?.filter(sku => sku.id !== skuId),
-              })),
-            };
-            set({ selectedProduct: updatedSelectedProduct });
+            set({
+              selectedProduct: {
+                ...state.selectedProduct,
+                variants: state.selectedProduct.variants?.map((variant) => ({
+                  ...variant,
+                  skus: variant.skus?.filter((sku) => sku.id !== skuId),
+                })),
+              },
+            });
           }
 
           if (state.selectedVariant) {
-            const updatedSelectedVariant = {
-              ...state.selectedVariant,
-              skus: state.selectedVariant.skus?.filter(sku => sku.id !== skuId),
-            };
-            set({ selectedVariant: updatedSelectedVariant });
+            set({
+              selectedVariant: {
+                ...state.selectedVariant,
+                skus: state.selectedVariant.skus?.filter(
+                  (sku) => sku.id !== skuId
+                ),
+              },
+            });
           }
 
-          // Clear selected SKU if it matches
           if (state.selectedSKU?.id === skuId) {
             set({ selectedSKU: null });
           }
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Failed to delete SKU';
+          const message =
+            error instanceof Error ? error.message : "Failed to delete SKU";
           set({ error: message });
           throw error;
         }
       },
 
-      // Utility functions
-      setSearchTerm: (term: string) => set({ searchTerm: term }),
-      setCurrentPage: (page: number) => set({ currentPage: page }),
-      setPageSize: (pageSize: number) => set({ itemsPerPage: pageSize, currentPage: 1 }),
+      setSearchTerm: (term) => set({ searchTerm: term }),
+      setCurrentPage: (page) => set({ currentPage: page }),
+      setPageSize: (pageSize) =>
+        set({ itemsPerPage: pageSize, currentPage: 1 }),
 
       resetState: () =>
         set({
@@ -516,12 +556,10 @@ const useProductVariantsStore = create<ProductVariantsState>()(
           totalPages: 1,
           totalItems: 0,
           itemsPerPage: 10,
-          searchTerm: '',
+          searchTerm: "",
         }),
     }),
-    {
-      name: 'product-variants-store',
-    }
+    { name: "product-variants-store" }
   )
 );
 

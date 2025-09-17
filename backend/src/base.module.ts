@@ -5,6 +5,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { CommonModule } from './common/common.module';
 import { UsersModule } from './users/users.module';
 import { OrdersModule } from './orders/orders.module';
+import { BarcodeModule } from './barcode/barcode.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { OrdersModule } from './orders/orders.module';
     CategoriesModule,
     CommonModule,
     UsersModule,
-    OrdersModule],
+    OrdersModule,
+    BarcodeModule],
   controllers: [],
   providers: [],
 })
