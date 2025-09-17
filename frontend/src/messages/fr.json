@@ -30,14 +30,14 @@
     "nextPage": "Page suivante",
     "lastPage": "Dernière page"
   },
-        "multiImageUploader": {
-          "dropHere": "Déposez vos images ici",
-          "selectImages": "Sélectionner des images",
-          "formats": "SVG, PNG, JPG ou GIF (max. {maxSizeMB} Mo)",
-          "errors": {
-            "maxSize": "{name} dépasse la taille maximale autorisée"
-          }
-        },
+  "multiImageUploader": {
+    "dropHere": "Déposez vos images ici",
+    "selectImages": "Sélectionner des images",
+    "formats": "SVG, PNG, JPG ou GIF (max. {maxSizeMB} Mo)",
+    "errors": {
+      "maxSize": "{name} dépasse la taille maximale autorisée"
+    }
+  },
   "pages": {
     "skus": {
       "title": "Gestion des SKU & Stock",
@@ -117,6 +117,42 @@
             "create": "Créer SKU",
             "cancel": "Annuler"
           }
+        },
+        "editSKU": {
+          "title": "Modifier le SKU",
+          "description": "Mettez à jour les détails du SKU, les prix, le stock et les images.",
+          "fields": {
+            "variant": "Variante de produit",
+            "sku": "Code SKU",
+            "barcode": "Code-barres",
+            "price": "Prix",
+            "comparePrice": "Prix de comparaison",
+            "costPrice": "Prix coûtant",
+            "stock": "Stock",
+            "lowStockAlert": "Alerte de stock faible",
+            "weight": "Poids",
+            "dimensions": "Dimensions",
+            "isActive": "Actif",
+            "images": "Images"
+          },
+          "placeholders": {
+            "selectVariant": "Sélectionnez une variante de produit",
+            "sku": "Entrez le code SKU",
+            "barcode": "Entrez le code-barres",
+            "dimensions": "{\"longueur\":10,\"largeur\":5,\"hauteur\":2}"
+          },
+          "actions": {
+            "update": "Mettre à jour le SKU",
+            "updating": "Mise à jour...",
+            "cancel": "Annuler",
+            "deleteImage": "Supprimer l'image"
+          },
+          "toast": {
+            "success": "SKU mis à jour avec succès",
+            "failed": "Échec de la mise à jour du SKU",
+            "imageDeleted": "Image supprimée",
+            "imageDeleteFailed": "Échec de la suppression de l'image"
+          }
         }
       },
       "stock": {
@@ -126,93 +162,144 @@
       }
     },
     "orders": {
-  "title": "Gestion des commandes",
-  "description": "Gérez les commandes des clients, les paiements et les informations de livraison",
-  "dialogs": {
-    "orderDetails": {
-      "title": "Détails de la commande #{orderNumber}",
-      "viewDetails": "Voir les détails",
-      "sections": {
-        "generalInfo": "Informations générales",
-        "shippingInfo": "Informations de livraison",
-        "billingInfo": "Informations de facturation",
-        "items": "Articles de la commande",
-        "totals": "Totaux",
-        "deliveryLocation": "Lieu de livraison"
-      },
-      "fields": {
-        "status": "Statut",
-        "payment": "Paiement",
-        "user": "Utilisateur",
-        "createdAt": "Créé le",
-        "name": "Nom",
-        "email": "Email",
-        "phone": "Téléphone",
-        "address": "Adresse",
-        "subtotal": "Sous-total",
-        "tax": "Taxe",
-        "shipping": "Livraison",
-        "discount": "Remise",
-        "total": "Total"
-      },
-      "labels": {
-        "qty": "Qté: {qty}"
-      }
-    },
-    "createOrder": {
-      "trigger": "Ajouter une commande",
-      "title": "Créer une nouvelle commande",
-      "description": "Ajoutez une nouvelle commande. Vous pouvez définir plusieurs produits et informations de livraison.",
-      "sections": {
-        "user": "Utilisateur",
-        "orderItems": "Articles de la commande",
-        "delivery": "Livraison",
-        "shipping": "Informations de livraison",
-        "billing": "Informations de facturation",
-        "notes": "Notes",
-        "trackingNumber": "Numéro de suivi"
-      },
-      "fields": {
-        "sku": "SKU",
-        "quantity": "Quantité",
-        "deliveryLat": "Latitude",
-        "deliveryLng": "Longitude",
-        "deliveryPlace": "Lieu",
-        "shippingName": "Nom du destinataire",
-        "shippingEmail": "Email du destinataire",
-        "shippingPhone": "Téléphone du destinataire",
-        "shippingAddress": "Adresse de livraison (JSON)",
-        "billingName": "Nom de facturation",
-        "billingEmail": "Email de facturation",
-        "billingAddress": "Adresse de facturation (JSON)"
-      },
-      "actions": {
-        "addItem": "Ajouter un article",
-        "removeItem": "Supprimer",
-        "cancel": "Annuler",
-        "create": "Créer la commande",
-        "creating": "Création..."
-      },
-      "placeholders": {
-        "selectUser": "Sélectionner un utilisateur",
-        "selectSKU": "Sélectionner un SKU"
-      },
-      "errors": {
-        "userRequired": "Veuillez sélectionner un utilisateur",
-        "skuRequired": "Veuillez sélectionner un SKU",
-        "quantityMin": "La quantité doit être au moins de 1"
-      },
-      "status": {
-        "detectingLocation": "Détection de la position...",
-        "locationError": "Échec de la récupération de la position"
-      },
-      "toast": {
-        "success": "Commande créée",
-        "failed": "Échec de la création de la commande"
+      "title": "Gestion des commandes",
+      "description": "Gérez les commandes des clients, les paiements et les informations de livraison",
+      "dialogs": {
+        "orderDetails": {
+          "title": "Détails de la commande #{orderNumber}",
+          "viewDetails": "Voir les détails",
+          "sections": {
+            "generalInfo": "Informations générales",
+            "shippingInfo": "Informations de livraison",
+            "billingInfo": "Informations de facturation",
+            "items": "Articles de la commande",
+            "totals": "Totaux",
+            "deliveryLocation": "Lieu de livraison"
+          },
+          "fields": {
+            "status": "Statut",
+            "payment": "Paiement",
+            "user": "Utilisateur",
+            "createdAt": "Créé le",
+            "name": "Nom",
+            "email": "Email",
+            "phone": "Téléphone",
+            "address": "Adresse",
+            "subtotal": "Sous-total",
+            "tax": "Taxe",
+            "shipping": "Livraison",
+            "discount": "Remise",
+            "total": "Total"
+          },
+          "labels": {
+            "qty": "Qté: {qty}"
+          }
+        },
+        "createOrder": {
+          "trigger": "Ajouter une commande",
+          "title": "Créer une nouvelle commande",
+          "description": "Ajoutez une nouvelle commande. Vous pouvez définir plusieurs produits et informations de livraison.",
+          "sections": {
+            "user": "Utilisateur",
+            "orderItems": "Articles de la commande",
+            "delivery": "Livraison",
+            "shipping": "Informations de livraison",
+            "billing": "Informations de facturation",
+            "notes": "Notes",
+            "trackingNumber": "Numéro de suivi"
+          },
+          "fields": {
+            "sku": "SKU",
+            "quantity": "Quantité",
+            "deliveryLat": "Latitude",
+            "deliveryLng": "Longitude",
+            "deliveryPlace": "Lieu",
+            "shippingName": "Nom du destinataire",
+            "shippingEmail": "Email du destinataire",
+            "shippingPhone": "Téléphone du destinataire",
+            "shippingAddress": "Adresse de livraison (JSON)",
+            "billingName": "Nom de facturation",
+            "billingEmail": "Email de facturation",
+            "billingAddress": "Adresse de facturation (JSON)"
+          },
+          "actions": {
+            "addItem": "Ajouter un article",
+            "removeItem": "Supprimer",
+            "cancel": "Annuler",
+            "create": "Créer la commande",
+            "creating": "Création..."
+          },
+          "placeholders": {
+            "selectUser": "Sélectionner un utilisateur",
+            "selectSKU": "Sélectionner un SKU"
+          },
+          "errors": {
+            "userRequired": "Veuillez sélectionner un utilisateur",
+            "skuRequired": "Veuillez sélectionner un SKU",
+            "quantityMin": "La quantité doit être au moins de 1"
+          },
+          "status": {
+            "detectingLocation": "Détection de la position...",
+            "locationError": "Échec de la récupération de la position"
+          },
+          "toast": {
+            "success": "Commande créée",
+            "failed": "Échec de la création de la commande"
+          }
+        },
+        "updateOrder": {
+          "trigger": "Modifier la commande",
+          "title": "Mettre à jour la commande #{orderNumber}",
+          "description": "Modifiez une commande existante. Vous pouvez changer les détails de livraison et les articles.",
+          "sections": {
+            "shippingInfo": "Informations de livraison",
+            "billingInfo": "Informations de facturation",
+            "delivery": "Lieu de livraison",
+            "status": "Statut",
+            "notes": "Notes",
+            "trackingNumber": "Numéro de suivi"
+          },
+          "fields": {
+            "status": "Statut de la commande",
+            "paymentStatus": "Statut du paiement",
+            "shippingName": "Nom du destinataire",
+            "shippingEmail": "Email du destinataire",
+            "shippingPhone": "Téléphone du destinataire",
+            "shippingAddress": "Adresse de livraison (JSON)",
+            "billingName": "Nom de facturation",
+            "billingEmail": "Email de facturation",
+            "billingAddress": "Adresse de facturation (JSON)",
+            "deliveryLat": "Latitude",
+            "deliveryLng": "Longitude",
+            "deliveryPlace": "Lieu",
+            "notes": "Notes",
+            "trackingNumber": "Numéro de suivi",
+            "sku": "SKU",
+            "quantity": "Quantité"
+          },
+          "actions": {
+            "saveChanges": "Enregistrer les modifications",
+            "cancel": "Annuler",
+            "addItem": "Ajouter un article",
+            "removeItem": "Supprimer"
+          },
+          "placeholders": {
+            "selectStatus": "Sélectionnez le statut",
+            "selectPaymentStatus": "Sélectionnez le statut de paiement",
+            "selectSKU": "Sélectionnez le SKU"
+          },
+          "errors": {
+            "statusRequired": "Le statut de la commande est requis",
+            "paymentStatusRequired": "Le statut du paiement est requis",
+            "skuRequired": "Le SKU est requis",
+            "quantityMin": "La quantité doit être au moins de 1"
+          },
+          "toast": {
+            "success": "Commande mise à jour avec succès",
+            "failed": "Échec de la mise à jour de la commande"
+          }
+        }
       }
     }
-  }
-}
-
   }
 }

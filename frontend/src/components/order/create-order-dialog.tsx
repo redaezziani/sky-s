@@ -187,8 +187,15 @@ export function CreateOrderDialog({
         trackingNumber: formData.trackingNumber,
       };
 
-      await createOrder(payload);
+      const pdfUrl = await createOrder(payload);
       toast.success(t.toast?.success);
+      const link = document.createElement("a");
+      link.href = pdfUrl;
+      link.target = "_blank"; // optional, opens in new tab if needed
+      link.download = `Order-${Date.now()}.pdf`; // suggested file name
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
       setFormData({
         userId: "",

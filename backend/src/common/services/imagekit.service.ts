@@ -163,4 +163,53 @@ export class ImageKitService {
       original: this.generateUrl(filePath),
     };
   }
+
+  // upload pdf file
+  async uploadPdf(
+    file: Express.Multer.File,
+    options: ImageUploadOptions = {}
+  ): Promise<ImageUploadResult> {
+    if (!this.imagekit) {
+      throw new BadRequestException('ImageKit service not configured');
+    }
+    
+    if (!file) {
+      throw new BadRequestException('No file provided');
+    }
+    // Validate file type
+    const allowedTypes = ['application/pdf'];
+    if (!allowedTypes.includes(file.mimetype)) {
+      throw new BadRequestException('Invalid file type. Only PDF files are allowed.');
+    }
+    
+    // Validate file size (max 20MB)
+    const maxSize = 20 * 1024 * 1024; // 20MB
+    if (file.size > maxSize) {
+      throw new BadRequestException('File size too large. Maximum size is 20MB.');
+    }
+    try {
+      const fileName = options.fileName || `${Date.now()}-${file.originalname}`;
+      const folder = options.folder || 'documents';
+    
+      const uploadResponse = await this.imagekit.upload({
+        file: file.buffer,
+        fileName,
+        folder: `/${folder}`,
+        tags: options.tags,
+        useUniqueFileName: true,
+      });
+
+      return {
+        url: uploadResponse.url,
+        thumbnailUrl: uploadResponse.url,
+        fileId: uploadResponse.fileId,
+        name: uploadResponse.name,
+        size: uploadResponse.size,
+        filePath: uploadResponse.filePath,
+      };
+    } catch (error) {
+      console.error('ImageKit upload error:', error);
+      throw new BadRequestException('Failed to upload PDF file');
+    }
+  }
 }

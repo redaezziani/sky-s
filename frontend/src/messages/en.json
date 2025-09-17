@@ -118,6 +118,42 @@
             "create": "Create SKU",
             "cancel": "Cancel"
           }
+        },
+        "editSKU": {
+          "title": "Edit SKU",
+          "description": "Update the SKU details, pricing, inventory, and images.",
+          "fields": {
+            "variant": "Product Variant",
+            "sku": "SKU Code",
+            "barcode": "Barcode",
+            "price": "Price",
+            "comparePrice": "Compare Price",
+            "costPrice": "Cost Price",
+            "stock": "Stock",
+            "lowStockAlert": "Low Stock Alert",
+            "weight": "Weight",
+            "dimensions": "Dimensions",
+            "isActive": "Active",
+            "images": "Images"
+          },
+          "placeholders": {
+            "selectVariant": "Select a product variant",
+            "sku": "Enter SKU code",
+            "barcode": "Enter barcode",
+            "dimensions": "{\"length\":10,\"width\":5,\"height\":2}"
+          },
+          "actions": {
+            "update": "Update SKU",
+            "updating": "Updating...",
+            "cancel": "Cancel",
+            "deleteImage": "Delete Image"
+          },
+          "toast": {
+            "success": "SKU updated successfully",
+            "failed": "Failed to update SKU",
+            "imageDeleted": "Image deleted",
+            "imageDeleteFailed": "Failed to delete image"
+          }
         }
       },
       "stock": {
@@ -210,6 +246,58 @@
       "toast": {
         "success": "Order created",
         "failed": "Failed to create order"
+      }
+    },
+    "updateOrder": {
+      "trigger": "Edit Order",
+      "title": "Update Order #{orderNumber}",
+      "description": "Edit an existing order. You can change shipping details and items.",
+      "sections": {
+        "shippingInfo": "Shipping Info",
+        "billingInfo": "Billing Info",
+        "delivery": "Delivery Location",
+        "status": "Status",
+        "notes": "Notes",
+        "trackingNumber": "Tracking Number"
+      },
+      "fields": {
+        "status": "Order Status",
+        "paymentStatus": "Payment Status",
+        "shippingName": "Shipping Name",
+        "shippingEmail": "Shipping Email",
+        "shippingPhone": "Shipping Phone",
+        "shippingAddress": "Shipping Address (JSON)",
+        "billingName": "Billing Name",
+        "billingEmail": "Billing Email",
+        "billingAddress": "Billing Address (JSON)",
+        "deliveryLat": "Latitude",
+        "deliveryLng": "Longitude",
+        "deliveryPlace": "Place",
+        "notes": "Notes",
+        "trackingNumber": "Tracking Number",
+        "sku": "SKU",
+        "quantity": "Quantity"
+      },
+      "actions": {
+        "saveChanges": "Save Changes",
+        "cancel": "Cancel",
+        "addItem": "Add Item",
+        "removeItem": "Remove"
+      },
+      "placeholders": {
+        "selectStatus": "Select status",
+        "selectPaymentStatus": "Select payment status",
+        "selectSKU": "Select SKU"
+      },
+      "errors": {
+        "statusRequired": "Order status is required",
+        "paymentStatusRequired": "Payment status is required",
+        "skuRequired": "SKU is required",
+        "quantityMin": "Quantity must be at least 1"
+      },
+      "toast": {
+        "success": "Order updated successfully",
+        "failed": "Failed to update order"
       }
     }
   }

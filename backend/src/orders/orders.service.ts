@@ -5,10 +5,14 @@ import { CreateOrderDto, OrderItemDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Decimal } from 'generated/prisma/runtime/index-browser';
 import { QueryOrderDto } from './dto/query-order.dto';
+import { PdfService } from 'src/common/services/pdf.service';
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private pdfService: PdfService,
+  ) {}
 
   private async generateOrderNumber(): Promise<string> {
     const timestamp = Date.now();
@@ -18,7 +22,9 @@ export class OrdersService {
     return `ORD-${timestamp}-${random}`;
   }
 
-  async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
+  async create(
+    createOrderDto: CreateOrderDto,
+  ): Promise<OrderResponseDto & { pdfUrl: string }> {
     const orderNumber = await this.generateOrderNumber();
 
     // Batch fetch SKUs
@@ -93,7 +99,17 @@ export class OrdersService {
       include: { items: true },
     });
 
-    return this.formatOrderResponse(order);
+    const pdfUrl = await this.pdfService.generateOrderPdf({
+      ...order,
+      items: order.items.map((i) => ({
+        ...i,
+        name: i.productName,
+        quantity: i.quantity,
+        totalPrice: i.totalPrice.toNumber(),
+      })),
+    });
+
+    return { ...this.formatOrderResponse(order), pdfUrl };
   }
 
   async findAll(query: QueryOrderDto): Promise<{
@@ -178,13 +194,73 @@ export class OrdersService {
     id: string,
     updateOrderDto: UpdateOrderDto,
   ): Promise<OrderResponseDto> {
-    const order = await this.prisma.order.update({
+    // 1. Fetch existing order with items
+    const order = await this.prisma.order.findUnique({
       where: { id },
-      data: updateOrderDto,
+      include: { items: true },
+    });
+    if (!order) throw new NotFoundException('Order not found');
+
+    const data: any = { ...updateOrderDto };
+
+    if (updateOrderDto.items && updateOrderDto.items.length > 0) {
+      const skuIds = updateOrderDto.items.map((i) => i.skuId);
+      const skus = await this.prisma.productSKU.findMany({
+        where: { id: { in: skuIds } },
+        include: { variant: { include: { product: true } } },
+      });
+
+      if (skus.length !== skuIds.length) {
+        const foundIds = skus.map((s) => s.id);
+        const missingIds = skuIds.filter((id) => !foundIds.includes(id));
+        throw new NotFoundException(
+          `SKU(s) not found: ${missingIds.join(', ')}`,
+        );
+      }
+
+      let subtotal = new Decimal(0);
+
+      const itemsData = updateOrderDto.items.map((item) => {
+        const sku = skus.find((s) => s.id === item.skuId)!;
+        const unitPrice = new Decimal(sku.price.toString());
+        const totalPrice = unitPrice.mul(item.quantity);
+        subtotal = subtotal.plus(totalPrice);
+
+        return {
+          skuId: sku.id,
+          quantity: item.quantity,
+          unitPrice,
+          totalPrice,
+          productName: sku.variant.product.name,
+          skuCode: sku.sku,
+        };
+      });
+
+      // Placeholder: recalc tax, shipping, discount if needed
+      const taxAmount = order.taxAmount;
+      const shippingAmount = order.shippingAmount;
+      const discountAmount = order.discountAmount;
+      const totalAmount = subtotal
+        .plus(taxAmount)
+        .plus(shippingAmount)
+        .minus(discountAmount);
+
+      data.subtotal = subtotal;
+      data.totalAmount = totalAmount;
+
+      // Replace existing items
+      await this.prisma.orderItem.deleteMany({ where: { orderId: id } });
+      data.items = { create: itemsData };
+    }
+
+    // 4. Update order
+    const updatedOrder = await this.prisma.order.update({
+      where: { id },
+      data,
       include: { items: true },
     });
 
-    return this.formatOrderResponse(order);
+    return this.formatOrderResponse(updatedOrder);
   }
 
   async remove(id: string): Promise<void> {

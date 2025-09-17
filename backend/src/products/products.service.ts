@@ -19,7 +19,8 @@ import { Prisma } from '../../generated/prisma';
 import { ImageKitService } from '../common/services/imagekit.service';
 import { customAlphabet } from 'nanoid';
 import { createCanvas } from 'canvas';
-import JsBarcode from 'jsbarcode';
+import * as JsBarcode from 'jsbarcode';
+
 
 @Injectable()
 export class ProductsService {

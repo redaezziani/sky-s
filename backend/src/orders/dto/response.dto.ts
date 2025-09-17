@@ -138,6 +138,8 @@ export class OrderResponseDto {
 
   @ApiProperty({ description: 'Order items', type: [OrderItemResponseDto] })
   items: OrderItemResponseDto[];
+
+  
 }
 
 export class PaginatedOrdersResponseDto {

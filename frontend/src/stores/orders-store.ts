@@ -72,12 +72,35 @@ export interface Order {
   deliveryPlace?: string | null;
 }
 
+interface UpdateOrderPayload {
+  shippingName?: string;
+  shippingEmail?: string;
+  shippingPhone?: string;
+  shippingAddress?: Record<string, any>;
+  billingName?: string;
+  billingEmail?: string;
+  billingAddress?: Record<string, any>;
+  deliveryLat?: number;
+  deliveryLng?: number;
+  deliveryPlace?: string;
+  notes?: string;
+  trackingNumber?: string;
+  status?: string;
+  paymentStatus?: string;
+  items?: { skuId: string; quantity: number }[];
+}
+
 export interface OrdersResponse {
   data: Order[];
   total: number;
   offset?: number;
   limit?: number;
 }
+
+interface OrderWithPdf extends Order {
+  pdfUrl: string;
+}
+
 
 interface OrdersStore {
   orders: Order[];
@@ -92,7 +115,11 @@ interface OrdersStore {
   fetchOrders: (params?: Record<string, any>) => Promise<void>;
   deleteOrder: (id: string) => Promise<void>;
   bulkDeleteOrders: (orderIds: string[]) => Promise<void>;
-  createOrder: (orderData: any) => Promise<void>;
+  createOrder: (orderData: any) => Promise<string>;
+  updateOrder: (
+    id: string,
+    updateData: Partial<UpdateOrderPayload>
+  ) => Promise<void>;
 
   setPage: (page: number) => void;
   setPageSize: (size: number) => void;
@@ -174,11 +201,35 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
   createOrder: async (orderData: any) => {
     try {
       set({ loading: true, error: null });
-      const res = await axiosInstance.post<Order>("/orders", orderData);
+      const res = await axiosInstance.post<OrderWithPdf>("/orders", orderData);
       set({ orders: [res.data, ...get().orders], loading: false });
+      return res.data.pdfUrl;
     } catch (err: any) {
       set({
         error: err.response?.data?.message || "Failed to create order",
+        loading: false,
+      });
+      throw err;
+    }
+  },
+
+  updateOrder: async (id: string, updateData: Partial<UpdateOrderPayload>) => {
+    try {
+      set({ loading: true, error: null });
+
+      // Send PUT request to your API
+      const res = await axiosInstance.patch<Order>(`/orders/${id}`, updateData);
+
+      // Update the order locally in the store
+      set({
+        orders: get().orders.map((order) =>
+          order.id === id ? res.data : order
+        ),
+        loading: false,
+      });
+    } catch (err: any) {
+      set({
+        error: err.response?.data?.message || "Failed to update order",
         loading: false,
       });
       throw err;

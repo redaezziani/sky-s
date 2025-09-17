@@ -34,6 +34,7 @@ import { useSearchQuery } from "@/hooks/use-search-query";
 import OrderDetails from "./order-details";
 import { CreateOrderDialog } from "./create-order-dialog";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
+import UpdateOrderSheet from "./edit-order-sheet";
 
 export function EnhancedOrderTable() {
   const [search, setSearch] = useSearchQuery("q", 400);
@@ -242,6 +243,12 @@ export function EnhancedOrderTable() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <OrderDetails order={order} />
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <UpdateOrderSheet order={order} />
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
                 setOrderToDelete(order.id);
@@ -251,9 +258,6 @@ export function EnhancedOrderTable() {
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <OrderDetails order={order} />
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -302,6 +306,7 @@ export function EnhancedOrderTable() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
               onClick={() => orderToDelete && handleDeleteOrder(orderToDelete)}
             >
               Delete
@@ -327,7 +332,10 @@ export function EnhancedOrderTable() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleBulkDelete}>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+              onClick={handleBulkDelete}
+            >
               Delete All
             </AlertDialogAction>
           </AlertDialogFooter>
