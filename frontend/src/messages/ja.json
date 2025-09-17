@@ -128,6 +128,94 @@
         "lowStock": "在庫少",
         "outOfStock": "在庫なし"
       }
+    },
+    "orders": {
+      "title": "注文管理",
+      "description": "顧客の注文、支払い、配送情報を管理します",
+      "dialogs": {
+        "orderDetails": {
+          "title": "注文 #{orderNumber} の詳細",
+          "viewDetails": "詳細を表示",
+          "sections": {
+            "generalInfo": "一般情報",
+            "shippingInfo": "配送情報",
+            "billingInfo": "請求情報",
+            "items": "注文商品",
+            "totals": "合計",
+            "deliveryLocation": "配送先位置"
+          },
+          "fields": {
+            "status": "ステータス",
+            "payment": "支払い",
+            "user": "ユーザー",
+            "createdAt": "作成日時",
+            "name": "名前",
+            "email": "メール",
+            "phone": "電話番号",
+            "address": "住所",
+            "subtotal": "小計",
+            "tax": "税金",
+            "shipping": "送料",
+            "discount": "割引",
+            "total": "合計"
+          },
+          "labels": {
+            "qty": "数量: {qty}"
+          }
+        },
+        "createOrder": {
+          "trigger": "注文を追加",
+          "title": "新しい注文を作成",
+          "description": "新しい注文を追加します。複数の商品と配送情報を設定できます。",
+          "sections": {
+            "user": "ユーザー",
+            "orderItems": "注文商品",
+            "delivery": "配送先",
+            "shipping": "配送情報",
+            "billing": "請求情報",
+            "notes": "備考",
+            "trackingNumber": "追跡番号"
+          },
+          "fields": {
+            "sku": "SKU",
+            "quantity": "数量",
+            "deliveryLat": "緯度",
+            "deliveryLng": "経度",
+            "deliveryPlace": "場所",
+            "shippingName": "配送先名",
+            "shippingEmail": "配送先メール",
+            "shippingPhone": "配送先電話",
+            "shippingAddress": "配送先住所 (JSON)",
+            "billingName": "請求先名",
+            "billingEmail": "請求先メール",
+            "billingAddress": "請求先住所 (JSON)"
+          },
+          "actions": {
+            "addItem": "商品を追加",
+            "removeItem": "削除",
+            "cancel": "キャンセル",
+            "create": "注文を作成",
+            "creating": "作成中..."
+          },
+          "placeholders": {
+            "selectUser": "ユーザーを選択",
+            "selectSKU": "SKUを選択"
+          },
+          "errors": {
+            "userRequired": "ユーザーを選択してください",
+            "skuRequired": "SKUを選択してください",
+            "quantityMin": "数量は1以上である必要があります"
+          },
+          "status": {
+            "detectingLocation": "位置情報を検出中...",
+            "locationError": "位置情報の取得に失敗しました"
+          },
+          "toast": {
+            "success": "注文を作成しました",
+            "failed": "注文の作成に失敗しました"
+          }
+        }
+      }
     }
   }
 }

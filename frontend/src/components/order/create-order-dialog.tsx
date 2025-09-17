@@ -30,7 +30,8 @@ import { toast } from "sonner";
 import { Loader } from "../loader";
 import { useUserLocation } from "@/hooks/use-user-location";
 import DeliveryMapPicker from "../delivery-map-picker";
-
+import { useLocale } from "@/components/local-lang-swither";
+import { getMessages } from "@/lib/locale";
 interface CreateOrderDialogProps {
   trigger?: React.ReactNode;
   isOpen?: boolean;
@@ -42,6 +43,11 @@ export function CreateOrderDialog({
   isOpen: externalIsOpen,
   onClose: externalOnClose,
 }: CreateOrderDialogProps) {
+  const { locale } = useLocale();
+  const lang = getMessages(locale);
+  const t = lang.pages?.orders?.dialogs?.createOrder || {};
+
+  console.log("CreateOrderDialog t:", t);
   const { createOrder, loading } = useOrdersStore();
   const { products, fetchProducts } = useProductsStore();
   const { users, fetchUsers } = useUsersStore();
@@ -94,7 +100,6 @@ export function CreateOrderDialog({
     }
   }, [isDialogOpen, fetchProducts, fetchUsers]);
 
-  // Apply default location if available
   useEffect(() => {
     if (lat && lng) {
       setFormData((prev) => ({
@@ -140,18 +145,21 @@ export function CreateOrderDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic validation
     const newErrors = {
       userId: "",
-      items: formData.items.map((item) => ({ skuId: "", quantity: "" })),
+      items: formData.items.map(() => ({ skuId: "", quantity: "" })),
     };
-    if (!formData.userId) newErrors.userId = "User is required";
+
+    if (!formData.userId) newErrors.userId = t.errors?.userRequired;
+
     formData.items.forEach((item, idx) => {
-      if (!item.skuId) newErrors.items[idx].skuId = "SKU is required";
+      if (!item.skuId) newErrors.items[idx].skuId = t.errors?.skuRequired;
       if (!item.quantity || item.quantity < 1)
-        newErrors.items[idx].quantity = "Quantity must be at least 1";
+        newErrors.items[idx].quantity = t.errors?.quantityMin;
     });
+
     setErrors(newErrors);
+
     if (
       newErrors.userId ||
       newErrors.items.some((itemErr) => itemErr.skuId || itemErr.quantity)
@@ -159,7 +167,6 @@ export function CreateOrderDialog({
       return;
 
     try {
-      // Create order adapted to backend DTO
       const payload = {
         userId: formData.userId,
         items: formData.items.map((item) => ({
@@ -181,10 +188,8 @@ export function CreateOrderDialog({
       };
 
       await createOrder(payload);
+      toast.success(t.toast?.success);
 
-      toast.success("Order created successfully");
-
-      // Reset form
       setFormData({
         userId: "",
         items: [{ skuId: "", quantity: 1 }],
@@ -204,7 +209,7 @@ export function CreateOrderDialog({
       setErrors({ userId: "", items: [{ skuId: "", quantity: "" }] });
       setIsDialogOpen(false);
     } catch (error) {
-      toast.error("Failed to create order");
+      toast.error(t.toast?.failed);
     }
   };
 
@@ -214,22 +219,23 @@ export function CreateOrderDialog({
         {trigger || (
           <Button className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
-            Add Order
+            {t.trigger || "Add Order"}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[750px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Order</DialogTitle>
+          <DialogTitle>{t.title || "Create New Order"}</DialogTitle>
           <DialogDescription>
-            Add a new order. You can add multiple items and delivery details.
+            {t.description ||
+              "Add a new order. You can add multiple items and delivery details."}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* User */}
           <div className="space-y-2">
-            <Label htmlFor="userId">User</Label>
+            <Label htmlFor="userId">{t.sections?.user || "User"}</Label>
             <Select
               value={formData.userId}
               onValueChange={(val) =>
@@ -237,7 +243,9 @@ export function CreateOrderDialog({
               }
             >
               <SelectTrigger id="userId">
-                <SelectValue placeholder="Select user" />
+                <SelectValue
+                  placeholder={t.placeholders?.selectUser || "Select user"}
+                />
               </SelectTrigger>
               <SelectContent>
                 {users.map((user) => (
@@ -254,13 +262,12 @@ export function CreateOrderDialog({
 
           {/* Order Items */}
           <div className="space-y-2">
-            <Label>Order Items</Label>
+            <Label>{t.sections?.orderItems || "Order Items"}</Label>
             {formData.items.map((item, idx) => (
               <div key={idx} className="border rounded-md p-3 mb-2 space-y-3">
-                {/* SKU + Quantity */}
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label>SKU</Label>
+                    <Label>{t.fields?.sku || "SKU"}</Label>
                     <Select
                       value={item.skuId}
                       onValueChange={(val) =>
@@ -268,7 +275,11 @@ export function CreateOrderDialog({
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select SKU" />
+                        <SelectValue
+                          placeholder={
+                            t.placeholders?.selectSKU || "Select SKU"
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {products
@@ -293,7 +304,7 @@ export function CreateOrderDialog({
                     )}
                   </div>
                   <div>
-                    <Label>Quantity</Label>
+                    <Label>{t.fields?.quantity || "Quantity"}</Label>
                     <Input
                       type="number"
                       min={1}
@@ -313,8 +324,6 @@ export function CreateOrderDialog({
                     )}
                   </div>
                 </div>
-
-                {/* Actions */}
                 <div className="flex justify-end gap-2">
                   {formData.items.length > 1 && (
                     <Button
@@ -322,7 +331,7 @@ export function CreateOrderDialog({
                       variant="destructive"
                       onClick={() => removeOrderItem(idx)}
                     >
-                      Remove
+                      {t.actions?.removeItem || "Remove"}
                     </Button>
                   )}
                   {idx === formData.items.length - 1 && (
@@ -331,7 +340,7 @@ export function CreateOrderDialog({
                       variant="outline"
                       onClick={addOrderItem}
                     >
-                      Add Item
+                      {t.actions?.addItem || "Add Item"}
                     </Button>
                   )}
                 </div>
@@ -341,25 +350,11 @@ export function CreateOrderDialog({
 
           {/* Delivery */}
           <div className="space-y-2">
-            <Label>Delivery Location</Label>
+            <Label>{t.sections?.delivery || "Delivery Location"}</Label>
             {locationLoading ? (
               <p className="text-sm text-muted-foreground">
-                Detecting location...
+                {t.status?.detectingLocation || "Detecting location..."}
               </p>
-            ) : locationError ? (
-              <DeliveryMapPicker
-                deliveryLat={formData.deliveryLat}
-                deliveryLng={formData.deliveryLng}
-                deliveryPlace={formData.deliveryPlace}
-                onChange={(data) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    deliveryLat: data.lat,
-                    deliveryLng: data.lng,
-                    deliveryPlace: data.place,
-                  }))
-                }
-              />
             ) : (
               <DeliveryMapPicker
                 deliveryLat={formData.deliveryLat}
@@ -380,7 +375,9 @@ export function CreateOrderDialog({
           {/* Shipping & Billing */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="shippingName">Shipping Name</Label>
+              <Label htmlFor="shippingName">
+                {t.fields?.shippingName || "Shipping Name"}
+              </Label>
               <Input
                 id="shippingName"
                 value={formData.shippingName}
@@ -393,7 +390,9 @@ export function CreateOrderDialog({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="shippingEmail">Shipping Email</Label>
+              <Label htmlFor="shippingEmail">
+                {t.fields?.shippingEmail || "Shipping Email"}
+              </Label>
               <Input
                 id="shippingEmail"
                 value={formData.shippingEmail}
@@ -406,7 +405,9 @@ export function CreateOrderDialog({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="shippingPhone">Shipping Phone</Label>
+              <Label htmlFor="shippingPhone">
+                {t.fields?.shippingPhone || "Shipping Phone"}
+              </Label>
               <Input
                 id="shippingPhone"
                 value={formData.shippingPhone}
@@ -419,7 +420,9 @@ export function CreateOrderDialog({
               />
             </div>
             <div className="space-y-2 col-span-2">
-              <Label htmlFor="shippingAddress">Shipping Address (JSON)</Label>
+              <Label htmlFor="shippingAddress">
+                {t.fields?.shippingAddress || "Shipping Address (JSON)"}
+              </Label>
               <Textarea
                 id="shippingAddress"
                 value={JSON.stringify(formData.shippingAddress)}
@@ -442,7 +445,9 @@ export function CreateOrderDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="billingName">Billing Name</Label>
+              <Label htmlFor="billingName">
+                {t.fields?.billingName || "Billing Name"}
+              </Label>
               <Input
                 id="billingName"
                 value={formData.billingName}
@@ -455,7 +460,9 @@ export function CreateOrderDialog({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="billingEmail">Billing Email</Label>
+              <Label htmlFor="billingEmail">
+                {t.fields?.billingEmail || "Billing Email"}
+              </Label>
               <Input
                 id="billingEmail"
                 value={formData.billingEmail}
@@ -468,7 +475,9 @@ export function CreateOrderDialog({
               />
             </div>
             <div className="space-y-2 col-span-2">
-              <Label htmlFor="billingAddress">Billing Address (JSON)</Label>
+              <Label htmlFor="billingAddress">
+                {t.fields?.billingAddress || "Billing Address (JSON)"}
+              </Label>
               <Textarea
                 id="billingAddress"
                 value={JSON.stringify(formData.billingAddress)}
@@ -489,8 +498,9 @@ export function CreateOrderDialog({
             </div>
           </div>
 
+          {/* Notes */}
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="notes">{t.sections?.notes || "Notes"}</Label>
             <Textarea
               id="notes"
               value={formData.notes}
@@ -500,8 +510,12 @@ export function CreateOrderDialog({
               rows={2}
             />
           </div>
+
+          {/* Tracking */}
           <div className="space-y-2">
-            <Label htmlFor="trackingNumber">Tracking Number</Label>
+            <Label htmlFor="trackingNumber">
+              {t.sections?.trackingNumber || "Tracking Number"}
+            </Label>
             <Input
               id="trackingNumber"
               value={formData.trackingNumber}
@@ -520,15 +534,16 @@ export function CreateOrderDialog({
               variant="outline"
               onClick={() => setIsDialogOpen(false)}
             >
-              Cancel
+              {t.actions?.cancel || "Cancel"}
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <>
-                  <Loader className="mr-2 h-4 w-4" /> Creating...
+                  <Loader className="mr-2 h-4 w-4" />{" "}
+                  {t.actions?.creating || "Creating..."}
                 </>
               ) : (
-                "Create Order"
+                t.actions?.create || "Create Order"
               )}
             </Button>
           </DialogFooter>
