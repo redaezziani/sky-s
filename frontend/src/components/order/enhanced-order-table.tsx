@@ -160,7 +160,7 @@ export function EnhancedOrderTable() {
           <div className="flex flex-col">
             <span className="font-medium">#{order.orderNumber}</span>
             <span className="text-xs text-muted-foreground">
-              User: {order.userId}
+              User: {order.shippingName} - {order.shippingEmail}
             </span>
           </div>
         </div>

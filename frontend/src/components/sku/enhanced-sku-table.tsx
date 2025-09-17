@@ -54,7 +54,11 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingSKU, setEditingSKU] = useState<
-    | (ProductSKU & { productName: string; variantName: string; variantId: string })
+    | (ProductSKU & {
+        productName: string;
+        variantName: string;
+        variantId: string;
+      })
     | null
   >(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -137,7 +141,13 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
     }
   };
 
-  const handleEditSKU = (sku: ProductSKU & { productName: string; variantName: string; variantId: string }) => {
+  const handleEditSKU = (
+    sku: ProductSKU & {
+      productName: string;
+      variantName: string;
+      variantId: string;
+    }
+  ) => {
     setEditingSKU(sku);
     setIsEditDialogOpen(true);
   };
@@ -164,7 +174,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
       return {
         status: "low-stock",
         label: t.pages.skus.components.skuTable.stock.lowStock,
-        color: "default",
+        color: "secondary",
       };
     return {
       status: "in-stock",
@@ -242,7 +252,8 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
           )}
           {sku.costPrice && (
             <div className="text-xs text-muted-foreground">
-              {t.pages.skus.components.skuTable.table.cost}: {formatPrice(sku.costPrice)}
+              {t.pages.skus.components.skuTable.table.cost}:{" "}
+              {formatPrice(sku.costPrice)}
             </div>
           )}
         </div>
@@ -256,7 +267,9 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
         return (
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
-              <Badge variant={stockStatus.color as any}>{stockStatus.label}</Badge>
+              <Badge variant={stockStatus.color as any}>
+                {stockStatus.label}
+              </Badge>
               {stockStatus.status === "low-stock" && (
                 <AlertTriangle className="h-3 w-3 text-orange-500" />
               )}
@@ -266,7 +279,8 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
               {t.pages.skus.components.skuTable.table.units}
               {sku.lowStockAlert && (
                 <span className="text-xs text-muted-foreground ml-1">
-                  ({t.pages.skus.components.skuTable.table.alert}: {sku.lowStockAlert})
+                  ({t.pages.skus.components.skuTable.table.alert}:{" "}
+                  {sku.lowStockAlert})
                 </span>
               )}
             </div>
@@ -336,7 +350,9 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
         searchValue={search}
         onSearchChange={setSearch}
         searchKeys={["sku", "barcode", "productName", "variantName"]}
-        searchPlaceholder={t.pages.skus.components.skuTable.table.searchPlaceholder}
+        searchPlaceholder={
+          t.pages.skus.components.skuTable.table.searchPlaceholder
+        }
         emptyMessage={t.pages.skus.components.skuTable.table.empty}
         showCount
         customHeader={
