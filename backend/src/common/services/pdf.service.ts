@@ -57,6 +57,22 @@ export class PdfService {
     return String(value).toLowerCase() === 'n/a' ? defaultValue : String(value);
   }
 
+  // Helper to truncate text if too long for a column
+  private truncateText(
+    doc: PDFKit.PDFDocument,
+    text: string,
+    maxWidth: number,
+  ): string {
+    let truncated = text;
+    while (doc.widthOfString(truncated) > maxWidth && truncated.length > 0) {
+      truncated = truncated.slice(0, -1);
+    }
+    if (truncated.length < text.length) {
+      truncated = truncated.slice(0, -3) + '...';
+    }
+    return truncated;
+  }
+
   async generateOrderPdf(order: any): Promise<string> {
     const doc = new PDFDocument({
       size: 'A4',
@@ -219,6 +235,7 @@ export class PdfService {
 
     // Items
     doc.fontSize(8).font('Helvetica');
+    // Items
     order.items.forEach((item, index) => {
       const rowY = currentY;
       const rowHeight = 20;
@@ -229,9 +246,12 @@ export class PdfService {
         doc.fillColor('#000000');
       }
 
-      // Item data
-      doc.text(this.safe(item.skuCode), 50, rowY + 3, { width: 80 });
-      doc.text(this.safe(item.name), 140, rowY + 3, { width: 180 });
+      // Truncate SKU and Product names
+      const skuText = this.truncateText(doc, this.safe(item.skuCode), 80);
+      const productText = this.truncateText(doc, this.safe(item.name), 180);
+
+      doc.text(skuText, 50, rowY + 3, { width: 80 });
+      doc.text(productText, 140, rowY + 3, { width: 180 });
       doc.text(this.safe(item.quantity), 330, rowY + 3, {
         width: 40,
         align: 'right',
@@ -240,19 +260,13 @@ export class PdfService {
         `$${this.safe(item.unitPrice?.toFixed?.(2) ?? '0.00')}`,
         380,
         rowY + 3,
-        {
-          width: 70,
-          align: 'right',
-        },
+        { width: 70, align: 'right' },
       );
       doc.text(
         `$${this.safe(item.totalPrice?.toFixed?.(2) ?? '0.00')}`,
         460,
         rowY + 3,
-        {
-          width: 80,
-          align: 'right',
-        },
+        { width: 80, align: 'right' },
       );
 
       currentY += rowHeight;
