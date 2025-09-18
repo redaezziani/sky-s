@@ -66,7 +66,7 @@ model RefreshToken {
   userId    String
   expiresAt DateTime
   createdAt DateTime @default(now())
-  
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([token])
@@ -146,28 +146,28 @@ model ProductVariant {
 }
 
 model ProductSKU {
-  id           String    @id @default(uuid())
-  variantId    String
-  sku          String    @unique @db.VarChar(100)
-  barcode      String?   @unique @db.VarChar(100)
-  price        Decimal   @db.Decimal(10, 2)
-  comparePrice Decimal?  @db.Decimal(10, 2) // Original price for discounts
-  costPrice    Decimal?  @db.Decimal(10, 2) // Cost for profit calculation
-  stock        Int       @default(0)
-  lowStockAlert Int      @default(5)
-  weight       Decimal?  @db.Decimal(8, 2) // in grams
-  dimensions   Json? // {"length": 10, "width": 5, "height": 2}
-  coverImage   String?   @db.VarChar(500)
-  isActive     Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  deletedAt    DateTime?
+  id            String    @id @default(uuid())
+  variantId     String
+  sku           String    @unique @db.VarChar(100)
+  barcode       String?   @unique @db.VarChar(100)
+  price         Decimal   @db.Decimal(10, 2)
+  comparePrice  Decimal?  @db.Decimal(10, 2) // Original price for discounts
+  costPrice     Decimal?  @db.Decimal(10, 2) // Cost for profit calculation
+  stock         Int       @default(0)
+  lowStockAlert Int       @default(5)
+  weight        Decimal?  @db.Decimal(8, 2) // in grams
+  dimensions    Json? // {"length": 10, "width": 5, "height": 2}
+  coverImage    String?   @db.VarChar(500)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
 
   // Relations
-  variant   ProductVariant    @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  images    ProductSKUImage[]
-  cartItems CartItem[]
-  orderItems OrderItem[]
+  variant            ProductVariant      @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  images             ProductSKUImage[]
+  cartItems          CartItem[]
+  orderItems         OrderItem[]
   inventoryMovements InventoryMovement[]
   priceHistory       PriceHistory[]
 
@@ -183,7 +183,7 @@ model ProductSKUImage {
   id        String   @id @default(uuid())
   skuId     String
   url       String   @db.VarChar(500)
-  fileId    String?  @db.VarChar(200) @default("") // store ImageKit fileId here
+  fileId    String?  @default("") @db.VarChar(200) // store ImageKit fileId here
   altText   String?  @db.VarChar(200)
   position  Int      @default(0)
   createdAt DateTime @default(now())
@@ -195,15 +195,15 @@ model ProductSKUImage {
 }
 
 model ProductReview {
-  id        String   @id @default(uuid())
-  productId String
-  userId    String
-  rating    Int // 1-5 stars
-  title     String?  @db.VarChar(200)
-  comment   String?  @db.Text
-  isApproved Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  productId  String
+  userId     String
+  rating     Int // 1-5 stars
+  title      String?  @db.VarChar(200)
+  comment    String?  @db.Text
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -232,43 +232,43 @@ model CartItem {
 }
 
 model Order {
-  id              String        @id @default(uuid())
-  orderNumber     String        @unique @db.VarChar(50)
-  userId          String
-  status          OrderStatus   @default(PENDING)
-  paymentStatus   PaymentStatus @default(PENDING)
-  subtotal        Decimal       @db.Decimal(10, 2)
-  taxAmount       Decimal       @db.Decimal(10, 2) @default(0)
-  shippingAmount  Decimal       @db.Decimal(10, 2) @default(0)
-  discountAmount  Decimal       @db.Decimal(10, 2) @default(0)
-  totalAmount     Decimal       @db.Decimal(10, 2)
-  currency        String        @default("USD") @db.VarChar(3)
-  
+  id             String        @id @default(uuid())
+  orderNumber    String        @unique @db.VarChar(50)
+  userId         String
+  status         OrderStatus   @default(PENDING)
+  paymentStatus  PaymentStatus @default(PENDING)
+  subtotal       Decimal       @db.Decimal(10, 2)
+  taxAmount      Decimal       @default(0) @db.Decimal(10, 2)
+  shippingAmount Decimal       @default(0) @db.Decimal(10, 2)
+  discountAmount Decimal       @default(0) @db.Decimal(10, 2)
+  totalAmount    Decimal       @db.Decimal(10, 2)
+  currency       String        @default("USD") @db.VarChar(3)
+
   // pdf invoice url
-  invoiceUrl      String?       @db.VarChar(500) @default("")
-  invoiceFileId   String?       @db.VarChar(200) @default("") // store ImageKit fileId here
+  invoiceUrl      String? @default("") @db.VarChar(500)
+  invoiceFileId   String? @default("") @db.VarChar(200) // store ImageKit fileId here
   // Shipping Information
-  shippingName    String        @db.VarChar(100)
-  shippingEmail   String        @db.VarChar(255)
-  shippingPhone   String?       @db.VarChar(20)
+  shippingName    String  @db.VarChar(100)
+  shippingEmail   String  @db.VarChar(255)
+  shippingPhone   String? @db.VarChar(20)
   shippingAddress Json // Full address object
-  
+
   // Delivery Coordinates
-  deliveryLat     Float?
-  deliveryLng     Float?
-  deliveryPlace   String?  
+  deliveryLat   Float?
+  deliveryLng   Float?
+  deliveryPlace String?
 
   // Billing Information
-  billingName     String?       @db.VarChar(100)
-  billingEmail    String?       @db.VarChar(255)
-  billingAddress  Json? // Full address object
-  
-  notes           String?       @db.Text
-  trackingNumber  String?       @db.VarChar(100)
-  shippedAt       DateTime?
-  deliveredAt     DateTime?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  billingName    String? @db.VarChar(100)
+  billingEmail   String? @db.VarChar(255)
+  billingAddress Json? // Full address object
+
+  notes          String?   @db.Text
+  trackingNumber String?   @db.VarChar(100)
+  shippedAt      DateTime?
+  deliveredAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   user  User        @relation(fields: [userId], references: [id])
   items OrderItem[]
@@ -290,23 +290,25 @@ model OrderItem {
   productName String  @db.VarChar(200) // Snapshot for historical data
   skuCode     String  @db.VarChar(100) // Snapshot for historical data
 
-  order Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  sku   ProductSKU @relation(fields: [skuId], references: [id])
+  order     Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  sku       ProductSKU @relation(fields: [skuId], references: [id])
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now()) @updatedAt
 
   @@index([orderId])
   @@index([skuId])
 }
 
 model InventoryMovement {
-  id          String   @id @default(uuid())
-  skuId       String
-  type        String   @db.VarChar(20) // IN, OUT, ADJUSTMENT, RESERVED, UNRESERVED
-  quantity    Int // Positive for IN, negative for OUT
-  reason      String?  @db.VarChar(200)
-  reference   String?  @db.VarChar(100) // Order ID, etc.
+  id            String   @id @default(uuid())
+  skuId         String
+  type          String   @db.VarChar(20) // IN, OUT, ADJUSTMENT, RESERVED, UNRESERVED
+  quantity      Int // Positive for IN, negative for OUT
+  reason        String?  @db.VarChar(200)
+  reference     String?  @db.VarChar(100) // Order ID, etc.
   previousStock Int
-  newStock    Int
-  createdAt   DateTime @default(now())
+  newStock      Int
+  createdAt     DateTime @default(now())
 
   sku ProductSKU @relation(fields: [skuId], references: [id])
 

@@ -21,20 +21,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Trash2, Eye, Package } from "lucide-react";
-import {
-  useOrdersStore,
-  type Order,
-  OrderStatus,
-  PaymentStatus,
-} from "@/stores/orders-store";
+import { MoreHorizontal, Trash2, Package } from "lucide-react";
+import { useOrdersStore, type Order } from "@/stores/orders-store";
 import { toast } from "sonner";
 import PaginationTable from "@/components/pagination-table";
 import { useSearchQuery } from "@/hooks/use-search-query";
 import OrderDetails from "./order-details";
 import { CreateOrderDialog } from "./create-order-dialog";
-import { IconCircleCheckFilled } from "@tabler/icons-react";
 import UpdateOrderSheet from "./edit-order-sheet";
+import { IconCircleCheckFilled } from "@tabler/icons-react";
+import { useLocale } from "@/components/local-lang-swither";
+import { getMessages } from "@/lib/locale";
 
 export function EnhancedOrderTable() {
   const [search, setSearch] = useSearchQuery("q", 400);
@@ -51,7 +48,6 @@ export function EnhancedOrderTable() {
     deleteOrder,
     bulkDeleteOrders,
     selectOrder,
-    clearSelection,
     clearError,
     setPage,
     setPageSize,
@@ -61,12 +57,13 @@ export function EnhancedOrderTable() {
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
 
-  // Fetch orders on mount and when search changes
+  const { locale } = useLocale();
+  const t = getMessages(locale).pages.orders;
+
   useEffect(() => {
     fetchOrders({ search });
   }, [search, fetchOrders]);
 
-  // Show error toast
   useEffect(() => {
     if (error) {
       toast.error(error);
@@ -77,82 +74,58 @@ export function EnhancedOrderTable() {
   const handleDeleteOrder = async (id: string) => {
     try {
       await deleteOrder(id);
-      toast.success("Order deleted successfully");
+      toast.success(t.toast?.success ?? "Order deleted successfully");
       setDeleteDialogOpen(false);
       setOrderToDelete(null);
     } catch {
-      toast.error("Failed to delete order");
+      toast.error(t.toast?.failed ?? "Failed to delete order");
     }
   };
 
   const handleBulkDelete = async () => {
     try {
       await bulkDeleteOrders(selectedOrders);
-      toast.success(`${selectedOrders.length} orders deleted successfully`);
+      toast.success(
+        t.toast?.bulkDeleted?.replace(
+          "{0}",
+          selectedOrders.length.toString()
+        ) || `${selectedOrders.length} orders deleted successfully`
+      );
       setBulkDeleteDialogOpen(false);
     } catch {
-      toast.error("Failed to delete orders");
+      toast.error(t.toast?.bulkDeleteFailed ?? "Failed to delete orders");
     }
   };
 
   const formatCurrency = (amount: number, currency: string) =>
-    new Intl.NumberFormat("en-US", {
+    new Intl.NumberFormat(locale === "ja" ? "ja-JP" : "en-US", {
       style: "currency",
       currency,
     }).format(amount);
 
-  // Helper to get enum label from string
-  const getOrderStatusLabel = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return "Pending";
-      case "CONFIRMED":
-        return "Confirmed";
-      case "PROCESSING":
-        return "Processing";
-      case "SHIPPED":
-        return "Shipped";
-      case "DELIVERED":
-        return "Delivered";
-      case "CANCELLED":
-        return "Cancelled";
-      case "REFUNDED":
-        return "Refunded";
-      default:
-        return status;
-    }
-  };
+  const getOrderStatusLabel = (status: string) =>
+    t.updateOrder?.fields?.status?.[status] || status;
 
-  const getPaymentStatusLabel = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return "Pending";
-      case "COMPLETED":
-        return "Completed";
-      case "FAILED":
-        return "Failed";
-      case "REFUNDED":
-        return "Refunded";
-      default:
-        return status;
-    }
-  };
+  const getPaymentStatusLabel = (status: string) =>
+    t.updateOrder?.fields?.paymentStatus?.[status] || status;
 
   const columns: TableColumn<Order>[] = [
     {
       key: "select",
-      label: "Select",
+      label: "",
       render: (order) => (
         <Checkbox
           checked={selectedOrders.includes(order.id)}
           onCheckedChange={() => selectOrder(order.id)}
-          aria-label="Select order"
+          aria-label={
+            t.components?.ordersTable?.table?.selectRow ?? "Select order"
+          }
         />
       ),
     },
     {
       key: "orderNumber",
-      label: "Order",
+      label: t.components?.ordersTable?.table?.orderNumber ?? "Order",
       render: (order) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center">
@@ -161,7 +134,8 @@ export function EnhancedOrderTable() {
           <div className="flex flex-col">
             <span className="font-medium">#{order.orderNumber}</span>
             <span className="text-xs text-muted-foreground">
-              User: {order.shippingName} - {order.shippingEmail}
+              {t.updateOrder?.fields?.shippingName ?? "User"}:{" "}
+              {order.shippingName} - {order.shippingEmail}
             </span>
           </div>
         </div>
@@ -169,51 +143,47 @@ export function EnhancedOrderTable() {
     },
     {
       key: "status",
-      label: "Status",
+      label: t.components?.ordersTable?.table?.status ?? "Status",
       render: (order) => (
-        <Badge variant="secondary">
-          {order.status === "PENDING" ? (
-            <IconCircleCheckFilled className="fill-yellow-500 dark:fill-yellow-400" />
-          ) : order.status === "SHIPPED" ? (
-            <IconCircleCheckFilled className="fill-blue-500 dark:fill-blue-400" />
-          ) : order.status === "DELIVERED" ? (
-            <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-          ) : order.status === "CANCELLED" ? (
-            <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" />
-          ) : (
-            <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-          )}
+        <Badge variant="secondary" className="flex items-center gap-1">
+          <IconCircleCheckFilled
+            className={`${
+              order.status === "PENDING"
+                ? "fill-yellow-500"
+                : order.status === "SHIPPED"
+                ? "fill-blue-500"
+                : order.status === "DELIVERED"
+                ? "fill-green-500"
+                : order.status === "CANCELLED"
+                ? "fill-red-500"
+                : "fill-gray-500"
+            } dark:fill-current`}
+          />
           {getOrderStatusLabel(order.status)}
         </Badge>
       ),
     },
     {
       key: "paymentStatus",
-      label: "Payment",
+      label: t.components?.ordersTable?.table?.paymentStatus ?? "Payment",
       render: (order) => (
-        <Badge
-          variant={
-            order.paymentStatus === "COMPLETED"
-              ? "secondary"
-              : order.paymentStatus === "FAILED"
-              ? "secondary"
-              : "secondary"
-          }
-        >
-          {order.paymentStatus === "COMPLETED" ? (
-            <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-          ) : order.paymentStatus === "FAILED" ? (
-            <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" />
-          ) : (
-            <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-          )}
+        <Badge variant="secondary" className="flex items-center gap-1">
+          <IconCircleCheckFilled
+            className={`${
+              order.paymentStatus === "COMPLETED"
+                ? "fill-green-500"
+                : order.paymentStatus === "FAILED"
+                ? "fill-red-500"
+                : "fill-gray-500"
+            } dark:fill-current`}
+          />
           {getPaymentStatusLabel(order.paymentStatus)}
         </Badge>
       ),
     },
     {
       key: "totalAmount",
-      label: "Total",
+      label: t.components?.ordersTable?.table?.total ?? "Total",
       render: (order) => (
         <span className="font-medium">
           {formatCurrency(order.totalAmount, order.currency)}
@@ -222,19 +192,16 @@ export function EnhancedOrderTable() {
     },
     {
       key: "createdAt",
-      label: "Created",
-      render: (order) => {
-        const date = new Date(order.createdAt);
-        return (
-          <span className="text-sm text-muted-foreground">
-            {date.toLocaleDateString()}
-          </span>
-        );
-      },
+      label: t.components?.ordersTable?.table?.createdAt ?? "Created",
+      render: (order) => (
+        <span className="text-sm text-muted-foreground">
+          {new Date(order.createdAt).toLocaleDateString()}
+        </span>
+      ),
     },
     {
       key: "actions",
-      label: "Actions",
+      label: t.components?.ordersTable?.table?.actions ?? "Actions",
       render: (order) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -257,7 +224,7 @@ export function EnhancedOrderTable() {
               className="text-destructive"
             >
               <Trash2 className="mr-2 h-4 w-4" />
-              Delete
+              {t.components?.ordersTable?.dialogs?.delete ?? "Delete"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -268,13 +235,18 @@ export function EnhancedOrderTable() {
   return (
     <div className="space-y-4">
       <DataTable
-        title="Order Management"
+        title={t.title ?? "Order Management"}
         data={orders}
         columns={columns}
-        searchKeys={["orderNumber", "userId", "status", "paymentStatus"]}
-        searchPlaceholder="Search orders by number, user, or status..."
-        emptyMessage="No orders found"
-        showCount={true}
+        searchKeys={["orderNumber", "shippingName", "status", "paymentStatus"]}
+        searchPlaceholder={
+          t.components?.ordersTable?.table?.searchPlaceholder ??
+          "Search orders by number, user, or status..."
+        }
+        emptyMessage={
+          t.components?.ordersTable?.table?.empty ?? "No orders found"
+        }
+        showCount
         searchValue={search}
         onSearchChange={setSearch}
         customHeader={
@@ -286,7 +258,10 @@ export function EnhancedOrderTable() {
                 className="flex items-center gap-2"
               >
                 <Trash2 className="h-4 w-4" />
-                Delete Selected ({selectedOrders.length})
+                {t.components?.ordersTable?.table?.deleteSelected?.replace(
+                  "{0}",
+                  selectedOrders.length.toString()
+                ) || `Delete Selected (${selectedOrders.length})`}
               </Button>
             )}
             <CreateOrderDialog />
@@ -298,18 +273,24 @@ export function EnhancedOrderTable() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Order?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t.components?.ordersTable?.dialogs?.deleteTitle ??
+                "Delete Order?"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this order and its items.
+              {t.components?.ordersTable?.dialogs?.deleteDesc ??
+                "This will permanently delete this order and its items."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>
+              {t.components?.ordersTable?.dialogs?.cancel ?? "Cancel"}
+            </AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
               onClick={() => orderToDelete && handleDeleteOrder(orderToDelete)}
             >
-              Delete
+              {t.components?.ordersTable?.dialogs?.delete ?? "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -323,20 +304,28 @@ export function EnhancedOrderTable() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Delete {selectedOrders.length} orders?
+              {t.components?.ordersTable?.dialogs?.bulkDeleteTitle?.replace(
+                "{0}",
+                selectedOrders.length.toString()
+              ) ?? `Delete ${selectedOrders.length} orders?`}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete all
-              selected orders and their items.
+              {t.components?.ordersTable?.dialogs?.bulkDeleteDesc?.replace(
+                "{0}",
+                selectedOrders.length.toString()
+              ) ??
+                "This action cannot be undone. This will permanently delete all selected orders and their items."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>
+              {t.components?.ordersTable?.dialogs?.cancel ?? "Cancel"}
+            </AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
               onClick={handleBulkDelete}
             >
-              Delete All
+              {t.components?.ordersTable?.dialogs?.delete ?? "Delete All"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

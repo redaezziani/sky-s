@@ -168,6 +168,38 @@
     "orders": {
       "title": "注文管理",
       "description": "顧客の注文、支払い、配送情報を管理します",
+      "components":{
+        
+      "ordersTable": {
+        "title": "注文一覧",
+        "table": {
+          "selectRow": "この行を選択",
+          "orderNumber": "注文番号",
+          "status": "ステータス",
+          "paymentStatus": "支払い",
+          "total": "合計",
+          "createdAt": "作成日",
+          "actions": "操作",
+          "searchPlaceholder": "注文番号、ユーザー、ステータスで検索...",
+          "empty": "注文が見つかりません",
+          "deleteSelected": "{0} 件選択を削除"
+        },
+        "dialogs": {
+          "deleteTitle": "注文を削除",
+          "deleteDesc": "この注文を削除してもよろしいですか？ この操作は元に戻せません。",
+          "bulkDeleteTitle": "選択した注文を削除",
+          "bulkDeleteDesc": "選択した {0} 件の注文を削除してもよろしいですか？ この操作は元に戻せません。",
+          "cancel": "キャンセル",
+          "delete": "削除"
+        },
+        "toast": {
+          "success": "注文を削除しました",
+          "failed": "注文の削除に失敗しました",
+          "bulkDeleted": "{0} 件の注文を削除しました",
+          "bulkDeleteFailed": "注文の削除に失敗しました"
+        }
+      }
+      },
       "dialogs": {
         "orderDetails": {
           "title": "注文 #{orderNumber} の詳細",
@@ -301,6 +333,41 @@
           "toast": {
             "success": "注文を更新しました",
             "failed": "注文の更新に失敗しました"
+          }
+        }
+      }
+    },
+    "orderItems": {
+      "title": "注文アイテム管理",
+      "description": "注文に含まれる商品の詳細、数量、価格を管理します",
+      "components": {
+        "orderItemsTable": {
+          "title": "注文アイテム一覧",
+          "table": {
+            "selectRow": "この行を選択",
+            "orderNumber": "注文番号",
+            "sku": "SKU / 商品名",
+            "quantity": "数量",
+            "unitPrice": "単価",
+            "totalPrice": "合計",
+            "actions": "操作",
+            "searchPlaceholder": "SKUまたは商品名で検索...",
+            "empty": "注文アイテムが見つかりません",
+            "deleteSelected": "{0} 件選択を削除"
+          },
+          "dialogs": {
+            "deleteTitle": "注文アイテムを削除",
+            "deleteDesc": "この注文アイテムを削除してもよろしいですか？ この操作は元に戻せません。",
+            "bulkDeleteTitle": "選択した注文アイテムを削除",
+            "bulkDeleteDesc": "選択した {0} 件の注文アイテムを削除してもよろしいですか？ この操作は元に戻せません。",
+            "cancel": "キャンセル",
+            "delete": "削除"
+          },
+          "toast": {
+            "itemDeleted": "注文アイテムを削除しました",
+            "itemDeleteFailed": "注文アイテムの削除に失敗しました",
+            "bulkDeleted": "{0} 件の注文アイテムを削除しました",
+            "bulkDeleteFailed": "注文アイテムの削除に失敗しました"
           }
         }
       }

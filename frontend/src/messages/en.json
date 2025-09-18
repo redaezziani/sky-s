@@ -88,7 +88,6 @@
             "outOfStock": "Out of Stock"
           }
         }
-        
       },
       "dialogs": {
         "createSKU": {
@@ -163,145 +162,212 @@
       }
     },
     "orders": {
-  "title": "Order Management",
-  "description": "Manage customer orders, payments, and shipping information",
-  "dialogs": {
-    "orderDetails": {
-      "title": "Order #{orderNumber} Details",
-      "viewDetails": "View Details",
-      "sections": {
-        "generalInfo": "General Info",
-        "shippingInfo": "Shipping Info",
-        "billingInfo": "Billing Info",
-        "items": "Order Items",
-        "totals": "Totals",
-        "deliveryLocation": "Delivery Location"
-      },
-      "fields": {
-        "status": "Status",
-        "payment": "Payment",
-        "user": "User",
-        "createdAt": "Created At",
-        "name": "Name",
-        "email": "Email",
-        "phone": "Phone",
-        "address": "Address",
-        "subtotal": "Subtotal",
-        "tax": "Tax",
-        "shipping": "Shipping",
-        "discount": "Discount",
-        "total": "Total"
-      },
-      "labels": {
-        "qty": "Qty: {qty}"
+      "title": "Order Management",
+      "description": "Manage customer orders, payments, and shipping information",
+      "components": {
+        "ordersTable": {
+          "title": "Orders List",
+          "table": {
+            "selectRow": "Select this row",
+            "orderNumber": "Order Number",
+            "status": "Status",
+            "paymentStatus": "Payment",
+            "total": "Total",
+            "createdAt": "Created At",
+            "actions": "Actions",
+            "searchPlaceholder": "Search by order number, user, or status...",
+            "empty": "No orders found",
+            "deleteSelected": "Delete {0} selected"
+          },
+          "dialogs": {
+            "deleteTitle": "Delete Order",
+            "deleteDesc": "Are you sure you want to delete this order? This action cannot be undone.",
+            "bulkDeleteTitle": "Delete Selected Orders",
+            "bulkDeleteDesc": "Are you sure you want to delete {0} selected orders? This action cannot be undone.",
+            "cancel": "Cancel",
+            "delete": "Delete"
+          },
+          "toast": {
+            "success": "Order deleted successfully",
+            "failed": "Failed to delete order",
+            "bulkDeleted": "{0} orders deleted successfully",
+            "bulkDeleteFailed": "Failed to delete selected orders"
+          }
+        }
+      }
+    
+      ,
+      "dialogs": {
+        "orderDetails": {
+          "title": "Order #{orderNumber} Details",
+          "viewDetails": "View Details",
+          "sections": {
+            "generalInfo": "General Info",
+            "shippingInfo": "Shipping Info",
+            "billingInfo": "Billing Info",
+            "items": "Order Items",
+            "totals": "Totals",
+            "deliveryLocation": "Delivery Location"
+          },
+          "fields": {
+            "status": "Status",
+            "payment": "Payment",
+            "user": "User",
+            "createdAt": "Created At",
+            "name": "Name",
+            "email": "Email",
+            "phone": "Phone",
+            "address": "Address",
+            "subtotal": "Subtotal",
+            "tax": "Tax",
+            "shipping": "Shipping",
+            "discount": "Discount",
+            "total": "Total"
+          },
+          "labels": {
+            "qty": "Qty: {qty}"
+          }
+        },
+        "createOrder": {
+          "trigger": "Add Order",
+          "title": "Create New Order",
+          "description": "Add a new order. You can set multiple products and shipping info.",
+          "sections": {
+            "user": "User",
+            "orderItems": "Order Items",
+            "delivery": "Delivery",
+            "shipping": "Shipping Info",
+            "billing": "Billing Info",
+            "notes": "Notes",
+            "trackingNumber": "Tracking Number"
+          },
+          "fields": {
+            "sku": "SKU",
+            "quantity": "Quantity",
+            "deliveryLat": "Latitude",
+            "deliveryLng": "Longitude",
+            "deliveryPlace": "Place",
+            "shippingName": "Shipping Name",
+            "shippingEmail": "Shipping Email",
+            "shippingPhone": "Shipping Phone",
+            "shippingAddress": "Shipping Address (JSON)",
+            "billingName": "Billing Name",
+            "billingEmail": "Billing Email",
+            "billingAddress": "Billing Address (JSON)"
+          },
+          "actions": {
+            "addItem": "Add Item",
+            "removeItem": "Remove",
+            "cancel": "Cancel",
+            "create": "Create Order",
+            "creating": "Creating..."
+          },
+          "placeholders": {
+            "selectUser": "Select User",
+            "selectSKU": "Select SKU"
+          },
+          "errors": {
+            "userRequired": "Please select a user",
+            "skuRequired": "Please select a SKU",
+            "quantityMin": "Quantity must be at least 1"
+          },
+          "status": {
+            "detectingLocation": "Detecting location...",
+            "locationError": "Failed to get location"
+          },
+          "toast": {
+            "success": "Order created",
+            "failed": "Failed to create order"
+          }
+        },
+        "updateOrder": {
+          "trigger": "Edit Order",
+          "title": "Update Order #{orderNumber}",
+          "description": "Edit an existing order. You can change shipping details and items.",
+          "sections": {
+            "shippingInfo": "Shipping Info",
+            "billingInfo": "Billing Info",
+            "delivery": "Delivery Location",
+            "status": "Status",
+            "notes": "Notes",
+            "trackingNumber": "Tracking Number"
+          },
+          "fields": {
+            "status": "Order Status",
+            "paymentStatus": "Payment Status",
+            "shippingName": "Shipping Name",
+            "shippingEmail": "Shipping Email",
+            "shippingPhone": "Shipping Phone",
+            "shippingAddress": "Shipping Address (JSON)",
+            "billingName": "Billing Name",
+            "billingEmail": "Billing Email",
+            "billingAddress": "Billing Address (JSON)",
+            "deliveryLat": "Latitude",
+            "deliveryLng": "Longitude",
+            "deliveryPlace": "Place",
+            "notes": "Notes",
+            "trackingNumber": "Tracking Number",
+            "sku": "SKU",
+            "quantity": "Quantity"
+          },
+          "actions": {
+            "saveChanges": "Save Changes",
+            "cancel": "Cancel",
+            "addItem": "Add Item",
+            "removeItem": "Remove"
+          },
+          "placeholders": {
+            "selectStatus": "Select status",
+            "selectPaymentStatus": "Select payment status",
+            "selectSKU": "Select SKU"
+          },
+          "errors": {
+            "statusRequired": "Order status is required",
+            "paymentStatusRequired": "Payment status is required",
+            "skuRequired": "SKU is required",
+            "quantityMin": "Quantity must be at least 1"
+          },
+          "toast": {
+            "success": "Order updated successfully",
+            "failed": "Failed to update order"
+          }
+        }
       }
     },
-    "createOrder": {
-      "trigger": "Add Order",
-      "title": "Create New Order",
-      "description": "Add a new order. You can set multiple products and shipping info.",
-      "sections": {
-        "user": "User",
-        "orderItems": "Order Items",
-        "delivery": "Delivery",
-        "shipping": "Shipping Info",
-        "billing": "Billing Info",
-        "notes": "Notes",
-        "trackingNumber": "Tracking Number"
-      },
-      "fields": {
-        "sku": "SKU",
-        "quantity": "Quantity",
-        "deliveryLat": "Latitude",
-        "deliveryLng": "Longitude",
-        "deliveryPlace": "Place",
-        "shippingName": "Shipping Name",
-        "shippingEmail": "Shipping Email",
-        "shippingPhone": "Shipping Phone",
-        "shippingAddress": "Shipping Address (JSON)",
-        "billingName": "Billing Name",
-        "billingEmail": "Billing Email",
-        "billingAddress": "Billing Address (JSON)"
-      },
-      "actions": {
-        "addItem": "Add Item",
-        "removeItem": "Remove",
-        "cancel": "Cancel",
-        "create": "Create Order",
-        "creating": "Creating..."
-      },
-      "placeholders": {
-        "selectUser": "Select User",
-        "selectSKU": "Select SKU"
-      },
-      "errors": {
-        "userRequired": "Please select a user",
-        "skuRequired": "Please select a SKU",
-        "quantityMin": "Quantity must be at least 1"
-      },
-      "status": {
-        "detectingLocation": "Detecting location...",
-        "locationError": "Failed to get location"
-      },
-      "toast": {
-        "success": "Order created",
-        "failed": "Failed to create order"
-      }
-    },
-    "updateOrder": {
-      "trigger": "Edit Order",
-      "title": "Update Order #{orderNumber}",
-      "description": "Edit an existing order. You can change shipping details and items.",
-      "sections": {
-        "shippingInfo": "Shipping Info",
-        "billingInfo": "Billing Info",
-        "delivery": "Delivery Location",
-        "status": "Status",
-        "notes": "Notes",
-        "trackingNumber": "Tracking Number"
-      },
-      "fields": {
-        "status": "Order Status",
-        "paymentStatus": "Payment Status",
-        "shippingName": "Shipping Name",
-        "shippingEmail": "Shipping Email",
-        "shippingPhone": "Shipping Phone",
-        "shippingAddress": "Shipping Address (JSON)",
-        "billingName": "Billing Name",
-        "billingEmail": "Billing Email",
-        "billingAddress": "Billing Address (JSON)",
-        "deliveryLat": "Latitude",
-        "deliveryLng": "Longitude",
-        "deliveryPlace": "Place",
-        "notes": "Notes",
-        "trackingNumber": "Tracking Number",
-        "sku": "SKU",
-        "quantity": "Quantity"
-      },
-      "actions": {
-        "saveChanges": "Save Changes",
-        "cancel": "Cancel",
-        "addItem": "Add Item",
-        "removeItem": "Remove"
-      },
-      "placeholders": {
-        "selectStatus": "Select status",
-        "selectPaymentStatus": "Select payment status",
-        "selectSKU": "Select SKU"
-      },
-      "errors": {
-        "statusRequired": "Order status is required",
-        "paymentStatusRequired": "Payment status is required",
-        "skuRequired": "SKU is required",
-        "quantityMin": "Quantity must be at least 1"
-      },
-      "toast": {
-        "success": "Order updated successfully",
-        "failed": "Failed to update order"
+    "orderItems": {
+      "title": "Order Items Management",
+      "description": "Manage the details, quantity, and price of items included in an order",
+      "components": {
+        "orderItemsTable": {
+          "title": "Order Items List",
+          "table": {
+            "selectRow": "Select this row",
+            "orderNumber": "Order Number",
+            "sku": "SKU / Product Name",
+            "quantity": "Quantity",
+            "unitPrice": "Unit Price",
+            "totalPrice": "Total",
+            "actions": "Actions",
+            "searchPlaceholder": "Search by SKU or product name...",
+            "empty": "No order items found",
+            "deleteSelected": "Delete {0} selected items"
+          },
+          "dialogs": {
+            "deleteTitle": "Delete Order Item",
+            "deleteDesc": "Are you sure you want to delete this order item? This action cannot be undone.",
+            "bulkDeleteTitle": "Delete Selected Order Items",
+            "bulkDeleteDesc": "Are you sure you want to delete {0} selected order items? This action cannot be undone.",
+            "cancel": "Cancel",
+            "delete": "Delete"
+          },
+          "toast": {
+            "itemDeleted": "Order item deleted",
+            "itemDeleteFailed": "Failed to delete order item",
+            "bulkDeleted": "{0} order items deleted",
+            "bulkDeleteFailed": "Failed to delete order items"
+          }
+        }
       }
     }
-  }
-}
-
   }
 }

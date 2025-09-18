@@ -206,8 +206,12 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
       label: t.pages.skus.components.skuTable.table.sku,
       render: (sku) => (
         <div className="flex items-center space-x-2">
-          <div className="flex items-center justify-center w-8 h-8 bg-muted rounded">
-            <Package className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center justify-center  max-w-80 bg-muted rounded">
+            <img
+              src={sku?.images?.[0].url}
+              alt={sku.sku}
+              className="w-10 aspect-auto object-cover rounded-md"
+            />
           </div>
           <div>
             <div className="font-medium font-mono text-sm">{sku.sku}</div>

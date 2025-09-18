@@ -164,6 +164,39 @@
     "orders": {
       "title": "Gestion des commandes",
       "description": "Gérez les commandes des clients, les paiements et les informations de livraison",
+      "components": {
+        "ordersTable": {
+          "title": "Liste des commandes",
+          "table": {
+            "selectRow": "Sélectionner cette ligne",
+            "orderNumber": "Numéro de commande",
+            "status": "Statut",
+            "paymentStatus": "Paiement",
+            "total": "Total",
+            "createdAt": "Créé le",
+            "actions": "Actions",
+            "searchPlaceholder": "Rechercher par numéro de commande, utilisateur ou statut...",
+            "empty": "Aucune commande trouvée",
+            "deleteSelected": "Supprimer {0} sélectionnés"
+          },
+          "dialogs": {
+            "deleteTitle": "Supprimer la commande",
+            "deleteDesc": "Êtes-vous sûr de vouloir supprimer cette commande ? Cette action est irréversible.",
+            "bulkDeleteTitle": "Supprimer les commandes sélectionnées",
+            "bulkDeleteDesc": "Êtes-vous sûr de vouloir supprimer {0} commandes sélectionnées ? Cette action est irréversible.",
+            "cancel": "Annuler",
+            "delete": "Supprimer"
+          },
+          "toast": {
+            "success": "Commande supprimée avec succès",
+            "failed": "Échec de la suppression de la commande",
+            "bulkDeleted": "{0} commandes supprimées avec succès",
+            "bulkDeleteFailed": "Échec de la suppression des commandes sélectionnées"
+          }
+        }
+      }
+    
+      ,
       "dialogs": {
         "orderDetails": {
           "title": "Détails de la commande #{orderNumber}",
@@ -297,6 +330,41 @@
           "toast": {
             "success": "Commande mise à jour avec succès",
             "failed": "Échec de la mise à jour de la commande"
+          }
+        }
+      }
+    },
+    "orderItems": {
+      "title": "Gestion des articles de commande",
+      "description": "Gérez les détails, la quantité et le prix des articles inclus dans une commande",
+      "components": {
+        "orderItemsTable": {
+          "title": "Liste des articles de commande",
+          "table": {
+            "selectRow": "Sélectionner cette ligne",
+            "orderNumber": "Numéro de commande",
+            "sku": "SKU / Nom du produit",
+            "quantity": "Quantité",
+            "unitPrice": "Prix unitaire",
+            "totalPrice": "Total",
+            "actions": "Actions",
+            "searchPlaceholder": "Rechercher par SKU ou nom du produit...",
+            "empty": "Aucun article de commande trouvé",
+            "deleteSelected": "Supprimer {0} articles sélectionnés"
+          },
+          "dialogs": {
+            "deleteTitle": "Supprimer l'article de commande",
+            "deleteDesc": "Êtes-vous sûr de vouloir supprimer cet article de commande ? Cette action est irréversible.",
+            "bulkDeleteTitle": "Supprimer les articles de commande sélectionnés",
+            "bulkDeleteDesc": "Êtes-vous sûr de vouloir supprimer {0} articles de commande sélectionnés ? Cette action est irréversible.",
+            "cancel": "Annuler",
+            "delete": "Supprimer"
+          },
+          "toast": {
+            "itemDeleted": "Article de commande supprimé",
+            "itemDeleteFailed": "Échec de la suppression de l'article de commande",
+            "bulkDeleted": "{0} articles de commande supprimés",
+            "bulkDeleteFailed": "Échec de la suppression des articles de commande"
           }
         }
       }

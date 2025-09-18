@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 
 interface AuthGuardProps {
@@ -12,18 +12,19 @@ interface AuthGuardProps {
 export function AuthGuard({ children, requireAuth = true }: AuthGuardProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!isLoading) {
       if (requireAuth && !isAuthenticated) {
-        // Redirect to login if authentication is required but user is not authenticated
-        router.push("/auth/login");
+        // Redirect to login and keep track of where user was
+        router.push(`/auth/login?redirect=${encodeURIComponent(pathname)}`);
       } else if (!requireAuth && isAuthenticated) {
-        // Redirect to dashboard if user is authenticated but trying to access login page
+        // If already logged in and on login/register, send them to dashboard
         router.push("/dashboard");
       }
     }
-  }, [isAuthenticated, isLoading, requireAuth, router]);
+  }, [isAuthenticated, isLoading, requireAuth, router, pathname]);
 
   // Show loading while checking authentication
   if (isLoading) {
@@ -37,14 +38,9 @@ export function AuthGuard({ children, requireAuth = true }: AuthGuardProps) {
     );
   }
 
-  // Don't render anything while redirecting
-  if (requireAuth && !isAuthenticated) {
-    return null;
-  }
-
-  if (!requireAuth && isAuthenticated) {
-    return null;
-  }
+  // Don’t render anything while redirecting
+  if (requireAuth && !isAuthenticated) return null;
+  if (!requireAuth && isAuthenticated) return null;
 
   return <>{children}</>;
 }

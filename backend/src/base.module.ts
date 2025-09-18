@@ -6,6 +6,7 @@ import { CommonModule } from './common/common.module';
 import { UsersModule } from './users/users.module';
 import { OrdersModule } from './orders/orders.module';
 import { BarcodeModule } from './barcode/barcode.module';
+import { OrderItemsModule } from './order-items/order-items.module';
 
 @Module({
   imports: [
@@ -15,7 +16,9 @@ import { BarcodeModule } from './barcode/barcode.module';
     CommonModule,
     UsersModule,
     OrdersModule,
-    BarcodeModule],
+    BarcodeModule,
+    OrderItemsModule,
+  ],
   controllers: [],
   providers: [],
 })

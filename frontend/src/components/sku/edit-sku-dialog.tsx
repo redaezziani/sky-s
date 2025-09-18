@@ -203,13 +203,13 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
                           value={controllerField.value}
                           onValueChange={controllerField.onChange}
                         >
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full max-w-[400px]">
                             <SelectValue
                               className="truncate"
                               placeholder={t.editSKU.placeholders.selectVariant}
                             />
                           </SelectTrigger>
-                          <SelectContent className="w-full max-w-[70%]">
+                          <SelectContent className="w-full max-w-[400px]">
                             {allVariants.map((variant) => (
                               <SelectItem
                                 className="truncate"

@@ -24,6 +24,25 @@ const bonaImageFiles = [
   'f2b1242f-5d93-4add-9f1a-76ab145bad7e.webp',
 ];
 
+const antaBlackImageFiles = [
+  '2ac51811-882f-44aa-b504-d9c9839d76a4.webp',
+  '65ac52ab-8f49-440f-8bc8-d5103ff7c669.webp',
+  '8d384ba2-ee77-4393-b065-a53faa069dc4.webp',
+  '9750f08d-7196-4ea7-9bd9-96b949620899.webp',
+  'c4a2c28e-ed0f-4961-8fc0-745d60dd4f31.webp',
+  'ff33d1a4-1177-4431-b072-ea7ba41d7946.webp',
+];
+const antaGreyImageFiles = [
+  '061671a5-c58b-4049-88b9-f1ef544943ed.webp',
+  '11d3841e-798c-4f17-ab23-2aee35ab6940.webp',
+  '8453a0f9-a468-42c0-98ee-bdd7544a9c69.webp',
+  'af53dcfc-04a9-45fa-a1a5-d96289c62cfd.webp',
+  'b1a15fe3-4dc5-474a-9510-3e0ad965fd11.webp',
+  'c6add983-3c1c-44b8-958c-0b5a831fc441.webp',
+  'e7a832d3-2961-4cbe-a8fc-291e15a314b5.webp',
+  'ff9dc3c8-67ec-4f00-9b1b-ee7317213873.webp',
+];
+
 async function uploadNB9060Images() {
   const uploadPromises = nb9060ImageFiles.map(async (filename) => {
     const filePath = path.resolve(__dirname, './new-balance', filename);
@@ -107,6 +126,56 @@ async function uploadJordanImages() {
   return Promise.all(uploadPromises);
 }
 
+async function uploadAntaBlackImages() {
+  const uploadPromises = antaBlackImageFiles.map(async (filename) => {
+    const filePath = path.resolve(__dirname, './anta/black', filename);
+    const buffer = fs.readFileSync(filePath);
+    const file: Express.Multer.File = {
+      fieldname: 'file',
+      originalname: filename,
+      encoding: '7bit',
+      mimetype: 'image/webp',
+      size: buffer.length,
+      buffer,
+      destination: '',
+      filename,
+      path: filePath,
+      stream: undefined as any,
+    };
+    const result = await imageKit.uploadImage(file, {
+      fileName: filename,
+      folder: 'products/anta-tank/black',
+    });
+    return result.url;
+  });
+  return Promise.all(uploadPromises);
+}
+
+async function uploadAntaGreyImages() {
+  const uploadPromises = antaGreyImageFiles.map(async (filename) => {
+    const filePath = path.resolve(__dirname, './anta/grey', filename);
+    const buffer = fs.readFileSync(filePath);
+    const file: Express.Multer.File = {
+      fieldname: 'file',
+      originalname: filename,
+      encoding: '7bit',
+      mimetype: 'image/webp',
+      size: buffer.length,
+      buffer,
+      destination: '',
+      filename,
+      path: filePath,
+      stream: undefined as any,
+    };
+    const result = await imageKit.uploadImage(file, {
+      fileName: filename,
+      folder: 'products/anta-tank/grey',
+    });
+    return result.url;
+  });
+  return Promise.all(uploadPromises);
+}
+
 export async function seedProducts() {
   console.log('🌱 Seeding New Balance 9060 product...');
 
@@ -117,6 +186,8 @@ export async function seedProducts() {
   const nb9060Images = await uploadNB9060Images();
   const bonaImages = await uploadBonaImages();
   const jordanImages = await uploadJordanImages();
+  const antaBlackImages = await uploadAntaBlackImages();
+  const antaGreyImages = await uploadAntaGreyImages();
 
   // Find or create sneakers category
   const categorySlug = 'sneakers';
@@ -164,6 +235,22 @@ export async function seedProducts() {
       },
     });
     console.log('✅ Created category: Jordan');
+  }
+
+  // Find or create ANTA category
+  const antaCategorySlug = 'anta';
+  let antaCategory = await prisma.category.findUnique({
+    where: { slug: antaCategorySlug },
+  });
+  if (!antaCategory) {
+    antaCategory = await prisma.category.create({
+      data: {
+        name: 'ANTA',
+        slug: antaCategorySlug,
+        isActive: true,
+      },
+    });
+    console.log('✅ Created category: ANTA');
   }
 
   // Create New Balance 9060 product only
@@ -470,6 +557,103 @@ export async function seedProducts() {
     console.log(
       '✅ Created product: Vichy Dercos Densi-Solutions Thickening Shampoo',
     );
+  }
+
+  // Add ANTA Men's Regular Fit Workout Training Commute Knit Tank product
+  const antaSlug = 'anta-mens-regular-fit-knit-tank';
+  const antaExists = await prisma.product.findUnique({
+    where: { slug: antaSlug },
+  });
+  if (!antaExists) {
+    await prisma.product.create({
+      data: {
+        name: "ANTA Men's Regular Fit Workout Training Commute Knit Tank",
+        slug: antaSlug,
+        description:
+          'Versatile sports/everyday wear. Keeps you dry during workouts. Gym, outdoors & casual. Free-movement loose fit. Ice Skin quick-cool.',
+        shortDesc: 'Regular Fit Workout Training Commute Knit Tank',
+        coverImage: antaBlackImages[0],
+        isFeatured: true,
+        metaTitle: "ANTA Men's Regular Fit Workout Training Commute Knit Tank",
+        metaDesc: 'Black and Grey, Male, Training, Sports',
+        isActive: true,
+        sortOrder: 0,
+        categories: {
+          connect: { id: antaCategory.id },
+        },
+        variants: {
+          create: [
+            {
+              name: 'Black',
+              attributes: {
+                color: 'Black',
+                gender: 'Male',
+                style: 'Sports',
+                sportType: 'Training',
+                fit: 'Regular',
+              },
+              isActive: true,
+              sortOrder: 0,
+              skus: {
+                create: [
+                  {
+                    sku: 'ANTA-TANK-BLACK-M',
+                    price: 29.99,
+                    stock: 20,
+                    weight: 200,
+                    dimensions: { length: 70, width: 50, height: 2 },
+                    coverImage: antaBlackImages[0],
+                    lowStockAlert: 3,
+                    isActive: true,
+                    images: {
+                      create: antaBlackImages.map((url, idx) => ({
+                        url,
+                        altText: `ANTA Tank Black view ${idx + 1}`,
+                        position: idx,
+                      })),
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              name: 'Grey',
+              attributes: {
+                color: 'Grey',
+                gender: 'Male',
+                style: 'Sports',
+                sportType: 'Training',
+                fit: 'Regular',
+              },
+              isActive: true,
+              sortOrder: 1,
+              skus: {
+                create: [
+                  {
+                    sku: 'ANTA-TANK-GREY-M',
+                    price: 29.99,
+                    stock: 20,
+                    weight: 200,
+                    dimensions: { length: 70, width: 50, height: 2 },
+                    coverImage: antaGreyImages[0],
+                    lowStockAlert: 3,
+                    isActive: true,
+                    images: {
+                      create: antaGreyImages.map((url, idx) => ({
+                        url,
+                        altText: `ANTA Tank Grey view ${idx + 1}`,
+                        position: idx,
+                      })),
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    });
+    console.log('✅ Created product: ANTA Tank');
   }
 
   console.log('✅ Product seeding complete');
