@@ -6,12 +6,14 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { Decimal } from 'generated/prisma/runtime/index-browser';
 import { QueryOrderDto } from './dto/query-order.dto';
 import { PdfService } from 'src/common/services/pdf.service';
+import { ImageKitService } from 'src/common/services/imagekit.service';
 
 @Injectable()
 export class OrdersService {
   constructor(
     private prisma: PrismaService,
     private pdfService: PdfService,
+    private imageKitService: ImageKitService,
   ) {}
 
   private async generateOrderNumber(): Promise<string> {
@@ -92,6 +94,8 @@ export class OrdersService {
         deliveryLng: createOrderDto.deliveryLng ?? null,
         deliveryPlace: createOrderDto.deliveryPlace ?? null,
 
+        invoiceUrl: '',
+        invoiceFileId: '',
         items: {
           create: itemsData,
         },
@@ -99,7 +103,7 @@ export class OrdersService {
       include: { items: true },
     });
 
-    const pdfUrl = await this.pdfService.generateOrderPdf({
+    const { url, fileId } = await this.pdfService.generateOrderPdf({
       ...order,
       items: order.items.map((i) => ({
         ...i,
@@ -109,7 +113,13 @@ export class OrdersService {
       })),
     });
 
-    return { ...this.formatOrderResponse(order), pdfUrl };
+    // Update order with invoice URL and fileId
+    await this.prisma.order.update({
+      where: { id: order.id },
+      data: { invoiceUrl: url, invoiceFileId: fileId },
+    });
+
+    return { ...this.formatOrderResponse(order), pdfUrl: url };
   }
 
   async findAll(query: QueryOrderDto): Promise<{
@@ -259,12 +269,35 @@ export class OrdersService {
       data,
       include: { items: true },
     });
+    // lets delete old invoice and generate a new one
+    if (order.invoiceFileId) {
+      await this.imageKitService.deleteImage(order.invoiceFileId);
+    }
+    const { url, fileId } = await this.pdfService.generateOrderPdf({
+      ...updatedOrder,
+      items: updatedOrder.items.map((i) => ({
+        ...i,
+        name: i.productName,
+        quantity: i.quantity,
+        totalPrice: i.totalPrice.toNumber(),
+      })),
+    });
+    await this.prisma.order.update({
+      where: { id: updatedOrder.id },
+      data: { invoiceUrl: url, invoiceFileId: fileId },
+    });
 
     return this.formatOrderResponse(updatedOrder);
   }
 
   async remove(id: string): Promise<void> {
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+    });
+    if (!order) throw new NotFoundException('Order not found');
     await this.prisma.order.delete({ where: { id } });
+    if (order.invoiceFileId)
+      await this.imageKitService.deleteImage(order.invoiceFileId);
   }
 
   private formatOrderResponse(order: any): OrderResponseDto {

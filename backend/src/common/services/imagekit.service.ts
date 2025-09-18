@@ -164,7 +164,7 @@ export class ImageKitService {
     };
   }
 
-  // upload pdf file
+  // upload pdf file // url and fileId
   async uploadPdf(
     file: Express.Multer.File,
     options: ImageUploadOptions = {}
@@ -206,6 +206,7 @@ export class ImageKitService {
         name: uploadResponse.name,
         size: uploadResponse.size,
         filePath: uploadResponse.filePath,
+        
       };
     } catch (error) {
       console.error('ImageKit upload error:', error);

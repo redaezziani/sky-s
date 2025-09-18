@@ -73,7 +73,8 @@ export class PdfService {
     return truncated;
   }
 
-  async generateOrderPdf(order: any): Promise<string> {
+  // url and fileId
+  async generateOrderPdf(order: any): Promise<{url: string, fileId: string}> {
     const doc = new PDFDocument({
       size: 'A4',
       margin: 50,
@@ -361,7 +362,8 @@ export class PdfService {
       } as Express.Multer.File,
       { folder: 'orders' },
     );
-
-    return uploaded.url;
+    const url = uploaded.url;
+    const fileId = uploaded.fileId;
+    return { url, fileId}
   }
 }
