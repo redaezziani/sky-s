@@ -183,7 +183,7 @@ model ProductSKUImage {
   id        String   @id @default(uuid())
   skuId     String
   url       String   @db.VarChar(500)
-  fileId    String?  @db.VarChar(200) // store ImageKit fileId here
+  fileId    String?  @db.VarChar(200) @default("") // store ImageKit fileId here
   altText   String?  @db.VarChar(200)
   position  Int      @default(0)
   createdAt DateTime @default(now())
@@ -244,6 +244,9 @@ model Order {
   totalAmount     Decimal       @db.Decimal(10, 2)
   currency        String        @default("USD") @db.VarChar(3)
   
+  // pdf invoice url
+  invoiceUrl      String?       @db.VarChar(500) @default("")
+  invoiceFileId   String?       @db.VarChar(200) @default("") // store ImageKit fileId here
   // Shipping Information
   shippingName    String        @db.VarChar(100)
   shippingEmail   String        @db.VarChar(255)
