@@ -413,7 +413,10 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
                         className="absolute top-1 right-1 p-1 rounded-full hover:cursor-pointer"
                         onClick={() => handleDeleteImage(img.id)}
                       >
-                        <Trash2 className="text-destructive" size={16} />
+                        <Trash2
+                          className="hover:text-destructive text-muted transition-colors ease-in-out duration-500"
+                          size={16}
+                        />
                       </button>
                     </div>
                   ))}

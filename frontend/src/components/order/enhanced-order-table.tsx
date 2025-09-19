@@ -153,11 +153,11 @@ export function EnhancedOrderTable() {
                 : order.status === "SHIPPED"
                 ? "fill-blue-500"
                 : order.status === "DELIVERED"
-                ? "fill-green-500"
+                ? "fill-green-400"
                 : order.status === "CANCELLED"
                 ? "fill-red-500"
                 : "fill-gray-500"
-            } dark:fill-current`}
+            } `}
           />
           {getOrderStatusLabel(order.status)}
         </Badge>
@@ -171,11 +171,11 @@ export function EnhancedOrderTable() {
           <IconCircleCheckFilled
             className={`${
               order.paymentStatus === "COMPLETED"
-                ? "fill-green-500"
+                ? "fill-green-400"
                 : order.paymentStatus === "FAILED"
                 ? "fill-red-500"
                 : "fill-gray-500"
-            } dark:fill-current`}
+            }  `}
           />
           {getPaymentStatusLabel(order.paymentStatus)}
         </Badge>
