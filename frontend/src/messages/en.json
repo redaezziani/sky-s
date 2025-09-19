@@ -31,13 +31,13 @@
     "lastPage": "Last page"
   },
   "multiImageUploader": {
-          "dropHere": "Drop your images here",
-          "selectImages": "Select images",
-          "formats": "SVG, PNG, JPG or GIF (max. {maxSizeMB}MB)",
-          "errors": {
-            "maxSize": "{name} exceeds the maximum file size"
-          }
-        },
+    "dropHere": "Drop your images here",
+    "selectImages": "Select images",
+    "formats": "SVG, PNG, JPG or GIF (max. {maxSizeMB}MB)",
+    "errors": {
+      "maxSize": "{name} exceeds the maximum file size"
+    }
+  },
   "pages": {
     "skus": {
       "title": "SKU & Inventory Management",
@@ -194,9 +194,8 @@
             "bulkDeleteFailed": "Failed to delete selected orders"
           }
         }
-      }
-    
-      ,
+      },
+
       "dialogs": {
         "orderDetails": {
           "title": "Order #{orderNumber} Details",
@@ -365,6 +364,59 @@
             "itemDeleteFailed": "Failed to delete order item",
             "bulkDeleted": "{0} order items deleted",
             "bulkDeleteFailed": "Failed to delete order items"
+          }
+        }
+      }
+    },
+    "analytics": {
+      "components": {
+        "sectionCards": {
+          "totalOrders": {
+            "title": "Total Orders",
+            "description": "Orders placed in the last 30 days"
+          },
+          "revenue": {
+            "title": "Revenue",
+            "description": "Revenue generated in the last 30 days"
+          },
+          "activeUsers": {
+            "title": "Active Users",
+            "description": "Users who logged in within the last 30 days"
+          },
+          "productsSold": {
+            "title": "Products Sold",
+            "description": "Total products sold in the last 30 days"
+          }
+        },
+        "chartAreaInteractive": {
+          "title": "Analytics",
+          "description": {
+            "desktop": "Total for the selected period",
+            "mobile": "Selected period"
+          },
+          "periods": {
+            "90d": "Last 3 months",
+            "30d": "Last 30 days",
+            "7d": "Last 7 days"
+          },
+          "chartLabels": {
+            "orders": "Orders",
+            "revenue": "Revenue",
+            "products": "Products"
+          },
+          "selectPeriodPlaceholder": "Select period"
+        },
+        "chartTopProducts": {
+          "title": "Top 10 Products",
+          "description": "Most ordered products ",
+          "selectPeriodPlaceholder": "Select period",
+          "periods": {
+            "90d": "Last 3 months",
+            "30d": "Last 30 days",
+            "7d": "Last 7 days"
+          },
+          "labels": {
+            "totalOrdered": "Total Ordered"
           }
         }
       }

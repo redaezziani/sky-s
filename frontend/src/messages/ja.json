@@ -168,37 +168,36 @@
     "orders": {
       "title": "注文管理",
       "description": "顧客の注文、支払い、配送情報を管理します",
-      "components":{
-        
-      "ordersTable": {
-        "title": "注文一覧",
-        "table": {
-          "selectRow": "この行を選択",
-          "orderNumber": "注文番号",
-          "status": "ステータス",
-          "paymentStatus": "支払い",
-          "total": "合計",
-          "createdAt": "作成日",
-          "actions": "操作",
-          "searchPlaceholder": "注文番号、ユーザー、ステータスで検索...",
-          "empty": "注文が見つかりません",
-          "deleteSelected": "{0} 件選択を削除"
-        },
-        "dialogs": {
-          "deleteTitle": "注文を削除",
-          "deleteDesc": "この注文を削除してもよろしいですか？ この操作は元に戻せません。",
-          "bulkDeleteTitle": "選択した注文を削除",
-          "bulkDeleteDesc": "選択した {0} 件の注文を削除してもよろしいですか？ この操作は元に戻せません。",
-          "cancel": "キャンセル",
-          "delete": "削除"
-        },
-        "toast": {
-          "success": "注文を削除しました",
-          "failed": "注文の削除に失敗しました",
-          "bulkDeleted": "{0} 件の注文を削除しました",
-          "bulkDeleteFailed": "注文の削除に失敗しました"
+      "components": {
+        "ordersTable": {
+          "title": "注文一覧",
+          "table": {
+            "selectRow": "この行を選択",
+            "orderNumber": "注文番号",
+            "status": "ステータス",
+            "paymentStatus": "支払い",
+            "total": "合計",
+            "createdAt": "作成日",
+            "actions": "操作",
+            "searchPlaceholder": "注文番号、ユーザー、ステータスで検索...",
+            "empty": "注文が見つかりません",
+            "deleteSelected": "{0} 件選択を削除"
+          },
+          "dialogs": {
+            "deleteTitle": "注文を削除",
+            "deleteDesc": "この注文を削除してもよろしいですか？ この操作は元に戻せません。",
+            "bulkDeleteTitle": "選択した注文を削除",
+            "bulkDeleteDesc": "選択した {0} 件の注文を削除してもよろしいですか？ この操作は元に戻せません。",
+            "cancel": "キャンセル",
+            "delete": "削除"
+          },
+          "toast": {
+            "success": "注文を削除しました",
+            "failed": "注文の削除に失敗しました",
+            "bulkDeleted": "{0} 件の注文を削除しました",
+            "bulkDeleteFailed": "注文の削除に失敗しました"
+          }
         }
-      }
       },
       "dialogs": {
         "orderDetails": {
@@ -368,6 +367,59 @@
             "itemDeleteFailed": "注文アイテムの削除に失敗しました",
             "bulkDeleted": "{0} 件の注文アイテムを削除しました",
             "bulkDeleteFailed": "注文アイテムの削除に失敗しました"
+          }
+        }
+      }
+    },
+    "analytics": {
+      "components": {
+        "sectionCards": {
+          "totalOrders": {
+            "title": "合計注文数",
+            "description": "過去30日間に行われた注文数"
+          },
+          "revenue": {
+            "title": "売上",
+            "description": "過去30日間に生成された売上"
+          },
+          "activeUsers": {
+            "title": "アクティブユーザー",
+            "description": "過去30日間にログインしたユーザー"
+          },
+          "productsSold": {
+            "title": "販売された商品",
+            "description": "過去30日間に販売された合計商品数"
+          }
+        },
+        "chartAreaInteractive": {
+          "title": "分析",
+          "description": {
+            "desktop": "選択期間の合計",
+            "mobile": "選択期間"
+          },
+          "periods": {
+            "90d": "過去3か月",
+            "30d": "過去30日間",
+            "7d": "過去7日間"
+          },
+          "chartLabels": {
+            "orders": "注文",
+            "revenue": "売上",
+            "products": "商品"
+          },
+          "selectPeriodPlaceholder": "期間を選択"
+        },
+        "chartTopProducts": {
+          "title": "トップ10製品",
+          "description": "選択した期間の最も注文された製品",
+          "selectPeriodPlaceholder": "期間を選択",
+          "periods": {
+            "90d": "過去3か月",
+            "30d": "過去30日間",
+            "7d": "過去7日間"
+          },
+          "labels": {
+            "totalOrdered": "合計注文数"
           }
         }
       }

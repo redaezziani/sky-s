@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { OrdersModule } from './orders/orders.module';
 import { BarcodeModule } from './barcode/barcode.module';
 import { OrderItemsModule } from './order-items/order-items.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { OrderItemsModule } from './order-items/order-items.module';
     OrdersModule,
     BarcodeModule,
     OrderItemsModule,
+    AnalyticsModule
   ],
   controllers: [],
   providers: [],

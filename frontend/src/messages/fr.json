@@ -194,9 +194,8 @@
             "bulkDeleteFailed": "Échec de la suppression des commandes sélectionnées"
           }
         }
-      }
-    
-      ,
+      },
+
       "dialogs": {
         "orderDetails": {
           "title": "Détails de la commande #{orderNumber}",
@@ -365,6 +364,59 @@
             "itemDeleteFailed": "Échec de la suppression de l'article de commande",
             "bulkDeleted": "{0} articles de commande supprimés",
             "bulkDeleteFailed": "Échec de la suppression des articles de commande"
+          }
+        }
+      }
+    },
+    "analytics": {
+      "components": {
+        "sectionCards": {
+          "totalOrders": {
+            "title": "Commandes Totales",
+            "description": "Commandes passées au cours des 30 derniers jours"
+          },
+          "revenue": {
+            "title": "Revenu",
+            "description": "Revenu généré au cours des 30 derniers jours"
+          },
+          "activeUsers": {
+            "title": "Utilisateurs Actifs",
+            "description": "Utilisateurs connectés au cours des 30 derniers jours"
+          },
+          "productsSold": {
+            "title": "Produits Vendus",
+            "description": "Nombre total de produits vendus au cours des 30 derniers jours"
+          }
+        },
+        "chartAreaInteractive": {
+          "title": "Analytique",
+          "description": {
+            "desktop": "Total pour la période sélectionnée",
+            "mobile": "Période sélectionnée"
+          },
+          "periods": {
+            "90d": "3 derniers mois",
+            "30d": "30 derniers jours",
+            "7d": "7 derniers jours"
+          },
+          "chartLabels": {
+            "orders": "Commandes",
+            "revenue": "Revenu",
+            "products": "Produits"
+          },
+          "selectPeriodPlaceholder": "Sélectionner une période"
+        },
+        "chartTopProducts": {
+          "title": "Top 10 des produits",
+          "description": "Produits les plus commandés ",
+          "selectPeriodPlaceholder": "Sélectionner la période",
+          "periods": {
+            "90d": "3 derniers mois",
+            "30d": "30 derniers jours",
+            "7d": "7 derniers jours"
+          },
+          "labels": {
+            "totalOrdered": "Total commandé"
           }
         }
       }
