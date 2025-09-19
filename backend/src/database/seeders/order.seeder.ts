@@ -1,24 +1,30 @@
 import { PrismaClient } from '../../../generated/prisma';
+import { addDays, startOfMonth, endOfMonth } from 'date-fns';
 
 const prisma = new PrismaClient();
 
-export async function seedOrders() {
-  console.log('🌱 Seeding orders...');
+function randomDateThisMonth(): Date {
+  const start = startOfMonth(new Date());
+  const end = endOfMonth(new Date());
+  const diff = end.getTime() - start.getTime();
+  return new Date(start.getTime() + Math.random() * diff);
+}
 
-  // Get some users
+export async function seedOrders() {
+  console.log('🌱 Seeding 40 orders...');
+
+  // Get some active users
   const users = await prisma.user.findMany({
     where: { isActive: true },
-    take: 2,
   });
-  if (users.length === 0) {
+  if (!users.length) {
     console.log('No active users found. Skipping order seeding.');
     return;
   }
 
-  // Get some products and their SKUs
+  // Get some active products with SKUs
   const products = await prisma.product.findMany({
     where: { isActive: true },
-    take: 2,
     include: {
       variants: {
         include: {
@@ -27,22 +33,26 @@ export async function seedOrders() {
       },
     },
   });
-  if (products.length === 0) {
+  if (!products.length) {
     console.log('No active products found. Skipping order seeding.');
     return;
   }
 
-  for (const [i, user] of users.entries()) {
+  for (let i = 0; i < 40; i++) {
+    const user = users[i % users.length];
     const product = products[i % products.length];
     const variant = product.variants[0];
     const sku = variant.skus[0];
 
-    // Create an order
+    const createdAt = randomDateThisMonth();
+    const shippedAt = addDays(createdAt, 1);
+    const deliveredAt = addDays(createdAt, 2);
+
     const order = await prisma.order.create({
       data: {
         orderNumber: `ORD-${Date.now()}-${i}`,
         userId: user.id,
-        status: 'CONFIRMED',
+        status: 'DELIVERED',
         paymentStatus: 'COMPLETED',
         subtotal: sku.price,
         taxAmount: 0,
@@ -67,9 +77,9 @@ export async function seedOrders() {
         },
         notes: 'Seeded order',
         trackingNumber: `TRACK-${Date.now()}-${i}`,
-        shippedAt: new Date(),
-        deliveredAt: new Date(),
-        // Delivery Coordinates
+        createdAt,
+        shippedAt,
+        deliveredAt,
         deliveryLat: 35.751206,
         deliveryLng: -5.800534,
         deliveryPlace: 'no 3, Rue 20, Tangier 90060',
@@ -77,7 +87,7 @@ export async function seedOrders() {
           create: [
             {
               skuId: sku.id,
-              quantity: 1,
+              quantity: Math.ceil(Math.random() * 5), // random quantity 1-5
               unitPrice: sku.price,
               totalPrice: sku.price,
               productName: product.name,
@@ -87,8 +97,11 @@ export async function seedOrders() {
         },
       },
     });
-    console.log(`✅ Created order ${order.orderNumber} for user ${user.email}`);
+
+    console.log(
+      `✅ Created order ${order.orderNumber} on ${createdAt.toDateString()}`,
+    );
   }
 
-  console.log('✅ Orders seeding complete');
+  console.log('✅ 40 Orders seeding complete');
 }

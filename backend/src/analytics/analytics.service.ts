@@ -130,14 +130,22 @@ export class AnalyticsService {
 
     // Aggregate orders, revenue, and products per day
     orders.forEach((order) => {
+      if (!order?.createdAt) return; // skip if createdAt is missing
+
       const date = format(order.createdAt, 'yyyy-MM-dd');
+
+      // Ensure the date entry exists
+      if (!data[date]) {
+        data[date] = { date, orders: 0, revenue: 0, products: 0 };
+      }
+
       data[date].orders += 1;
-      data[date].revenue += Number(order.totalAmount);
+      data[date].revenue += Number(order.totalAmount ?? 0);
       data[date].products +=
-        order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+        order.items?.reduce((sum, item) => sum + (item.quantity ?? 0), 0) ?? 0;
     });
 
-    // Return sorted array
+    // Return a sorted array by date ascending
     return Object.values(data).sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     );
@@ -173,7 +181,7 @@ export class AnalyticsService {
       where: {
         order: {
           createdAt: { gte: fromDate },
-          status: { not: 'CANCELLED' }, 
+          status: { not: 'CANCELLED' },
         },
       },
       select: {
