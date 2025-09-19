@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AnalyticsCardDto } from './dto/analytics.dto';
 import { subDays, format } from 'date-fns';
 import { TopProductsDto } from './dto/analytics-top-products.dto';
+import { TopProductsMetricsDto } from './dto/analytics-top-products-metrics.dto';
 @Injectable()
 export class AnalyticsService {
   constructor(private prisma: PrismaService) {}
@@ -161,6 +162,50 @@ export class AnalyticsService {
       productName: r.productName,
       totalOrdered: r._sum.quantity ?? 0, // <- coerce null to 0
     }));
+  }
+
+  async getTopProductsMetrics(
+    period: number,
+  ): Promise<TopProductsMetricsDto[]> {
+    const fromDate = new Date(Date.now() - period * 24 * 60 * 60 * 1000);
+
+    const orderItems = await this.prisma.orderItem.findMany({
+      where: {
+        order: {
+          createdAt: { gte: fromDate },
+          status: { not: 'CANCELLED' }, 
+        },
+      },
+      select: {
+        productName: true,
+        quantity: true,
+        totalPrice: true,
+      },
+    });
+
+    const metricsMap: Record<
+      string,
+      { totalOrdered: number; totalRevenue: number }
+    > = {};
+
+    for (const item of orderItems) {
+      if (!metricsMap[item.productName]) {
+        metricsMap[item.productName] = { totalOrdered: 0, totalRevenue: 0 };
+      }
+      metricsMap[item.productName].totalOrdered += item.quantity;
+      metricsMap[item.productName].totalRevenue += Number(item.totalPrice);
+    }
+
+    const result: TopProductsMetricsDto[] = Object.entries(metricsMap)
+      .map(([label, values]) => ({
+        label,
+        totalOrdered: values.totalOrdered,
+        totalRevenue: values.totalRevenue,
+      }))
+      .sort((a, b) => b.totalOrdered - a.totalOrdered)
+      .slice(0, 10); // top 10
+
+    return result;
   }
 
   calculateGrowth(current: number, previous: number) {

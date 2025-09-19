@@ -6,6 +6,8 @@ import { AnalyticsChartDataDto } from './dto/analytics-chart-response.dto';
 import { AnalyticsChartQueryDto } from './dto/analytics-chart.dto';
 import { TopProductsDto } from './dto/analytics-top-products.dto';
 import { AnalyticsTopProductsQueryDto } from './dto/analytics-top-products-query.dto';
+import { TopProductsMetricsDto } from './dto/analytics-top-products-metrics.dto';
+import { AnalyticsTopProductsMetricsQueryDto } from './dto/analytics-top-products-metrics-query.dto';
 
 @ApiTags('Analytics')
 @Controller('analytics')
@@ -62,5 +64,24 @@ export class AnalyticsController {
     @Query('period') query?: AnalyticsTopProductsQueryDto,
   ): Promise<TopProductsDto[]> {
     return this.analyticsService.getTopProducts(query?.period || 30);
+  }
+
+  @Get('top-products-metrics')
+  @ApiOperation({ summary: 'Get top products metrics for charting' })
+  @ApiQuery({
+    name: 'period',
+    required: false,
+    description: 'Period in days (default 30)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Top products metrics retrieved successfully',
+    type: [TopProductsMetricsDto],
+  })
+  async getTopProductsMetrics(
+    @Query() query: AnalyticsTopProductsMetricsQueryDto,
+  ): Promise<TopProductsMetricsDto[]> {
+    const period = query.period || 30;
+    return this.analyticsService.getTopProductsMetrics(period);
   }
 }

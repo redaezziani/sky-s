@@ -418,6 +418,20 @@
           "labels": {
             "totalOrdered": "Total commandé"
           }
+        },
+        "chartTopProductsRadar": {
+          "title": "Top 10 Produits",
+          "description": "Produits les plus commandés ",
+          "selectPeriodPlaceholder": "Sélectionnez la période",
+          "periods": {
+            "90d": "3 derniers mois",
+            "30d": "30 derniers jours",
+            "7d": "7 derniers jours"
+          },
+          "labels": {
+            "totalOrdered": "Total Commandé"
+          },
+          "labelSuffix": "période"
         }
       }
     }

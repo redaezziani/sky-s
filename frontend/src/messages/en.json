@@ -418,6 +418,20 @@
           "labels": {
             "totalOrdered": "Total Ordered"
           }
+        },
+        "chartTopProductsRadar": {
+          "title": "Top 10 Products",
+          "description": "Most ordered products ",
+          "selectPeriodPlaceholder": "Select period",
+          "periods": {
+            "90d": "Last 3 months",
+            "30d": "Last 30 days",
+            "7d": "Last 7 days"
+          },
+          "labels": {
+            "totalOrdered": "Total Ordered"
+          },
+          "labelSuffix": "period"
         }
       }
     }

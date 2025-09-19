@@ -421,6 +421,20 @@
           "labels": {
             "totalOrdered": "合計注文数"
           }
+        },
+        "chartTopProductsRadar": {
+          "title": "トップ10製品",
+          "description": "選択した期間で最も注文された製品",
+          "selectPeriodPlaceholder": "期間を選択",
+          "periods": {
+            "90d": "過去3か月",
+            "30d": "過去30日間",
+            "7d": "過去7日間"
+          },
+          "labels": {
+            "totalOrdered": "合計注文数",
+            "totalRevenue": "売上合計"
+          }
         }
       }
     }
