@@ -24,61 +24,8 @@ services:
       timeout: 5s
       retries: 5
 
-  # pgAdmin for database management (optional but helpful)
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: sky-s-pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    ports:
-      - "5051:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json
-    networks:
-      - sky-s-network
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  # Redis for caching and sessions (optional but useful for scaling)
-  redis:
-    image: redis:7-alpine
-    container_name: sky-s-redis
-    restart: unless-stopped
-    ports:
-      - "6380:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - sky-s-network
-    command: redis-server --appendonly yes --requirepass redis123
-    healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-
-  # MailHog for email testing (catches all emails sent during development)
-  mailhog:
-    image: mailhog/mailhog:latest
-    container_name: sky-s-mailhog
-    restart: unless-stopped
-    ports:
-      - "1026:1025" # SMTP port
-      - "8026:8025" # Web UI port
-    networks:
-      - sky-s-network
-
 volumes:
   postgres_data:
-    driver: local
-  pgadmin_data:
-    driver: local
-  redis_data:
     driver: local
 
 networks:
