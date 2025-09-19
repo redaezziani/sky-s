@@ -116,7 +116,7 @@ export const ResendVerificationForm = memo<ResendVerificationFormProps>(
 
     return (
       <div className={cn("flex flex-col gap-6", className)}>
-        <Card>
+        <Card className="border-none bg-transparent  ">
           <CardHeader>
             <CardTitle>Resend Email Verification</CardTitle>
             <CardDescription>
