@@ -27,6 +27,14 @@ if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/
     exit 1
 fi
 
+# --- Remove old backend Docker image ---
+if docker image inspect sky-s-backend >/dev/null 2>&1; then
+    print_status "Removing old Docker image..."
+    docker rm -f sky-s-backend 2>/dev/null || true
+    docker rmi -f sky-s-backend 2>/dev/null || true
+    print_success "Old Docker image removed!"
+fi
+
 # --- Build backend Docker image ---
 print_status "Building backend Docker image..."
 docker build -t sky-s-backend ./backend && print_success "Backend Docker image built!" || { print_error "Failed to build backend Docker image"; exit 1; }
@@ -60,6 +68,15 @@ else
     print_status ".env file exists, skipping..."
 fi
 
+# --- Clean node_modules and lock file to avoid ENOTEMPTY issues ---
+print_status "Cleaning previous dependencies..."
+rm -rf node_modules package-lock.json
+npm cache clean --force
+print_success "Dependencies cleaned!"
+
+# --- Install dependencies with unsafe-perm (for Docker/Alpine/Prisma) ---
+print_status "Installing dependencies..."
+npm install --unsafe-perm && print_success "Dependencies installed!" || { print_error "npm install failed"; exit 1; }
 
 # --- Generate Prisma client ---
 print_status "Generating Prisma client..."

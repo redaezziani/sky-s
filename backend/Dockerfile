@@ -1,29 +1,27 @@
 # -------------------------------
 # Stage 1: Build
 # -------------------------------
-FROM node:22-alpine AS builder
+FROM node:22-bullseye AS builder
 
 # Build tools + canvas dependencies
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     python3 \
     make \
     g++ \
-    libc6-compat \
-    cairo-dev \
-    pango-dev \
-    giflib-dev \
-    jpeg-dev \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libgif-dev \
+    libjpeg-dev \
     libpng-dev \
-    musl-dev \
-    util-linux-dev \
     bash \
-    git
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm install --unsafe-perm
 
 # Copy source
 COPY . .
@@ -37,18 +35,17 @@ RUN npm run build
 # -------------------------------
 # Stage 2: Production
 # -------------------------------
-FROM node:22-alpine
+FROM node:22-bullseye
 
 # Runtime dependencies for canvas
-RUN apk add --no-cache \
-    libc6-compat \
+RUN apt-get update && apt-get install -y \
+    libcairo2 \
+    libpango1.0-0 \
+    libgif7 \
+    libjpeg62-turbo \
+    libpng16-16 \
     bash \
-    cairo \
-    pango \
-    giflib \
-    jpeg \
-    libpng \
-    util-linux
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -56,11 +53,7 @@ WORKDIR /app
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
-
-# Prisma schema + migrations
 COPY --from=builder /app/prisma ./prisma
-
-# Prisma client
 COPY --from=builder /app/prisma/generated/prisma ./prisma/generated/prisma
 
 ENV NODE_ENV=production
