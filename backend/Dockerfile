@@ -27,8 +27,7 @@ RUN npm install --unsafe-perm
 # Copy source
 COPY . .
 
-# Generate Prisma client silently
-RUN npx prisma generate --silent
+RUN npx prisma generate 
 
 # Build project
 RUN npm run build
