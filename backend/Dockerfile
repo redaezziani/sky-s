@@ -26,8 +26,8 @@ RUN npm install --unsafe-perm
 # Copy source
 COPY . .
 
-# Generate Prisma client
-RUN npx prisma generate
+# Generate Prisma client (silent to reduce output)
+RUN npx prisma generate --silent
 
 # Build project
 RUN npm run build
@@ -54,7 +54,6 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/prisma/generated/prisma ./prisma/generated/prisma
 
 ENV NODE_ENV=production
 EXPOSE 8080

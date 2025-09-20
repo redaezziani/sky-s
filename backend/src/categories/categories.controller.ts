@@ -27,7 +27,7 @@ import { CategoryResponseDto } from './dto/response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { UserRole } from '../../prisma/generated/prisma';
+import { UserRole } from '@prisma/client';
 
 @ApiTags('Categories')
 @Controller('categories')

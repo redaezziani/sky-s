@@ -15,11 +15,11 @@ import {
   ProductVariantResponseDto,
   ProductSKUResponseDto 
 } from './dto/response.dto';
-import { Prisma } from '../../prisma/generated/prisma';
 import { ImageKitService } from '../common/services/imagekit.service';
 import { customAlphabet } from 'nanoid';
 import { createCanvas } from 'canvas';
 import * as JsBarcode from 'jsbarcode';
+import { Prisma } from '@prisma/client';
 
 
 @Injectable()
