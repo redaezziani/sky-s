@@ -50,7 +50,7 @@ export function ChartAreaInteractive() {
 
   // Fetch chart data
   const { data: chartData } = useSWR(
-    `http://localhost:8085/api/analytics/chart?period=${period}`,
+    `http://localhost:8080/api/analytics/chart?period=${period}`,
     fetcher,
     { refreshInterval: 60000 }
   );

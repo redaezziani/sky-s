@@ -53,7 +53,7 @@ export function ChartTopProductsRadar() {
   }, [timeRange]);
 
   const { data: topProductsMetrics } = useSWR(
-    `http://localhost:8085/api/analytics/top-products-metrics?period=${period}`,
+    `http://localhost:8080/api/analytics/top-products-metrics?period=${period}`,
     fetcher,
     { refreshInterval: 60000 }
   );

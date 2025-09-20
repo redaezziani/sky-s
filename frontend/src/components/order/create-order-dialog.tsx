@@ -47,7 +47,7 @@ export function CreateOrderDialog({
   const lang = getMessages(locale);
   const t = lang.pages?.orders?.dialogs?.createOrder || {};
 
-  console.log("CreateOrderDialog t:", t);
+ 
   const { createOrder, loading } = useOrdersStore();
   const { products, fetchProducts } = useProductsStore();
   const { users, fetchUsers } = useUsersStore();

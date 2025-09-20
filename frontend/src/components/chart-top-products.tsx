@@ -58,7 +58,7 @@ export function ChartTopProducts() {
   }, [timeRange]);
 
   const { data: topProducts } = useSWR(
-    `http://localhost:8085/api/analytics/top-products?period=${period}`,
+    `http://localhost:8080/api/analytics/top-products?period=${period}`,
     fetcher,
     { refreshInterval: 60000 }
   );

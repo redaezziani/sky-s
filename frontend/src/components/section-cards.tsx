@@ -30,7 +30,7 @@ export function SectionCards() {
   const t = getMessages(locale).pages.analytics.components.sectionCards;
 
   const { data: apiData } = useSWR(
-    `http://localhost:8085/api/analytics/cards?period=${period}`,
+    `http://localhost:8080/api/analytics/cards?period=${period}`,
     fetcher,
     { refreshInterval: 60000 }
   );
