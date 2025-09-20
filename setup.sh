@@ -60,13 +60,6 @@ else
     print_status ".env file exists, skipping..."
 fi
 
-# --- Install Node.js dependencies locally ---
-if [ ! -d "node_modules" ]; then
-    print_status "Installing Node.js dependencies..."
-    npm install && print_success "Dependencies installed!" || { print_error "Failed to install dependencies"; exit 1; }
-else
-    print_status "Dependencies already installed, skipping..."
-fi
 
 # --- Generate Prisma client ---
 print_status "Generating Prisma client..."
