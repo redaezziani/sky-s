@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../../generated/prisma';
+import { PrismaClient, UserRole } from '../../../prisma/generated/prisma';
 import { addDays, startOfMonth, endOfMonth } from 'date-fns';
 
 const prisma = new PrismaClient();

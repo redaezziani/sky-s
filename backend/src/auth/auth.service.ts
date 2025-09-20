@@ -18,7 +18,7 @@ import {
   RefreshTokenDto,
 } from './dto/auth.dto';
 import { JwtPayload, AuthTokens, AuthResponse } from './types/auth.types';
-import { User, UserRole } from '../../generated/prisma';
+import { User, UserRole } from '../../prisma/generated/prisma';
 
 @Injectable()
 export class AuthService {

@@ -45,7 +45,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { UserRole } from '../../generated/prisma';
+import { UserRole } from '../../prisma/generated/prisma';
 import { ImageKitService } from '../common/services/imagekit.service';
 
 @ApiTags('Products')

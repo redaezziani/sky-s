@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { OrderStatus, PaymentStatus } from 'generated/prisma';
+import { OrderStatus, PaymentStatus } from '../../../prisma/generated/prisma';
 
 export class OrderItemResponseDto {
   @ApiProperty({ description: 'SKU ID of the product' })

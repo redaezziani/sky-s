@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 const instance = axios.create({
-  baseURL: "http://localhost:8085/api",
+  baseURL: "http://localhost:8080/api",
   timeout: 10000,
 });
 

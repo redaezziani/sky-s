@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../generated/prisma';
+import { PrismaClient } from '../../prisma/generated/prisma';
 import { seedUsers, clearUsers } from './seeders/user.seeder';
 import { seedCategories } from './seeders/category.seeder';
 import { seedProducts } from './seeders/product.seeder';

@@ -1,69 +1,38 @@
-# Frontend Dockerfile
-FROM node:18-alpine AS base
-
-# Install dependencies only when needed
-FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
+# Stage 1: build
+FROM node:22-alpine AS builder
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
-COPY package.json package-lock.json* ./
-# Install ALL dependencies (including dev dependencies) needed for building
-RUN npm ci && npm cache clean --force
+# Install dependencies needed to build native modules
+RUN apk add --no-cache python3 make g++ libc6-compat cairo-dev pango-dev giflib-dev jpeg-dev libpng-dev musl-dev bash
 
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Copy package files and install
+COPY package*.json ./
+RUN npm install
+
+# Copy source code
 COPY . .
 
-# Accept build arguments for Next.js public environment variables
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+# Generate Prisma client
+RUN npx prisma generate
 
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-ENV NEXT_TELEMETRY_DISABLED=1
-
+# Build the project
 RUN npm run build
 
-# Production image, copy all the files and run next
-FROM base AS runner
+# Stage 2: runtime
+FROM node:22-alpine
 WORKDIR /app
 
-ENV NODE_ENV=production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-ENV NEXT_TELEMETRY_DISABLED=1
+# Copy package files and installed dependencies
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# Copy compiled app
+COPY --from=builder /app/dist ./dist
 
-# Install only production dependencies in final stage
-COPY package.json package-lock.json* ./
-RUN npm ci --only=production && npm cache clean --force
+# Copy prisma folder
+COPY --from=builder /app/prisma ./prisma
 
-COPY --from=builder /app/public ./public
+# Copy generated Prisma client
+COPY --from=builder /app/generated ./generated
 
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Change ownership of the entire app directory
-RUN chown -R nextjs:nodejs /app
-
-USER nextjs
-
-EXPOSE 3000
-
-ENV PORT=3000
-# set hostname to localhost
-ENV HOSTNAME="0.0.0.0"
-
-CMD ["node", "server.js"]
+CMD ["node", "dist/main.js"]

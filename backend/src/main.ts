@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { BaseModule } from './base.module';
-import { secrets } from './config/secrets';
+// import { secrets } from './config/secrets';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
@@ -39,7 +39,7 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, documentFactory);
   
   app.enableCors({
-    origin: 'http://localhost:3001', // frontend URL
+    origin:"*", 
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   });
@@ -47,7 +47,7 @@ async function bootstrap() {
   app.enableVersioning();
   app.setGlobalPrefix('api');
   
-  await app.listen(8085);
+  await app.listen(8080);
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();

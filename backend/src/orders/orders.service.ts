@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { OrderResponseDto } from './dto/order-response.dto';
 import { CreateOrderDto, OrderItemDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { Decimal } from 'generated/prisma/runtime/index-browser';
+import { Decimal } from 'prisma/generated/prisma/runtime/library';
 import { QueryOrderDto } from './dto/query-order.dto';
 import { PdfService } from 'src/common/services/pdf.service';
 import { ImageKitService } from 'src/common/services/imagekit.service';
