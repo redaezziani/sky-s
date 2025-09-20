@@ -1,21 +1,22 @@
 # -------------------------------
 # Stage 1: Build
 # -------------------------------
-FROM node:22-bullseye AS builder
+FROM node:22-alpine AS builder
 
 # Build tools + canvas dependencies
-RUN apt-get update && apt-get install -y \
+RUN apk add --no-cache \
     python3 \
     make \
     g++ \
-    libcairo2-dev \
-    libpango1.0-dev \
-    libgif-dev \
-    libjpeg-dev \
+    libc6-compat \
+    cairo-dev \
+    pango-dev \
+    giflib-dev \
+    jpeg-dev \
     libpng-dev \
+    musl-dev \
     bash \
-    git \
-    && rm -rf /var/lib/apt/lists/*
+    git
 
 WORKDIR /app
 
@@ -26,7 +27,7 @@ RUN npm install --unsafe-perm
 # Copy source
 COPY . .
 
-# Generate Prisma client (silent to reduce output)
+# Generate Prisma client silently
 RUN npx prisma generate --silent
 
 # Build project
@@ -35,17 +36,17 @@ RUN npm run build
 # -------------------------------
 # Stage 2: Production
 # -------------------------------
-FROM node:22-bullseye
+FROM node:22-alpine
 
 # Runtime dependencies for canvas
-RUN apt-get update && apt-get install -y \
-    libcairo2 \
-    libpango1.0-0 \
-    libgif7 \
-    libjpeg62-turbo \
-    libpng16-16 \
-    bash \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache \
+    libc6-compat \
+    cairo \
+    pango \
+    giflib \
+    jpeg \
+    libpng \
+    bash
 
 WORKDIR /app
 
