@@ -16,21 +16,45 @@ export class StripePaymentStrategy implements PaymentStrategy {
     });
   }
 
-async create(dto: CreatePaymentDto) {
-  if (dto.redirectToCheckout) {
-    const session = await this.stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: (dto.items ?? []).map((i) => ({
-        price_data: {
-          currency: dto.currency ?? 'usd',
-          product_data: { name: i.productName },
-          unit_amount: Math.round(i.unitPrice * 100),
+  async create(dto: CreatePaymentDto) {
+    if (dto.redirectToCheckout) {
+      const session = await this.stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: (dto.items ?? []).map((i) => ({
+          price_data: {
+            currency: dto.currency ?? 'usd',
+            product_data: { name: i.productName },
+            unit_amount: Math.round(i.unitPrice * 100),
+          },
+          quantity: i.quantity,
+        })),
+        mode: 'payment',
+        success_url: `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`,
+        metadata: { orderId: dto.orderId, userId: dto.userId },
+      });
+
+      const payment = await this.prisma.payment.create({
+        data: {
+          orderId: dto.orderId,
+          userId: dto.userId,
+          method: 'STRIPE',
+          amount: dto.amount,
+          currency: dto.currency,
+          status: 'PENDING',
+          transactionId: session.id,
+          provider: 'stripe',
+          rawResponse: session as any,
         },
-        quantity: i.quantity,
-      })),
-      mode: 'payment',
-      success_url: `https://localhost:3000`,
-      cancel_url: `https://localhost:3000`,
+      });
+
+      return { ...payment, checkoutUrl: session.url ?? undefined };
+    }
+
+    // fallback: PaymentIntent flow
+    const paymentIntent = await this.stripe.paymentIntents.create({
+      amount: Math.round(dto.amount * 100),
+      currency: dto.currency ?? 'usd',
       metadata: { orderId: dto.orderId, userId: dto.userId },
     });
 
@@ -42,47 +66,61 @@ async create(dto: CreatePaymentDto) {
         amount: dto.amount,
         currency: dto.currency,
         status: 'PENDING',
-        transactionId: session.id,
+        transactionId: paymentIntent.id,
         provider: 'stripe',
-        rawResponse: session as any,
+        rawResponse: paymentIntent as any,
       },
     });
 
-    return { ...payment, checkoutUrl: session.url ?? undefined };
+    const clientSecret = paymentIntent.client_secret ?? undefined;
+    return clientSecret ? { ...payment, clientSecret } : { ...payment };
   }
 
-  // fallback: original PaymentIntent flow
-  const paymentIntent = await this.stripe.paymentIntents.create({
-    amount: Math.round(dto.amount * 100),
-    currency: dto.currency ?? 'usd',
-    metadata: { orderId: dto.orderId, userId: dto.userId },
-  });
-
-  const payment = await this.prisma.payment.create({
-    data: {
-      orderId: dto.orderId,
-      userId: dto.userId,
-      method: 'STRIPE',
-      amount: dto.amount,
-      currency: dto.currency,
-      status: 'PENDING',
-      transactionId: paymentIntent.id,
-      provider: 'stripe',
-      rawResponse: paymentIntent as any,
-    },
-  });
-
-  const clientSecret = paymentIntent.client_secret ?? undefined;
-  return clientSecret ? { ...payment, clientSecret } : { ...payment };
-}
   async confirm(transactionId: string) {
-    const intent = await this.stripe.paymentIntents.retrieve(transactionId);
-    if (intent.status === 'succeeded') {
-      await this.prisma.payment.updateMany({
-        where: { transactionId },
-        data: { status: 'COMPLETED', rawResponse: intent as any },
-      });
+    let stripeObject:
+      | Stripe.PaymentIntent
+      | Stripe.Checkout.Session
+      | null = null;
+
+    try {
+      // Try to fetch as PaymentIntent
+      stripeObject = await this.stripe.paymentIntents.retrieve(transactionId);
+    } catch {
+      // If not a PI, maybe it's a Checkout Session
+      try {
+        stripeObject = await this.stripe.checkout.sessions.retrieve(
+          transactionId,
+          { expand: ['payment_intent'] },
+        );
+      } catch {
+        throw new Error(`Stripe object not found for ${transactionId}`);
+      }
     }
-    return intent;
+
+    if (!stripeObject) {
+      throw new Error(`Stripe object not found for ${transactionId}`);
+    }
+
+    // normalize status
+    let newStatus: 'PENDING' | 'COMPLETED' | 'FAILED' = 'PENDING';
+
+    if ('status' in stripeObject) {
+      if (stripeObject.status === 'succeeded' || stripeObject.status === 'complete') {
+        newStatus = 'COMPLETED';
+      } else if (stripeObject.status === 'requires_payment_method' || stripeObject.status === 'canceled') {
+        newStatus = 'FAILED';
+      }
+    }
+
+    // update in DB
+    await this.prisma.payment.updateMany({
+      where: { transactionId },
+      data: {
+        status: newStatus,
+        rawResponse: stripeObject as any,
+      },
+    });
+
+    return stripeObject;
   }
 }

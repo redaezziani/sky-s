@@ -98,13 +98,13 @@ export class CreateOrderDto {
   @IsString()
   trackingNumber?: string;
 
-  //paymentMethod
-  @ApiProperty({ description: 'Payment method: STRIPE or CASH', default: PaymentMethod.STRIPE })
+  @ApiProperty({
+    description: 'Payment method: STRIPE or CASH',
+    default: PaymentMethod.STRIPE,
+  })
   @IsEnum(PaymentMethod, { message: 'method must be STRIPE or CASH' })
   method: PaymentMethod = PaymentMethod.STRIPE;
-
-   // ✅ New fields for Stripe Checkout
-    @IsOptional()
-    @IsBoolean()
-    redirectToCheckout?: boolean = true;
+  @IsOptional()
+  @IsBoolean()
+  redirectToCheckout?: boolean = true;
 }

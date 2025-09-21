@@ -23,6 +23,7 @@ export class PaymentService {
     if (!strategy?.confirm) {
       throw new BadRequestException('Confirm not supported for this method');
     }
+    // this is for methods like PayPal that need server-side confirmation 
     return strategy.confirm(transactionId);
   }
 }
