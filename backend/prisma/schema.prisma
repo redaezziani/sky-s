@@ -52,6 +52,7 @@ model User {
   orders        Order[]
   reviews       ProductReview[]
   cartItems     CartItem[]
+  payments      Payment[]
 
   @@index([email])
   @@index([isActive])
@@ -271,6 +272,8 @@ model Order {
 
   user  User        @relation(fields: [userId], references: [id])
   items OrderItem[]
+  payments Payment[]
+
 
   @@index([orderNumber])
   @@index([userId])
@@ -328,4 +331,36 @@ model PriceHistory {
 
   @@index([skuId])
   @@index([createdAt])
+}
+
+
+enum PaymentMethod {
+  STRIPE
+  CASH
+}
+
+
+
+model Payment {
+  id             String        @id @default(uuid())
+  orderId        String
+  userId         String
+  method         PaymentMethod
+  status         PaymentStatus @default(PENDING)
+  amount         Decimal       @db.Decimal(10, 2)
+  currency       String        @db.VarChar(3) @default("USD")
+  transactionId  String?       @db.VarChar(200) // Provider transaction ref
+  provider       String?       @db.VarChar(100) // Stripe, PayPal, etc.
+  rawResponse    Json?                       // Store API response for debugging
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([status])
+  @@index([method])
 }
