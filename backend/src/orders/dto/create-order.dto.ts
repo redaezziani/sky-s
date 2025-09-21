@@ -5,9 +5,12 @@ import {
   IsOptional,
   IsNumber,
   ValidateNested,
+  IsEnum,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { PaymentMethod } from '@prisma/client';
 
 export class OrderItemDto {
   @ApiProperty({ description: 'SKU ID of the product' })
@@ -94,4 +97,14 @@ export class CreateOrderDto {
   @IsOptional()
   @IsString()
   trackingNumber?: string;
+
+  @ApiProperty({
+    description: 'Payment method: STRIPE or CASH',
+    default: PaymentMethod.STRIPE,
+  })
+  @IsEnum(PaymentMethod, { message: 'method must be STRIPE or CASH' })
+  method: PaymentMethod = PaymentMethod.STRIPE;
+  @IsOptional()
+  @IsBoolean()
+  redirectToCheckout?: boolean = true;
 }
