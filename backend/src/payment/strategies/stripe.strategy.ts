@@ -4,9 +4,10 @@ import Stripe from 'stripe';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PaymentStrategy } from './payment-strategy.interface';
 import { CreatePaymentDto } from '../dto/create-payment.dto';
-
+import { Logger } from '@nestjs/common';
 @Injectable()
 export class StripePaymentStrategy implements PaymentStrategy {
+  private readonly logger = new Logger(StripePaymentStrategy.name);
   method = 'STRIPE';
   private stripe: Stripe;
 
@@ -29,8 +30,8 @@ export class StripePaymentStrategy implements PaymentStrategy {
           quantity: i.quantity,
         })),
         mode: 'payment',
-        success_url: `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`,
+        success_url: `http://localhost:3000/payment/success?session_id={CHECKOUT_SESSION_ID}&method=STRIPE`,
+        cancel_url: `http://localhost:3000/payment/cancel`,
         metadata: { orderId: dto.orderId, userId: dto.userId },
       });
 
