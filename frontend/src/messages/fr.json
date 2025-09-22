@@ -13,7 +13,8 @@
       "orders": "Commandes",
       "orderItems": "Articles de commande",
       "reviews": "Avis",
-      "analytics": "Analyses"
+      "analytics": "Analyses",
+      "settings": "Paramètres"
     },
     "navUser": {
       "logout": "Déconnexion",
@@ -436,6 +437,40 @@
           "labelSuffix": "période"
         }
       }
-    }
+    },
+      "settings": {
+        "title": "Paramètres",
+        "description": "Gérez les paramètres de votre application",
+        "auth": {
+          "title": "Authentification",
+          "changePassword": {
+            "currentPassword": "Mot de passe actuel",
+            "newPassword": "Nouveau mot de passe",
+            "save": "Enregistrer",
+            "saving": "Enregistrement..."
+          },
+          "logout": {
+            "currentDevice": {
+              "label": "Se déconnecter de l'appareil actuel",
+              "button": "Se déconnecter",
+              "processing": "Traitement..."
+            },
+            "allDevices": {
+              "label": "Se déconnecter de tous les appareils",
+              "button": "Tout déconnecter",
+              "processing": "Traitement..."
+            }
+          },
+          "toast": {
+            "passwordChanged": "Mot de passe modifié avec succès",
+            "passwordChangeFailed": "Échec de la modification du mot de passe",
+            "logoutSuccess": "Déconnecté avec succès",
+            "logoutFailed": "Échec de la déconnexion",
+            "logoutAllSuccess": "Déconnecté de tous les appareils avec succès",
+            "logoutAllFailed": "Échec de la déconnexion de tous les appareils"
+          }
+        }
+      }
+    
   }
 }

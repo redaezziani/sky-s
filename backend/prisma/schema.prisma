@@ -365,3 +365,27 @@ model Payment {
   @@index([status])
   @@index([method])
 }
+
+model Setting {
+  id          String      @id @default(uuid())
+  key         String      @unique @db.VarChar(100)  
+  label       String      @db.VarChar(100)         
+  type        SettingType @default(STRING)        
+  valueString String?                            
+  valueNumber Float?                              
+  valueBool   Boolean?                          
+  options     String?                           
+  description String? @db.VarChar(255)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum SettingType {
+  STRING
+  NUMBER
+  BOOLEAN
+  SELECT     
+  
+}
+
+

@@ -4,10 +4,10 @@ import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 import { PdfService } from 'src/common/services/pdf.service';
 import { ImageKitService } from 'src/common/services/imagekit.service';
-import { PaymentModule } from 'src/payment/payment.module';
+import { PaymentsModule } from 'src/payments/payments.module';
 
 @Module({
-  imports: [PaymentModule],
+  imports: [PaymentsModule],
   controllers: [OrdersController],
   providers: [OrdersService, PrismaService, PdfService, ImageKitService],
   exports: [OrdersService],

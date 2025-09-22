@@ -3,6 +3,7 @@ import { seedUsers, clearUsers } from './seeders/user.seeder';
 import { seedCategories } from './seeders/category.seeder';
 import { seedProducts } from './seeders/product.seeder';
 import { seedOrders } from './seeders/order.seeder';
+import { clearSettings, seedSettings } from './seeders/setting.seeder';
 
 const prisma = new PrismaClient();
 
@@ -15,6 +16,7 @@ async function clearAll() {
   await prisma.productVariant.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
+  await clearSettings();
   await clearUsers();
 
   console.log('✅ All data cleared');
@@ -24,6 +26,7 @@ async function seedAll() {
   console.log('🌱 Seeding all data...');
 
   // Seed in dependency order
+  await seedSettings();
   await seedUsers();
   await seedCategories();
   await seedProducts();

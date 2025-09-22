@@ -14,6 +14,7 @@ import {
   IconTag,
   IconBoxSeam,
   IconClipboardList,
+  IconSettings2,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -104,6 +105,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       title: t.sidebar.links.analytics,
       url: "/dashboard/analytics",
       icon: IconChartLine,
+      active: true,
+    },
+    {
+      title: t.sidebar.links.settings,
+      url: "/dashboard/settings",
+      icon: IconSettings2,
       active: true,
     },
   ];

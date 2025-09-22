@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { PaymentService } from './payment.service';
+import { PaymentService } from './payments.service';
 import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
 
 @ApiTags('payments')
