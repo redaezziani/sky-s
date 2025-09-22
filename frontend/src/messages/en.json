@@ -438,9 +438,39 @@
         }
       }
     },
-    "settings":{
-      "title": "Settings",
-      "description": "Manage application settings"
-    }
+      "settings": {
+        "title": "Settings",
+        "description": "Manage your application settings",
+        "auth": {
+          "title": "Authentication",
+          "changePassword": {
+            "currentPassword": "Current Password",
+            "newPassword": "New Password",
+            "save": "Save",
+            "saving": "Saving..."
+          },
+          "logout": {
+            "currentDevice": {
+              "label": "Logout from Current Device",
+              "button": "Logout",
+              "processing": "Processing..."
+            },
+            "allDevices": {
+              "label": "Logout from All Devices",
+              "button": "Logout All",
+              "processing": "Processing..."
+            }
+          },
+          "toast": {
+            "passwordChanged": "Password changed successfully",
+            "passwordChangeFailed": "Failed to change password",
+            "logoutSuccess": "Logged out successfully",
+            "logoutFailed": "Failed to logout",
+            "logoutAllSuccess": "Logged out from all devices successfully",
+            "logoutAllFailed": "Failed to logout from all devices"
+          }
+        }
+      }
+    
   }
 }

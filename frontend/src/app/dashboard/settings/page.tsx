@@ -17,9 +17,18 @@ import { useLocale } from "@/components/local-lang-swither";
 import { getMessages } from "@/lib/locale";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
+import { IconLogout } from "@tabler/icons-react";
 
 export default function SettingsPage() {
-  const { settings, fetchSettings, updateSetting } = useSettingsStore();
+  const {
+    settings,
+    fetchSettings,
+    updateSetting,
+    changePassword,
+    logout,
+    logoutAll,
+  } = useSettingsStore();
+
   const { locale } = useLocale();
   const t = getMessages(locale).pages.settings;
 
@@ -48,7 +57,6 @@ export default function SettingsPage() {
   const handleSave = async (setting: Setting) => {
     try {
       setLoadingKeys((prev) => ({ ...prev, [setting.key]: true }));
-
       let payload: any = {};
       switch (setting.type) {
         case "BOOLEAN":
@@ -65,14 +73,19 @@ export default function SettingsPage() {
           payload.valueString = localSettings[setting.key];
           break;
       }
-
       await updateSetting(setting.key, payload);
       toast.success(
-        `Setting "${setting.label?.[locale] ?? setting.key}" saved successfully`
+        `${t.title}: "${setting.label?.[locale] ?? setting.key}" ${
+          t.auth?.toast?.passwordChanged || "saved successfully"
+        }`
       );
     } catch (err) {
       console.error(err);
-      toast.error(`Failed to save "${setting.label?.[locale] ?? setting.key}"`);
+      toast.error(
+        `${t.title}: "${setting.label?.[locale] ?? setting.key}" ${
+          t.auth?.toast?.passwordChangeFailed || "failed"
+        }`
+      );
     } finally {
       setLoadingKeys((prev) => ({ ...prev, [setting.key]: false }));
     }
@@ -82,18 +95,17 @@ export default function SettingsPage() {
     <section className="flex flex-col gap-4 w-full px-6 py-4">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold">{t.title || "Settings"}</h1>
-          <p className="text-muted-foreground">
-            {t.description || "Manage your application settings"}
-          </p>
+          <h1 className="text-2xl font-semibold">{t.title}</h1>
+          <p className="text-muted-foreground">{t.description}</p>
         </div>
       </div>
 
+      {/* General Settings */}
       <Card className="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {settings.map((setting) => (
           <div
             key={setting.key}
-            className="flex flex-col md:flex-row md:items-center gap-2  p-3"
+            className="flex flex-col md:flex-row md:items-center gap-2 p-3"
           >
             <div className="flex-1 flex flex-col gap-2">
               <Label htmlFor={setting.key}>
@@ -112,7 +124,11 @@ export default function SettingsPage() {
                   onValueChange={(val) => handleChange(setting.key, val)}
                 >
                   <SelectTrigger id={setting.key}>
-                    <SelectValue placeholder="Select an option" />
+                    <SelectValue
+                      placeholder={
+                        t.auth?.changePassword?.saving || "Select an option"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {setting.options.map((opt) => (
@@ -147,11 +163,129 @@ export default function SettingsPage() {
                 disabled={loadingKeys[setting.key]}
                 variant={"secondary"}
               >
-                {loadingKeys[setting.key] ? "Saving..." : "Save"}
+                {loadingKeys[setting.key]
+                  ? t.auth?.changePassword?.saving || "Saving..."
+                  : t.auth?.changePassword?.save || "Save"}
               </Button>
             </div>
           </div>
         ))}
+      </Card>
+
+      {/* Auth Settings */}
+      <Card className="mt-4 grid gap-4 grid-cols-1 p-3">
+        {/* Change Password */}
+        <div className="flex flex-col md:w-1/2 md:flex-row md:items-end gap-2">
+          <div className="flex-1 flex gap-2">
+            <div className="flex-1 flex flex-col gap-2">
+              <Label htmlFor="currentPassword">
+                {t.auth.changePassword.currentPassword}
+              </Label>
+              <Input
+                id="currentPassword"
+                type="password"
+                value={localSettings.currentPassword || ""}
+                onChange={(e) =>
+                  handleChange("currentPassword", e.target.value)
+                }
+              />
+            </div>
+            <div className="flex-1 flex flex-col gap-2">
+              <Label htmlFor="newPassword">
+                {t.auth.changePassword.newPassword}
+              </Label>
+              <Input
+                id="newPassword"
+                type="password"
+                value={localSettings.newPassword || ""}
+                onChange={(e) => handleChange("newPassword", e.target.value)}
+              />
+            </div>
+          </div>
+          <Button
+            variant={"secondary"}
+            onClick={async () => {
+              try {
+                setLoadingKeys((prev) => ({ ...prev, changePassword: true }));
+                await changePassword(
+                  localSettings.currentPassword,
+                  localSettings.newPassword
+                );
+                toast.success(t.auth.toast.passwordChanged);
+                handleChange("currentPassword", "");
+                handleChange("newPassword", "");
+              } catch (err: any) {
+                toast.error(err.message || t.auth.toast.passwordChangeFailed);
+              } finally {
+                setLoadingKeys((prev) => ({
+                  ...prev,
+                  changePassword: false,
+                }));
+              }
+            }}
+            disabled={
+              loadingKeys.changePassword ||
+              !localSettings.currentPassword ||
+              !localSettings.newPassword
+            }
+          >
+            {loadingKeys.changePassword
+              ? t.auth.changePassword.saving
+              : t.auth.changePassword.save}
+          </Button>
+        </div>
+
+        {/* Logout Current Device */}
+        <div className="flex flex-col gap-2">
+          <Label>{t.auth.logout.currentDevice.label}</Label>
+          <Button
+            onClick={async () => {
+              try {
+                setLoadingKeys((prev) => ({ ...prev, logout: true }));
+                await logout();
+                toast.success(t.auth.toast.logoutSuccess);
+              } catch (err: any) {
+                toast.error(err.message || t.auth.toast.logoutFailed);
+              } finally {
+                setLoadingKeys((prev) => ({ ...prev, logout: false }));
+              }
+            }}
+            className="md:w-32"
+            disabled={loadingKeys.logout}
+            variant={"destructive"}
+          >
+            <IconLogout />
+            {loadingKeys.logout
+              ? t.auth.logout.currentDevice.processing
+              : t.auth.logout.currentDevice.button}
+          </Button>
+        </div>
+
+        {/* Logout All Devices */}
+        <div className="flex flex-col gap-2">
+          <Label>{t.auth.logout.allDevices.label}</Label>
+          <Button
+            variant={"destructive"}
+            onClick={async () => {
+              try {
+                setLoadingKeys((prev) => ({ ...prev, logoutAll: true }));
+                await logoutAll();
+                toast.success(t.auth.toast.logoutAllSuccess);
+              } catch (err: any) {
+                toast.error(err.message || t.auth.toast.logoutAllFailed);
+              } finally {
+                setLoadingKeys((prev) => ({ ...prev, logoutAll: false }));
+              }
+            }}
+            disabled={loadingKeys.logoutAll}
+            className="md:w-38"
+          >
+            <IconLogout />
+            {loadingKeys.logoutAll
+              ? t.auth.logout.allDevices.processing
+              : t.auth.logout.allDevices.button}
+          </Button>
+        </div>
       </Card>
     </section>
   );

@@ -443,7 +443,36 @@
     },
     "settings": {
       "title": "設定",
-      "description": "アプリケーション設定を管理します"
+      "description": "アプリケーション設定を管理します",
+      "auth": {
+        "title": "認証",
+        "changePassword": {
+          "currentPassword": "現在のパスワード",
+          "newPassword": "新しいパスワード",
+          "save": "保存",
+          "saving": "保存中..."
+        },
+        "logout": {
+          "currentDevice": {
+            "label": "現在のデバイスからログアウト",
+            "button": "ログアウト",
+            "processing": "処理中..."
+          },
+          "allDevices": {
+            "label": "すべてのデバイスからログアウト",
+            "button": "すべてログアウト",
+            "processing": "処理中..."
+          }
+        },
+        "toast": {
+          "passwordChanged": "パスワードを変更しました",
+          "passwordChangeFailed": "パスワードの変更に失敗しました",
+          "logoutSuccess": "ログアウトしました",
+          "logoutFailed": "ログアウトに失敗しました",
+          "logoutAllSuccess": "すべてのデバイスからログアウトしました",
+          "logoutAllFailed": "すべてのデバイスからのログアウトに失敗しました"
+        }
+      }
     }
   }
 }

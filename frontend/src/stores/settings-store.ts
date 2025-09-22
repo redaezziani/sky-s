@@ -22,10 +22,19 @@ interface SettingsStore {
   loading: boolean;
   error: string | null;
 
+  // Settings CRUD
   fetchSettings: () => Promise<void>;
   createSetting: (data: Partial<Setting>) => Promise<Setting>;
   updateSetting: (key: string, data: Partial<Setting>) => Promise<Setting>;
   deleteSetting: (key: string) => Promise<void>;
+
+  // Auth actions
+  changePassword: (
+    currentPassword: string,
+    newPassword: string
+  ) => Promise<void>;
+  logout: () => Promise<void>;
+  logoutAll: () => Promise<void>;
 
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -36,6 +45,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   loading: false,
   error: null,
 
+  // CRUD
   fetchSettings: async () => {
     try {
       set({ loading: true, error: null });
@@ -93,6 +103,52 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     } catch (err: any) {
       set({
         error: err.response?.data?.message || "Failed to delete setting",
+        loading: false,
+      });
+      throw err;
+    }
+  },
+
+  // Auth actions
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    try {
+      set({ loading: true, error: null });
+      await axiosInstance.post("/auth/reset-password", {
+        token: currentPassword, // or implement current password verification if needed
+        newPassword,
+      });
+      set({ loading: false });
+    } catch (err: any) {
+      set({
+        error: err.response?.data?.message || "Failed to change password",
+        loading: false,
+      });
+      throw err;
+    }
+  },
+
+  logout: async () => {
+    try {
+      set({ loading: true, error: null });
+      await axiosInstance.post("/auth/logout");
+      set({ loading: false });
+    } catch (err: any) {
+      set({
+        error: err.response?.data?.message || "Failed to logout",
+        loading: false,
+      });
+      throw err;
+    }
+  },
+
+  logoutAll: async () => {
+    try {
+      set({ loading: true, error: null });
+      await axiosInstance.post("/auth/logout-all");
+      set({ loading: false });
+    } catch (err: any) {
+      set({
+        error: err.response?.data?.message || "Failed to logout all devices",
         loading: false,
       });
       throw err;
