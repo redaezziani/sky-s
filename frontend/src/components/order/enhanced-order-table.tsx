@@ -21,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Trash2, Package } from "lucide-react";
+import { MoreHorizontal, Trash2, Package, CloudDownload } from "lucide-react";
 import { useOrdersStore, type Order } from "@/stores/orders-store";
 import { toast } from "sonner";
 import PaginationTable from "@/components/pagination-table";
@@ -108,6 +108,16 @@ export function EnhancedOrderTable() {
 
   const getPaymentStatusLabel = (status: string) =>
     t.updateOrder?.fields?.paymentStatus?.[status] || status;
+
+  // handle  invoiceUrl column
+
+  const handleInvoiceClick = (url: string | undefined) => {
+    if (url) {
+      window.open(url, "_blank");
+    } else {
+      toast.error(t.toast?.noInvoice ?? "No invoice available");
+    }
+  };
 
   const columns: TableColumn<Order>[] = [
     {
@@ -216,6 +226,14 @@ export function EnhancedOrderTable() {
             <DropdownMenuItem asChild>
               <UpdateOrderSheet order={order} />
             </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => handleInvoiceClick(order.invoiceUrl)}
+              disabled={!order.invoiceUrl}
+            >
+              <CloudDownload className={`mr-2 h-4 w-4 `} />
+              {t.components?.ordersTable?.table?.viewInvoice ?? "View Invoice"}
+            </DropdownMenuItem>
+
             <DropdownMenuItem
               onClick={() => {
                 setOrderToDelete(order.id);

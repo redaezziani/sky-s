@@ -35,8 +35,8 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useLocale } from "@/components/local-lang-swither";
 import { getMessages } from "@/lib/locale";
+import { fetcher } from "@/lib/utils";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 // Helper function to truncate text
 const truncateText = (text: string, maxLength: number) => {
@@ -58,7 +58,7 @@ export function ChartTopProducts() {
   }, [timeRange]);
 
   const { data: topProducts } = useSWR(
-    `http://localhost:8080/api/analytics/top-products?period=${period}`,
+    `/analytics/top-products?period=${period}`,
     fetcher,
     { refreshInterval: 60000 }
   );

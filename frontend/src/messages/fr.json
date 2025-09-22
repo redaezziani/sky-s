@@ -177,7 +177,8 @@
             "actions": "Actions",
             "searchPlaceholder": "Rechercher par numéro de commande, utilisateur ou statut...",
             "empty": "Aucune commande trouvée",
-            "deleteSelected": "Supprimer {0} sélectionnés"
+            "deleteSelected": "Supprimer {0} sélectionnés",
+            "viewInvoice": "Voir la facture"
           },
           "dialogs": {
             "deleteTitle": "Supprimer la commande",

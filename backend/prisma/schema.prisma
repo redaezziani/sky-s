@@ -246,7 +246,7 @@ model Order {
 
   // pdf invoice url
   invoiceUrl      String? @default("") @db.VarChar(500)
-  invoiceFileId   String? @default("") @db.VarChar(200) // store ImageKit fileId here
+  invoiceFileId   String? @default("") @db.VarChar(200)
   // Shipping Information
   shippingName    String  @db.VarChar(100)
   shippingEmail   String  @db.VarChar(255)

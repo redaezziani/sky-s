@@ -36,7 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+import { fetcher } from "@/lib/utils";
 
 export function ChartTopProductsRadar() {
   const { locale } = useLocale();
@@ -53,7 +53,7 @@ export function ChartTopProductsRadar() {
   }, [timeRange]);
 
   const { data: topProductsMetrics } = useSWR(
-    `http://localhost:8080/api/analytics/top-products-metrics?period=${period}`,
+    `/analytics/top-products-metrics?period=${period}`,
     fetcher,
     { refreshInterval: 60000 }
   );

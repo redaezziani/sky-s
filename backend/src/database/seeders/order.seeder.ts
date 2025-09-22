@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { addDays, startOfMonth, endOfMonth } from 'date-fns';
 
 const prisma = new PrismaClient();
@@ -11,14 +11,11 @@ function randomDateThisMonth(): Date {
 }
 
 export async function seedOrders() {
-  console.log('🌱 Seeding 40 orders...');
 
-  // Get some active users
   const users = await prisma.user.findMany({
     where: { isActive: true },
   });
   if (!users.length) {
-    console.log('No active users found. Skipping order seeding.');
     return;
   }
 
@@ -34,7 +31,6 @@ export async function seedOrders() {
     },
   });
   if (!products.length) {
-    console.log('No active products found. Skipping order seeding.');
     return;
   }
 

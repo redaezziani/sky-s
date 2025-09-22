@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { ImageKitService } from '../../common/services/imagekit.service';
 import * as path from 'path';
 import * as fs from 'fs';

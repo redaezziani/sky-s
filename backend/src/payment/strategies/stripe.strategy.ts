@@ -30,8 +30,8 @@ export class StripePaymentStrategy implements PaymentStrategy {
           quantity: i.quantity,
         })),
         mode: 'payment',
-        success_url: `http://localhost:3000/payment/success?session_id={CHECKOUT_SESSION_ID}&method=STRIPE`,
-        cancel_url: `http://localhost:3000/payment/cancel`,
+        success_url: `http://localhost:3001/payment/success?session_id={CHECKOUT_SESSION_ID}&method=STRIPE`,
+        cancel_url: `http://localhost:3001/payment/cancel`,
         metadata: { orderId: dto.orderId, userId: dto.userId },
       });
 
