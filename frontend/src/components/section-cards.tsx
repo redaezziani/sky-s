@@ -16,9 +16,7 @@ import {
 
 import { useLocale } from "@/components/local-lang-swither";
 import { getMessages } from "@/lib/locale";
-
-// Fetcher helper
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+import { fetcher } from "@/lib/utils";
 
 // Hardcoded card keys
 const CARD_KEYS = ["totalOrders", "revenue", "activeUsers", "productsSold"];
@@ -30,7 +28,7 @@ export function SectionCards() {
   const t = getMessages(locale).pages.analytics.components.sectionCards;
 
   const { data: apiData } = useSWR(
-    `http://localhost:8080/api/analytics/cards?period=${period}`,
+    `/analytics/cards?period=${period}`,
     fetcher,
     { refreshInterval: 60000 }
   );

@@ -29,9 +29,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useLocale } from "@/components/local-lang-swither";
 import { getMessages } from "@/lib/locale";
-
-// SWR fetcher
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+import { fetcher } from "@/lib/utils";
 
 export function ChartAreaInteractive() {
   const isMobile = useIsMobile();
@@ -50,7 +48,7 @@ export function ChartAreaInteractive() {
 
   // Fetch chart data
   const { data: chartData } = useSWR(
-    `http://localhost:8080/api/analytics/chart?period=${period}`,
+    `/analytics/chart?period=${period}`,
     fetcher,
     { refreshInterval: 60000 }
   );

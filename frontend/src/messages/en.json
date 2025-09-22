@@ -177,7 +177,8 @@
             "actions": "Actions",
             "searchPlaceholder": "Search by order number, user, or status...",
             "empty": "No orders found",
-            "deleteSelected": "Delete {0} selected"
+            "deleteSelected": "Delete {0} selected",
+            "viewInvoice": "View Invoice"
           },
           "dialogs": {
             "deleteTitle": "Delete Order",

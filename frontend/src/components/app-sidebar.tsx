@@ -40,17 +40,72 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const t = getMessages(locale);
 
   const navMainData = [
-    { title: t.sidebar.links.dashboard, url: "/dashboard", icon: IconDashboard },
-    { title: t.sidebar.links.users, url: "/dashboard/users", icon: IconUsers },
-    { title: t.sidebar.links.roles, url: "/dashboard/roles", icon: IconShield },
-    { title: t.sidebar.links.categories, url: "/dashboard/categories", icon: IconCategory },
-    { title: t.sidebar.links.products, url: "/dashboard/products", icon: IconPackage },
-    { title: t.sidebar.links.productVariants, url: "/dashboard/product-variants", icon: IconTag },
-    { title: t.sidebar.links.skus, url: "/dashboard/skus", icon: IconBoxSeam },
-    { title: t.sidebar.links.orders, url: "/dashboard/orders", icon: IconShoppingCart },
-    { title: t.sidebar.links.orderItems, url: "/dashboard/order-items", icon: IconClipboardList },
-    { title: t.sidebar.links.reviews, url: "/dashboard/reviews", icon: IconStar },
-    { title: t.sidebar.links.analytics, url: "/dashboard/analytics", icon: IconChartLine },
+    {
+      title: t.sidebar.links.dashboard,
+      url: "/dashboard",
+      icon: IconDashboard,
+      active: true,
+    },
+    {
+      title: t.sidebar.links.users,
+      url: "/dashboard/users",
+      icon: IconUsers,
+      active: true,
+    },
+    {
+      title: t.sidebar.links.roles,
+      url: "/dashboard/roles",
+      icon: IconShield,
+      active: false,
+    },
+    {
+      title: t.sidebar.links.categories,
+      url: "/dashboard/categories",
+      icon: IconCategory,
+      active: true,
+    },
+    {
+      title: t.sidebar.links.products,
+      url: "/dashboard/products",
+      icon: IconPackage,
+      active: true,
+    },
+    {
+      title: t.sidebar.links.productVariants,
+      url: "/dashboard/product-variants",
+      icon: IconTag,
+      active: true,
+    },
+    {
+      title: t.sidebar.links.skus,
+      url: "/dashboard/skus",
+      icon: IconBoxSeam,
+      active: true,
+    },
+    {
+      title: t.sidebar.links.orders,
+      url: "/dashboard/orders",
+      icon: IconShoppingCart,
+      active: true,
+    },
+    {
+      title: t.sidebar.links.orderItems,
+      url: "/dashboard/order-items",
+      icon: IconClipboardList,
+      active: true,
+    },
+    {
+      title: t.sidebar.links.reviews,
+      url: "/dashboard/reviews",
+      icon: IconStar,
+      active: true,
+    },
+    {
+      title: t.sidebar.links.analytics,
+      url: "/dashboard/analytics",
+      icon: IconChartLine,
+      active: true,
+    },
   ];
 
   return (
@@ -64,7 +119,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#">
                 <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">{t.sidebar.storeManager}</span>
+                <span className="text-base font-semibold">
+                  {t.sidebar.storeManager}
+                </span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

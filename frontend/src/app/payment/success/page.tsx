@@ -1,29 +1,40 @@
-'use client';
+"use client";
 
-import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Loader } from '@/components/loader';
-import { cn } from '@/lib/utils';
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Loader } from "@/components/loader";
+import { cn } from "@/lib/utils";
 
 export default function PaymentSuccessPage() {
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get('session_id');
-  const method = searchParams.get('method');
-  const [status, setStatus] = useState<'loading' | 'confirmed' | 'error'>('loading');
+  const sessionId = searchParams.get("session_id");
+  const method = searchParams.get("method");
+  const [status, setStatus] = useState<"loading" | "confirmed" | "error">(
+    "loading"
+  );
 
   useEffect(() => {
     if (!sessionId || !method) return;
 
     const confirmPayment = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/payments/confirm?method=${method}&transactionId=${sessionId}`);
-        console.log('Confirmation response:', res);
-        if (!res.ok) throw new Error('Failed to confirm');
-        setStatus('confirmed');
+        const res = await fetch(
+          `http://localhost:8085/api/payments/confirm?method=${method}&transactionId=${sessionId}`
+        );
+        const data = await res.json();
+        console.log("Confirmation response:", data);
+        if (!res.ok) throw new Error("Failed to confirm");
+        setStatus("confirmed");
       } catch {
-        setStatus('error');
+        setStatus("error");
       }
     };
 
@@ -31,24 +42,37 @@ export default function PaymentSuccessPage() {
   }, [sessionId, method]);
 
   return (
-    <div className={cn("flex flex-col gap-6 items-center justify-center min-h-screen bg-gray-50 p-6")}>
+    <div
+      className={cn(
+        "flex flex-col gap-6 items-center justify-center min-h-screen  p-6"
+      )}
+    >
       <Card className="border-none bg-transparent w-full max-w-md">
         <CardHeader>
-          <CardTitle>Payment {status === 'confirmed' ? 'Successful' : status === 'error' ? 'Failed ' : 'Processing...'}</CardTitle>
+          <CardTitle>
+            Payment{" "}
+            {status === "confirmed"
+              ? "Successful"
+              : status === "error"
+              ? "Failed "
+              : "Processing..."}
+          </CardTitle>
           <CardDescription>
-            {status === 'loading' && 'Confirming your payment...'}
-            {status === 'confirmed' && 'Your payment has been successfully confirmed. Thank you for your order!'}
-            {status === 'error' && 'We could not confirm your payment. Please try again or contact support.'}
+            {status === "loading" && "Confirming your payment..."}
+            {status === "confirmed" &&
+              "Your payment has been successfully confirmed. Thank you for your order!"}
+            {status === "error" &&
+              "We could not confirm your payment. Please try again or contact support."}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          {status === 'loading' && (
+          {status === "loading" && (
             <div className="flex justify-center">
               <Loader size={24} />
             </div>
           )}
 
-          {status === 'error' && (
+          {status === "error" && (
             <Button
               variant="outline"
               className="w-full"
@@ -58,10 +82,10 @@ export default function PaymentSuccessPage() {
             </Button>
           )}
 
-          {status === 'confirmed' && (
+          {status === "confirmed" && (
             <Button
               className="w-full"
-              onClick={() => (window.location.href = '/dashboard/orders')}
+              onClick={() => (window.location.href = "/dashboard/orders")}
             >
               View My Orders
             </Button>

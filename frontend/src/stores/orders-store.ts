@@ -71,6 +71,7 @@ export interface Order {
   deliveryLat?: number | null;
   deliveryLng?: number | null;
   deliveryPlace?: string | null;
+  invoiceUrl?: string;
 }
 
 interface UpdateOrderPayload {
@@ -99,8 +100,7 @@ export interface OrdersResponse {
 }
 
 interface OrderWithPdf extends Order {
-  pdfUrl: string;
-    payment?: {
+  payment?: {
     id: string;
     method: string;
     status: string;
@@ -108,7 +108,7 @@ interface OrderWithPdf extends Order {
     currency: string;
     clientSecret?: string; // for Stripe PaymentIntent
   };
-   checkoutUrl?: string; // optional checkout redirect URL
+  checkoutUrl?: string; // optional checkout redirect URL
 }
 
 interface OrdersStore {
@@ -213,11 +213,11 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
       const res = await axiosInstance.post<OrderWithPdf>("/orders", orderData);
       set({ orders: [res.data, ...get().orders], loading: false });
       console.log("Create Order Response:", res.data);
-      if ( res.data.checkoutUrl) {
+      if (res.data.checkoutUrl) {
         window.location.href = res.data.checkoutUrl;
-        return res.data.pdfUrl; // or return early if you want
       }
-      return res.data.pdfUrl;
+
+      return res.data.id;
     } catch (err: any) {
       set({
         error: err.response?.data?.message || "Failed to create order",

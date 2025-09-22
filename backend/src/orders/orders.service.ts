@@ -31,7 +31,7 @@ export class OrdersService {
 
 async create(
   createOrderDto: CreateOrderDto,
-): Promise<OrderResponseDto & { pdfUrl: string; payment?: any ; checkoutUrl?: string }> {
+): Promise<OrderResponseDto & {  payment?: any ; checkoutUrl?: string }> {
   const orderNumber = await this.generateOrderNumber();
 
   // Batch fetch SKUs
@@ -151,20 +151,18 @@ if (createOrderDto.method) {
 
     return {
       ...this.formatOrderResponse(order),
-      pdfUrl: url,
       payment,
       checkoutUrl: payment.checkoutUrl, 
     };
   }
 
 
-  return { ...this.formatOrderResponse(order), pdfUrl: url, payment };
+  return { ...this.formatOrderResponse(order),  payment };
 }
 
 // Ensure a return statement for code paths where createOrderDto.method is not provided
 return {
   ...this.formatOrderResponse(order),
-  pdfUrl: url,
 };
 }
 
@@ -208,13 +206,13 @@ return {
             include: {
               sku: {
                 include: {
-                  // Include main SKU cover image and all images
                   images: true,
                 },
               },
             },
           },
-          user: true, // if you want user details
+          user: true,
+
         },
         orderBy,
         skip,
@@ -371,7 +369,7 @@ return {
       trackingNumber: order.trackingNumber,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
-
+      invoiceUrl: order.invoiceUrl,
       // delivery info at order level
       deliveryLat: order.deliveryLat ?? null,
       deliveryLng: order.deliveryLng ?? null,

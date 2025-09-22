@@ -108,4 +108,7 @@ export class OrderResponseDto {
 
   @ApiPropertyOptional({ description: 'Delivery place description' })
   deliveryPlace?: string;
+
+  @ApiPropertyOptional({ description: 'Invoice URL if available' })
+  invoiceUrl?: string;
 }
