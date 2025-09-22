@@ -22,7 +22,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 import { getMessages } from "@/lib/locale";
-import { useLocale } from "@/components/local-lang-swither"; // <-- your LocaleProvider
+import { useLocale } from "@/components/local-lang-swither"; 
 
 export function NavUser({
   user,

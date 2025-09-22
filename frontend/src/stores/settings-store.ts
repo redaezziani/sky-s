@@ -17,8 +17,20 @@ export interface Setting {
   updatedAt: string;
 }
 
+export interface UserDevice {
+  id: string;
+  ip: string;
+  userAgent: string;
+  deviceType: string;
+  country?: string;
+  city?: string;
+  lastUsedAt: string;
+}
+
 interface SettingsStore {
   settings: Setting[];
+  devices: UserDevice[];
+  fetchDevices: () => Promise<void>;
   loading: boolean;
   error: string | null;
 
@@ -42,6 +54,7 @@ interface SettingsStore {
 
 export const useSettingsStore = create<SettingsStore>((set, get) => ({
   settings: [],
+  devices: [],
   loading: false,
   error: null,
 
@@ -131,13 +144,19 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     try {
       set({ loading: true, error: null });
       await axiosInstance.post("/auth/logout");
-      set({ loading: false });
     } catch (err: any) {
       set({
         error: err.response?.data?.message || "Failed to logout",
-        loading: false,
       });
       throw err;
+    } finally {
+      // 🔑 clear local session
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user_data");
+      localStorage.removeItem("device_data");
+
+      set({ loading: false });
     }
   },
 
@@ -146,12 +165,31 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       set({ loading: true, error: null });
       await axiosInstance.post("/auth/logout-all");
       set({ loading: false });
+      // 🔑 clear local sessio
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user_data");
+      localStorage.removeItem("device_data");
+      
     } catch (err: any) {
       set({
         error: err.response?.data?.message || "Failed to logout all devices",
         loading: false,
       });
       throw err;
+    }
+  },
+
+  fetchDevices: async () => {
+    try {
+      set({ loading: true, error: null });
+      const res = await axiosInstance.get<UserDevice[]>("/auth/devices");
+      set({ devices: res.data, loading: false });
+    } catch (err: any) {
+      set({
+        error: err.response?.data?.message || "Failed to fetch devices",
+        loading: false,
+      });
     }
   },
 

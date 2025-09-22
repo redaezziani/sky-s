@@ -88,10 +88,9 @@ export const LoginForm = memo<LoginFormProps>(({ className }) => {
       isSubmittingRef.current = true;
 
       try {
-        const response = await AuthService.login(data);
+        const response = await AuthService.login({ ...data }); // backend should accept this field
         await login(response);
 
-        // Navigate to dashboard
         router.push("/dashboard");
       } catch (error: any) {
         console.error("Login error:", error);
@@ -104,6 +103,7 @@ export const LoginForm = memo<LoginFormProps>(({ className }) => {
     },
     [router, login]
   );
+  
 
   return (
     <div className={cn("flex flex-col gap-6", className)}>

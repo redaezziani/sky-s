@@ -1,6 +1,6 @@
 export enum UserRole {
-  USER = 'USER',
-  ADMIN = 'ADMIN',
+  USER = "USER",
+  ADMIN = "ADMIN",
 }
 
 export interface User {
@@ -9,6 +9,19 @@ export interface User {
   name: string | null;
   role: UserRole;
   isEmailVerified: boolean;
+  isActive?: boolean; // optional
+  lastLoginAt?: string | null;
+}
+
+export interface UserDevice {
+  id: string;
+  ip: string;
+  userAgent: string;
+  deviceType: "Desktop" | "Mobile" | "Tablet" | string;
+  country: string | null;
+  city: string | null;
+  lastUsedAt: string;
+  isActive?: boolean;
 }
 
 export interface AuthTokens {
@@ -16,10 +29,14 @@ export interface AuthTokens {
   refreshToken: string;
 }
 
+
+
 export interface AuthResponse {
   user: User;
   tokens: AuthTokens;
+  device?: UserDevice; // added
 }
+
 
 export interface LoginRequest {
   email: string;

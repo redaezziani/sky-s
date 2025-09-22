@@ -18,16 +18,15 @@ import { getMessages } from "@/lib/locale";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { IconLogout } from "@tabler/icons-react";
+import { axiosInstance } from "@/lib/utils";
+import { Monitor, Power, Tablet } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function SettingsPage() {
-  const {
-    settings,
-    fetchSettings,
-    updateSetting,
-    changePassword,
-    logout,
-    logoutAll,
-  } = useSettingsStore();
+  const { settings, fetchSettings, updateSetting, changePassword } =
+    useSettingsStore();
+
+  const { logout, logoutAll } = useAuth();
 
   const { locale } = useLocale();
   const t = getMessages(locale).pages.settings;
@@ -38,6 +37,12 @@ export default function SettingsPage() {
   useEffect(() => {
     fetchSettings();
   }, [fetchSettings]);
+
+  const { devices, fetchDevices } = useSettingsStore();
+
+  useEffect(() => {
+    fetchDevices();
+  }, [fetchDevices]);
 
   useEffect(() => {
     const initial: Record<string, any> = {};
@@ -101,7 +106,7 @@ export default function SettingsPage() {
       </div>
 
       {/* General Settings */}
-      <Card className="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <Card className="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 md:col-span-2 xl:grid-cols-3">
         {settings.map((setting) => (
           <div
             key={setting.key}
@@ -175,7 +180,7 @@ export default function SettingsPage() {
       {/* Auth Settings */}
       <Card className="mt-4 grid gap-4 grid-cols-1 p-3">
         {/* Change Password */}
-        <div className="flex flex-col md:w-1/2 md:flex-row md:items-end gap-2">
+        <div className="flex flex-col xl:w-1/2 md:flex-row md:items-end gap-2">
           <div className="flex-1 flex gap-2">
             <div className="flex-1 flex flex-col gap-2">
               <Label htmlFor="currentPassword">
@@ -286,6 +291,65 @@ export default function SettingsPage() {
               : t.auth.logout.allDevices.button}
           </Button>
         </div>
+      </Card>
+
+      {/* User Devices */}
+      <Card className="mt-4 grid md:grid-cols-3 gap-2 p-3">
+        {devices.length === 0 ? (
+          <p className="text-muted-foreground">
+            {t.auth.devices.empty || "No devices found."}
+          </p>
+        ) : (
+          devices.map((device) => (
+            <div
+              key={device.id}
+              className="flex flex-col gap-2 justify-start items-start p-2 "
+            >
+              <div className="flex-1 flex gap-1 justify-start items-start">
+                {device.deviceType === "Desktop" ? <Monitor /> : <Tablet />}
+
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm font-medium">
+                    {device.deviceType} — {device.ip}{" "}
+                    {device.country &&
+                      `(${device.country}${
+                        device.city ? `, ${device.city}` : ""
+                      })`}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {device.userAgent}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Last used:{" "}
+                    {new Date(device.lastUsedAt).toLocaleString(locale)}
+                  </p>
+
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    onClick={async () => {
+                      try {
+                        await axiosInstance.post(
+                          `/auth/logout-device/${device.id}`
+                        );
+                        toast.success("Logged out from device successfully");
+                        fetchDevices();
+                      } catch (err: any) {
+                        toast.error(
+                          err.response?.data?.message ||
+                            "Failed to logout device"
+                        );
+                      }
+                    }}
+                    className="w-6 h-6 cursor-pointer "
+                  >
+                    <Power className="size-3" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </Card>
     </section>
   );

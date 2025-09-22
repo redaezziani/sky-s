@@ -47,6 +47,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
 import { ImageKitService } from '../common/services/imagekit.service';
+import { PaginatedPublicProductsResponseDto, PublicProductDetailDto, PublicProductQueryDto } from './dto/public-products.dto';
 
 @ApiTags('Products')
 @Controller('products')
@@ -60,7 +61,10 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MODERATOR)
   @ApiBearerAuth()
-  @UseInterceptors(FileInterceptor('coverImage'), FilesInterceptor('additionalImages', 10))
+  @UseInterceptors(
+    FileInterceptor('coverImage'),
+    FilesInterceptor('additionalImages', 10),
+  )
   @ApiOperation({ summary: 'Create a new product' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -167,7 +171,11 @@ export class ProductsController {
     @UploadedFile() coverImage?: Express.Multer.File,
     @UploadedFiles() additionalImages?: Express.Multer.File[],
   ): Promise<ProductResponseDto> {
-    return this.productsService.create(createProductDto, coverImage, additionalImages);
+    return this.productsService.create(
+      createProductDto,
+      coverImage,
+      additionalImages,
+    );
   }
 
   @Post('with-variants')
@@ -298,7 +306,9 @@ export class ProductsController {
     description: 'Include images in response',
     type: Boolean,
   })
-  async findAll(@Query() query: ProductQueryDto): Promise<PaginatedProductsResponseDto> {
+  async findAll(
+    @Query() query: ProductQueryDto,
+  ): Promise<PaginatedProductsResponseDto> {
     return this.productsService.findAll(query);
   }
 
@@ -318,7 +328,9 @@ export class ProductsController {
     status: 404,
     description: 'Product not found',
   })
-  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<ProductResponseDto> {
+  async findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<ProductResponseDto> {
     return this.productsService.findOne(id);
   }
 
@@ -515,7 +527,9 @@ export class ProductsController {
     status: 404,
     description: 'Variant not found',
   })
-  async removeVariant(@Param('variantId', ParseUUIDPipe) variantId: string): Promise<void> {
+  async removeVariant(
+    @Param('variantId', ParseUUIDPipe) variantId: string,
+  ): Promise<void> {
     return this.productsService.removeVariant(variantId);
   }
 
@@ -540,8 +554,14 @@ export class ProductsController {
         stock: { type: 'number', example: 10 },
         lowStockAlert: { type: 'number', example: 5 },
         weight: { type: 'number', example: 250 },
-        dimensions: { type: 'object', example: { length: 20, width: 15, height: 8 } },
-        coverImage: { type: 'string', example: 'https://example.com/image.jpg' },
+        dimensions: {
+          type: 'object',
+          example: { length: 20, width: 15, height: 8 },
+        },
+        coverImage: {
+          type: 'string',
+          example: 'https://example.com/image.jpg',
+        },
         isActive: { type: 'boolean', example: true },
         images: {
           type: 'array',
@@ -559,7 +579,10 @@ export class ProductsController {
   })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
   @ApiResponse({ status: 404, description: 'Variant not found' })
   @ApiResponse({ status: 409, description: 'SKU or barcode already exists' })
   async addSKU(
@@ -590,8 +613,14 @@ export class ProductsController {
         stock: { type: 'number', example: 10 },
         lowStockAlert: { type: 'number', example: 5 },
         weight: { type: 'number', example: 250 },
-        dimensions: { type: 'object', example: { length: 20, width: 15, height: 8 } },
-        coverImage: { type: 'string', example: 'https://example.com/image.jpg' },
+        dimensions: {
+          type: 'object',
+          example: { length: 20, width: 15, height: 8 },
+        },
+        coverImage: {
+          type: 'string',
+          example: 'https://example.com/image.jpg',
+        },
         isActive: { type: 'boolean', example: true },
         images: {
           type: 'array',
@@ -601,10 +630,17 @@ export class ProductsController {
       },
     },
   })
-  @ApiResponse({ status: 200, description: 'SKU updated successfully', type: ProductSKUResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'SKU updated successfully',
+    type: ProductSKUResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
   @ApiResponse({ status: 404, description: 'SKU not found' })
   @ApiResponse({ status: 409, description: 'SKU or barcode already exists' })
   async updateSKU(
@@ -612,7 +648,6 @@ export class ProductsController {
     @Body() updateSKUDto: UpdateProductSKUDto,
     @UploadedFiles() images?: Express.Multer.File[],
   ): Promise<ProductSKUResponseDto> {
-  
     return this.productsService.updateSKU(skuId, updateSKUDto, images);
   }
 
@@ -648,25 +683,131 @@ export class ProductsController {
   }
 
   @Delete('skus/images/:imageId')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN, UserRole.MODERATOR)
-@ApiBearerAuth()
-@HttpCode(HttpStatus.NO_CONTENT)
-@ApiOperation({ summary: 'Delete a single SKU image' })
-@ApiParam({
-  name: 'imageId',
-  description: 'SKU image UUID',
-  example: '550e8400-e29b-41d4-a716-446655440000',
-})
-@ApiResponse({
-  status: 204,
-  description: 'SKU image deleted successfully',
-})
-@ApiResponse({ status: 401, description: 'Unauthorized' })
-@ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
-@ApiResponse({ status: 404, description: 'SKU image not found' })
-async removeSKUImage(@Param('imageId', ParseUUIDPipe) imageId: string): Promise<void> {
-  return this.productsService.removeSKUImage(imageId);
-}
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a single SKU image' })
+  @ApiParam({
+    name: 'imageId',
+    description: 'SKU image UUID',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'SKU image deleted successfully',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
+  @ApiResponse({ status: 404, description: 'SKU image not found' })
+  async removeSKUImage(
+    @Param('imageId', ParseUUIDPipe) imageId: string,
+  ): Promise<void> {
+    return this.productsService.removeSKUImage(imageId);
+  }
 
+  // fix
+
+  @Get('public/latest')
+  @ApiOperation({
+    summary: 'Get latest products (public endpoint)',
+    description:
+      'Get the latest products with minimal information for storefront display',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Latest products retrieved successfully',
+    type: PaginatedPublicProductsResponseDto,
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Items per page (max 50)',
+    example: 12,
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Search term',
+  })
+  @ApiQuery({
+    name: 'categorySlug',
+    required: false,
+    description: 'Filter by category slug',
+  })
+  @ApiQuery({
+    name: 'isFeatured',
+    required: false,
+    description: 'Filter by featured status',
+    type: Boolean,
+  })
+  @ApiQuery({
+    name: 'minPrice',
+    required: false,
+    description: 'Minimum price filter',
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'maxPrice',
+    required: false,
+    description: 'Maximum price filter',
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'inStock',
+    required: false,
+    description: 'Filter by stock availability',
+    type: Boolean,
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    description: 'Sort by field',
+    enum: ['name', 'price', 'createdAt', 'featured'],
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    description: 'Sort order',
+    enum: ['asc', 'desc'],
+  })
+  async getLatestProducts(
+    @Query() query: PublicProductQueryDto,
+  ): Promise<PaginatedPublicProductsResponseDto> {
+    return this.productsService.getLatestProducts(query);
+  }
+
+  @Get('public/:identifier')
+  @ApiOperation({
+    summary: 'Get product details by ID or slug (public endpoint)',
+    description: 'Get detailed product information including variants and SKUs',
+  })
+  @ApiParam({
+    name: 'identifier',
+    description: 'Product UUID or slug',
+    example: 'diverge-4-comp-carbon',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Product details retrieved successfully',
+    type: PublicProductDetailDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Product not found',
+  })
+  async getPublicProductDetails(
+    @Param('identifier') identifier: string,
+  ): Promise<PublicProductDetailDto> {
+    return this.productsService.getPublicProductDetails(identifier);
+  }
 }

@@ -99,13 +99,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       title: t.sidebar.links.reviews,
       url: "/dashboard/reviews",
       icon: IconStar,
-      active: true,
+      active: false,
     },
     {
       title: t.sidebar.links.analytics,
       url: "/dashboard/analytics",
       icon: IconChartLine,
-      active: true,
+      active: false,
     },
     {
       title: t.sidebar.links.settings,

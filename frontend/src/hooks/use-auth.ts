@@ -1,62 +1,68 @@
-import { useState, useEffect } from "react";
+"use client";
+
+import { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "sonner";
-import { User, AuthResponse, AuthTokens } from "@/types/auth.types";
+import { User, AuthResponse, AuthTokens, UserDevice } from "@/types/auth.types";
 import { AuthService } from "@/services/auth.service";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
+  const [device, setDevice] = useState<UserDevice | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const isSubmittingRef = useRef(false);
 
   useEffect(() => {
     const initializeAuth = async () => {
       const accessToken = localStorage.getItem("access_token");
       const userData = localStorage.getItem("user_data");
-      
+      const deviceData = localStorage.getItem("device_data");
+
       if (accessToken && userData) {
         try {
-          const user = JSON.parse(userData);
-          setUser(user);
+          setUser(JSON.parse(userData));
+          setDevice(deviceData ? JSON.parse(deviceData) : null);
           setIsAuthenticated(true);
         } catch (error) {
-          console.error("Failed to parse user data:", error);
+          console.error("Failed to parse auth data:", error);
           clearAuthData();
         }
       }
-      
       setIsLoading(false);
     };
-
     initializeAuth();
   }, []);
 
   const login = async (authResponse: AuthResponse) => {
+
+    console.log("Auth Response:", authResponse); // Debug log
     setUser(authResponse.user);
+    setDevice(authResponse.device ?? null);
     setIsAuthenticated(true);
     saveTokens(authResponse.tokens);
     saveUserData(authResponse.user);
+    saveDeviceData(authResponse.device ?? null);
 
     toast.success("Logged in successfully", {
-      description: `Welcome back, ${authResponse.user.name || authResponse.user.email}!`,
+      description: `Welcome back, ${
+        authResponse.user.name || authResponse.user.email
+      }!`,
     });
   };
 
   const logout = async () => {
+    const refreshToken = localStorage.getItem("refresh_token");
     try {
-      const refreshToken = localStorage.getItem("refresh_token");
-      if (refreshToken) {
-        await AuthService.logout(refreshToken);
-      }
-    } catch (error) {
-      console.error("Logout error:", error);
+      if (!refreshToken) throw new Error("No refresh token");
+      await AuthService.logout(refreshToken);
     } finally {
-      clearAuthData();
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user_data");
+      localStorage.removeItem("device_data");
       setUser(null);
+      setDevice(null);
       setIsAuthenticated(false);
-
-      toast.success("Logged out successfully", {
-        description: "You have been logged out of your account.",
-      });
     }
   };
 
@@ -68,8 +74,8 @@ export function useAuth() {
     } finally {
       clearAuthData();
       setUser(null);
+      setDevice(null);
       setIsAuthenticated(false);
-
       toast.success("Logged out from all devices", {
         description: "You have been logged out from all devices.",
       });
@@ -85,35 +91,24 @@ export function useAuth() {
     localStorage.setItem("user_data", JSON.stringify(userData));
   };
 
+  const saveDeviceData = (deviceData: UserDevice | null) => {
+    if (deviceData)
+      localStorage.setItem("device_data", JSON.stringify(deviceData));
+    else localStorage.removeItem("device_data");
+  };
+
   const clearAuthData = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("user_data");
+    localStorage.removeItem("device_data");
   };
 
-  const updateAuthState = async () => {
-    try {
-      const userProfile = await AuthService.getProfile();
-      setUser(userProfile);
-      setIsAuthenticated(true);
-      saveUserData(userProfile);
-    } catch (error) {
-      console.error("Failed to update auth state:", error);
-      clearAuthData();
-      setUser(null);
-      setIsAuthenticated(false);
-    }
-  };
-
-  const getToken = () => {
-    return localStorage.getItem("access_token");
-  };
+  const getToken = () => localStorage.getItem("access_token");
 
   const refreshTokens = async () => {
     const refreshToken = localStorage.getItem("refresh_token");
-    if (!refreshToken) {
-      throw new Error("No refresh token available");
-    }
+    if (!refreshToken) throw new Error("No refresh token available");
 
     try {
       const tokens = await AuthService.refreshTokens(refreshToken);
@@ -122,6 +117,7 @@ export function useAuth() {
     } catch (error) {
       clearAuthData();
       setUser(null);
+      setDevice(null);
       setIsAuthenticated(false);
       throw error;
     }
@@ -129,12 +125,12 @@ export function useAuth() {
 
   return {
     user,
+    device,
     isAuthenticated,
     isLoading,
     login,
     logout,
     logoutAll,
-    updateAuthState,
     getToken,
     refreshTokens,
   };

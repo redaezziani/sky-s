@@ -84,3 +84,39 @@ export class TokenValidationResponseDto {
   })
   user: UserResponseDto;
 }
+
+
+
+export class UserDeviceDto {
+  @ApiProperty({ description: 'Device ID' })
+  id: string;
+
+  @ApiProperty({ description: 'IP address of the device' })
+  ip: string;
+
+  @ApiProperty({ description: 'User agent string of the device' })
+  userAgent: string;
+
+  @ApiProperty({
+    description: 'Device type',
+    example: 'Desktop | Mobile | Tablet',
+  })
+  deviceType: string;
+
+  @ApiProperty({
+    description: 'Country of the device',
+    nullable: true,
+    required: false,
+  })
+  country: string | null;
+
+  @ApiProperty({
+    description: 'City of the device',
+    nullable: true,
+    required: false,
+  })
+  city: string | null;
+
+  @ApiProperty({ description: 'Last time the device was used' })
+  lastUsedAt: Date;
+}

@@ -20,6 +20,7 @@ import { customAlphabet } from 'nanoid';
 import { createCanvas } from 'canvas';
 import * as JsBarcode from 'jsbarcode';
 import { Prisma } from '@prisma/client';
+import { PaginatedPublicProductsResponseDto, PublicProductDetailDto, PublicProductQueryDto, PublicProductSummaryDto } from './dto/public-products.dto';
 
 
 @Injectable()
@@ -749,89 +750,95 @@ export class ProductsService {
     return this.formatSKUResponse(sku);
   }
 
-async updateSKU(
-  skuId: string,
-  updateSKUDto: UpdateProductSKUDto,
-  imageFiles?: Express.Multer.File[],
-): Promise<ProductSKUResponseDto> {
-  const sku = await this.prisma.productSKU.findFirst({
-    where: { id: skuId, deletedAt: null },
-    include: { images: { orderBy: { position: 'asc' as const } } },
-  });
-
-  if (!sku) throw new NotFoundException('SKU not found');
-
-  // --- Validate uniqueness of SKU ---
-  if (updateSKUDto.sku && updateSKUDto.sku !== sku.sku) {
-    const existing = await this.prisma.productSKU.findFirst({
-      where: { sku: updateSKUDto.sku, id: { not: skuId }, deletedAt: null },
-    });
-    if (existing) throw new ConflictException('SKU already exists');
-  }
-
-  // --- Validate uniqueness of barcode ---
-  if (updateSKUDto.barcode && updateSKUDto.barcode !== sku.barcode) {
-    const existing = await this.prisma.productSKU.findFirst({
-      where: { barcode: updateSKUDto.barcode, id: { not: skuId }, deletedAt: null },
-    });
-    if (existing) throw new ConflictException('Barcode already exists');
-  }
-
-  // --- Update SKU ---
-  const updatedSKU = await this.prisma.productSKU.update({
-    where: { id: skuId },
-    data: {
-      sku: updateSKUDto.sku ?? sku.sku,
-      barcode: updateSKUDto.barcode ?? sku.barcode,
-      price: updateSKUDto.price ?? sku.price,
-      comparePrice: updateSKUDto.comparePrice ?? sku.comparePrice,
-      costPrice: updateSKUDto.costPrice ?? sku.costPrice,
-      stock: updateSKUDto.stock ?? sku.stock,
-      lowStockAlert: updateSKUDto.lowStockAlert ?? sku.lowStockAlert,
-      weight: updateSKUDto.weight ?? sku.weight,
-      dimensions: updateSKUDto.dimensions ?? sku.dimensions ??"",
-      isActive: updateSKUDto.isActive ?? sku.isActive,
-      coverImage: updateSKUDto.coverImage ?? sku.coverImage,
-    },
-    include: { images: { orderBy: { position: 'asc' as const } } },
-  });
-
-  // --- Handle new image uploads ---
-  if (imageFiles?.length) {
-    const uploadResults = await this.imageKitService.uploadMultipleImages(imageFiles, {
-      folder: 'products/skus',
-      tags: ['sku', updatedSKU.sku],
+  async updateSKU(
+    skuId: string,
+    updateSKUDto: UpdateProductSKUDto,
+    imageFiles?: Express.Multer.File[],
+  ): Promise<ProductSKUResponseDto> {
+    const sku = await this.prisma.productSKU.findFirst({
+      where: { id: skuId, deletedAt: null },
+      include: { images: { orderBy: { position: 'asc' as const } } },
     });
 
-    const imageCreates = uploadResults.map((res, index) =>
-      this.prisma.productSKUImage.create({
-        data: {
-          skuId: updatedSKU.id,
-          url: res.url,
-          altText: `${updatedSKU.sku}`,
-          position: (updatedSKU.images?.length ?? 0) + index,
-        },
-      }),
-    );
-    await Promise.all(imageCreates);
+    if (!sku) throw new NotFoundException('SKU not found');
 
-    if (!updatedSKU.coverImage || updateSKUDto.coverImage) {
-      await this.prisma.productSKU.update({
-        where: { id: updatedSKU.id },
-        data: { coverImage: uploadResults[0].url },
+    // --- Validate uniqueness of SKU ---
+    if (updateSKUDto.sku && updateSKUDto.sku !== sku.sku) {
+      const existing = await this.prisma.productSKU.findFirst({
+        where: { sku: updateSKUDto.sku, id: { not: skuId }, deletedAt: null },
       });
+      if (existing) throw new ConflictException('SKU already exists');
     }
+
+    // --- Validate uniqueness of barcode ---
+    if (updateSKUDto.barcode && updateSKUDto.barcode !== sku.barcode) {
+      const existing = await this.prisma.productSKU.findFirst({
+        where: {
+          barcode: updateSKUDto.barcode,
+          id: { not: skuId },
+          deletedAt: null,
+        },
+      });
+      if (existing) throw new ConflictException('Barcode already exists');
+    }
+
+    // --- Update SKU ---
+    const updatedSKU = await this.prisma.productSKU.update({
+      where: { id: skuId },
+      data: {
+        sku: updateSKUDto.sku ?? sku.sku,
+        barcode: updateSKUDto.barcode ?? sku.barcode,
+        price: updateSKUDto.price ?? sku.price,
+        comparePrice: updateSKUDto.comparePrice ?? sku.comparePrice,
+        costPrice: updateSKUDto.costPrice ?? sku.costPrice,
+        stock: updateSKUDto.stock ?? sku.stock,
+        lowStockAlert: updateSKUDto.lowStockAlert ?? sku.lowStockAlert,
+        weight: updateSKUDto.weight ?? sku.weight,
+        dimensions: updateSKUDto.dimensions ?? sku.dimensions ?? '',
+        isActive: updateSKUDto.isActive ?? sku.isActive,
+        coverImage: updateSKUDto.coverImage ?? sku.coverImage,
+      },
+      include: { images: { orderBy: { position: 'asc' as const } } },
+    });
+
+    // --- Handle new image uploads ---
+    if (imageFiles?.length) {
+      const uploadResults = await this.imageKitService.uploadMultipleImages(
+        imageFiles,
+        {
+          folder: 'products/skus',
+          tags: ['sku', updatedSKU.sku],
+        },
+      );
+
+      const imageCreates = uploadResults.map((res, index) =>
+        this.prisma.productSKUImage.create({
+          data: {
+            skuId: updatedSKU.id,
+            url: res.url,
+            altText: `${updatedSKU.sku}`,
+            position: (updatedSKU.images?.length ?? 0) + index,
+          },
+        }),
+      );
+      await Promise.all(imageCreates);
+
+      if (!updatedSKU.coverImage || updateSKUDto.coverImage) {
+        await this.prisma.productSKU.update({
+          where: { id: updatedSKU.id },
+          data: { coverImage: uploadResults[0].url },
+        });
+      }
+    }
+
+    // --- Refetch with images ---
+    const refreshedSKU = await this.prisma.productSKU.findFirst({
+      where: { id: skuId },
+      include: { images: { orderBy: { position: 'asc' as const } } },
+    });
+
+    return this.formatSKUResponse(refreshedSKU);
   }
-
-  // --- Refetch with images ---
-  const refreshedSKU = await this.prisma.productSKU.findFirst({
-    where: { id: skuId },
-    include: { images: { orderBy: { position: 'asc' as const } } },
-  });
-
-  return this.formatSKUResponse(refreshedSKU);
-}
-
 
   async removeSKU(skuId: string): Promise<void> {
     const sku = await this.prisma.productSKU.findFirst({
@@ -951,23 +958,22 @@ async updateSKU(
   }
 
   async removeSKUImage(imageId: string): Promise<void> {
-  const image = await this.prisma.productSKUImage.findUnique({
-    where: { id: imageId },
-  });
+    const image = await this.prisma.productSKUImage.findUnique({
+      where: { id: imageId },
+    });
 
-  if (!image) throw new NotFoundException('SKU image not found');
+    if (!image) throw new NotFoundException('SKU image not found');
 
-  // Optionally delete from ImageKit / storage
-  if (image.fileId) {
-    await this.imageKitService.deleteImage(image.fileId);
+    // Optionally delete from ImageKit / storage
+    if (image.fileId) {
+      await this.imageKitService.deleteImage(image.fileId);
+    }
+
+    // Delete record from DB
+    await this.prisma.productSKUImage.delete({
+      where: { id: imageId },
+    });
   }
-
-  // Delete record from DB
-  await this.prisma.productSKUImage.delete({
-    where: { id: imageId },
-  });
-}
-
 
   async deleteImage(imageId: string): Promise<void> {
     const image = await this.prisma.productSKUImage.findUnique({
@@ -998,7 +1004,7 @@ async updateSKU(
       id: product.id,
       name: product.name,
       slug: product.slug,
-      description: product.description,
+      description: product.description ?? undefined,
       shortDesc: product.shortDesc,
       coverImage: product.coverImage,
       isActive: product.isActive,
@@ -1056,6 +1062,301 @@ async updateSKU(
         position: img.position,
         createdAt: img.createdAt,
       })),
+    };
+  }
+
+  // Add these methods to your ProductsService class
+
+  async getLatestProducts(
+    query: PublicProductQueryDto,
+  ): Promise<PaginatedPublicProductsResponseDto> {
+    const {
+      page = 1,
+      limit = 12,
+      search,
+      categorySlug,
+      isFeatured,
+      minPrice,
+      maxPrice,
+      inStock = true,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = query;
+
+    const skip = (page - 1) * limit;
+
+    // Build where clause
+    const where: any = {
+      isActive: true,
+      deletedAt: null,
+    };
+
+    // Search filter
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { shortDesc: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    // Category filter
+    if (categorySlug) {
+      where.categories = {
+        some: {
+          slug: categorySlug,
+          isActive: true,
+        },
+      };
+    }
+
+    // Featured filter
+    if (typeof isFeatured === 'boolean') {
+      where.isFeatured = isFeatured;
+    }
+
+    // Stock filter
+    if (inStock) {
+      where.variants = {
+        some: {
+          isActive: true,
+          skus: {
+            some: {
+              isActive: true,
+              stock: { gt: 0 },
+            },
+          },
+        },
+      };
+    }
+
+    // Price filter - this is more complex as we need to check SKU prices
+    const priceFilter: any = {};
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.variants = {
+        some: {
+          isActive: true,
+          skus: {
+            some: {
+              isActive: true,
+              ...(minPrice !== undefined && { price: { gte: minPrice } }),
+              ...(maxPrice !== undefined && { price: { lte: maxPrice } }),
+              ...(inStock && { stock: { gt: 0 } }),
+            },
+          },
+        },
+      };
+    }
+
+    // Build orderBy clause
+    let orderBy: any = {};
+    switch (sortBy) {
+      case 'name':
+        orderBy = { name: sortOrder };
+        break;
+      case 'price':
+        // For price sorting, we'll sort by the minimum price of active SKUs
+        // This requires a more complex query, we'll handle it in the service
+        orderBy = { createdAt: sortOrder }; // Fallback for now
+        break;
+      case 'featured':
+        orderBy = [{ isFeatured: 'desc' }, { createdAt: sortOrder }];
+        break;
+      default:
+        orderBy = { [sortBy]: sortOrder };
+    }
+
+    // Execute query
+    const [products, total] = await Promise.all([
+      this.prisma.product.findMany({
+        where,
+        include: {
+          categories: {
+            where: { isActive: true },
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+          variants: {
+            where: { isActive: true },
+            include: {
+              skus: {
+                where: { isActive: true },
+                select: {
+                  id: true,
+                  price: true,
+                  comparePrice: true,
+                  stock: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy,
+        skip,
+        take: limit,
+      }),
+      this.prisma.product.count({ where }),
+    ]);
+
+    // Transform to public format
+    const transformedProducts: PublicProductSummaryDto[] = products.map(
+      (product) => {
+        // Calculate starting price and stock status
+        const allSKUs = product.variants.flatMap((variant) => variant.skus);
+        const activeSKUs = allSKUs.filter((sku) => sku.stock > 0);
+
+        const prices = allSKUs.map((sku) => Number(sku.price));
+        const comparePrices = allSKUs
+          .map((sku) => (sku.comparePrice ? Number(sku.comparePrice) : null))
+          .filter((price) => price !== null);
+
+        const startingPrice = prices.length > 0 ? Math.min(...prices) : 0;
+        const comparePrice =
+          comparePrices.length > 0 ? Math.min(...comparePrices) : undefined;
+        const inStockStatus = activeSKUs.length > 0;
+
+        return {
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          shortDesc: product.shortDesc ?? undefined,
+          coverImage: product.coverImage ?? undefined,
+          isFeatured: product.isFeatured,
+          startingPrice,
+          comparePrice,
+          inStock: inStockStatus,
+          categories: product.categories,
+          createdAt: product.createdAt,
+        };
+      },
+    );
+
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(total / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
+    return {
+      data: transformedProducts,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage,
+        hasPrevPage,
+      },
+    };
+  }
+
+  async getPublicProductDetails(
+    identifier: string,
+  ): Promise<PublicProductDetailDto> {
+    // Determine if identifier is UUID or slug
+    const isUUID =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        identifier,
+      );
+
+    const where = isUUID ? { id: identifier } : { slug: identifier };
+
+    const product = await this.prisma.product.findFirst({
+      where: {
+        ...where,
+        isActive: true,
+        deletedAt: null,
+      },
+      include: {
+        categories: {
+          where: { isActive: true },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        variants: {
+          where: { isActive: true },
+          include: {
+            skus: {
+              where: { isActive: true },
+              include: {
+                images: {
+                  orderBy: { position: 'asc' },
+                  select: {
+                    id: true,
+                    url: true,
+                    altText: true,
+                    position: true,
+                  },
+                },
+              },
+              orderBy: { price: 'asc' },
+            },
+          },
+          orderBy: { sortOrder: 'asc' },
+        },
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    // Calculate price range and stock information
+    const allSKUs = product.variants.flatMap((variant) => variant.skus);
+    const prices = allSKUs.map((sku) => Number(sku.price));
+    const totalStock = allSKUs.reduce((sum, sku) => sum + sku.stock, 0);
+    const inStock = allSKUs.some((sku) => sku.stock > 0);
+
+    const priceRange = {
+      min: prices.length > 0 ? Math.min(...prices) : 0,
+      max: prices.length > 0 ? Math.max(...prices) : 0,
+    };
+
+    const startingPrice = priceRange.min;
+
+    // Transform variants and SKUs
+    const transformedVariants = product.variants.map((variant) => ({
+      id: variant.id,
+      name: variant.name ?? '', // Ensure string, not null
+      attributes: variant.attributes,
+      isActive: variant.isActive,
+      skus: variant.skus.map((sku) => ({
+        id: sku.id,
+        sku: sku.sku,
+        price: Number(sku.price),
+        comparePrice: sku.comparePrice ? Number(sku.comparePrice) : undefined,
+        stock: sku.stock,
+        weight: sku.weight ? Number(sku.weight) : undefined,
+        dimensions: sku.dimensions ?? undefined, // Use undefined if null
+        coverImage: sku.coverImage ?? undefined, // Use undefined if null
+        images: sku.images,
+        isActive: sku.isActive,
+      })),
+    }));
+
+    return {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      description: product.description ?? undefined,
+      shortDesc: product.shortDesc ?? undefined,
+      coverImage: product.coverImage ?? undefined,
+      isFeatured: product.isFeatured,
+      metaTitle: product.metaTitle ?? undefined,
+      metaDesc: product.metaDesc ?? undefined,
+      categories: product.categories,
+      variants: !transformedVariants || [] ,
+      startingPrice,
+      priceRange,
+      inStock,
+      totalStock,
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt,
     };
   }
 }

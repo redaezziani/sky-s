@@ -54,6 +54,7 @@ model User {
   reviews       ProductReview[]
   cartItems     CartItem[]
   payments      Payment[]
+  devices       UserDevice[]
 
   @@index([email])
   @@index([isActive])
@@ -65,13 +66,17 @@ model RefreshToken {
   id        String   @id @default(uuid())
   token     String   @unique @db.VarChar(500)
   userId    String
+  deviceId  String? // link to device
   expiresAt DateTime
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device UserDevice? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
 
   @@index([token])
   @@index([expiresAt])
+  @@index([userId])
+  @@index([deviceId])
 }
 
 model Category {
@@ -271,10 +276,9 @@ model Order {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  user  User        @relation(fields: [userId], references: [id])
-  items OrderItem[]
+  user     User        @relation(fields: [userId], references: [id])
+  items    OrderItem[]
   payments Payment[]
-
 
   @@index([orderNumber])
   @@index([userId])
@@ -334,27 +338,24 @@ model PriceHistory {
   @@index([createdAt])
 }
 
-
 enum PaymentMethod {
   STRIPE
   CASH
 }
 
-
-
 model Payment {
-  id             String        @id @default(uuid())
-  orderId        String
-  userId         String
-  method         PaymentMethod
-  status         PaymentStatus @default(PENDING)
-  amount         Decimal       @db.Decimal(10, 2)
-  currency       String        @db.VarChar(3) @default("USD")
-  transactionId  String?       @db.VarChar(200) // Provider transaction ref
-  provider       String?       @db.VarChar(100) // Stripe, PayPal, etc.
-  rawResponse    Json?                       // Store API response for debugging
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id            String        @id @default(uuid())
+  orderId       String
+  userId        String
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("USD") @db.VarChar(3)
+  transactionId String?       @db.VarChar(200) // Provider transaction ref
+  provider      String?       @db.VarChar(100) // Stripe, PayPal, etc.
+  rawResponse   Json? // Store API response for debugging
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   // Relations
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -368,24 +369,43 @@ model Payment {
 
 model Setting {
   id          String      @id @default(uuid())
-  key         String      @unique @db.VarChar(100)  
-  label       String      @db.VarChar(100)         
-  type        SettingType @default(STRING)        
-  valueString String?                            
-  valueNumber Float?                              
-  valueBool   Boolean?                          
-  options     String?                           
-  description String? @db.VarChar(255)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  key         String      @unique @db.VarChar(100)
+  label       String      @db.VarChar(100)
+  type        SettingType @default(STRING)
+  valueString String?
+  valueNumber Float?
+  valueBool   Boolean?
+  options     String?
+  description String?     @db.VarChar(255)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 enum SettingType {
   STRING
   NUMBER
   BOOLEAN
-  SELECT     
-  
+  SELECT
 }
 
+model UserDevice {
+  id         String   @id @default(uuid())
+  userId     String
+  ip         String
+  userAgent  String
+  deviceType String
+  country    String?  @db.VarChar(50)
+  city       String?  @db.VarChar(100)
+  lastUsedAt DateTime @default(now())
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  refreshTokens RefreshToken[] // <-- add this back-relation
+
+  @@unique([userId, ip]) // Composite unique
+  @@index([userId])
+  @@index([ip])
+}

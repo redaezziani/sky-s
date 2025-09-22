@@ -471,6 +471,24 @@
           "logoutFailed": "ログアウトに失敗しました",
           "logoutAllSuccess": "すべてのデバイスからログアウトしました",
           "logoutAllFailed": "すべてのデバイスからのログアウトに失敗しました"
+        },
+        "devices": {
+          "title": "デバイス管理",
+          "empty": "デバイス情報が見つかりません",
+          "columns": {
+            "deviceType": "デバイスタイプ",
+            "ip": "IPアドレス",
+            "location": "場所",
+            "userAgent": "ユーザーエージェント",
+            "lastUsedAt": "最終使用日時"
+          },
+          "actions": {
+            "logoutDevice": "ログアウト"
+          },
+          "toast": {
+            "logoutDeviceSuccess": "デバイスからログアウトしました",
+            "logoutDeviceFailed": "デバイスからのログアウトに失敗しました"
+          }
         }
       }
     }

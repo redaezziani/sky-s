@@ -18,7 +18,10 @@ import {
   RefreshTokenDto,
 } from './dto/auth.dto';
 import { JwtPayload, AuthTokens, AuthResponse } from './types/auth.types';
-import { User, UserRole } from '@prisma/client';
+import { User } from '@prisma/client';
+import { UserDeviceDto } from './dto/response.dto';
+
+import * as geoip from 'geoip-lite';
 
 @Injectable()
 export class AuthService {
@@ -40,7 +43,10 @@ export class AuthService {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, secrets.BcryptSaltRounds);
+    const hashedPassword = await bcrypt.hash(
+      password,
+      secrets.BcryptSaltRounds,
+    );
 
     // Generate email verification token
     const emailVerificationToken = randomBytes(32).toString('hex');
@@ -72,23 +78,22 @@ export class AuthService {
     };
   }
 
-  async login(loginDto: LoginDto): Promise<AuthResponse> {
+  async login(
+    loginDto: LoginDto,
+    ip: string,
+    userAgent: string,
+  ): Promise<AuthResponse & { device: UserDeviceDto }> {
     const { email, password } = loginDto;
 
     // Find user
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (!user || !user.isActive) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user || !user.isActive)
       throw new UnauthorizedException('Invalid credentials');
-    }
 
-    // Verify password
+    // Check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
+    if (!isPasswordValid)
       throw new UnauthorizedException('Invalid credentials');
-    }
 
     // Update last login
     await this.prisma.user.update({
@@ -96,8 +101,48 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
-    // Generate tokens
-    const tokens = await this.generateTokens(user);
+    // Determine device type
+    let deviceType = 'Desktop';
+    if (/mobile/i.test(userAgent)) deviceType = 'Mobile';
+    if (/tablet/i.test(userAgent)) deviceType = 'Tablet';
+
+    // Handle geo lookup safely
+    let country: string | null = null;
+    let city: string | null = null;
+
+    // For local development, default to a public IP to avoid null geo
+    const ipForGeo =
+      ip === '::1' || ip === '127.0.0.1' || ip === 'unknown' ? '8.8.8.8' : ip;
+
+    const geo = geoip.lookup(ipForGeo);
+    if (geo) {
+      country = geo.country || null;
+      city = geo.city || null;
+    }
+
+    // Upsert device info
+    const device = await this.prisma.userDevice.upsert({
+      where: { userId_ip: { userId: user.id, ip } },
+      create: {
+        userId: user.id,
+        ip,
+        userAgent,
+        deviceType,
+        country,
+        city,
+        lastUsedAt: new Date(),
+      },
+      update: {
+        lastUsedAt: new Date(),
+        userAgent,
+        deviceType,
+        country,
+        city,
+      },
+    });
+
+    // Generate tokens linked to device
+    const tokens = await this.generateTokens(user, device.id);
 
     return {
       user: {
@@ -108,6 +153,15 @@ export class AuthService {
         isEmailVerified: user.isEmailVerified,
       },
       tokens,
+      device: {
+        id: device.id,
+        ip: device.ip,
+        userAgent: device.userAgent,
+        deviceType: device.deviceType,
+        country: device.country,
+        city: device.city,
+        lastUsedAt: device.lastUsedAt,
+      },
     };
   }
 
@@ -207,7 +261,10 @@ export class AuthService {
     }
 
     // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, secrets.BcryptSaltRounds);
+    const hashedPassword = await bcrypt.hash(
+      newPassword,
+      secrets.BcryptSaltRounds,
+    );
 
     // Update user password and clear reset token
     await this.prisma.user.update({
@@ -270,7 +327,9 @@ export class AuthService {
     });
 
     // TODO: Send verification email
-    console.log(`Email verification token for ${email}: ${emailVerificationToken}`);
+    console.log(
+      `Email verification token for ${email}: ${emailVerificationToken}`,
+    );
   }
 
   async validateUser(email: string, password: string): Promise<User | null> {
@@ -278,7 +337,11 @@ export class AuthService {
       where: { email },
     });
 
-    if (user && user.isActive && await bcrypt.compare(password, user.password)) {
+    if (
+      user &&
+      user.isActive &&
+      (await bcrypt.compare(password, user.password))
+    ) {
       return user;
     }
 
@@ -291,26 +354,26 @@ export class AuthService {
     });
   }
 
-  private async generateTokens(user: User): Promise<AuthTokens> {
+  private async generateTokens(
+    user: User,
+    deviceId?: string,
+  ): Promise<AuthTokens> {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
       role: user.role,
     };
 
-    // Generate access token
     const accessToken = this.jwtService.sign(payload, {
       secret: secrets.JwtSecret,
       expiresIn: secrets.JwtExpiresIn,
     });
 
-    // Generate refresh token
     const refreshToken = this.jwtService.sign(payload, {
       secret: secrets.JwtRefreshSecret,
       expiresIn: secrets.JwtRefreshExpiresIn,
     });
 
-    // Store refresh token in database
     const refreshTokenExpires = new Date();
     refreshTokenExpires.setDate(refreshTokenExpires.getDate() + 7); // 7 days
 
@@ -318,13 +381,40 @@ export class AuthService {
       data: {
         token: refreshToken,
         userId: user.id,
+        deviceId,
         expiresAt: refreshTokenExpires,
       },
     });
 
-    return {
-      accessToken,
-      refreshToken,
-    };
+    return { accessToken, refreshToken };
+  }
+
+  async getUserDevices(userId: string) {
+    return this.prisma.userDevice.findMany({
+      where: { userId, isActive: true },
+      orderBy: { lastUsedAt: 'desc' },
+      select: {
+        id: true,
+        ip: true,
+        userAgent: true,
+        deviceType: true,
+        country: true,
+        city: true,
+        lastUsedAt: true,
+      },
+    });
+  }
+
+  async logoutDevice(userId: string, deviceId: string) {
+    // Delete refresh tokens linked to that device
+    await this.prisma.refreshToken.deleteMany({
+      where: { userId, deviceId },
+    });
+
+    // Optionally deactivate device
+    await this.prisma.userDevice.update({
+      where: { id: deviceId },
+      data: { isActive: false },
+    });
   }
 }
