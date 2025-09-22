@@ -178,7 +178,8 @@
             "searchPlaceholder": "Rechercher par numéro de commande, utilisateur ou statut...",
             "empty": "Aucune commande trouvée",
             "deleteSelected": "Supprimer {0} sélectionnés",
-            "viewInvoice": "Voir la facture"
+            "viewInvoice": "Voir la facture",
+            "cancelOrder": "Annuler la commande"
           },
           "dialogs": {
             "deleteTitle": "Supprimer la commande",

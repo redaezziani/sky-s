@@ -16,6 +16,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderSortBy, QueryOrderDto, SortOrder } from './dto/query-order.dto';
 import { PaginatedOrdersResponseDto } from './dto/response.dto';
+import { CancelOrderDto } from './dto/cancel-order.dto';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -77,5 +78,11 @@ export class OrdersController {
   @ApiResponse({ status: 204, description: 'Order deleted successfully' })
   remove(@Param('id') id: string) {
     return this.ordersService.remove(id);
+  }
+
+  @Post('cancel')
+  async cancelOrder(@Body() dto: CancelOrderDto) {
+   
+    return this.ordersService.cancelOrder(dto);
   }
 }

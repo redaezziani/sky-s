@@ -178,7 +178,8 @@
             "searchPlaceholder": "Search by order number, user, or status...",
             "empty": "No orders found",
             "deleteSelected": "Delete {0} selected",
-            "viewInvoice": "View Invoice"
+            "viewInvoice": "View Invoice",
+            "cancelOrder": "Cancel Order"
           },
           "dialogs": {
             "deleteTitle": "Delete Order",

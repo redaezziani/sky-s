@@ -51,6 +51,7 @@ export function EnhancedOrderTable() {
     clearError,
     setPage,
     setPageSize,
+    cancelOrder,
   } = useOrdersStore();
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -79,6 +80,15 @@ export function EnhancedOrderTable() {
       setOrderToDelete(null);
     } catch {
       toast.error(t.toast?.failed ?? "Failed to delete order");
+    }
+  };
+
+  const handelOrderCancel = async (orderId: string, userId: string) => {
+    try {
+      await cancelOrder(orderId, userId);
+      toast.success(t.toast?.cancelled ?? "Order cancelled successfully");
+    } catch {
+      toast.error(t.toast?.cancelFailed ?? "Failed to cancel order");
     }
   };
 
@@ -232,6 +242,13 @@ export function EnhancedOrderTable() {
             >
               <CloudDownload className={`mr-2 h-4 w-4 `} />
               {t.components?.ordersTable?.table?.viewInvoice ?? "View Invoice"}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => handelOrderCancel(order.id, order.userId)}
+              disabled={order.status === "CANCELLED"}
+            >
+              <Package className="mr-2 h-4 w-4" />
+              {t.components?.ordersTable?.table?.cancelOrder ?? "Cancel Order"}
             </DropdownMenuItem>
 
             <DropdownMenuItem
