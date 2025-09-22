@@ -13,7 +13,8 @@
       "orders": "注文",
       "orderItems": "注文アイテム",
       "reviews": "レビュー",
-      "analytics": "分析"
+      "analytics": "分析",
+      "settings": "設定"
     },
     "navUser": {
       "logout": "ログアウト",
@@ -439,6 +440,10 @@
           }
         }
       }
+    },
+    "settings": {
+      "title": "設定",
+      "description": "アプリケーション設定を管理します"
     }
   }
 }

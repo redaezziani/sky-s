@@ -1,10 +1,10 @@
 // src/payment/payment.module.ts
 import { Module } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { PaymentService } from './payment.service';
+import { PaymentService } from './payments.service';
 import { StripePaymentStrategy } from './strategies/stripe.strategy';
 import { CashPaymentStrategy } from './strategies/cash.strategy';
-import { PaymentController } from './payment.controller';
+import { PaymentController } from './payments.controller';
 
 @Module({
   providers: [
@@ -25,4 +25,4 @@ import { PaymentController } from './payment.controller';
   controllers: [PaymentController],
   exports: [PaymentService],
 })
-export class PaymentModule {}
+export class PaymentsModule {}

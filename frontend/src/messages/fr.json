@@ -13,7 +13,8 @@
       "orders": "Commandes",
       "orderItems": "Articles de commande",
       "reviews": "Avis",
-      "analytics": "Analyses"
+      "analytics": "Analyses",
+      "settings": "Paramètres"
     },
     "navUser": {
       "logout": "Déconnexion",
@@ -436,6 +437,10 @@
           "labelSuffix": "période"
         }
       }
+    },
+    "settings": {
+      "title": "Paramètres",
+      "description": "Gérer les paramètres de l'application"
     }
   }
 }

@@ -13,7 +13,8 @@
       "orders": "Orders",
       "orderItems": "Order Items",
       "reviews": "Reviews",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "settings": "Settings"
     },
     "navUser": {
       "logout": "Logout",
@@ -436,6 +437,10 @@
           "labelSuffix": "period"
         }
       }
+    },
+    "settings":{
+      "title": "Settings",
+      "description": "Manage application settings"
     }
   }
 }
