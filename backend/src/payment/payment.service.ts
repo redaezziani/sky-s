@@ -12,7 +12,9 @@ export class PaymentService {
     strategies.forEach((s) => this.strategies.set(s.method, s));
   }
 
-  async createPayment(dto: CreatePaymentDto): Promise<Payment & { checkoutUrl?: string }> {
+  async createPayment(
+    dto: CreatePaymentDto,
+  ): Promise<Payment & { checkoutUrl?: string }> {
     const strategy = this.strategies.get(dto.method);
     if (!strategy) throw new BadRequestException('Unsupported payment method');
     return strategy.create(dto);
@@ -23,7 +25,15 @@ export class PaymentService {
     if (!strategy?.confirm) {
       throw new BadRequestException('Confirm not supported for this method');
     }
-    // this is for methods like PayPal that need server-side confirmation 
     return strategy.confirm(transactionId);
   }
+
+  async cancelPayment(method: string, transactionId: string) {
+    const strategy = this.strategies.get(method);
+    if (!strategy?.cancel) {
+      throw new BadRequestException('Cancel not supported for this method');
+    }
+    return strategy.cancel(transactionId);
+  }
+  
 }

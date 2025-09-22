@@ -130,6 +130,8 @@ interface OrdersStore {
     updateData: Partial<UpdateOrderPayload>
   ) => Promise<void>;
 
+  cancelOrder: (orderId: string, userId: string) => Promise<void>;
+
   setPage: (page: number) => void;
   setPageSize: (size: number) => void;
 
@@ -244,6 +246,28 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
     } catch (err: any) {
       set({
         error: err.response?.data?.message || "Failed to update order",
+        loading: false,
+      });
+      throw err;
+    }
+  },
+
+  cancelOrder: async (orderId: string, userId: string) => {
+    try {
+      set({ loading: true, error: null });
+      await axiosInstance.post(`/orders/cancel`, { orderId, userId });
+      // Update the order status locally in the store
+      set({
+        orders: get().orders.map((order) =>
+          order.id === orderId
+            ? { ...order, status: OrderStatus.CANCELLED.toString() }
+            : order
+        ),
+        loading: false,
+      });
+    } catch (err: any) {
+      set({
+        error: err.response?.data?.message || "Failed to cancel order",
         loading: false,
       });
       throw err;

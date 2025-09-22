@@ -5,6 +5,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { PaymentStrategy } from './payment-strategy.interface';
 import { CreatePaymentDto } from '../dto/create-payment.dto';
 import { Logger } from '@nestjs/common';
+import { PaymentStatus } from '@prisma/client';
 @Injectable()
 export class StripePaymentStrategy implements PaymentStrategy {
   private readonly logger = new Logger(StripePaymentStrategy.name);
@@ -78,10 +79,8 @@ export class StripePaymentStrategy implements PaymentStrategy {
   }
 
   async confirm(transactionId: string) {
-    let stripeObject:
-      | Stripe.PaymentIntent
-      | Stripe.Checkout.Session
-      | null = null;
+    let stripeObject: Stripe.PaymentIntent | Stripe.Checkout.Session | null =
+      null;
 
     try {
       // Try to fetch as PaymentIntent
@@ -106,9 +105,15 @@ export class StripePaymentStrategy implements PaymentStrategy {
     let newStatus: 'PENDING' | 'COMPLETED' | 'FAILED' = 'PENDING';
 
     if ('status' in stripeObject) {
-      if (stripeObject.status === 'succeeded' || stripeObject.status === 'complete') {
+      if (
+        stripeObject.status === 'succeeded' ||
+        stripeObject.status === 'complete'
+      ) {
         newStatus = 'COMPLETED';
-      } else if (stripeObject.status === 'requires_payment_method' || stripeObject.status === 'canceled') {
+      } else if (
+        stripeObject.status === 'requires_payment_method' ||
+        stripeObject.status === 'canceled'
+      ) {
         newStatus = 'FAILED';
       }
     }
@@ -123,5 +128,74 @@ export class StripePaymentStrategy implements PaymentStrategy {
     });
 
     return stripeObject;
+  }
+
+  async cancel(transactionId: string) {
+    
+    try {
+      const pi = await this.stripe.paymentIntents.retrieve(transactionId);
+      if (pi && pi.status !== 'canceled' && pi.status !== 'succeeded') {
+        const canceled = await this.stripe.paymentIntents.cancel(transactionId);
+        await this.prisma.payment.updateMany({
+          where: { transactionId },
+          data: {
+            status: PaymentStatus.FAILED,
+            rawResponse: canceled as any,
+          },
+        });
+        return canceled;
+      }
+
+      if (pi?.status === 'succeeded') {
+        const refund = await this.stripe.refunds.create({
+          payment_intent: pi.id,
+        });
+        await this.prisma.payment.updateMany({
+          where: { transactionId },
+          data: { status: PaymentStatus.REFUNDED, rawResponse: refund as any },
+        });
+        return refund;
+      }
+    } catch {
+
+      const session = await this.stripe.checkout.sessions.retrieve(
+        transactionId,
+        {
+          expand: ['payment_intent'],
+        },
+      );
+
+      if (
+        session.payment_intent &&
+        typeof session.payment_intent === 'object'
+      ) {
+        const pi = session.payment_intent as Stripe.PaymentIntent;
+        if (pi.status !== 'succeeded') {
+          const canceled = await this.stripe.paymentIntents.cancel(pi.id);
+          await this.prisma.payment.updateMany({
+            where: { transactionId },
+            data: {
+              status: PaymentStatus.FAILED,
+              rawResponse: canceled as any,
+            },
+          });
+          return canceled;
+        } else {
+          const refund = await this.stripe.refunds.create({
+            payment_intent: pi.id,
+          });
+          await this.prisma.payment.updateMany({
+            where: { transactionId },
+            data: {
+              status: PaymentStatus.REFUNDED  ,
+              rawResponse: refund as any,
+            },
+          });
+          return refund;
+        }
+      }
+    }
+
+    throw new Error(`Unable to cancel payment ${transactionId}`);
   }
 }

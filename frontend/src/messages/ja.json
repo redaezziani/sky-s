@@ -182,7 +182,8 @@
             "searchPlaceholder": "注文番号、ユーザー、ステータスで検索...",
             "empty": "注文が見つかりません",
             "deleteSelected": "{0} 件選択を削除",
-            "viewInvoice": "請求書を見る"
+            "viewInvoice": "請求書を見る",
+            "cancelOrder": "注文をキャンセル"
           },
           "dialogs": {
             "deleteTitle": "注文を削除",
