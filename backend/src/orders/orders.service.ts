@@ -165,10 +165,6 @@ export class OrdersService {
       };
 
       const payment = await this.paymentService.createPayment(paymentDto);
-      console.log('Payment created:', payment);
-      this.logger.log(
-        `Payment created for order ${order.id}: ${JSON.stringify(payment)}`,
-      );
 
       if (createOrderDto.redirectToCheckout && payment.checkoutUrl) {
         return {

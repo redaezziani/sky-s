@@ -1,18 +1,21 @@
-// src/payment/strategies/stripe.strategy.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import Stripe from 'stripe';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PaymentStrategy } from './payment-strategy.interface';
 import { CreatePaymentDto } from '../dto/create-payment.dto';
-import { Logger } from '@nestjs/common';
 import { PaymentStatus } from '@prisma/client';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
 @Injectable()
 export class StripePaymentStrategy implements PaymentStrategy {
   private readonly logger = new Logger(StripePaymentStrategy.name);
   method = 'STRIPE';
   private stripe: Stripe;
 
-  constructor(private prisma: PrismaService) {
+  constructor(
+    private prisma: PrismaService,
+    private eventEmitter: EventEmitter2,
+  ) {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? '', {
       apiVersion: '2025-08-27.basil',
     });
@@ -56,7 +59,6 @@ export class StripePaymentStrategy implements PaymentStrategy {
       return { ...payment, checkoutUrl: session.url ?? undefined };
     }
 
-    // fallback: PaymentIntent flow
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount: Math.round(dto.amount * 100),
       currency: dto.currency ?? 'usd',
@@ -86,88 +88,49 @@ export class StripePaymentStrategy implements PaymentStrategy {
       null;
 
     try {
-      // Try to fetch as PaymentIntent
       stripeObject = await this.stripe.paymentIntents.retrieve(transactionId);
     } catch {
-      // If not a PI, maybe it's a Checkout Session
       try {
         stripeObject = await this.stripe.checkout.sessions.retrieve(
           transactionId,
-          { expand: ['payment_intent'] },
+          {
+            expand: ['payment_intent'],
+          },
         );
       } catch {
         throw new Error(`Stripe object not found for ${transactionId}`);
       }
     }
 
-    if (!stripeObject) {
+    if (!stripeObject)
       throw new Error(`Stripe object not found for ${transactionId}`);
-    }
 
     // normalize status
     let newStatus: 'PENDING' | 'COMPLETED' | 'FAILED' = 'PENDING';
-
     if ('status' in stripeObject) {
       if (
         stripeObject.status === 'succeeded' ||
         stripeObject.status === 'complete'
-      ) {
+      )
         newStatus = 'COMPLETED';
-      } else if (
+      else if (
         stripeObject.status === 'requires_payment_method' ||
         stripeObject.status === 'canceled'
-      ) {
+      )
         newStatus = 'FAILED';
-      }
     }
 
-    // update in DB
-    await this.prisma.payment.updateMany({
+    // update payment in DB
+    const payment = await this.prisma.payment.updateMany({
       where: { transactionId },
-      data: {
-        status: newStatus,
-        rawResponse: stripeObject as any,
-      },
+      data: { status: newStatus, rawResponse: stripeObject as any },
     });
 
-    // what about updating the order status? Should be done in a service layer
-
-    const updateOrders = async () => {
-      const payment = await this.prisma.payment.findFirst({
-        where: { transactionId },
-      });
-      if (!payment) {
-        this.logger.error(
-          `Payment with transactionId ${transactionId} not found`,
-        );
-        return;
-      }
-
-      const order = await this.prisma.order.findUnique({
-        where: { id: payment.orderId },
-      });
-      if (!order) {
-        this.logger.error(
-          `Order with id ${payment.orderId} not found for payment ${transactionId}`,
-        );
-        return;
-      }
-
-      if (newStatus === 'COMPLETED' && order.status === 'PENDING') {
-        await this.prisma.order.update({
-          where: { id: order.id },
-          data: { paymentStatus: 'COMPLETED', status: 'PROCESSING' },
-        });
-      } else if (newStatus === 'FAILED' && order.status === 'PENDING') {
-        await this.prisma.order.update({
-          where: { id: order.id },
-          data: { status: 'CANCELLED' },
-        });
-      }
-    };
-    
-    await updateOrders();
-
+    // emit event to handle order update
+    this.eventEmitter.emit('payment.updated', {
+      transactionId,
+      status: newStatus,
+    });
 
     return stripeObject;
   }
@@ -179,10 +142,7 @@ export class StripePaymentStrategy implements PaymentStrategy {
         const canceled = await this.stripe.paymentIntents.cancel(transactionId);
         await this.prisma.payment.updateMany({
           where: { transactionId },
-          data: {
-            status: PaymentStatus.FAILED,
-            rawResponse: canceled as any,
-          },
+          data: { status: PaymentStatus.FAILED, rawResponse: canceled as any },
         });
         return canceled;
       }
@@ -200,39 +160,25 @@ export class StripePaymentStrategy implements PaymentStrategy {
     } catch {
       const session = await this.stripe.checkout.sessions.retrieve(
         transactionId,
-        {
-          expand: ['payment_intent'],
-        },
+        { expand: ['payment_intent'] },
       );
-
-      if (
-        session.payment_intent &&
-        typeof session.payment_intent === 'object'
-      ) {
-        const pi = session.payment_intent as Stripe.PaymentIntent;
-        if (pi.status !== 'succeeded') {
-          const canceled = await this.stripe.paymentIntents.cancel(pi.id);
-          await this.prisma.payment.updateMany({
-            where: { transactionId },
-            data: {
-              status: PaymentStatus.FAILED,
-              rawResponse: canceled as any,
-            },
-          });
-          return canceled;
-        } else {
-          const refund = await this.stripe.refunds.create({
-            payment_intent: pi.id,
-          });
-          await this.prisma.payment.updateMany({
-            where: { transactionId },
-            data: {
-              status: PaymentStatus.REFUNDED,
-              rawResponse: refund as any,
-            },
-          });
-          return refund;
-        }
+      const pi = session.payment_intent as Stripe.PaymentIntent;
+      if (pi.status !== 'succeeded') {
+        const canceled = await this.stripe.paymentIntents.cancel(pi.id);
+        await this.prisma.payment.updateMany({
+          where: { transactionId },
+          data: { status: PaymentStatus.FAILED, rawResponse: canceled as any },
+        });
+        return canceled;
+      } else {
+        const refund = await this.stripe.refunds.create({
+          payment_intent: pi.id,
+        });
+        await this.prisma.payment.updateMany({
+          where: { transactionId },
+          data: { status: PaymentStatus.REFUNDED, rawResponse: refund as any },
+        });
+        return refund;
       }
     }
 

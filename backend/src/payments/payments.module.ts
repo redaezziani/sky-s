@@ -5,12 +5,15 @@ import { PaymentService } from './payments.service';
 import { StripePaymentStrategy } from './strategies/stripe.strategy';
 import { CashPaymentStrategy } from './strategies/cash.strategy';
 import { PaymentController } from './payments.controller';
+import { PaymentEvent } from './payments.event';
+import { EmailService } from 'src/common/services/email.service';
 
 @Module({
   providers: [
     PrismaService,
     StripePaymentStrategy,
     CashPaymentStrategy,
+    EmailService,
     {
       provide: PaymentService,
       useFactory: (
@@ -21,6 +24,7 @@ import { PaymentController } from './payments.controller';
       },
       inject: [StripePaymentStrategy, CashPaymentStrategy],
     },
+    PaymentEvent
   ],
   controllers: [PaymentController],
   exports: [PaymentService],

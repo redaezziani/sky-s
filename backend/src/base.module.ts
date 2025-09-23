@@ -10,6 +10,7 @@ import { OrderItemsModule } from './order-items/order-items.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { PaymentsModule } from './payments/payments.module';
 import { SettingsModule } from './settings/settings.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SettingsModule } from './settings/settings.module';
     AnalyticsModule,
     PaymentsModule,
     SettingsModule,
+    EventEmitterModule.forRoot(),
   ],
   controllers: [],
   providers: [],
