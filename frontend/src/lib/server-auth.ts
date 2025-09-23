@@ -11,14 +11,14 @@ export async function getServerUser() {
     const response = await fetch(`${BACKEND_API_URL}/auth/validate`, {
       method: "GET",
       headers: {
-        'Cookie': `access_token=${accessToken}`, // match middleware
+        'Cookie': `access_token=${accessToken}`, 
       },
     });
 
     if (!response.ok) return null;
 
     const data = await response.json();
-    return data.user ?? null; // must exist
+    return data.user ?? null; 
   } catch (err) {
     console.error("Server-side token validation failed:", err);
     return null;
