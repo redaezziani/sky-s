@@ -5,6 +5,11 @@ import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getServerUser } from "@/lib/server-auth";
 
+// frontend/src/app/dashboard/layout.tsx
+
+
+
+
 export default async function DashboardLayout({
   children,
 }: {

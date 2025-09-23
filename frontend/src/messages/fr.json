@@ -551,5 +551,9 @@
       "unknownProduct": "Produit inconnu",
       "noAttributes": "Aucun attribut"
     }
+  },
+  "app": {
+    "title": "Sky's Store - Plateforme e-commerce open source",
+    "description": "Sky's Store est une plateforme e-commerce moderne et extensible, open source, construite avec Next.js et Prisma. Elle offre des fonctionnalités telles que la gestion des produits, le traitement des commandes et l'authentification des utilisateurs."
   }
 }

@@ -572,5 +572,9 @@
       "unknownProduct": "不明な商品",
       "noAttributes": "属性なし"
     }
+  },
+  "app": {
+    "title": "Sky's Store - オープンソースeコマースプラットフォーム",
+    "description": "Sky's Storeは、Next.jsとPrismaを使用したモダンで拡張可能なオープンソースeコマースプラットフォームです。製品管理、注文処理、ユーザー認証などの機能を提供します。"
   }
 }

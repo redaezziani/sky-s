@@ -42,14 +42,12 @@ import {
 import { UserRole, User } from "@/types/auth.types";
 
 export function AppSidebar({
-  user, // <-- Now only use the `user` prop passed from the server
+  user,
   ...props
 }: React.ComponentProps<typeof Sidebar> & { user: User | null }) {
-  // We no longer need the `useAuth` hook here for user data
   const { locale } = useLocale();
   const t = getMessages(locale);
 
-  // Helper function to check if a route is accessible based on the user's role
   const isRouteAccessible = (url: string) => {
     if (!user) return false;
     if (authenticatedRoutes.includes(url)) {
@@ -147,8 +145,24 @@ export function AppSidebar({
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
-                <IconInnerShadowTop className="!size-5" />
+              <a
+                href="#"
+                className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 200 160"
+                  className="h-11 w-11"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M 75.36,45.39 C 80.93,35.58 86.31,26.09 92.56,15.10 C 119.73,63.00 145.09,109.48 170.40,155.88 C 169.04,157.80 167.65,157.30 166.40,157.30 C 151.24,157.35 136.08,157.24 120.92,157.43 C 118.89,157.47 117.64,156.09 116.65,153.63 C 99.72,120.88 82.67,88.19 65.56,55.54 C 64.37,53.63 64.13,52.28 65.39,50.29 C 68.18,45.21 70.61,39.92 75.36,45.39 Z"
+                  />
+                  <path
+                    fill="currentColor"
+                    d="M 15.00,157.32 C 9.54,157.33 4.58,157.33 -1.22,157.33 C 9.28,138.97 19.04,121.87 29.59,103.42 C 40.12,121.82 50.84,138.85 62.40,157.32 C 49.61,157.32 38.56,157.32 15.00,157.32 Z"
+                  />
+                </svg>
                 <span className="text-base font-semibold">
                   {t.sidebar.storeManager}
                 </span>

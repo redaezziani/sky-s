@@ -1,6 +1,10 @@
-// app/layout.tsx
-"use client";
 
+
+
+export const metadata = {
+  title: "ダッシュボード | マイアプリ",
+  description: "ストア管理用の管理者ダッシュボードです",
+};
 import { LocaleProvider } from "@/components/local-lang-swither";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";

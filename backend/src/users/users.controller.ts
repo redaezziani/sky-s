@@ -35,7 +35,7 @@ import { RequestUser } from '../auth/types/auth.types';
 
 @ApiTags('users')
 @Controller('users')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
