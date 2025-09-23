@@ -3,7 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { BaseModule } from './base.module';
 // import { secrets } from './config/secrets';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-
+import * as cookieParser from 'cookie-parser'; 
 async function bootstrap() {
   const app = await NestFactory.create(BaseModule);
   
@@ -37,11 +37,11 @@ async function bootstrap() {
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, documentFactory);
-  
-  app.enableCors({
-    origin:"*", 
+
+    app.use(cookieParser());
+   app.enableCors({
+    origin: "http://localhost:3000", // frontend URL
     credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   });
   
   app.enableVersioning();

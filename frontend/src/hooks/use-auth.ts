@@ -1,46 +1,44 @@
-
-
-import Cookies from "js-cookie";
-import { useState, useEffect, useRef, useCallback } from "react";
+// src/hooks/use-auth.ts
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { User, AuthResponse, AuthTokens, UserDevice } from "@/types/auth.types";
+import { User, AuthResponse, UserDevice } from "@/types/auth.types";
 import { AuthService } from "@/services/auth.service";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [device, setDevice] = useState<UserDevice | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const isSubmittingRef = useRef(false);
+  const [isLoading, setIsLoading] = useState(false); // Set to false initially. The middleware handles the first auth check.
+
+  // The logic to fetch the profile should be separated from the initial render.
+  const fetchProfile = async () => {
+    setIsLoading(true);
+    try {
+      const profile = await AuthService.getProfile();
+      setUser(profile);
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error("Failed to fetch profile:", error);
+      clearAuthData();
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      // Get the token from the cookie instead of localStorage
-      const accessToken = Cookies.get("auth_token");
-      const userData = localStorage.getItem("user_data");
-      const deviceData = localStorage.getItem("device_data");
-
-      if (accessToken && userData) {
-        try {
-          setUser(JSON.parse(userData));
-          setDevice(deviceData ? JSON.parse(deviceData) : null);
-          setIsAuthenticated(true);
-        } catch (error) {
-          console.error("Failed to parse auth data:", error);
-          clearAuthData();
-        }
-      }
-      setIsLoading(false);
-    };
-    initializeAuth();
+    // We don't need to do anything here on initial load.
+    // The middleware already handles redirection if the user is unauthenticated.
+    // If we're on a protected page, we can assume the token is present and the middleware has passed us through.
+    // We can then trigger a profile fetch based on a condition or just rely on a page-level fetch.
+    // The previous implementation was a client-side anti-pattern.
   }, []);
 
   const login = async (authResponse: AuthResponse) => {
     setUser(authResponse.user);
     setDevice(authResponse.device ?? null);
     setIsAuthenticated(true);
-    // Save token to cookie and user data to localStorage
-    saveTokens(authResponse.tokens);
     saveUserData(authResponse.user);
     saveDeviceData(authResponse.device ?? null);
 
@@ -49,79 +47,33 @@ export function useAuth() {
         authResponse.user.name || authResponse.user.email
       }!`,
     });
+    // ✅ After successful login, trigger the profile fetch and redirect.
+    // We'll let the redirect happen automatically on the successful login response.
   };
 
   const logout = async () => {
-    const refreshToken = localStorage.getItem("refresh_token");
     try {
-      if (!refreshToken) throw new Error("No refresh token");
-      await AuthService.logout(refreshToken);
-    } finally {
-      // Clear token from cookie and data from localStorage
-      clearAuthData();
-      setUser(null);
-      setDevice(null);
-      setIsAuthenticated(false);
-    }
-  };
-
-  const logoutAll = async () => {
-    try {
-      await AuthService.logoutAll();
-    } catch (error) {
-      console.error("Logout all error:", error);
+      await AuthService.logout();
     } finally {
       clearAuthData();
       setUser(null);
       setDevice(null);
       setIsAuthenticated(false);
-      toast.success("Logged out from all devices", {
-        description: "You have been logged out from all devices.",
-      });
     }
-  };
-
-  const saveTokens = (tokens: AuthTokens) => {
-    // Save the access token to a cookie that is readable by the middleware
-    Cookies.set("auth_token", tokens.accessToken, { expires: 7, path: "/" });
-    localStorage.setItem("refresh_token", tokens.refreshToken);
-  };
-
-  const saveUserData = (userData: User) => {
-    localStorage.setItem("user_data", JSON.stringify(userData));
-  };
-
-  const saveDeviceData = (deviceData: UserDevice | null) => {
-    if (deviceData)
-      localStorage.setItem("device_data", JSON.stringify(deviceData));
-    else localStorage.removeItem("device_data");
   };
 
   const clearAuthData = () => {
-    // Remove the cookie and localStorage data
-    Cookies.remove("auth_token");
-    localStorage.removeItem("refresh_token");
     localStorage.removeItem("user_data");
     localStorage.removeItem("device_data");
   };
-
-  const getToken = () => Cookies.get("auth_token");
-
-  const refreshTokens = async () => {
-    const refreshToken = localStorage.getItem("refresh_token");
-    if (!refreshToken) throw new Error("No refresh token available");
-
-    try {
-      const tokens = await AuthService.refreshTokens(refreshToken);
-      saveTokens(tokens);
-      return tokens;
-    } catch (error) {
-      clearAuthData();
-      setUser(null);
-      setDevice(null);
-      setIsAuthenticated(false);
-      throw error;
-    }
+  
+  const saveUserData = (userData: User) => {
+    localStorage.setItem("user_data", JSON.stringify(userData));
+  };
+  
+  const saveDeviceData = (deviceData: UserDevice | null) => {
+    if (deviceData) localStorage.setItem("device_data", JSON.stringify(deviceData));
+    else localStorage.removeItem("device_data");
   };
 
   return {
@@ -131,8 +83,6 @@ export function useAuth() {
     isLoading,
     login,
     logout,
-    logoutAll,
-    getToken,
-    refreshTokens,
+    fetchProfile, // Expose fetchProfile to be used manually
   };
 }

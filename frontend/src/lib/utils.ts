@@ -10,73 +10,37 @@ export function cn(...inputs: ClassValue[]) {
 const instance = axios.create({
   baseURL: "http://localhost:8085/api",
   timeout: 10000,
+  withCredentials: true, // ✅ Key change: This tells axios to send cookies.
 });
 
-// Add a request interceptor to include auth token
+// Request interceptor: No changes needed here, as the browser handles the cookies.
 instance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (config) => config,
+  (error) => Promise.reject(error)
 );
 
-// Add a response interceptor to handle auth errors
+// Response interceptor
 instance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
+    // Handle expired session (401)
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      const refreshToken = localStorage.getItem("refresh_token");
-      if (refreshToken) {
-        try {
-          // Try to refresh the token
-          const response = await axios.post(
-            `${
-              process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1"
-            }/auth/refresh`,
-            { refreshToken }
-          );
+      try {
+        // Call the refresh endpoint. The backend will read the refresh_token from the cookie.
+        await instance.post("/auth/refresh");
 
-          const { accessToken, refreshToken: newRefreshToken } = response.data;
-          localStorage.setItem("access_token", accessToken);
-          localStorage.setItem("refresh_token", newRefreshToken);
-
-          // Retry the original request with new token
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          return instance(originalRequest);
-        } catch (refreshError) {
-          // Refresh failed, clear tokens and redirect
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
-          localStorage.removeItem("user_data");
-
-          toast.error("Session expired", {
-            description: "Please log in again to continue.",
-          });
-
-          if (typeof window !== "undefined") {
-            window.location.href = "/auth/login";
-          }
-        }
-      } else {
-        // No refresh token, clear storage and redirect
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        localStorage.removeItem("user_data");
-
+        // Retry the original request with the new access token cookie.
+        return instance(originalRequest);
+      } catch (refreshError) {
         toast.error("Session expired", {
           description: "Please log in again to continue.",
         });
 
+        // Redirect to login page on refresh failure
         if (typeof window !== "undefined") {
           window.location.href = "/auth/login";
         }
@@ -89,4 +53,4 @@ instance.interceptors.response.use(
 
 const fetcher = (url: string) => instance.get(url).then((res) => res.data);
 
-export { instance as axiosInstance , fetcher };
+export { instance as axiosInstance, fetcher };

@@ -9,6 +9,7 @@ import {
   ValidationPipe,
   Req,
   Param,
+  Res,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -40,7 +41,7 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { RequestUser, AuthResponse, AuthTokens } from './types/auth.types';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -61,28 +62,63 @@ export class AuthController {
   async login(
     @Body(new ValidationPipe()) loginDto: LoginDto,
     @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<AuthResponse> {
     const ip =
       req.ip || req.headers['x-forwarded-for']?.toString() || 'unknown';
     const userAgent = req.headers['user-agent'] || 'unknown';
-    return this.authService.login(loginDto, ip, userAgent);
+    const authResponse = await this.authService.login(loginDto, ip, userAgent);
+
+    // Set HttpOnly cookies
+    res.cookie('access_token', authResponse.tokens.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+    res.cookie('refresh_token', authResponse.tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+
+    return authResponse;
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refreshTokens(
-    @Body(new ValidationPipe()) refreshTokenDto: RefreshTokenDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<AuthTokens> {
-    return this.authService.refreshTokens(refreshTokenDto);
+    const refreshToken = req.cookies['refresh_token'];
+    const tokens = await this.authService.refreshTokens({ refreshToken });
+
+    // Reset cookies
+    res.cookie('access_token', tokens.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+    res.cookie('refresh_token', tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+
+    return tokens;
   }
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async logout(
-    @Body('refreshToken') refreshToken: string,
-  ): Promise<{ message: string }> {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const refreshToken = req.cookies['refresh_token'];
     await this.authService.logout(refreshToken);
+
+    // Clear cookies
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+
     return { message: 'Logged out successfully' };
   }
 
@@ -170,4 +206,6 @@ export class AuthController {
     await this.authService.logoutDevice(user.id, deviceId);
     return { message: 'Logged out from device successfully' };
   }
+
+  
 }

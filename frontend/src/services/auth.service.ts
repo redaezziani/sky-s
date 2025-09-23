@@ -14,7 +14,6 @@ import {
   AuthTokens,
   MessageResponse,
   TokenValidationResponse,
-  RefreshTokenRequest,
   User,
 } from "@/types/auth.types";
 
@@ -40,8 +39,6 @@ export class AuthService {
         "/auth/login",
         credentials
       );
-
-      
       return response.data;
     } catch (error) {
       if (error instanceof AxiosError && error.response?.data) {
@@ -51,12 +48,10 @@ export class AuthService {
     }
   }
 
-  static async refreshTokens(refreshToken: string): Promise<AuthTokens> {
+  static async refreshTokens(): Promise<AuthTokens> {
     try {
-      const response = await axiosInstance.post<AuthTokens>(
-        "/auth/refresh",
-        { refreshToken }
-      );
+      // ✅ No need to pass a token in the body, the cookie is sent automatically.
+      const response = await axiosInstance.post<AuthTokens>("/auth/refresh");
       return response.data;
     } catch (error) {
       if (error instanceof AxiosError && error.response?.data) {
@@ -66,12 +61,10 @@ export class AuthService {
     }
   }
 
-  static async logout(refreshToken: string): Promise<MessageResponse> {
+  static async logout(): Promise<MessageResponse> {
     try {
-      const response = await axiosInstance.post<MessageResponse>(
-        "/auth/logout",
-        { refreshToken }
-      );
+      // ✅ No need to pass a token in the body.
+      const response = await axiosInstance.post<MessageResponse>("/auth/logout");
       return response.data;
     } catch (error) {
       if (error instanceof AxiosError && error.response?.data) {
