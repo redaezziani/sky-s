@@ -67,7 +67,9 @@
             "addSKU": "Ajouter SKU",
             "edit": "Modifier",
             "delete": "Supprimer",
-            "openMenu": "Ouvrir le menu d'action"
+            "openMenu": "Ouvrir le menu d'action",
+            "created": "Créé le",
+            "actions": "Actions"
           },
           "dialogs": {
             "deleteTitle": "Supprimer le SKU",
@@ -438,39 +440,116 @@
         }
       }
     },
-      "settings": {
-        "title": "Paramètres",
-        "description": "Gérez les paramètres de votre application",
-        "auth": {
-          "title": "Authentification",
-          "changePassword": {
-            "currentPassword": "Mot de passe actuel",
-            "newPassword": "Nouveau mot de passe",
-            "save": "Enregistrer",
-            "saving": "Enregistrement..."
+    "settings": {
+      "title": "Paramètres",
+      "description": "Gérez les paramètres de votre application",
+      "auth": {
+        "title": "Authentification",
+        "changePassword": {
+          "currentPassword": "Mot de passe actuel",
+          "newPassword": "Nouveau mot de passe",
+          "save": "Enregistrer",
+          "saving": "Enregistrement..."
+        },
+        "logout": {
+          "currentDevice": {
+            "label": "Se déconnecter de l'appareil actuel",
+            "button": "Se déconnecter",
+            "processing": "Traitement..."
           },
-          "logout": {
-            "currentDevice": {
-              "label": "Se déconnecter de l'appareil actuel",
-              "button": "Se déconnecter",
-              "processing": "Traitement..."
-            },
-            "allDevices": {
-              "label": "Se déconnecter de tous les appareils",
-              "button": "Tout déconnecter",
-              "processing": "Traitement..."
-            }
+          "allDevices": {
+            "label": "Se déconnecter de tous les appareils",
+            "button": "Tout déconnecter",
+            "processing": "Traitement..."
+          }
+        },
+        "toast": {
+          "passwordChanged": "Mot de passe modifié avec succès",
+          "passwordChangeFailed": "Échec de la modification du mot de passe",
+          "logoutSuccess": "Déconnecté avec succès",
+          "logoutFailed": "Échec de la déconnexion",
+          "logoutAllSuccess": "Déconnecté de tous les appareils avec succès",
+          "logoutAllFailed": "Échec de la déconnexion de tous les appareils"
+        }
+      }
+    },
+    "variants": {
+      "components": {
+        "variantTable": {
+          "title": "Liste des variantes",
+          "table": {
+            "selectRow": "Sélectionner la ligne",
+            "name": "Nom",
+            "attributes": "Attributs",
+            "skus": "SKU",
+            "status": "Statut",
+            "created": "Créé le",
+            "actions": "Actions",
+            "openMenu": "Ouvrir le menu",
+            "edit": "Modifier",
+            "delete": "Supprimer",
+            "searchPlaceholder": "Rechercher par nom ou produit",
+            "active": "Actif",
+            "inactive": "Inactif"
           },
           "toast": {
-            "passwordChanged": "Mot de passe modifié avec succès",
-            "passwordChangeFailed": "Échec de la modification du mot de passe",
-            "logoutSuccess": "Déconnecté avec succès",
-            "logoutFailed": "Échec de la déconnexion",
-            "logoutAllSuccess": "Déconnecté de tous les appareils avec succès",
-            "logoutAllFailed": "Échec de la déconnexion de tous les appareils"
+            "deleted": "La variante a été supprimée",
+            "deleteFailed": "Échec de la suppression de la variante",
+            "bulkDeleted": "{0} variantes ont été supprimées",
+            "bulkDeleteFailed": "Échec de la suppression de plusieurs variantes"
+          },
+          "dialogs": {
+            "deleteTitle": "Supprimer la variante ?",
+            "deleteDesc": "Cette action est irréversible. La variante sera définitivement supprimée.",
+            "bulkDeleteTitle": "Supprimer les variantes sélectionnées ?",
+            "bulkDeleteDesc": "Vous êtes sur le point de supprimer {0} variantes. Cette action est irréversible.",
+            "cancel": "Annuler",
+            "delete": "Supprimer"
+          }
+        },
+        "dialogs": {
+          "createProductVariant": {
+            "title": "Create Product Variant",
+            "description": "Add a new product variant and set its attributes and stock information.",
+            "fields": {
+              "product": "Product",
+              "name": "Variant Name",
+              "attributes": "Attributes",
+              "sortOrder": "Sort Order",
+              "isActive": "Active"
+            },
+            "placeholders": {
+              "selectProduct": "Select a product",
+              "name": "e.g., Red / Size M",
+              "attributeName": "Attribute Name",
+              "attributeValue": "Attribute Value"
+            },
+            "hints": {
+              "name": "Variant name is optional",
+              "attributes": "You can add optional attributes to the variant",
+              "sortOrder": "Set display order as a number",
+              "isActive": "If disabled, it will not be visible"
+            },
+            "actions": {
+              "addAttribute": "Add Attribute",
+              "removeAttribute": "Remove"
+            },
+            "submit": {
+              "creating": "Creating...",
+              "create": "Create",
+              "cancel": "Cancel"
+            },
+            "toast": {
+              "variantCreated": "Variant created successfully",
+              "variantCreateFailed": "Failed to create variant"
+            }
           }
         }
       }
-    
+    },
+    "common": {
+      "unknownProduct": "Produit inconnu",
+      "noAttributes": "Aucun attribut"
+    }
   }
 }

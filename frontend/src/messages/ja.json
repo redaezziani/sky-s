@@ -67,7 +67,9 @@
             "addSKU": "SKUを追加",
             "edit": "編集",
             "delete": "削除",
-            "openMenu": "操作メニューを開く"
+            "openMenu": "操作メニューを開く",
+            "created": "作成日",
+            "actions": "操作"
           },
           "dialogs": {
             "deleteTitle": "SKUを削除",
@@ -491,6 +493,84 @@
           }
         }
       }
+    },
+    "variants": {
+      "components": {
+        "variantTable": {
+          "title": "バリアント一覧",
+          "table": {
+            "selectRow": "行を選択",
+            "name": "名前",
+            "attributes": "属性",
+            "skus": "SKU",
+            "status": "ステータス",
+            "created": "作成日",
+            "actions": "操作",
+            "openMenu": "メニューを開く",
+            "edit": "編集",
+            "delete": "削除",
+            "searchPlaceholder": "名前または商品で検索",
+            "active": "有効",
+            "inactive": "無効"
+          },
+          "toast": {
+            "deleted": "バリアントが削除されました",
+            "deleteFailed": "バリアントの削除に失敗しました",
+            "bulkDeleted": "{0} 件のバリアントが削除されました",
+            "bulkDeleteFailed": "複数のバリアントの削除に失敗しました"
+          },
+          "dialogs": {
+            "deleteTitle": "バリアントを削除しますか？",
+            "deleteDesc": "この操作は元に戻せません。このバリアントは完全に削除されます。",
+            "bulkDeleteTitle": "選択したバリアントを削除しますか？",
+            "bulkDeleteDesc": "選択した {0} 件のバリアントを削除しようとしています。この操作は元に戻せません。",
+            "cancel": "キャンセル",
+            "delete": "削除"
+          }
+        },
+        "dialogs": {
+          "createProductVariant": {
+            "title": "商品バリアントを作成",
+            "description": "新しい商品バリアントを追加し、属性や在庫情報を設定します。",
+            "fields": {
+              "product": "商品",
+              "name": "バリアント名",
+              "attributes": "属性",
+              "sortOrder": "表示順",
+              "isActive": "有効"
+            },
+            "placeholders": {
+              "selectProduct": "商品を選択",
+              "name": "例: 赤 / Mサイズ",
+              "attributeName": "属性名",
+              "attributeValue": "属性値"
+            },
+            "hints": {
+              "name": "バリアント名は任意です",
+              "attributes": "バリアントに任意の属性を追加できます",
+              "sortOrder": "表示順序を数字で設定します",
+              "isActive": "無効にすると公開されません"
+            },
+            "actions": {
+              "addAttribute": "属性を追加",
+              "removeAttribute": "削除"
+            },
+            "submit": {
+              "creating": "作成中...",
+              "create": "作成",
+              "cancel": "キャンセル"
+            },
+            "toast": {
+              "variantCreated": "バリアントを作成しました",
+              "variantCreateFailed": "バリアントの作成に失敗しました"
+            }
+          }
+        }
+      }
+    },
+    "common": {
+      "unknownProduct": "不明な商品",
+      "noAttributes": "属性なし"
     }
   }
 }

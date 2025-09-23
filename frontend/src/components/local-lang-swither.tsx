@@ -19,6 +19,7 @@ const localesList: { key: Locale; label: string }[] = [
   { key: "en", label: "EN" },
   { key: "ja", label: "JA" },
   { key: "fr", label: "FR" },
+  { key: "ar", label: "AR" },
 ];
 
 // ---------- Locale Context ----------

@@ -15,11 +15,11 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import {
   Select,
@@ -34,12 +34,14 @@ import { Switch } from "@/components/ui/switch";
 import useProductVariantsStore from "@/stores/product-variants-store";
 import { toast } from "sonner";
 import { useProductsStore } from "@/stores/products-store";
+import { useLocale } from "@/components/local-lang-swither";
+import { getMessages } from "@/lib/locale";
 
 const createProductVariantSchema = z.object({
-  productId: z.string().min(1, "Product is required"),
+  productId: z.string().min(1),
   name: z.string().optional(),
   isActive: z.boolean(),
-  sortOrder: z.number().min(0, "Sort order must be non-negative"),
+  sortOrder: z.number().min(0),
 });
 
 type CreateProductVariantFormData = z.infer<typeof createProductVariantSchema>;
@@ -55,6 +57,9 @@ export function CreateProductVariantDialog({
 }: CreateProductVariantDialogProps) {
   const { createVariant, loading } = useProductVariantsStore();
   const { products, fetchProducts } = useProductsStore();
+  const { locale } = useLocale();
+  const t =
+    getMessages(locale).pages.variants.components.dialogs.createProductVariant;
   const [attributes, setAttributes] = useState<Record<string, string>>({});
 
   const form = useForm<CreateProductVariantFormData>({
@@ -68,15 +73,10 @@ export function CreateProductVariantDialog({
   });
 
   useEffect(() => {
-    if (open) {
-      fetchProducts({ includeVariants: false });
-    }
+    if (open) fetchProducts({ includeVariants: false });
   }, [open, fetchProducts]);
 
-  const handleAddAttribute = () => {
-    setAttributes({ ...attributes, "": "" });
-  };
-
+  const handleAddAttribute = () => setAttributes({ ...attributes, "": "" });
   const handleUpdateAttribute = (
     oldKey: string,
     newKey: string,
@@ -91,7 +91,6 @@ export function CreateProductVariantDialog({
     }
     setAttributes(newAttributes);
   };
-
   const handleRemoveAttribute = (key: string) => {
     const newAttributes = { ...attributes };
     delete newAttributes[key];
@@ -114,12 +113,12 @@ export function CreateProductVariantDialog({
         sortOrder: data.sortOrder,
       });
 
-      toast.success("Product variant created successfully");
+      toast.success(t.toast.variantCreated);
       onOpenChange(false);
       form.reset();
       setAttributes({});
-    } catch (error) {
-      toast.error("Failed to create product variant");
+    } catch {
+      toast.error(t.toast.variantCreateFailed);
     }
   };
 
@@ -135,11 +134,8 @@ export function CreateProductVariantDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Create Product Variant</DialogTitle>
-          <DialogDescription>
-            Add a new variant for an existing product. You can specify
-            attributes like size, color, etc.
-          </DialogDescription>
+          <DialogTitle>{t.title}</DialogTitle>
+          <DialogDescription>{t.description}</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -147,19 +143,22 @@ export function CreateProductVariantDialog({
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4 max-w-[600px] overflow-hidden"
           >
+            {/* Product */}
             <FormField
               control={form.control}
               name="productId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Product</FormLabel>
+                  <FormLabel>{t.fields.product}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger className="w-[400px]">
-                        <SelectValue placeholder="Select a product" />
+                        <SelectValue
+                          placeholder={t.placeholders.selectProduct}
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -175,43 +174,40 @@ export function CreateProductVariantDialog({
               )}
             />
 
+            {/* Name */}
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name (Optional)</FormLabel>
+                  <FormLabel>{t.fields.name}</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Large - Red" {...field} />
+                    <Input placeholder={t.placeholders.name} {...field} />
                   </FormControl>
-                  <FormDescription>
-                    A descriptive name for this variant. If not provided, it
-                    will be auto-generated.
-                  </FormDescription>
+                  <FormDescription>{t.hints.name}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* Attributes */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <FormLabel>Attributes</FormLabel>
+                <FormLabel>{t.fields.attributes}</FormLabel>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={handleAddAttribute}
                 >
-                  Add Attribute
+                  {t.actions.addAttribute}
                 </Button>
               </div>
-              <FormDescription>
-                Define attributes like size, color, material, etc.
-              </FormDescription>
+              <FormDescription>{t.hints.attributes}</FormDescription>
               {Object.entries(attributes).map(([key, value], index) => (
                 <div key={index} className="flex items-center space-x-2">
                   <Input
-                    placeholder="Attribute name (e.g., size)"
+                    placeholder={t.placeholders.attributeName}
                     value={key}
                     onChange={(e) =>
                       handleUpdateAttribute(key, e.target.value, value)
@@ -219,7 +215,7 @@ export function CreateProductVariantDialog({
                     className="flex-1"
                   />
                   <Input
-                    placeholder="Value (e.g., Large)"
+                    placeholder={t.placeholders.attributeValue}
                     value={value}
                     onChange={(e) =>
                       handleUpdateAttribute(key, key, e.target.value)
@@ -232,18 +228,19 @@ export function CreateProductVariantDialog({
                     size="sm"
                     onClick={() => handleRemoveAttribute(key)}
                   >
-                    Remove
+                    {t.actions.removeAttribute}
                   </Button>
                 </div>
               ))}
             </div>
 
+            {/* Sort Order */}
             <FormField
               control={form.control}
               name="sortOrder"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Sort Order</FormLabel>
+                  <FormLabel>{t.fields.sortOrder}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -254,24 +251,23 @@ export function CreateProductVariantDialog({
                       }
                     />
                   </FormControl>
-                  <FormDescription>
-                    Used to control the display order of variants.
-                  </FormDescription>
+                  <FormDescription>{t.hints.sortOrder}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* Active */}
             <FormField
               control={form.control}
               name="isActive"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">Active</FormLabel>
-                    <FormDescription>
-                      Whether this variant is active and available for use.
-                    </FormDescription>
+                    <FormLabel className="text-base">
+                      {t.fields.isActive}
+                    </FormLabel>
+                    <FormDescription>{t.hints.isActive}</FormDescription>
                   </div>
                   <FormControl>
                     <Switch
@@ -289,10 +285,10 @@ export function CreateProductVariantDialog({
                 variant="outline"
                 onClick={() => handleOpenChange(false)}
               >
-                Cancel
+                {t.submit.cancel}
               </Button>
               <Button type="submit" disabled={loading}>
-                {loading ? "Creating..." : "Create Product Variant"}
+                {loading ? t.submit.creating : t.submit.create}
               </Button>
             </DialogFooter>
           </form>

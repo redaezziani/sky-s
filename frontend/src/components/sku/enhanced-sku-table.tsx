@@ -332,13 +332,53 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
       label: t.pages.skus.components.skuTable.table.created,
       render: (sku) => {
         const date = new Date(sku.createdAt);
+        const formatter = new Intl.DateTimeFormat(locale, {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        // => 2025年9月22日
+
         return (
           <div className="text-sm text-muted-foreground">
-            {date.toLocaleDateString(locale)}
+            {formatter.format(date)}
           </div>
         );
       },
     },
+    {
+      key: "actions",
+      label: t.pages.skus.components.skuTable.table.actions,
+      render: (sku) => {
+        return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">
+              {t.pages.skus.components.skuTable.table.openMenu}
+            </span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => handleEditSKU(sku)}>
+            <Edit className="mr-2 h-4 w-4" />
+            {t.pages.skus.components.skuTable.table.edit}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => openDeleteDialog(sku.id)}
+            className="text-red-600"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            {t.pages.skus.components.skuTable.table.delete}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+        );
+      },
+    },
+
+    
   ];
 
   useEffect(() => {
@@ -379,31 +419,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
             </Button>
           </div>
         }
-        actions={(sku) => (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">
-                  {t.pages.skus.components.skuTable.table.openMenu}
-                </span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleEditSKU(sku)}>
-                <Edit className="mr-2 h-4 w-4" />
-                {t.pages.skus.components.skuTable.table.edit}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => openDeleteDialog(sku.id)}
-                className="text-red-600"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                {t.pages.skus.components.skuTable.table.delete}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+       
       />
 
       <PaginationTable

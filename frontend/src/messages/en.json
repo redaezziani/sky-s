@@ -67,7 +67,9 @@
             "addSKU": "Add SKU",
             "edit": "Edit",
             "delete": "Delete",
-            "openMenu": "Open action menu"
+            "openMenu": "Open action menu",
+            "created": "Created At",
+            "actions": "Actions"
           },
           "dialogs": {
             "deleteTitle": "Delete SKU",
@@ -438,39 +440,116 @@
         }
       }
     },
-      "settings": {
-        "title": "Settings",
-        "description": "Manage your application settings",
-        "auth": {
-          "title": "Authentication",
-          "changePassword": {
-            "currentPassword": "Current Password",
-            "newPassword": "New Password",
-            "save": "Save",
-            "saving": "Saving..."
+    "settings": {
+      "title": "Settings",
+      "description": "Manage your application settings",
+      "auth": {
+        "title": "Authentication",
+        "changePassword": {
+          "currentPassword": "Current Password",
+          "newPassword": "New Password",
+          "save": "Save",
+          "saving": "Saving..."
+        },
+        "logout": {
+          "currentDevice": {
+            "label": "Logout from Current Device",
+            "button": "Logout",
+            "processing": "Processing..."
           },
-          "logout": {
-            "currentDevice": {
-              "label": "Logout from Current Device",
-              "button": "Logout",
-              "processing": "Processing..."
-            },
-            "allDevices": {
-              "label": "Logout from All Devices",
-              "button": "Logout All",
-              "processing": "Processing..."
-            }
+          "allDevices": {
+            "label": "Logout from All Devices",
+            "button": "Logout All",
+            "processing": "Processing..."
+          }
+        },
+        "toast": {
+          "passwordChanged": "Password changed successfully",
+          "passwordChangeFailed": "Failed to change password",
+          "logoutSuccess": "Logged out successfully",
+          "logoutFailed": "Failed to logout",
+          "logoutAllSuccess": "Logged out from all devices successfully",
+          "logoutAllFailed": "Failed to logout from all devices"
+        }
+      }
+    },
+    "variants": {
+      "components": {
+        "variantTable": {
+          "title": "Variant List",
+          "table": {
+            "selectRow": "Select row",
+            "name": "Name",
+            "attributes": "Attributes",
+            "skus": "SKU",
+            "status": "Status",
+            "created": "Created At",
+            "actions": "Actions",
+            "openMenu": "Open Menu",
+            "edit": "Edit",
+            "delete": "Delete",
+            "searchPlaceholder": "Search by name or product",
+            "active": "Active",
+            "inactive": "Inactive"
           },
           "toast": {
-            "passwordChanged": "Password changed successfully",
-            "passwordChangeFailed": "Failed to change password",
-            "logoutSuccess": "Logged out successfully",
-            "logoutFailed": "Failed to logout",
-            "logoutAllSuccess": "Logged out from all devices successfully",
-            "logoutAllFailed": "Failed to logout from all devices"
+            "deleted": "Variant deleted",
+            "deleteFailed": "Failed to delete variant",
+            "bulkDeleted": "{0} variants deleted",
+            "bulkDeleteFailed": "Failed to delete multiple variants"
+          },
+          "dialogs": {
+            "deleteTitle": "Delete variant?",
+            "deleteDesc": "This action cannot be undone. The variant will be permanently deleted.",
+            "bulkDeleteTitle": "Delete selected variants?",
+            "bulkDeleteDesc": "You are about to delete {0} variants. This action cannot be undone.",
+            "cancel": "Cancel",
+            "delete": "Delete"
+          }
+        },
+        "dialogs": {
+          "createProductVariant": {
+            "title": "Créer une variante de produit",
+            "description": "Ajoutez une nouvelle variante de produit et définissez ses attributs et informations de stock.",
+            "fields": {
+              "product": "Produit",
+              "name": "Nom de la variante",
+              "attributes": "Attributs",
+              "sortOrder": "Ordre d'affichage",
+              "isActive": "Actif"
+            },
+            "placeholders": {
+              "selectProduct": "Sélectionnez un produit",
+              "name": "ex: Rouge / Taille M",
+              "attributeName": "Nom de l'attribut",
+              "attributeValue": "Valeur de l'attribut"
+            },
+            "hints": {
+              "name": "Le nom de la variante est facultatif",
+              "attributes": "Vous pouvez ajouter des attributs facultatifs à la variante",
+              "sortOrder": "Définissez l'ordre d'affichage en nombre",
+              "isActive": "Si désactivé, il ne sera pas visible"
+            },
+            "actions": {
+              "addAttribute": "Ajouter un attribut",
+              "removeAttribute": "Supprimer"
+            },
+            "submit": {
+              "creating": "Création...",
+              "create": "Créer",
+              "cancel": "Annuler"
+            },
+            "toast": {
+              "variantCreated": "Variante créée avec succès",
+              "variantCreateFailed": "Échec de la création de la variante"
+            }
           }
         }
       }
-    
+    },
+    "common": {
+      "unknownProduct": "Unknown product",
+      "noAttributes": "No attributes"
+    }
   }
 }
