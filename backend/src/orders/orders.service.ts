@@ -34,17 +34,26 @@ export class OrdersService {
       .padStart(3, '0');
     return `ORD-${timestamp}-${random}`;
   }
-
   async create(
     createOrderDto: CreateOrderDto,
   ): Promise<OrderResponseDto & { payment?: any; checkoutUrl?: string }> {
     const orderNumber = await this.generateOrderNumber();
 
-    // Batch fetch SKUs
+    // Batch fetch SKUs and include necessary relations
     const skuIds = createOrderDto.items.map((i) => i.skuId);
     const skus = await this.prisma.productSKU.findMany({
       where: { id: { in: skuIds } },
-      include: { variant: { include: { product: true } } },
+      include: {
+        variant: {
+          include: {
+            product: true,
+          },
+        },
+        images: {
+          where: { position: 0 }, // Assuming position 0 is the cover image
+          select: { url: true },
+        },
+      },
     });
 
     if (skus.length !== skuIds.length) {
@@ -132,10 +141,16 @@ export class OrdersService {
       const stripeItems =
         createOrderDto.items?.map((item) => {
           const sku = skus.find((s) => s.id === item.skuId)!;
+          // Use the coverImage property that was fetched
+          const coverImage =
+            sku.images?.[0]?.url ?? sku.coverImage ?? undefined;
+
           return {
             productName: sku.variant.product.name,
             unitPrice: sku.price.toNumber(),
             quantity: item.quantity,
+            // Include the cover image URL to pass to the payment service
+            coverImage: coverImage,
           };
         }) || [];
 
@@ -165,7 +180,6 @@ export class OrdersService {
 
       return { ...this.formatOrderResponse(order), payment };
     }
-
     // Ensure a return statement for code paths where createOrderDto.method is not provided
     return {
       ...this.formatOrderResponse(order),

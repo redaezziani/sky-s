@@ -25,7 +25,10 @@ export class StripePaymentStrategy implements PaymentStrategy {
         line_items: (dto.items ?? []).map((i) => ({
           price_data: {
             currency: dto.currency ?? 'usd',
-            product_data: { name: i.productName },
+            product_data: {
+              name: i.productName,
+              images: i.coverImage ? [i.coverImage] : [],
+            },
             unit_amount: Math.round(i.unitPrice * 100),
           },
           quantity: i.quantity,
@@ -127,11 +130,49 @@ export class StripePaymentStrategy implements PaymentStrategy {
       },
     });
 
+    // what about updating the order status? Should be done in a service layer
+
+    const updateOrders = async () => {
+      const payment = await this.prisma.payment.findFirst({
+        where: { transactionId },
+      });
+      if (!payment) {
+        this.logger.error(
+          `Payment with transactionId ${transactionId} not found`,
+        );
+        return;
+      }
+
+      const order = await this.prisma.order.findUnique({
+        where: { id: payment.orderId },
+      });
+      if (!order) {
+        this.logger.error(
+          `Order with id ${payment.orderId} not found for payment ${transactionId}`,
+        );
+        return;
+      }
+
+      if (newStatus === 'COMPLETED' && order.status === 'PENDING') {
+        await this.prisma.order.update({
+          where: { id: order.id },
+          data: { paymentStatus: 'COMPLETED', status: 'PROCESSING' },
+        });
+      } else if (newStatus === 'FAILED' && order.status === 'PENDING') {
+        await this.prisma.order.update({
+          where: { id: order.id },
+          data: { status: 'CANCELLED' },
+        });
+      }
+    };
+    
+    await updateOrders();
+
+
     return stripeObject;
   }
 
   async cancel(transactionId: string) {
-    
     try {
       const pi = await this.stripe.paymentIntents.retrieve(transactionId);
       if (pi && pi.status !== 'canceled' && pi.status !== 'succeeded') {
@@ -157,7 +198,6 @@ export class StripePaymentStrategy implements PaymentStrategy {
         return refund;
       }
     } catch {
-
       const session = await this.stripe.checkout.sessions.retrieve(
         transactionId,
         {
@@ -187,7 +227,7 @@ export class StripePaymentStrategy implements PaymentStrategy {
           await this.prisma.payment.updateMany({
             where: { transactionId },
             data: {
-              status: PaymentStatus.REFUNDED  ,
+              status: PaymentStatus.REFUNDED,
               rawResponse: refund as any,
             },
           });

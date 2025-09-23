@@ -1,5 +1,5 @@
 // src/payment/dto/create-payment.dto.ts
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsBoolean, ValidateNested, ArrayNotEmpty } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsBoolean, ValidateNested, ArrayNotEmpty, IsString } from 'class-validator';
 import { PaymentMethod } from '@prisma/client';
 import { Type } from 'class-transformer';
 
@@ -12,6 +12,9 @@ class PaymentItemDto {
 
   @IsNumber()
   quantity: number;
+  @IsOptional()
+  @IsString()
+  coverImage?: string; // Add this new field
 }
 
 export class CreatePaymentDto {
