@@ -99,5 +99,5 @@ fi
 echo ""
 echo "🎉 Setup completed!"
 echo "🚀 To start NestJS server locally: cd backend && npm run start:dev"
-echo "🗄️ PostgreSQL: localhost:5433 (postgres / postgres123)"
+echo "🗄️ PostgreSQL: 192.168.1.1:5433 (postgres / postgres123)"
 echo "🚀 Backend Docker container: docker run -d -p 8080:8080 --name sky-s-backend sky-s-backend"

@@ -40,6 +40,48 @@
     }
   },
   "pages": {
+     "forgotPassword": {
+    "title": "パスワードをリセット",
+    "description": {
+      "initial": "メールアドレスを入力してください。リセットリンクをお送りします",
+      "success": "パスワードリセットリンクが記載されたメールを確認してください"
+    },
+    "sending": "リセットリンクを送信中...",
+    "sent": "メールを送信しました！",
+    "sendLink": "リセットリンクを送信",
+    "email": "メールアドレス",
+    "toast": {
+      "successTitle": "リセットリンクを送信しました！",
+      "successDescription": "そのメールアドレスのアカウントが存在する場合、パスワードリセットリンクを送信しました。",
+      "failedTitle": "リセットリンクの送信に失敗しました",
+      "failedDescription": "エラーが発生しました。もう一度お試しください。",
+      "serverError": "エラーが発生しました。もう一度お試しください。"
+    },
+    "messages": {
+      "sentTitle": "リセットリンクを送信しました",
+      "sentDescription": "{email} にパスワードリセットリンクを送信しました。メールを確認し、指示に従ってください。"
+    },
+    "actions": {
+      "sendAnotherLink": "別のリンクを送信",
+      "rememberPassword": "パスワードを覚えていますか？",
+      "signIn": "サインイン"
+    }
+  },
+    "login": {
+    "title": "サインイン",
+    "description": "メールアドレスとパスワードを入力してアカウントにアクセスしてください",
+    "loggingIn": "ログイン中...",
+    "login": "ログイン",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "noAccount": "アカウントをお持ちではありませんか？",
+    "signUp": "サインアップ",
+    "toast": {
+      "failed": "ログインに失敗しました",
+      "invalid": "無効なメールアドレスまたはパスワードです。"
+    }
+  },
     "skus": {
       "title": "SKUと在庫管理",
       "description": "製品SKU、価格、在庫レベルを管理します",

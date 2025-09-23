@@ -40,6 +40,47 @@
     }
   },
   "pages": {
+    "forgotPassword": {
+    "title": "Réinitialiser le mot de passe",
+    "description": {
+      "initial": "Entrez votre adresse email et nous vous enverrons un lien de réinitialisation",
+      "success": "Vérifiez votre email pour un lien de réinitialisation de mot de passe"
+    },
+    "sending": "Envoi du lien de réinitialisation...",
+    "sent": "Email envoyé !",
+    "sendLink": "Envoyer le lien de réinitialisation",
+    "email": "Email",
+    "toast": {
+      "successTitle": "Lien de réinitialisation envoyé !",
+      "successDescription": "Si un compte avec cet email existe, nous avons envoyé un lien de réinitialisation de mot de passe.",
+      "failedTitle": "Échec de l'envoi du lien de réinitialisation",
+      "failedDescription": "Une erreur est survenue. Veuillez réessayer."
+    },
+    "messages": {
+      "sentTitle": "Lien de réinitialisation envoyé",
+      "sentDescription": "Nous avons envoyé un lien de réinitialisation de mot de passe à {email}. Veuillez vérifier votre email et suivre les instructions."
+    },
+    "actions": {
+      "sendAnotherLink": "Envoyer un autre lien",
+      "rememberPassword": "Vous vous souvenez de votre mot de passe ?",
+      "signIn": "Se connecter"
+    }
+  },
+    "login": {
+    "title": "Connexion",
+    "description": "Entrez votre email et mot de passe pour accéder à votre compte",
+    "loggingIn": "Connexion en cours...",
+    "login": "Se connecter",
+    "email": "Email",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "signUp": "S'inscrire",
+    "toast": {
+      "failed": "Échec de la connexion",
+      "invalid": "Email ou mot de passe invalide."
+    }
+  },
     "skus": {
       "title": "Gestion des SKU & Stock",
       "description": "Gérer les SKU, les prix et les niveaux de stock des produits",

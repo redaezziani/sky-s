@@ -1,7 +1,7 @@
 // frontend/src/lib/server-auth.ts
 import { cookies } from "next/headers";
 
-const BACKEND_API_URL = "http://localhost:8085/api";
+const BACKEND_API_URL = "http://192.168.1.1:8085/api";
 
 export async function getServerUser() {
   const accessToken =  (await cookies()).get("access_token")?.value;

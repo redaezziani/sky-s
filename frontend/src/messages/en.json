@@ -40,6 +40,47 @@
     }
   },
   "pages": {
+    "forgotPassword": {
+    "title": "Reset Password",
+    "description": {
+      "initial": "Enter your email address and we'll send you a reset link",
+      "success": "Check your email for a password reset link"
+    },
+    "sending": "Sending reset link...",
+    "sent": "Email Sent!",
+    "sendLink": "Send Reset Link",
+    "email": "Email",
+    "toast": {
+      "successTitle": "Reset link sent!",
+      "successDescription": "If an account with that email exists, we've sent a password reset link.",
+      "failedTitle": "Failed to send reset link",
+      "failedDescription": "An error occurred. Please try again."
+    },
+    "messages": {
+      "sentTitle": "Reset link sent",
+      "sentDescription": "We've sent a password reset link to {email}. Please check your email and follow the instructions."
+    },
+    "actions": {
+      "sendAnotherLink": "Send Another Link",
+      "rememberPassword": "Remember your password?",
+      "signIn": "Sign in"
+    }
+  },
+     "login": {
+    "title": "Sign In",
+    "description": "Enter your email and password to access your account",
+    "loggingIn": "Logging in...",
+    "login": "Login",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot your password?",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "toast": {
+      "failed": "Login failed",
+      "invalid": "Invalid email or password."
+    }
+  },
     "skus": {
       "title": "SKU & Inventory Management",
       "description": "Manage product SKUs, pricing, and stock levels",

@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { secrets } from '../config/secrets';
+import { EmailService } from 'src/common/services/email.service';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { secrets } from '../config/secrets';
     PrismaService,
     JwtStrategy,
     LocalStrategy,
+    EmailService,
   ],
   exports: [AuthService, JwtModule],
 })

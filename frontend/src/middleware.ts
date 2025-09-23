@@ -7,7 +7,7 @@ import {
   roleProtectedRoutes
 } from '@/lib/routes';
 
-const BACKEND_API_URL = "http://localhost:8085/api";
+const BACKEND_API_URL = "http://192.168.1.1:8085/api";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

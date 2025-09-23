@@ -127,9 +127,9 @@ Sky S follows a microservices-inspired architecture with clear separation of con
    ```
 
 4. **Access the application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:3001
-   - API Documentation: http://localhost:3001/api
+   - Frontend: http://192.168.1.1:3000
+   - Backend API: http://192.168.1.1:3001
+   - API Documentation: http://192.168.1.1:3001/api
 
 ## 🐳 Docker Deployment
 
@@ -171,7 +171,7 @@ sky-s/
 
 ### Backend (.env)
 ```env
-DATABASE_URL="postgresql://username:password@localhost:5432/skystore"
+DATABASE_URL="postgresql://username:password@192.168.1.1:5432/skystore"
 JWT_SECRET="your-super-secure-jwt-secret"
 JWT_EXPIRES_IN="15m"
 REFRESH_TOKEN_SECRET="your-refresh-token-secret"
@@ -181,7 +181,7 @@ PORT=3001
 
 ### Frontend (.env.local)
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_API_URL=http://192.168.1.1:3001
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your-stripe-key
 ```
 
@@ -215,7 +215,7 @@ npm run test:watch
 ## 📊 API Documentation
 
 The API documentation is automatically generated using Swagger and available at:
-- Development: http://localhost:3001/api
+- Development: http://192.168.1.1:3001/api
 - Production: https://your-domain.com/api
 
 ## 🤝 Contributing

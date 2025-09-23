@@ -22,6 +22,8 @@ import {
   ForgotPasswordFormData,
 } from "@/types/validation.types";
 import Link from "next/link";
+import { useLocale } from "@/components/local-lang-swither";
+import { getMessages } from "@/lib/locale";
 
 interface ForgotPasswordFormProps {
   className?: string;
@@ -52,8 +54,8 @@ const FormField = memo<{
 FormField.displayName = "FormField";
 
 // Memoized submit button to prevent re-renders
-const SubmitButton = memo<{ isSubmitting: boolean; isSuccess: boolean }>(
-  ({ isSubmitting, isSuccess }) => (
+const SubmitButton = memo<{ isSubmitting: boolean; isSuccess: boolean; t: any }>(
+  ({ isSubmitting, isSuccess, t }) => (
     <Button
       type="submit"
       className="w-full"
@@ -62,12 +64,12 @@ const SubmitButton = memo<{ isSubmitting: boolean; isSuccess: boolean }>(
       {isSubmitting ? (
         <span className="flex items-center">
           <Loader size={16} />
-          <span className="ml-2">Sending reset link...</span>
+          <span className="ml-2">{t.forgotPassword.sending}</span>
         </span>
       ) : isSuccess ? (
-        "Email Sent!"
+        t.forgotPassword.sent
       ) : (
-        "Send Reset Link"
+        t.forgotPassword.sendLink
       )}
     </Button>
   )
@@ -79,6 +81,8 @@ export const ForgotPasswordForm = memo<ForgotPasswordFormProps>(
   ({ className }) => {
     const [isSuccess, setIsSuccess] = useState(false);
     const isSubmittingRef = useRef(false);
+    const { locale } = useLocale();
+    const t = getMessages(locale).pages;
 
     const { register, handleSubmit, formState, watch } =
       useForm<ForgotPasswordFormData>({
@@ -100,29 +104,28 @@ export const ForgotPasswordForm = memo<ForgotPasswordFormProps>(
         await AuthService.forgotPassword(data);
         setIsSuccess(true);
 
-        toast.success("Reset link sent!", {
-          description:
-            "If an account with that email exists, we've sent a password reset link.",
+        toast.success(t.forgotPassword.toast.successTitle, {
+          description: t.forgotPassword.toast.successDescription,
         });
       } catch (error: any) {
         console.error("Forgot password error:", error);
-        toast.error("Failed to send reset link", {
-          description: error?.message || "An error occurred. Please try again.",
+        toast.error(t.forgotPassword.toast.failedTitle, {
+          description: error?.message || t.forgotPassword.toast.failedDescription,
         });
       } finally {
         isSubmittingRef.current = false;
       }
-    }, []);
+    }, [t]);
 
     return (
       <div className={cn("flex flex-col gap-6", className)}>
         <Card className="border-none bg-transparent  ">
           <CardHeader>
-            <CardTitle>Reset Password</CardTitle>
+            <CardTitle>{t.forgotPassword.title}</CardTitle>
             <CardDescription>
               {isSuccess
-                ? "Check your email for a password reset link"
-                : "Enter your email address and we'll send you a reset link"}
+                ? t.forgotPassword.description.success
+                : t.forgotPassword.description.initial}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -145,13 +148,11 @@ export const ForgotPasswordForm = memo<ForgotPasswordFormProps>(
                     </div>
                     <div className="ml-3">
                       <h3 className="text-sm font-medium text-green-800">
-                        Reset link sent
+                        {t.forgotPassword.messages.sentTitle}
                       </h3>
                       <div className="mt-2 text-sm text-green-700">
                         <p>
-                          We've sent a password reset link to{" "}
-                          <span className="font-medium">{email}</span>. Please
-                          check your email and follow the instructions.
+                          {t.forgotPassword.messages.sentDescription.replace('{email}', email)}
                         </p>
                       </div>
                     </div>
@@ -164,16 +165,16 @@ export const ForgotPasswordForm = memo<ForgotPasswordFormProps>(
                     variant="outline"
                     className="w-full"
                   >
-                    Send Another Link
+                    {t.forgotPassword.actions.sendAnotherLink}
                   </Button>
 
                   <div className="text-center text-sm text-gray-600">
-                    Remember your password?{" "}
+                    {t.forgotPassword.actions.rememberPassword}{" "}
                     <Link
                       href="/auth/login"
                       className="text-primary hover:underline"
                     >
-                      Sign in
+                      {t.forgotPassword.actions.signIn}
                     </Link>
                   </div>
                 </div>
@@ -184,7 +185,7 @@ export const ForgotPasswordForm = memo<ForgotPasswordFormProps>(
                   <FormField
                     register={register}
                     name="email"
-                    label="Email"
+                    label={t.forgotPassword.email}
                     type="email"
                     placeholder="m@example.com"
                     error={errors.email?.message}
@@ -194,15 +195,16 @@ export const ForgotPasswordForm = memo<ForgotPasswordFormProps>(
                     <SubmitButton
                       isSubmitting={isSubmitting}
                       isSuccess={isSuccess}
+                      t={t}
                     />
 
                     <div className="text-center text-sm text-gray-600">
-                      Remember your password?{" "}
+                      {t.forgotPassword.actions.rememberPassword}{" "}
                       <Link
                         href="/auth/login"
                         className="text-primary hover:underline"
                       >
-                        Sign in
+                        {t.forgotPassword.actions.signIn}
                       </Link>
                     </div>
                   </div>

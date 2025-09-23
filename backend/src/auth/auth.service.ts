@@ -22,12 +22,14 @@ import { User } from '@prisma/client';
 import { UserDeviceDto } from './dto/response.dto';
 
 import * as geoip from 'geoip-lite';
+import { EmailService } from 'src/common/services/email.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+     private readonly emailService: EmailService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
@@ -240,6 +242,15 @@ export class AuthService {
     });
 
     // TODO: Send password reset email
+    const resetUrl = `${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
+  const html = `
+    <p>Hello ${user.name},</p>
+    <p>You requested a password reset. Click the link below to reset your password:</p>
+    <a href="${resetUrl}">Reset Password</a>
+    <p>If you did not request this, please ignore this email.</p>
+  `;
+
+  await this.emailService.sendEmail(user.email, 'Password Reset', html);
     console.log(`Password reset token for ${email}: ${resetToken}`);
   }
 
@@ -326,7 +337,14 @@ export class AuthService {
       },
     });
 
-    // TODO: Send verification email
+    const verifyUrl = `${process.env.FRONTEND_URL}/auth/verify-email?token=${emailVerificationToken}`;
+  const html = `
+    <p>Hello ${user.name},</p>
+    <p>Please verify your email by clicking the link below:</p>
+    <a href="${verifyUrl}">Verify Email</a>
+  `;
+
+  await this.emailService.sendEmail(user.email, 'Verify Your Email', html);
     console.log(
       `Email verification token for ${email}: ${emailVerificationToken}`,
     );
