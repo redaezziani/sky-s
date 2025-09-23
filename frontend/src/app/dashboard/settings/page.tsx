@@ -12,7 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useSettingsStore, Setting } from "@/stores/settings-store";
+import {
+  useSettings,
+  useDevices,
+  useSettingsStore,
+  Setting,
+} from "@/stores/settings-store";
 import { useLocale } from "@/components/local-lang-swither";
 import { getMessages } from "@/lib/locale";
 import { toast } from "sonner";
@@ -23,9 +28,17 @@ import { Monitor, Power, Tablet } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function SettingsPage() {
-  const { settings, fetchSettings, updateSetting, changePassword } =
-    useSettingsStore();
-
+  const {
+    data: settings = [],
+    error: settingsError,
+    isLoading: settingsLoading,
+  } = useSettings();
+  const {
+    data: devices = [],
+    error: devicesError,
+    isLoading: devicesLoading,
+  } = useDevices();
+  const { updateSetting, changePassword } = useSettingsStore();
   const { logout, logoutAll } = useAuth();
 
   const { locale } = useLocale();
@@ -33,16 +46,6 @@ export default function SettingsPage() {
 
   const [localSettings, setLocalSettings] = useState<Record<string, any>>({});
   const [loadingKeys, setLoadingKeys] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    fetchSettings();
-  }, [fetchSettings]);
-
-  const { devices, fetchDevices } = useSettingsStore();
-
-  useEffect(() => {
-    fetchDevices();
-  }, [fetchDevices]);
 
   useEffect(() => {
     const initial: Record<string, any> = {};
@@ -333,7 +336,11 @@ export default function SettingsPage() {
                           `/auth/logout-device/${device.id}`
                         );
                         toast.success("Logged out from device successfully");
-                        fetchDevices();
+                        // Refetch devices using SWR
+                        if (typeof window !== "undefined") {
+                          const { mutate } = require("swr");
+                          mutate("/auth/devices");
+                        }
                       } catch (err: any) {
                         toast.error(
                           err.response?.data?.message ||

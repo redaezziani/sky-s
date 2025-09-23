@@ -40,6 +40,8 @@ export class AuthService {
         "/auth/login",
         credentials
       );
+
+      
       return response.data;
     } catch (error) {
       if (error instanceof AxiosError && error.response?.data) {

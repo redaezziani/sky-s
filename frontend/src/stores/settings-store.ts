@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { axiosInstance } from "@/lib/utils";
+import useSWR from "swr";
 
 export type SettingType = "STRING" | "NUMBER" | "BOOLEAN" | "OPTIONS";
 
@@ -30,12 +31,10 @@ export interface UserDevice {
 interface SettingsStore {
   settings: Setting[];
   devices: UserDevice[];
-  fetchDevices: () => Promise<void>;
   loading: boolean;
   error: string | null;
 
   // Settings CRUD
-  fetchSettings: () => Promise<void>;
   createSetting: (data: Partial<Setting>) => Promise<Setting>;
   updateSetting: (key: string, data: Partial<Setting>) => Promise<Setting>;
   deleteSetting: (key: string) => Promise<void>;
@@ -52,6 +51,16 @@ interface SettingsStore {
   setError: (error: string | null) => void;
 }
 
+const fetcher = (url: string) => axiosInstance.get(url).then((res) => res.data);
+
+export function useSettings() {
+  return useSWR<Setting[]>("/settings", fetcher);
+}
+
+export function useDevices() {
+  return useSWR<UserDevice[]>("/auth/devices", fetcher);
+}
+
 export const useSettingsStore = create<SettingsStore>((set, get) => ({
   settings: [],
   devices: [],
@@ -59,19 +68,6 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   error: null,
 
   // CRUD
-  fetchSettings: async () => {
-    try {
-      set({ loading: true, error: null });
-      const res = await axiosInstance.get<Setting[]>("/settings");
-      set({ settings: res.data, loading: false });
-    } catch (err: any) {
-      set({
-        error: err.response?.data?.message || "Failed to fetch settings",
-        loading: false,
-      });
-    }
-  },
-
   createSetting: async (data) => {
     try {
       set({ loading: true, error: null });
@@ -170,26 +166,12 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("user_data");
       localStorage.removeItem("device_data");
-      
     } catch (err: any) {
       set({
         error: err.response?.data?.message || "Failed to logout all devices",
         loading: false,
       });
       throw err;
-    }
-  },
-
-  fetchDevices: async () => {
-    try {
-      set({ loading: true, error: null });
-      const res = await axiosInstance.get<UserDevice[]>("/auth/devices");
-      set({ devices: res.data, loading: false });
-    } catch (err: any) {
-      set({
-        error: err.response?.data?.message || "Failed to fetch devices",
-        loading: false,
-      });
     }
   },
 

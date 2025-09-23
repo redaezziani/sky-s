@@ -1,5 +1,6 @@
-"use client";
 
+
+import Cookies from "js-cookie";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import { User, AuthResponse, AuthTokens, UserDevice } from "@/types/auth.types";
@@ -14,7 +15,8 @@ export function useAuth() {
 
   useEffect(() => {
     const initializeAuth = async () => {
-      const accessToken = localStorage.getItem("access_token");
+      // Get the token from the cookie instead of localStorage
+      const accessToken = Cookies.get("auth_token");
       const userData = localStorage.getItem("user_data");
       const deviceData = localStorage.getItem("device_data");
 
@@ -34,11 +36,10 @@ export function useAuth() {
   }, []);
 
   const login = async (authResponse: AuthResponse) => {
-
-    console.log("Auth Response:", authResponse); // Debug log
     setUser(authResponse.user);
     setDevice(authResponse.device ?? null);
     setIsAuthenticated(true);
+    // Save token to cookie and user data to localStorage
     saveTokens(authResponse.tokens);
     saveUserData(authResponse.user);
     saveDeviceData(authResponse.device ?? null);
@@ -56,10 +57,8 @@ export function useAuth() {
       if (!refreshToken) throw new Error("No refresh token");
       await AuthService.logout(refreshToken);
     } finally {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-      localStorage.removeItem("user_data");
-      localStorage.removeItem("device_data");
+      // Clear token from cookie and data from localStorage
+      clearAuthData();
       setUser(null);
       setDevice(null);
       setIsAuthenticated(false);
@@ -83,7 +82,8 @@ export function useAuth() {
   };
 
   const saveTokens = (tokens: AuthTokens) => {
-    localStorage.setItem("access_token", tokens.accessToken);
+    // Save the access token to a cookie that is readable by the middleware
+    Cookies.set("auth_token", tokens.accessToken, { expires: 7, path: "/" });
     localStorage.setItem("refresh_token", tokens.refreshToken);
   };
 
@@ -98,13 +98,14 @@ export function useAuth() {
   };
 
   const clearAuthData = () => {
-    localStorage.removeItem("access_token");
+    // Remove the cookie and localStorage data
+    Cookies.remove("auth_token");
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("user_data");
     localStorage.removeItem("device_data");
   };
 
-  const getToken = () => localStorage.getItem("access_token");
+  const getToken = () => Cookies.get("auth_token");
 
   const refreshTokens = async () => {
     const refreshToken = localStorage.getItem("refresh_token");

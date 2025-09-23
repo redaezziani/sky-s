@@ -13,7 +13,7 @@ export default function Page() {
           <div className="px-4 lg:px-6">
             <ChartAreaInteractive />
           </div>
-          <div className="px-4 lg:px-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="px-4 lg:px-6 grid grid-cols-1 gap-4 md:grid-cols-1 xl:grid-cols-3">
             <ChartTopProducts />
             <ChartTopProductsRadar />
           </div>
