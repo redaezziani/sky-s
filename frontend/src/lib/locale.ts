@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 // src/lib/locale.ts
-export type Locale = "en" | "ja" | "fr" | "ar";
+export type Locale = "en" | "ja" | "fr" ;
 export const DEFAULT_LOCALE: Locale = "en";
 
 export function getMessages(locale: Locale) {
