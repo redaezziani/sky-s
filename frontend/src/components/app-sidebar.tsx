@@ -1,3 +1,5 @@
+// frontend/src/components/app-sidebar.tsx
+
 "use client";
 
 import type * as React from "react";
@@ -31,69 +33,90 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 
 import { getMessages } from "@/lib/locale";
-import { useLocale } from "@/components/local-lang-swither"; // LocaleProvider hook
+import { useLocale } from "@/components/local-lang-swither";
+import {
+  publicRoutes,
+  authenticatedRoutes,
+  roleProtectedRoutes,
+} from "@/lib/routes";
+import { UserRole, User } from "@/types/auth.types";
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user } = useAuth();
-
-  // ✅ use reactive locale
+export function AppSidebar({
+  user, // <-- Now only use the `user` prop passed from the server
+  ...props
+}: React.ComponentProps<typeof Sidebar> & { user: User | null }) {
+  // We no longer need the `useAuth` hook here for user data
   const { locale } = useLocale();
   const t = getMessages(locale);
+
+  // Helper function to check if a route is accessible based on the user's role
+  const isRouteAccessible = (url: string) => {
+    if (!user) return false;
+    if (authenticatedRoutes.includes(url)) {
+      return true;
+    }
+    const allowedRoles =
+      roleProtectedRoutes[url as keyof typeof roleProtectedRoutes];
+    if (!allowedRoles) {
+      return true;
+    }
+    return allowedRoles.includes(user.role as UserRole);
+  };
 
   const navMainData = [
     {
       title: t.sidebar.links.dashboard,
       url: "/dashboard",
       icon: IconDashboard,
-      active: true,
+      active: isRouteAccessible("/dashboard"),
     },
     {
       title: t.sidebar.links.users,
       url: "/dashboard/users",
       icon: IconUsers,
-      active: true,
+      active: isRouteAccessible("/dashboard/users"),
     },
     {
       title: t.sidebar.links.roles,
       url: "/dashboard/roles",
       icon: IconShield,
-      active: false,
+      active: isRouteAccessible("/dashboard/roles"),
     },
     {
       title: t.sidebar.links.categories,
       url: "/dashboard/categories",
       icon: IconCategory,
-      active: true,
+      active: isRouteAccessible("/dashboard/categories"),
     },
     {
       title: t.sidebar.links.products,
       url: "/dashboard/products",
       icon: IconPackage,
-      active: true,
+      active: isRouteAccessible("/dashboard/products"),
     },
     {
       title: t.sidebar.links.productVariants,
       url: "/dashboard/product-variants",
       icon: IconTag,
-      active: true,
+      active: isRouteAccessible("/dashboard/product-variants"),
     },
     {
       title: t.sidebar.links.skus,
       url: "/dashboard/skus",
       icon: IconBoxSeam,
-      active: true,
+      active: isRouteAccessible("/dashboard/skus"),
     },
     {
       title: t.sidebar.links.orders,
       url: "/dashboard/orders",
       icon: IconShoppingCart,
-      active: true,
+      active: isRouteAccessible("/dashboard/orders"),
     },
     {
       title: t.sidebar.links.orderItems,
       url: "/dashboard/order-items",
       icon: IconClipboardList,
-      active: true,
+      active: isRouteAccessible("/dashboard/order-items"),
     },
     {
       title: t.sidebar.links.reviews,
@@ -105,13 +128,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       title: t.sidebar.links.analytics,
       url: "/dashboard/analytics",
       icon: IconChartLine,
-      active: false,
+      active: isRouteAccessible("/dashboard/analytics"),
     },
     {
       title: t.sidebar.links.settings,
       url: "/dashboard/settings",
       icon: IconSettings2,
-      active: true,
+      active: isRouteAccessible("/dashboard/settings"),
     },
   ];
 
