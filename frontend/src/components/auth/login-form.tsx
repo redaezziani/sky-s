@@ -108,7 +108,6 @@ export const LoginForm = memo<LoginFormProps>(({ className }) => {
     },
     [router, login, t]
   );
-  
 
   return (
     <div className={cn("flex flex-col gap-6", className)}>

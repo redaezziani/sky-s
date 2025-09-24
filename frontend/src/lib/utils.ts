@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 const instance = axios.create({
-  baseURL: "http://192.168.1.1:8085/api",
+  baseURL: "http://localhost:8085/api",
   timeout: 10000,
   withCredentials: true, // ✅ Key change: This tells axios to send cookies.
 });

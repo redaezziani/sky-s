@@ -8,7 +8,7 @@ import { TopProductsDto } from './dto/analytics-top-products.dto';
 import { AnalyticsTopProductsQueryDto } from './dto/analytics-top-products-query.dto';
 import { TopProductsMetricsDto } from './dto/analytics-top-products-metrics.dto';
 import { AnalyticsTopProductsMetricsQueryDto } from './dto/analytics-top-products-metrics-query.dto';
-
+import { AnalyticsCategoryPerformanceQueryDto, DailyCategoryPerformanceDto } from './dto/analytics-category-performance-query';
 @ApiTags('Analytics')
 @Controller('analytics')
 export class AnalyticsController {
@@ -83,5 +83,25 @@ export class AnalyticsController {
   ): Promise<TopProductsMetricsDto[]> {
     const period = query.period || 30;
     return this.analyticsService.getTopProductsMetrics(period);
+  }
+
+  @Get('category-performance')
+  @ApiOperation({ summary: 'Get category performance metrics for charting' })
+  @ApiQuery({
+    name: 'period',
+    required: false,
+    description: 'Period in days (default 30)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Category performance metrics retrieved successfully',
+    type: [DailyCategoryPerformanceDto], // <-- This is the fix
+  })
+  async getCategoryPerformance(
+    @Query() query: AnalyticsCategoryPerformanceQueryDto,
+  ): Promise<DailyCategoryPerformanceDto[]> {
+    // <-- This is the fix
+    const period = query.period || 30;
+    return this.analyticsService.getCategoryPerformance(period);
   }
 }

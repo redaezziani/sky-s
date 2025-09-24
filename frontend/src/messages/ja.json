@@ -482,6 +482,21 @@
             "totalOrdered": "合計注文数",
             "totalRevenue": "売上合計"
           }
+        },
+        "chartCategoryPerformance": {
+          "title": "カテゴリ別パフォーマンス",
+          "description": "選択した期間における商品カテゴリ別のパフォーマンス指標",
+          "selectPeriodPlaceholder": "期間を選択",
+          "periods": {
+            "90d": "過去3か月",
+            "30d": "過去30日間",
+            "7d": "過去7日間"
+          },
+          "labels": {
+            "totalOrders": "合計注文数",
+            "totalRevenue": "売上合計",
+            "totalProducts": "商品総数"
+          }
         }
       }
     },

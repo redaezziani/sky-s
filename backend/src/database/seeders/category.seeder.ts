@@ -15,19 +15,8 @@ const categories = [
         slug: 'smartphones',
         description: 'Mobile phones and smartphones',
         info: { icon: 'phone', color: '#388e3c' },
-      },
-      {
-        name: 'Laptops',
-        slug: 'laptops',
-        description: 'Laptop computers and accessories',
-        info: { icon: 'laptop', color: '#7b1fa2' },
-      },
-      {
-        name: 'Audio',
-        slug: 'audio',
-        description: 'Headphones, speakers, and audio equipment',
-        info: { icon: 'headphones', color: '#f57c00' },
-      },
+      }
+     
     ],
   },
   {
@@ -42,18 +31,7 @@ const categories = [
         description: 'Clothing for men',
         info: { icon: 'male', color: '#2196f3' },
       },
-      {
-        name: 'Women\'s Clothing',
-        slug: 'womens-clothing',
-        description: 'Clothing for women',
-        info: { icon: 'female', color: '#e91e63' },
-      },
-      {
-        name: 'Accessories',
-        slug: 'accessories',
-        description: 'Fashion accessories',
-        info: { icon: 'accessories', color: '#ff9800' },
-      },
+     
     ],
   },
   {
@@ -68,12 +46,7 @@ const categories = [
         description: 'Home and office furniture',
         info: { icon: 'chair', color: '#795548' },
       },
-      {
-        name: 'Garden Tools',
-        slug: 'garden-tools',
-        description: 'Tools for gardening and landscaping',
-        info: { icon: 'garden', color: '#4caf50' },
-      },
+     
     ],
   },
 ];

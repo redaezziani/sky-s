@@ -27,7 +27,7 @@ export default function PaymentSuccessPage() {
     const confirmPayment = async () => {
       try {
         const res = await fetch(
-          `http://192.168.1.1:8085/api/payments/confirm?method=${method}&transactionId=${sessionId}`
+          `http://localhost:8085/api/payments/confirm?method=${method}&transactionId=${sessionId}`
         );
         const data = await res.json();
         console.log("Confirmation response:", data);

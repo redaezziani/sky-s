@@ -3,6 +3,7 @@ import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { SectionCards } from "@/components/section-cards";
 import { ChartTopProducts } from "@/components/chart-top-products";
 import { ChartTopProductsRadar } from "@/components/radar-chat";
+import { ChartCategoryPerformance } from "@/components/category-performance";
 
 export default function Page() {
   return (
@@ -16,6 +17,7 @@ export default function Page() {
           <div className="px-4 lg:px-6 grid grid-cols-1 gap-4 md:grid-cols-1 xl:grid-cols-3">
             <ChartTopProducts />
             <ChartTopProductsRadar />
+            <ChartCategoryPerformance />
           </div>
         </div>
       </div>

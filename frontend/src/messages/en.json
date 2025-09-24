@@ -478,6 +478,21 @@
             "totalOrdered": "Total Ordered"
           },
           "labelSuffix": "period"
+        },
+        "chartCategoryPerformance": {
+          "title": "Category Performance",
+          "description": "Performance metrics by product category for the selected period",
+          "selectPeriodPlaceholder": "Select period",
+          "periods": {
+            "90d": "Last 3 months",
+            "30d": "Last 30 days",
+            "7d": "Last 7 days"
+          },
+          "labels": {
+            "totalOrders": "Total Orders",
+            "totalRevenue": "Total Revenue",
+            "totalProducts": "Total Products"
+          }
         }
       }
     },

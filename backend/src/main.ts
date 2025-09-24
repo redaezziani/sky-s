@@ -3,17 +3,16 @@ import { ValidationPipe } from '@nestjs/common';
 import { BaseModule } from './base.module';
 // import { secrets } from './config/secrets';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser'; 
+import * as cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(BaseModule);
-  
+
   // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-      
     }),
   );
 
@@ -32,21 +31,21 @@ async function bootstrap() {
         description: 'Enter JWT token',
         in: 'header',
       },
-      'JWT-auth', 
+      'JWT-auth',
     )
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, documentFactory);
 
-    app.use(cookieParser());
-   app.enableCors({
-    origin: "http://192.168.1.1:3000", // frontend URL
+  app.use(cookieParser());
+  app.enableCors({
+    origin: 'http://localhost:3001', // frontend URL
     credentials: true,
   });
-  
+
   app.enableVersioning();
   app.setGlobalPrefix('api');
-  
+
   await app.listen(8085);
   console.log(`Application is running on: ${await app.getUrl()}`);
 }

@@ -2,8 +2,6 @@
 
   <img src="project-cover.png" alt="Sky S - Modern E-commerce Platform" width="800" />
 
-
-
 [![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -31,6 +29,7 @@ A modern, scalable e-commerce platform built with cutting-edge technologies and 
 Sky S follows a microservices-inspired architecture with clear separation of concerns:
 
 ### Backend (NestJS)
+
 - **SOLID Principles** - Clean, maintainable, and testable code
 - **Modular Design** - Feature-based modules for scalability
 - **Type Safety** - Full TypeScript implementation
@@ -41,6 +40,7 @@ Sky S follows a microservices-inspired architecture with clear separation of con
 - **Error Handling** - Centralized error handling and logging
 
 ### Frontend (Next.js)
+
 - **Server-Side Rendering** - SEO-optimized pages
 - **State Management** - Zustand for efficient state handling
 - **Component Library** - shadcn/ui for consistent design
@@ -51,6 +51,7 @@ Sky S follows a microservices-inspired architecture with clear separation of con
 ## 🛠️ Tech Stack
 
 ### Backend
+
 - **Framework**: NestJS
 - **Language**: TypeScript
 - **Database**: PostgreSQL
@@ -61,6 +62,7 @@ Sky S follows a microservices-inspired architecture with clear separation of con
 - **Documentation**: Swagger/OpenAPI
 
 ### Frontend
+
 - **Framework**: Next.js 14
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
@@ -70,6 +72,7 @@ Sky S follows a microservices-inspired architecture with clear separation of con
 - **HTTP Client**: Axios/Fetch
 
 ### DevOps & Tools
+
 - **Containerization**: Docker & Docker Compose
 - **Database**: PostgreSQL
 - **Code Quality**: ESLint, Prettier
@@ -87,49 +90,52 @@ Sky S follows a microservices-inspired architecture with clear separation of con
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/redaezziani/sky-s.git
    cd sky-s
    ```
 
 2. **Backend Setup**
+
    ```bash
    cd backend
    npm install
-   
+
    # Copy environment variables
    cp .env.example .env
-   
+
    # Start database with Docker
    docker-compose up -d postgres
-   
+
    # Run Prisma migrations
    npx prisma migrate dev
    npx prisma generate
-   
+
    # Seed the database (optional)
    npx prisma db seed
-   
+
    # Start the backend server
    npm run start:dev
    ```
 
 3. **Frontend Setup**
+
    ```bash
    cd ../frontend
    npm install
-   
+
    # Copy environment variables
    cp .env.example .env.local
-   
+
    # Start the frontend server
    npm run dev
    ```
 
 4. **Access the application**
-   - Frontend: http://192.168.1.1:3000
-   - Backend API: http://192.168.1.1:3001
-   - API Documentation: http://192.168.1.1:3001/api
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:3001
+   - API Documentation: http://localhost:3001/api
 
 ## 🐳 Docker Deployment
 
@@ -170,8 +176,9 @@ sky-s/
 ## 🔧 Environment Variables
 
 ### Backend (.env)
+
 ```env
-DATABASE_URL="postgresql://username:password@192.168.1.1:5432/skystore"
+DATABASE_URL="postgresql://username:password@localhost:5432/skystore"
 JWT_SECRET="your-super-secure-jwt-secret"
 JWT_EXPIRES_IN="15m"
 REFRESH_TOKEN_SECRET="your-refresh-token-secret"
@@ -180,14 +187,16 @@ PORT=3001
 ```
 
 ### Frontend (.env.local)
+
 ```env
-NEXT_PUBLIC_API_URL=http://192.168.1.1:3001
+NEXT_PUBLIC_API_URL=http://localhost:3001
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your-stripe-key
 ```
 
 ## 🧪 Testing
 
 ### Backend Tests
+
 ```bash
 cd backend
 
@@ -202,6 +211,7 @@ npm run test:cov
 ```
 
 ### Frontend Tests
+
 ```bash
 cd frontend
 
@@ -215,7 +225,8 @@ npm run test:watch
 ## 📊 API Documentation
 
 The API documentation is automatically generated using Swagger and available at:
-- Development: http://192.168.1.1:3001/api
+
+- Development: http://localhost:3001/api
 - Production: https://your-domain.com/api
 
 ## 🤝 Contributing

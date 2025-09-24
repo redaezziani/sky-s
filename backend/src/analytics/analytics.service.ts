@@ -4,6 +4,7 @@ import { AnalyticsCardDto } from './dto/analytics.dto';
 import { subDays, format } from 'date-fns';
 import { TopProductsDto } from './dto/analytics-top-products.dto';
 import { TopProductsMetricsDto } from './dto/analytics-top-products-metrics.dto';
+import { DailyCategoryPerformanceDto } from './dto/analytics-category-performance-query';
 @Injectable()
 export class AnalyticsService {
   constructor(private prisma: PrismaService) {}
@@ -214,6 +215,99 @@ export class AnalyticsService {
       .slice(0, 10); // top 10
 
     return result;
+  }
+
+  async getCategoryPerformance(
+    period: number,
+  ): Promise<DailyCategoryPerformanceDto[]> {
+    const startDate = subDays(new Date(), period);
+
+    const orderItems = await this.prisma.orderItem.findMany({
+      where: {
+        order: {
+          createdAt: { gte: startDate },
+          status: { not: 'CANCELLED' },
+        },
+      },
+      include: {
+        sku: {
+          include: {
+            variant: {
+              include: {
+                product: {
+                  include: {
+                    categories: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        order: {
+          select: {
+            createdAt: true,
+            totalAmount: true,
+            id: true,
+          },
+        },
+      },
+    });
+
+    const data: Record<string, any> = {};
+    for (let i = 0; i <= period; i++) {
+      const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
+      data[date] = { date };
+    }
+
+    const categories = await this.prisma.category.findMany({
+      where: { isActive: true },
+      select: { name: true },
+    });
+
+    categories.forEach((category) => {
+      const categoryKey = category.name.toLowerCase().replace(/\s+/g, '');
+      for (const dateKey in data) {
+        data[dateKey][categoryKey] = {
+          totalOrders: 0,
+          totalRevenue: 0,
+          totalProducts: 0,
+        };
+      }
+    });
+
+    const dailyOrders: Record<string, Set<string>> = {};
+
+    orderItems.forEach((item) => {
+      const date = format(item.order.createdAt, 'yyyy-MM-dd');
+      const orderId = item.order.id;
+
+      if (!dailyOrders[date]) {
+        dailyOrders[date] = new Set();
+      }
+
+      if (data[date] && item.sku?.variant?.product?.categories?.length > 0) {
+        const category = item.sku.variant.product.categories[0];
+        const categoryKey = category.name.toLowerCase().replace(/\s+/g, '');
+
+        if (data[date][categoryKey] !== undefined) {
+          data[date][categoryKey].totalProducts += item.quantity;
+          data[date][categoryKey].totalRevenue += Number(item.totalPrice);
+
+          if (!dailyOrders[date].has(`${categoryKey}-${orderId}`)) {
+            data[date][categoryKey].totalOrders += 1;
+            dailyOrders[date].add(`${categoryKey}-${orderId}`);
+          }
+        }
+      }
+    });
+
+    const finalData = Object.values(data);
+
+    finalData.sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
+
+    return finalData as DailyCategoryPerformanceDto[];
   }
 
   calculateGrowth(current: number, previous: number) {

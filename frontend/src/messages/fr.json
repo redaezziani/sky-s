@@ -478,6 +478,21 @@
             "totalOrdered": "Total Commandé"
           },
           "labelSuffix": "période"
+        },
+        "chartCategoryPerformance": {
+          "title": "Performance par Catégorie",
+          "description": "Métriques de performance par catégorie de produit pour la période sélectionnée",
+          "selectPeriodPlaceholder": "Sélectionner la période",
+          "periods": {
+            "90d": "3 derniers mois",
+            "30d": "30 derniers jours",
+            "7d": "7 derniers jours"
+          },
+          "labels": {
+            "totalOrders": "Commandes Totales",
+            "totalRevenue": "Chiffre d'Affaires Total",
+            "totalProducts": "Produits Totaux"
+          }
         }
       }
     },
