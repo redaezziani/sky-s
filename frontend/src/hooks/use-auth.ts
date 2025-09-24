@@ -27,13 +27,7 @@ export function useAuth() {
     }
   };
 
-  useEffect(() => {
-    // We don't need to do anything here on initial load.
-    // The middleware already handles redirection if the user is unauthenticated.
-    // If we're on a protected page, we can assume the token is present and the middleware has passed us through.
-    // We can then trigger a profile fetch based on a condition or just rely on a page-level fetch.
-    // The previous implementation was a client-side anti-pattern.
-  }, []);
+
 
   const login = async (authResponse: AuthResponse) => {
     setUser(authResponse.user);
@@ -62,17 +56,29 @@ export function useAuth() {
     }
   };
 
+  const logoutAll = async () => {
+    try {
+      await AuthService.logoutAll(); // Assumes AuthService.logoutAll() sends POST to /auth/logout-all
+    } finally {
+      clearAuthData();
+      setUser(null);
+      setDevice(null);
+      setIsAuthenticated(false);
+    }
+  };
+
   const clearAuthData = () => {
     localStorage.removeItem("user_data");
     localStorage.removeItem("device_data");
   };
-  
+
   const saveUserData = (userData: User) => {
     localStorage.setItem("user_data", JSON.stringify(userData));
   };
-  
+
   const saveDeviceData = (deviceData: UserDevice | null) => {
-    if (deviceData) localStorage.setItem("device_data", JSON.stringify(deviceData));
+    if (deviceData)
+      localStorage.setItem("device_data", JSON.stringify(deviceData));
     else localStorage.removeItem("device_data");
   };
 
@@ -83,6 +89,7 @@ export function useAuth() {
     isLoading,
     login,
     logout,
-    fetchProfile, // Expose fetchProfile to be used manually
+    logoutAll, // Expose logoutAll
+    fetchProfile,
   };
 }
