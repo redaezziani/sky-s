@@ -3,6 +3,8 @@
 import MainLayout from "@/components/store/main-layout";
 import React, { useState, useEffect } from "react";
 import { useCartStore } from "@/stores/public/cart-store";
+import swr from "swr";
+import { fetcher, axiosInstance } from "@/lib/utils";
 
 // Product type
 type Product = {
@@ -61,27 +63,19 @@ const ProductPage = ({ params }: ProductPageProps) => {
 
   const handelFetchProduct = async () => {
     try {
-      const res = await fetch(
-        `http://localhost:8085/api/public/products/${slug}`,
-        {
-          cache: "force-cache",
-        }
-      );
-
-      if (!res.ok) {
-        throw new Error("Failed to fetch product");
-      }
-
-      const productData: Product = await res.json();
-      setProduct(productData);
-      setLoading(false);
-
-      // --- NEW LOGIC: Set initial selected SKU based on the first variant's first SKU ---
-      if (productData.variants[0]?.skus.length > 0) {
-        setSelectedSku(productData.variants[0].skus[0].id);
+      
+      const res = await axiosInstance.get<Product>(`/public/products/${slug}`);
+      setProduct(res.data);
+      // Set default selected SKU to the first available SKU of the first variant
+      if (res.data.variants.length > 0) {
+        const firstAvailableSku = res.data.variants[0].skus.find(
+          (s) => s.stock > 0
+        );
+        setSelectedSku(firstAvailableSku ? firstAvailableSku.id : null);
       }
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Failed to fetch product");
+    } finally {
       setLoading(false);
     }
   };
