@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PublicCategoriesService } from './public-categories.service';
-import { PublicCategoryDto } from './dto/public-category.dto';
+import { PublicCategoryDto } from '../dto/public-category.dto';
 
 @ApiTags('Public Categories')
 @Controller('public/categories')

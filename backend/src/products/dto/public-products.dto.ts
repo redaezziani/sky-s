@@ -26,7 +26,10 @@ export class PublicProductSummaryDto {
   @ApiProperty({ description: 'Starting price (lowest SKU price)' })
   startingPrice: number;
 
-  @ApiProperty({ description: 'Compare price (original price)', nullable: true })
+  @ApiProperty({
+    description: 'Compare price (original price)',
+    nullable: true,
+  })
   comparePrice?: number;
 
   @ApiProperty({ description: 'Whether product is in stock' })
@@ -41,7 +44,24 @@ export class PublicProductSummaryDto {
 
   @ApiProperty({ description: 'Created at timestamp' })
   createdAt: Date;
+
+  // 👇 NEW: Lightweight variants + SKUs for cart
+  @ApiProperty({ description: 'Variants with SKUs (light version)' })
+  variants: Array<{
+    id: string;
+    name: string;
+    skus: Array<{
+      id: string;
+      sku: string;
+      price: number;
+      comparePrice?: number;
+      stock: number;
+    }>;
+  }>;
 }
+
+
+
 
 export class PaginatedPublicProductsResponseDto {
   @ApiProperty({ type: [PublicProductSummaryDto] })
@@ -256,4 +276,46 @@ export class PublicProductQueryDto {
   sortOrder?: string = 'desc';
 }
 
-// Add these methods to your ProductsController class
+export interface ProductDetailsDto {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  shortDesc?: string;
+  coverImage?: string;
+  isFeatured: boolean;
+  metaTitle?: string;
+  metaDesc?: string;
+
+  categories: {
+    id: string;
+    name: string;
+    slug: string;
+  }[];
+
+  variants: {
+    id: string;
+    name: string;
+    attributes: Record<string, any>; // from ProductVariant.attributes
+    skus: {
+      id: string;
+      sku: string;
+      price: number;
+      stock: number;
+      dimensions: Record<string, any>; // from ProductSKU.dimensions
+      coverImage?: string;
+      images: string[];
+      createdAt: Date;
+      updatedAt: Date;
+    }[];
+  }[];
+
+  startingPrice: number;
+  priceRange?: [number, number];
+  inStock: boolean;
+  totalStock: number;
+  avgRating: number;
+
+  createdAt: Date;
+  updatedAt: Date;
+}

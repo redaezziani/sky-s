@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { CategoriesService } from './categories.service';
-import { CategoriesController } from './categories.controller';
+import { CategoriesService } from './private/categories.service';
+import { CategoriesController } from './private/categories.controller';
 import { PrismaService } from '../prisma/prisma.service';
-import { PublicCategoriesController } from './public-categories.controller';
-import { PublicCategoriesService } from './public-categories.service';
+import { PublicCategoriesController } from './public/public-categories.controller';
+import { PublicCategoriesService } from './public/public-categories.service';
 
 @Module({
   controllers: [CategoriesController, PublicCategoriesController],

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { PublicCategoryDto } from './dto/public-category.dto';
+import { PrismaService } from '../../prisma/prisma.service';
+import { PublicCategoryDto } from '../dto/public-category.dto';
 
 @Injectable()
 export class PublicCategoriesService {

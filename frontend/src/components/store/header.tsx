@@ -13,6 +13,7 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
+import CartSheet from "./cart-sheet";
 
 const Header = () => {
   const { categories, loading, error, fetchCategories } = useCategoryStore();
@@ -72,7 +73,7 @@ const Header = () => {
                       categories.map((category) => (
                         <SheetClose asChild key={category.id}>
                           <Link
-                            href={`/store/category/${category.slug}`}
+                            href={`/store/products?category=${category.slug}`}
                             className=" hover:underline text-sm transition-all duration-200"
                           >
                             {category.name}
@@ -163,17 +164,7 @@ const Header = () => {
               fill="currentColor"
             />
           </svg>
-          <svg
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            className="w-5 h-5 cursor-pointer"
-          >
-            <path
-              d="M9 2h6v2H9V2zm6 4V4h2v2h4v16H3V6h4V4h2v2h6zm0 2H9v2H7V8H5v12h14V8h-2v2h-2V8z"
-              fill="currentColor"
-            />
-          </svg>
+          <CartSheet />
           <p className="underline cursor-pointer">reda store</p>
         </div>
 
@@ -205,7 +196,7 @@ const Header = () => {
           categories.map((category) => (
             <Link
               key={category.id}
-              href={`/store/category/${category.slug}`}
+              href={`/store/products?category=${category.slug}`}
               className="hover:underline transition-all duration-200"
             >
               {category.name}

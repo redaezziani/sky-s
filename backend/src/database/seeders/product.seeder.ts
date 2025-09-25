@@ -14,6 +14,26 @@ const newBalanceImages = [
   'd7a66636-3b7d-4a32-a930-7eaf44cc5982.webp',
 ];
 
+const bonaGoldStandardImages = [
+  '0540e5cc-c062-41da-b16b-6fabddc3d817.webp',
+  '203fbdc4-d645-4ae9-8f2b-1549079c24ab.webp',
+  '4b68619d-1870-4c92-a1fb-9ef6a3eb220f.webp',
+  '4bdcc243-e725-4521-b1c0-b409b05470d3.webp',
+  '794fac48-7363-40c7-8b26-c9eaf21c1c98.webp',
+  'a8df6955-0ea6-4f20-be3c-f718cc25a7c1.webp',
+  'a95374c1-f516-43e9-b855-e635ebdd72a1.webp',
+  'a9914a1f-042b-42b2-ac46-39e3ff2a6121.webp',
+  'b3394886-6837-4efd-83aa-d98a669b2a81.webp',
+];
+
+const bonaTightsBlackImages = [
+  '170cd7c9-0932-42cd-b72c-8b5bf40250b8.webp',
+  '5041a482-95c8-4657-9221-13b227b06f09.webp',
+  '562dd6ef-cd0f-4ed3-b2c6-83f85b3692a7.webp',
+  'b8eb42cd-69a0-4aec-ac7b-8d3ed0db7a9a.webp',
+  'f88d2459-065c-4555-9ffd-df38ffdee6c4.webp',
+];
+
 async function uploadImages(imageFiles: string[], folder: string) {
   const uploadPromises = imageFiles.map(async (filename) => {
     const filePath = path.resolve(__dirname, folder, filename);
@@ -45,7 +65,7 @@ async function uploadImages(imageFiles: string[], folder: string) {
 
 export async function seedProducts() {
   console.log('🌱 Clearing existing products...');
-  
+
   console.log('✅ All products cleared');
 
   // === NEW BALANCE 530 ===
@@ -133,6 +153,130 @@ export async function seedProducts() {
     });
 
     console.log('✅ Created product: New Balance 530 Sneakers');
+  }
+
+  // === BONA FIDE LEGGINGS ===
+  console.log('✨ Seeding Bona Fide Leggings...');
+
+  const womensCategorySlug = 'womens';
+  let womensCategory = await prisma.category.findUnique({
+    where: { slug: womensCategorySlug },
+  });
+
+  if (!womensCategory) {
+    womensCategory = await prisma.category.create({
+      data: {
+        name: "Women's",
+        slug: womensCategorySlug,
+        isActive: true,
+      },
+    });
+    console.log("✅ Created category: Women's");
+  }
+
+  const bonaSlug = 'bona-fide-premium-leggings';
+  const bonaExists = await prisma.product.findUnique({
+    where: { slug: bonaSlug },
+  });
+
+  if (!bonaExists) {
+    const bonaGoldImages = await uploadImages(
+      bonaGoldStandardImages,
+      './bona/Bona-GoldStandard-Black',
+    );
+    const bonaTightsImages = await uploadImages(
+      bonaTightsBlackImages,
+      './bona/Bona-Tights-Black',
+    );
+
+    const sizes = ['XS', 'S', 'M', 'L'];
+
+    await prisma.product.create({
+      data: {
+        name: 'Bona Fide Premium Leggings',
+        slug: bonaSlug,
+        description:
+          'Bona Fide Premium Quality Leggings for Women with Unique Design and Push Up - High Waisted Tummy Control Legging. Country of Origin: Russia.',
+        shortDesc:
+          'High-waisted, push-up leggings with unique design and tummy control.',
+        coverImage: bonaGoldImages[0],
+        isFeatured: true,
+        metaTitle: 'Bona Fide Leggings - Premium Push Up Tights',
+        metaDesc:
+          'Shop Bona Fide Premium Quality Leggings for women. High-waisted, tummy control, and push-up design. Available in multiple colors and sizes.',
+        isActive: true,
+        sortOrder: 1,
+        categories: {
+          connect: { id: womensCategory.id },
+        },
+        variants: {
+          create: [
+            {
+              name: 'Gold Standard Black',
+              attributes: { color: 'Black/Gold' },
+              isActive: true,
+              sortOrder: 0,
+              skus: {
+                create: sizes.map((size, i) => ({
+                  sku: `BONA-GLD-BLK-${size}`,
+                  price: 120,
+                  stock: 10,
+                  weight: 350,
+                  dimensions: {
+                    length: 30,
+                    width: 20,
+                    height: 5,
+                    size: size,
+                  },
+                  coverImage: bonaGoldImages[0],
+                  lowStockAlert: 2,
+                  isActive: true,
+                  images: {
+                    create: bonaGoldImages.map((url, idx) => ({
+                      url,
+                      altText: `Bona Fide Gold Standard Leggings Black size ${size} view ${idx + 1}`,
+                      position: idx,
+                    })),
+                  },
+                })),
+              },
+            },
+            {
+              name: 'Tights Black',
+              attributes: { color: 'Black' },
+              isActive: true,
+              sortOrder: 1,
+              skus: {
+                create: sizes.map((size, i) => ({
+                  sku: `BONA-TIGHTS-BLK-${size}`,
+                  price: 120,
+                  stock: 10,
+                  weight: 350,
+                  dimensions: {
+                    length: 30,
+                    width: 20,
+                    height: 5,
+                    size: size,
+                  },
+                  coverImage: bonaTightsImages[0],
+                  lowStockAlert: 2,
+                  isActive: true,
+                  images: {
+                    create: bonaTightsImages.map((url, idx) => ({
+                      url,
+                      altText: `Bona Fide Tights Black size ${size} view ${idx + 1}`,
+                      position: idx,
+                    })),
+                  },
+                })),
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    console.log('✅ Created product: Bona Fide Premium Leggings');
   }
 
   console.log('🎉 Product seeding complete');

@@ -22,11 +22,14 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
-import { CreateCategoryDto, UpdateCategoryDto } from './dto/create-category.dto';
-import { CategoryResponseDto } from './dto/response.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
+import {
+  CreateCategoryDto,
+  UpdateCategoryDto,
+} from '../dto/create-category.dto';
+import { CategoryResponseDto } from '../dto/response.dto';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
 
 @ApiTags('Categories')
@@ -56,7 +59,9 @@ export class CategoriesController {
     status: 403,
     description: 'Forbidden - insufficient permissions',
   })
-  async create(@Body() createCategoryDto: CreateCategoryDto): Promise<CategoryResponseDto> {
+  async create(
+    @Body() createCategoryDto: CreateCategoryDto,
+  ): Promise<CategoryResponseDto> {
     return this.categoriesService.create(createCategoryDto);
   }
 
@@ -80,8 +85,10 @@ export class CategoriesController {
     type: Boolean,
   })
   async findAll(
-    @Query('includeChildren', new ParseBoolPipe({ optional: true })) includeChildren?: boolean,
-    @Query('includeProductCount', new ParseBoolPipe({ optional: true })) includeProductCount?: boolean,
+    @Query('includeChildren', new ParseBoolPipe({ optional: true }))
+    includeChildren?: boolean,
+    @Query('includeProductCount', new ParseBoolPipe({ optional: true }))
+    includeProductCount?: boolean,
   ): Promise<CategoryResponseDto[]> {
     return this.categoriesService.findAll(includeChildren, includeProductCount);
   }
@@ -102,7 +109,9 @@ export class CategoriesController {
     status: 404,
     description: 'Category not found',
   })
-  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<CategoryResponseDto> {
+  async findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<CategoryResponseDto> {
     return this.categoriesService.findOne(id);
   }
 

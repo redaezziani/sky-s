@@ -3,7 +3,6 @@
 import MainLayout from "@/components/store/main-layout";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 
 interface Category {
   id: string;
@@ -37,6 +36,9 @@ interface ProductsResponse {
 }
 
 const ProductCard = ({ product }: { product: Product }) => {
+
+
+
   return (
     <div className="group">
       <div className=" transition-all duration-200 ">
@@ -80,7 +82,7 @@ const ProductCard = ({ product }: { product: Product }) => {
           {/* Category */}
           <div className="mb-2">
             <Link
-              href={`/store/category/${product.categories[0]?.slug}`}
+              href={`/store/products?category=${product.categories[0]?.slug}`}
               className="text-xs text-gray-500 uppercase tracking-wide hover:underline"
             >
               {product.categories[0]?.name}
@@ -123,7 +125,7 @@ const HomePage = () => {
       try {
         setLoading(true);
         const response = await fetch(
-          "http://localhost:8085/api/products/public/latest?page=1&limit=12&inStock=true"
+          "http://localhost:8085/api/public/products/latest?page=1&limit=12&inStock=true"
         );
 
         if (!response.ok) {
