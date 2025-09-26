@@ -5,8 +5,8 @@ import React, { useState, useEffect } from "react";
 import { useCartStore } from "@/stores/public/cart-store";
 import swr from "swr";
 import { fetcher, axiosInstance } from "@/lib/utils";
+import { toast } from "sonner";
 
-// Product type
 type Product = {
   id: string;
   name: string;
@@ -63,7 +63,6 @@ const ProductPage = ({ params }: ProductPageProps) => {
 
   const handelFetchProduct = async () => {
     try {
-      
       const res = await axiosInstance.get<Product>(`/public/products/${slug}`);
       setProduct(res.data);
       // Set default selected SKU to the first available SKU of the first variant
@@ -189,7 +188,6 @@ const ProductGallery = ({
     </div>
   );
 };
-
 // ================== Product Details ==================
 const ProductDetails = ({
   product,
@@ -234,8 +232,48 @@ const ProductDetails = ({
       coverImage: sku.coverImage || product.coverImage,
       price: sku.price,
     });
-    alert("Item added to cart!");
+    toast.success(`Added ${product.name} to bag!`);
   };
+
+  // --- NEW LOGIC START ---
+
+  const hasColorVariants = product.variants.every(
+    (v) => v.attributes && v.attributes.color
+  );
+  
+  // Get the display value for the current variant selector.
+  // It checks for 'color', then for any other single attribute (like 'size' for perfume),
+  // and finally falls back to the variant's 'name'.
+  const getVariantDisplayValue = (variant: typeof product.variants[0]) => {
+    if (variant.attributes.color) return variant.attributes.color;
+
+    // Fallback: If no color, check for other attributes (e.g., 'size' for perfume)
+    const attributesKeys = Object.keys(variant.attributes);
+    if (attributesKeys.length === 1) {
+      return variant.attributes[attributesKeys[0] as keyof typeof variant.attributes];
+    }
+
+    return variant.name; // Fallback to variant name
+  };
+
+  const currentVariantDisplayValue = getVariantDisplayValue(currentVariant);
+
+  // Determine the primary attribute name for the selector label (e.g., "Color", "Volume", "Type")
+  let variantLabel = "Option";
+  if (hasColorVariants) {
+    variantLabel = "Color";
+  } else if (currentVariant && Object.keys(currentVariant.attributes).length > 0) {
+    // If no color, try to get a label from the first variant's first attribute key
+    const primaryAttrKey = Object.keys(currentVariant.attributes)[0];
+    if (primaryAttrKey) {
+        // Simple capitalization: e.g., 'size' -> 'Size', 'volume' -> 'Volume'
+        variantLabel = primaryAttrKey.charAt(0).toUpperCase() + primaryAttrKey.slice(1);
+    }
+  }
+
+
+  // --- NEW LOGIC END ---
+
 
   return (
     <div className="space-y-6">
@@ -259,33 +297,64 @@ const ProductDetails = ({
         ${displayPrice.toFixed(2)}
       </p>
 
-      {/* Color selector */}
+      {/* Variant selector (Generalized) */}
       {product.variants.length > 1 && (
         <div>
           <h3 className="text-sm font-medium text-gray-900 mb-3">
-            Color: {currentVariant?.attributes.color}
+            {variantLabel}: {currentVariantDisplayValue}
           </h3>
-          <div className="flex gap-2">
-            {product.variants.map((v, idx) => (
-              <button
-                key={v.id}
-                onClick={() => {
-                  setSelectedVariant(idx);
-                  // Find the first available SKU of the new variant and set it as selected
-                  const firstAvailableSku = v.skus.find((s) => s.stock > 0);
-                  setSelectedSku(
-                    firstAvailableSku ? firstAvailableSku.id : null
-                  );
-                }}
-                className={`w-8 h-8 rounded-full border-2 transition-all ${
-                  selectedVariant === idx
-                    ? "border-gray-900 shadow-md"
-                    : "border-gray-300 hover:border-gray-500"
-                }`}
-                style={{ backgroundColor: v.attributes.color.toLowerCase() }}
-                title={v.attributes.color}
-              />
-            ))}
+          <div className="flex gap-2 flex-wrap">
+            {product.variants.map((v, idx) => {
+              const displayValue = getVariantDisplayValue(v);
+
+              if (hasColorVariants) {
+                // RENDER COLOR PICKER BUTTONS
+                return (
+                  <button
+                    key={v.id}
+                    onClick={() => {
+                      setSelectedVariant(idx);
+                      // Find the first available SKU of the new variant and set it as selected
+                      const firstAvailableSku = v.skus.find((s) => s.stock > 0);
+                      setSelectedSku(
+                        firstAvailableSku ? firstAvailableSku.id : null
+                      );
+                    }}
+                    className={`w-8 h-8 rounded-full border-2 transition-all ${
+                      selectedVariant === idx
+                        ? "border-gray-900 shadow-md"
+                        : "border-gray-300 hover:border-gray-500"
+                    }`}
+                    style={{
+                      backgroundColor: displayValue.toLowerCase(),
+                    }}
+                    title={displayValue}
+                  />
+                );
+              } else {
+                // RENDER GENERAL ATTRIBUTE BUTTONS (e.g., for Size/Volume)
+                return (
+                  <button
+                    key={v.id}
+                    onClick={() => {
+                      setSelectedVariant(idx);
+                      // Find the first available SKU of the new variant and set it as selected
+                      const firstAvailableSku = v.skus.find((s) => s.stock > 0);
+                      setSelectedSku(
+                        firstAvailableSku ? firstAvailableSku.id : null
+                      );
+                    }}
+                    className={`min-w-[4rem] px-4 py-2 border text-sm font-medium transition-colors ${
+                      selectedVariant === idx
+                        ? "border-gray-900 bg-gray-900 text-white"
+                        : "border-gray-300 text-gray-900 hover:border-gray-500"
+                    }`}
+                  >
+                    {displayValue}
+                  </button>
+                );
+              }
+            })}
           </div>
         </div>
       )}
@@ -363,7 +432,7 @@ const ProductDetails = ({
           >
             {" "}
             <path
-              d="M9 2H5v2H3v2H1v6h2v2h2v2h2v2h2v2h2v2h2v-2h2v-2h2v-2h2v-2h2v-2h2V6h-2V4h-2V2h-4v2h-2v2h-2V4H9V2zm0 2v2h2v2h2V6h2V4h4v2h2v6h-2v2h-2v2h-2v2h-2v2h-2v-2H9v-2H7v-2H5v-2H3V6h2V4h4z"
+              d="M9 2H5v2H3v2H1v6h2v2h2v2h2v2h2v2h2v-2h2v-2h2v-2h2v-2h2v-2h2V6h-2V4h-2V2h-4v2h-2v2h-2V4H9V2zm0 2v2h2v2h2V6h2V4h4v2h2v6h-2v2h-2v2h-2v2h-2v-2H9v-2H7v-2H5v-2H3V6h2V4h4z"
               fill="currentColor"
             />{" "}
           </svg>

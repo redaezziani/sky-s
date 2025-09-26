@@ -208,7 +208,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
         <div className="flex items-center space-x-2">
           <div className="flex items-center justify-center  max-w-80 bg-muted rounded">
             <img
-              src={sku?.images?.[0].url}
+              src={sku?.images?.[0]?.url || "/placeholder-image.png"}
               alt={sku.sku}
               className="w-10 aspect-auto object-cover rounded-md"
             />

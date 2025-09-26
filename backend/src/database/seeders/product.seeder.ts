@@ -7,6 +7,7 @@ import * as fs from 'fs';
 const prisma = new PrismaClient();
 const imageKit = new ImageKitService();
 
+// === IMAGE LISTS FOR PRODUCTS ===
 const newBalanceImages = [
   '36d9d2a2-7b23-4af3-b921-683f45ce5788.webp',
   '50aa8a1d-d966-4c7c-946a-7e0cc990aaa3.webp',
@@ -34,6 +35,14 @@ const bonaTightsBlackImages = [
   'f88d2459-065c-4555-9ffd-df38ffdee6c4.webp',
 ];
 
+const dolceLightBlueImages = [
+  '9267.jpg',
+  'Dolce_gabbana_light_blue_eau_intense_f_1024x1024_2x_4fc67335-6f0b-4e66-9773-6512fc891e5b.webp',
+  'Dolce_gabbana_light_blue_eau_intense_f_1024x1024_2x_4fc67335-6f0b-4e66-9773-6512fc891e5b (1).webp',
+  'dolce-gabbana-light-blue-eau-intense-homme-a1_1024x1024_2x_6177b987-27e0-45c8-9fcb-2b41620b7189.webp',
+];
+
+// === HELPERS ===
 async function uploadImages(imageFiles: string[], folder: string) {
   const uploadPromises = imageFiles.map(async (filename) => {
     const filePath = path.resolve(__dirname, folder, filename);
@@ -43,7 +52,7 @@ async function uploadImages(imageFiles: string[], folder: string) {
       fieldname: 'file',
       originalname: filename,
       encoding: '7bit',
-      mimetype: 'image/webp',
+      mimetype: filename.endsWith('.jpg') ? 'image/jpeg' : 'image/webp',
       size: buffer.length,
       buffer,
       destination: '',
@@ -63,6 +72,7 @@ async function uploadImages(imageFiles: string[], folder: string) {
   return Promise.all(uploadPromises);
 }
 
+// === MAIN SEED FUNCTION ===
 export async function seedProducts() {
   console.log('🌱 Clearing existing products...');
 
@@ -277,6 +287,131 @@ export async function seedProducts() {
     });
 
     console.log('✅ Created product: Bona Fide Premium Leggings');
+  }
+
+  // === DOLCE & GABBANA LIGHT BLUE EAU INTENSE HOMME ===
+  console.log('✨ Seeding Dolce & Gabbana Light Blue Eau Intense Homme...');
+
+  const perfumeCategorySlug = 'perfumes';
+  let perfumeCategory = await prisma.category.findUnique({
+    where: { slug: perfumeCategorySlug },
+  });
+
+  if (!perfumeCategory) {
+    perfumeCategory = await prisma.category.create({
+      data: {
+        name: 'Perfumes',
+        slug: perfumeCategorySlug,
+        isActive: true,
+      },
+    });
+    console.log('✅ Created category: Perfumes');
+  }
+
+  const dolceSlug = 'dolce-gabbana-light-blue-eau-intense-homme';
+  const dolceExists = await prisma.product.findUnique({
+    where: { slug: dolceSlug },
+  });
+
+  if (!dolceExists) {
+    const dolceImages = await uploadImages(
+      dolceLightBlueImages,
+      './DOLCE-GABBANA-LIGHT-BLUE-EAU-INTENSE-HOMME',
+    );
+
+    await prisma.product.create({
+      data: {
+        name: 'Dolce & Gabbana Light Blue Eau Intense Homme',
+        slug: dolceSlug,
+        description:
+          'Discover Light Blue Eau Intense Pour Homme, the magnetic masculine fragrance by Dolce & Gabbana. Launched in 2007, it embodies timeless masculine elegance. Crafted by master perfumer Alberto Morillas, this composition balances freshness and sensuality. A woody-aromatic scent with refreshing mandarin and grapefruit, aromatic juniper with a salty aquatic accord, and a base of amber woods and musk. Perfect for men seeking a captivating and original fragrance in Morocco.',
+        shortDesc:
+          'Woody-aromatic fragrance with citrus, juniper, amber woods, and musk.',
+        coverImage: dolceImages[0],
+        isFeatured: true,
+        metaTitle:
+          'Dolce & Gabbana Light Blue Eau Intense Homme - Perfume for Men',
+        metaDesc:
+          'Shop Dolce & Gabbana Light Blue Eau Intense Homme at Perfume Maroc. Fresh, sensual, and elegant masculine fragrance available in 50ml and 100ml bottles.',
+        isActive: true,
+        sortOrder: 2,
+        categories: {
+          connect: { id: perfumeCategory.id },
+        },
+        variants: {
+          create: [
+            {
+              name: '50ml',
+              attributes: { size: '50ml' },
+              isActive: true,
+              sortOrder: 0,
+              skus: {
+                create: [
+                  {
+                    sku: 'DG-LIGHT-BLUE-50ML',
+                    price: 549,
+                    stock: 20,
+                    weight: 400,
+                    dimensions: {
+                      length: 12,
+                      width: 6,
+                      height: 18,
+                      size: '50ml',
+                    },
+                    coverImage: dolceImages[0],
+                    lowStockAlert: 2,
+                    isActive: true,
+                    images: {
+                      create: dolceImages.map((url, idx) => ({
+                        url,
+                        altText: `Dolce & Gabbana Light Blue Eau Intense Homme 50ml view ${idx + 1}`,
+                        position: idx,
+                      })),
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              name: '100ml',
+              attributes: { size: '100ml' },
+              isActive: true,
+              sortOrder: 1,
+              skus: {
+                create: [
+                  {
+                    sku: 'DG-LIGHT-BLUE-100ML',
+                    price: 1100,
+                    stock: 15,
+                    weight: 600,
+                    dimensions: {
+                      length: 15,
+                      width: 8,
+                      height: 20,
+                      size: '100ml',
+                    },
+                    coverImage: dolceImages[0],
+                    lowStockAlert: 2,
+                    isActive: true,
+                    images: {
+                      create: dolceImages.map((url, idx) => ({
+                        url,
+                        altText: `Dolce & Gabbana Light Blue Eau Intense Homme 100ml view ${idx + 1}`,
+                        position: idx,
+                      })),
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    console.log(
+      '✅ Created product: Dolce & Gabbana Light Blue Eau Intense Homme',
+    );
   }
 
   console.log('🎉 Product seeding complete');

@@ -13,8 +13,13 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import CartSheet from "./cart-sheet";
+import { User } from "@/types/auth.types";
 
-const Header = () => {
+interface HeaderProps {
+  user: User | null;
+}
+
+const Header = ({ user }: HeaderProps) => {
   const { categories, loading, error, fetchCategories } = useCategoryStore();
 
   useEffect(() => {
@@ -103,12 +108,35 @@ const Header = () => {
                     <span className=" underline text-sm">Cart</span>
                   </div>
                   <SheetClose asChild>
-                    <Link
-                      href="/store"
-                      className="flex items-center gap-3 p-3 hover: rounded-lg transition-colors"
-                    >
-                      <span className=" font-medium">reda store</span>
-                    </Link>
+                    {user ? (
+                      <Link
+                        href="/store"
+                        className="flex items-center gap-3 p-3 hover: rounded-lg transition-colors cursor-pointer"
+                      >
+                        <span className=" underline text-sm">
+                          {user.email.split("@")[0]}
+                        </span>
+                      </Link>
+                    ) : (
+                      <div className="flex flex-col gap-2 w-full">
+                        <SheetClose asChild>
+                          <Link
+                            href="/auth/login"
+                            className="w-full text-center  px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition-colors text-sm"
+                          >
+                            Login
+                          </Link>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Link
+                            href="/auth/register"
+                            className="w-full text-center  px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-900 text-white transition-colors text-sm"
+                          >
+                            Register
+                          </Link>
+                        </SheetClose>
+                      </div>
+                    )}
                   </SheetClose>
                 </div>
               </div>
@@ -154,7 +182,43 @@ const Header = () => {
             />
           </svg>
           <CartSheet />
-          <p className="underline cursor-pointer">reda store</p>
+          {user ? (
+            <div className="flex gap-2">
+              <Link
+                href="/store"
+                className="font-medium hover:underline transition-all duration-200"
+              >
+                {user.email.split("@")[0]}
+              </Link>
+              {user.role === "ADMIN" && (
+                <>
+                  <span>/</span>
+                  <Link
+                    href="/dashboard"
+                    className="font-medium hover:underline transition-all duration-200"
+                  >
+                    Dashboard
+                  </Link>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Link
+                href="/auth/login"
+                className="font-medium hover:underline transition-all duration-200"
+              >
+                Login
+              </Link>
+              <span>/</span>
+              <Link
+                href="/auth/register"
+                className="font-medium hover:underline transition-all duration-200"
+              >
+                Register
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Mobile Actions - Only visible on mobile */}
