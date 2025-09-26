@@ -215,8 +215,13 @@ export default function CartSheet() {
               {/* Action buttons */}
               <div className="space-y-2">
                 <SheetClose asChild>
-                  <button className="w-full bg-gray-900 text-white py-3 text-sm font-medium hover:bg-gray-800 transition-colors">
+                  <button className="w-full flex justify-center items-center gap-1 bg-primary text-white py-3 text-sm font-medium hover:bg-primary transition-colors">
                     Checkout
+                    
+                    <svg
+                    
+                    className="inline w-5 h-5 "
+                    fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M8 4v2h4v2H6v2h6V8h2v2h8v6h-2v-4H4v6h14v-2h2v2h4v2H0v-2h2v-8h2V6h2V4h2z" fill="currentColor"/> </svg>
                   </button>
                 </SheetClose>
                 <button

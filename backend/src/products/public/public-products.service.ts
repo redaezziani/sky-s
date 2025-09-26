@@ -6,7 +6,6 @@ import { PaginatedPublicProductsResponseDto, ProductDetailsDto, PublicProductDet
 export class PublicProductsService {
   constructor(private prisma: PrismaService) {}
 
-  // Add these methods to your ProductsService class
 
   async getLatestProducts(
     query: PublicProductQueryDto,
@@ -286,4 +285,136 @@ export class PublicProductsService {
       updatedAt: product.updatedAt,
     };
   }
+
+  async getBestProducts(
+  query: PublicProductQueryDto,
+): Promise<PaginatedPublicProductsResponseDto> {
+  const {
+    page = 1,
+    limit = 12,
+    search,
+    categorySlug,
+    inStock = true,
+  } = query;
+
+  const skip = (page - 1) * limit;
+
+  // Build base where clause
+  const where: any = {
+    isActive: true,
+    deletedAt: null,
+  };
+
+  // Search filter
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { shortDesc: { contains: search, mode: 'insensitive' } },
+      { description: { contains: search, mode: 'insensitive' } },
+    ];
+  }
+
+  // Category filter
+  if (categorySlug) {
+    where.categories = {
+      some: { slug: categorySlug, isActive: true },
+    };
+  }
+
+  // Stock filter
+  if (inStock) {
+    where.variants = {
+      some: {
+        isActive: true,
+        skus: { some: { isActive: true, stock: { gt: 0 } } },
+      },
+    };
+  }
+
+  // Fetch products with reviews
+  const products = await this.prisma.product.findMany({
+    where,
+    include: {
+      categories: { where: { isActive: true }, select: { id: true, name: true, slug: true } },
+      variants: {
+        where: { isActive: true },
+        include: {
+          skus: { where: { isActive: true }, select: { id: true, sku: true, price: true, comparePrice: true, stock: true } },
+        },
+      },
+      reviews: { select: { rating: true } },
+    },
+  });
+
+  // Compute average rating for sorting
+  const productsWithRating = products.map((p) => {
+    const avgRating = p.reviews.length
+      ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length
+      : 0;
+    return { product: p, avgRating };
+  });
+
+  // Sort by rating descending, then by createdAt descending
+  productsWithRating.sort((a, b) => {
+    if (b.avgRating !== a.avgRating) return b.avgRating - a.avgRating;
+    return b.product.createdAt.getTime() - a.product.createdAt.getTime();
+  });
+
+  // Pagination
+  const paginatedProducts = productsWithRating.slice(skip, skip + limit).map((p) => p.product);
+  const total = productsWithRating.length;
+
+  // Transform products same as getLatestProducts
+  const transformedProducts: PublicProductSummaryDto[] = paginatedProducts.map((product) => {
+    const allSKUs = product.variants.flatMap((v) => v.skus);
+    const activeSKUs = allSKUs.filter((sku) => sku.stock > 0);
+    const prices = allSKUs.map((sku) => Number(sku.price));
+    const comparePrices = allSKUs
+      .map((sku) => sku.comparePrice)
+      .filter((price) => price !== null && price !== undefined)
+      .map((price) => Number(price));
+    const startingPrice = prices.length ? Math.min(...prices) : 0;
+    const comparePrice = comparePrices.length ? Math.min(...comparePrices) : undefined;
+
+    return {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      shortDesc: product.shortDesc ?? undefined,
+      coverImage: product.coverImage ?? undefined,
+      isFeatured: product.isFeatured,
+      startingPrice,
+      comparePrice,
+      inStock: activeSKUs.length > 0,
+      categories: product.categories,
+      createdAt: product.createdAt,
+      variants: product.variants.map((v) => ({
+        id: v.id,
+        name: v.name ?? '',
+        skus: v.skus.map((sku) => ({
+          id: sku.id,
+          sku: sku.sku,
+          price: Number(sku.price),
+          comparePrice: sku.comparePrice ? Number(sku.comparePrice) : undefined,
+          stock: sku.stock,
+        })),
+      })),
+    };
+  });
+
+  return {
+    data: transformedProducts,
+    meta: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      hasNextPage: page * limit < total,
+      hasPrevPage: page > 1,
+    },
+  };
+}
+
+
+  
 }

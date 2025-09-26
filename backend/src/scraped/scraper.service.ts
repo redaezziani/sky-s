@@ -42,7 +42,7 @@ export class ScraperService {
   };
 
   // Hardcoded category ID
-  private readonly perfumeCategoryId = '067817aa-2d92-4529-abd2-2407c422a400';
+  private readonly perfumeCategoryId = '075337c5-d7aa-496b-b40b-1dc8cca269cf';
 
   constructor(
     private readonly prisma: PrismaService,
@@ -75,7 +75,7 @@ export class ScraperService {
       const allProducts: ScrapedProduct[] = [];
 
       // Scrape pages 1-7
-      for (let page = 1; page <= 7; page++) {
+      for (let page = 1; page <= 2; page++) {
         this.scrapingStatus.currentPage = page;
         this.logger.log(`Scraping page ${page}...`);
 

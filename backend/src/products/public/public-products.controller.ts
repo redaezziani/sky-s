@@ -83,6 +83,44 @@ export class PublicProductsController {
     return this.publicProductsService.getLatestProducts(query);
   }
 
+    @Get('best')
+@ApiOperation({
+  summary: 'Get best products (public endpoint)',
+  description:
+    'Get the best-selling or highest-rated products for storefront display',
+})
+@ApiResponse({
+  status: 200,
+  description: 'Best products retrieved successfully',
+  type: PaginatedPublicProductsResponseDto,
+})
+@ApiQuery({
+  name: 'page',
+  required: false,
+  description: 'Page number',
+  example: 1,
+})
+@ApiQuery({
+  name: 'limit',
+  required: false,
+  description: 'Items per page (max 50)',
+  example: 12,
+})
+@ApiQuery({
+  name: 'sortBy',
+  required: false,
+  description: 'Criteria for best products',
+  enum: ['sales', 'rating'],
+  example: 'sales',
+})
+async getBestProducts(
+  @Query('page') page = 1,
+  @Query('limit') limit = 12,
+  @Query('sortBy') sortBy: 'sales' | 'rating' = 'sales',
+): Promise<PaginatedPublicProductsResponseDto> {
+  return this.publicProductsService.getBestProducts({ page, limit, sortBy });
+}
+
   @Get('/:identifier')
   @ApiOperation({
     summary: 'Get product details by ID or slug (public endpoint)',
@@ -107,4 +145,7 @@ export class PublicProductsController {
   ): Promise<ProductDetailsDto> {
     return this.publicProductsService.getPublicProductDetails(identifier);
   }
+
+
+
 }

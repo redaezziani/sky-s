@@ -13,7 +13,7 @@ export default async function RootLayout({
   const user = await getServerUser();
   return (
     <div
-      className={`relative flex flex-col gap-4 justify-start items-center  min-h-screen  pt-16`}
+      className={`relative bg-neutral-50 flex flex-col gap-4 justify-start items-center  min-h-screen  pt-16`}
     >
       <Header user={user} />
       {children}

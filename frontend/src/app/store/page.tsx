@@ -1,206 +1,173 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import MainLayout from "@/components/store/main-layout";
-import React, { useEffect, useState } from "react";
+import { ProductCard } from "@/components/store/product/product-card";
 import Link from "next/link";
+import { useHomeStore } from "@/stores/public/home-store";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import { Navigation } from "swiper/modules";
 
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-}
+const HomePage = () => {
+  const {
+    products,
+    bestProducts,
+    loading,
+    error,
+    fetchLatestProducts,
+    fetchBestProducts,
+  } = useHomeStore();
 
-interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  shortDesc: string;
-  coverImage: string;
-  isFeatured: boolean;
-  startingPrice: number;
-  inStock: boolean;
-  categories: Category[];
-  createdAt: string;
-}
+  const latestPrevRef = useRef<HTMLDivElement>(null);
+  const latestNextRef = useRef<HTMLDivElement>(null);
+  const bestPrevRef = useRef<HTMLDivElement>(null);
+  const bestNextRef = useRef<HTMLDivElement>(null);
 
-interface ProductsResponse {
-  data: Product[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-    hasNextPage: boolean;
-    hasPrevPage: boolean;
-  };
-}
+  useEffect(() => {
+    fetchLatestProducts(1, 15);
+    fetchBestProducts(1, 15);
+  }, [fetchLatestProducts, fetchBestProducts]);
 
-const ProductCard = ({ product }: { product: Product }) => {
+  const renderProductsSection = (
+    title: string,
+    description: string,
+    productList: typeof products,
+    prevRef: React.RefObject<HTMLDivElement | null>,
+    nextRef: React.RefObject<HTMLDivElement | null>
+  ) => (
+    <div className="w-full px-4 py-8">
+      <div className="flex flex-col max-w-[90rem] w-full mb-4">
+        <h2 className="text-lg font-medium">{title}</h2>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
 
+      {loading && (
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-6 w-full">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="aspect-square bg-gray-200 mb-4"></div>
+              <div className="h-4 bg-gray-200 mb-2"></div>
+              <div className="h-4 bg-gray-200 w-3/4 mb-2"></div>
+              <div className="h-4 bg-gray-200 w-1/2"></div>
+            </div>
+          ))}
+        </div>
+      )}
 
+      {error && (
+        <div className="text-center py-12">
+          <p className="text-red-600 mb-4">Failed to load products</p>
+          <button
+            onClick={() => {
+              title === "Latest Products"
+                ? fetchLatestProducts(1, 15)
+                : fetchBestProducts(1, 15);
+            }}
+            className="bg-gray-900 text-white px-4 py-2 hover:bg-gray-800 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      )}
 
-  return (
-    <div className="group">
-      <div className=" transition-all duration-200 ">
-        {/* Image Container */}
-        <div className=" relative overflow-hidden ">
-          <img
-            src={product.coverImage}
-            alt={product.name}
-            className="w-full h-full object-cover "
-          />
-          {product.isFeatured && (
-            <div className="absolute top-3 left-3">
-              <span className="bg-black text-white flex gap-1 text-xs px-2 py-1 font-medium">
+      {!loading && !error && productList.length > 0 && (
+        <>
+          {/* Desktop Grid */}
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 w-full">
+            {productList.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+
+          {/* Mobile Swiper */}
+          <div className="md:hidden relative">
+            <div className="absolute -top-8 right-6 z-10 flex gap-2">
+              <div ref={prevRef} className="p-2 cursor-pointer transition">
                 <svg
+                  className="w-4 h-4"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
-                  className="w-4 h-4"
                 >
-                  {" "}
                   <path
-                    d="M12 1h2v8h8v4h-2v-2h-8V5h-2V3h2V1zM8 7V5h2v2H8zM6 9V7h2v2H6zm-2 2V9h2v2H4zm10 8v2h-2v2h-2v-8H2v-4h2v2h8v6h2zm2-2v2h-2v-2h2zm2-2v2h-2v-2h2zm0 0h2v-2h-2v2z"
+                    d="M16 5v2h-2V5h2zm-4 4V7h2v2h-2zm-2 2V9h2v2h-2zm0 2H8v-2h2v2zm2 2v-2h-2v2h2zm0 0h2v2h-2v-2zm4 4v-2h-2v2h2z"
                     fill="currentColor"
-                  />{" "}
+                  />
                 </svg>
-                Featured
-              </span>
+              </div>
+              <div ref={nextRef} className="p-2 cursor-pointer transition">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </div>
             </div>
-          )}
-          {!product.inStock && (
-            <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-              <span className="bg-gray-900 text-white px-3 py-1 text-sm font-medium">
-                Out of Stock
-              </span>
-            </div>
-          )}
-        </div>
 
-        {/* Content */}
-        <div className="py-2 px-1">
-          {/* Category */}
-          <div className="mb-2">
-            <Link
-              href={`/store/products?category=${product.categories[0]?.slug}`}
-              className="text-xs text-gray-500 uppercase tracking-wide hover:underline"
+            <Swiper
+              spaceBetween={16}
+              slidesPerView={1.2}
+              modules={[Navigation]}
+              onInit={(swiper) => {
+                // connect custom refs
+                (swiper.params.navigation as any).prevEl = prevRef.current;
+                (swiper.params.navigation as any).nextEl = nextRef.current;
+                swiper.navigation.init();
+                swiper.navigation.update();
+              }}
             >
-              {product.categories[0]?.name}
-            </Link>
+              {productList.map((p) => (
+                <SwiperSlide key={p.id}>
+                  <ProductCard product={p} />
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
 
-          {/* Product Name */}
-          <Link
-            href={`/store/products/${product.slug}`}
-            className="font-medium text-gray-900 mb-2 line-clamp-2 group-hover:text-gray-700 transition-colors hover:underline"
-          >
-            {product.name}
-          </Link>
-
-          {/* Short Description */}
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-            {product.shortDesc}
-          </p>
-
-          {/* Price */}
-          <div className="flex items-center justify-between">
-            <span className="text-lg font-semibold text-gray-900">
-              ${product.startingPrice.toFixed(2)}
-            </span>
-            <span className="text-xs text-gray-500">Starting price</span>
-          </div>
-        </div>
-      </div>
+          {!loading && !error && productList.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-600 mb-4">
+                No products available at the moment
+              </p>
+              <Link
+                href="/store"
+                className="bg-gray-900 text-white px-4 py-2 hover:bg-gray-800 transition-colors inline-block"
+              >
+                Browse Store
+              </Link>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
-};
-
-const HomePage = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchLatestProducts = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          "http://localhost:8085/api/public/products/latest?page=1&limit=12&inStock=true"
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch products");
-        }
-
-        const data: ProductsResponse = await response.json();
-        setProducts(data.data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLatestProducts();
-  }, []);
 
   return (
-    <MainLayout
-      title="Welcome to reda store"
-      description="Browse our latest collection of amazing products."
-    >
-      <div className="w-full px-4 py-8">
-        {/* Loading State */}
-        {loading && (
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-6 w-full">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="aspect-square bg-gray-200 mb-4"></div>
-                <div className="h-4 bg-gray-200 mb-2"></div>
-                <div className="h-4 bg-gray-200 w-3/4 mb-2"></div>
-                <div className="h-4 bg-gray-200 w-1/2"></div>
-              </div>
-            ))}
-          </div>
-        )}
+    <MainLayout>
+      {/* Latest Products Section */}
+      {renderProductsSection(
+        "Latest Products",
+        "Check out our newest arrivals in the store",
+        products,
+        latestPrevRef,
+        latestNextRef
+      )}
 
-        {/* Error State */}
-        {error && (
-          <div className="text-center py-12">
-            <p className="text-red-600 mb-4">Failed to load products</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-gray-900 text-white px-4 py-2 hover:bg-gray-800 transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
-        )}
-
-        {/* Products Grid */}
-        {!loading && !error && products.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 w-full">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!loading && !error && products.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">
-              No products available at the moment
-            </p>
-            <Link
-              href="/store"
-              className="bg-gray-900 text-white px-4 py-2 hover:bg-gray-800 transition-colors inline-block"
-            >
-              Browse Store
-            </Link>
-          </div>
-        )}
-      </div>
+      {/* Best Products Section */}
+      {renderProductsSection(
+        "Best Products",
+        "Explore our top-rated or best-selling products",
+        bestProducts,
+        bestPrevRef,
+        bestNextRef
+      )}
     </MainLayout>
   );
 };

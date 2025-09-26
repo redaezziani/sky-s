@@ -27,8 +27,8 @@ const Header = ({ user }: HeaderProps) => {
   }, [fetchCategories]);
 
   return (
-    <header className="fixed top-0 left-0 py-3 w-full flex flex-col gap-3 justify-start items-center  backdrop-blur-sm border-b z-50">
-      <section className="w-full max-w-[110rem] gap-4 flex justify-between items-center px-4">
+    <header className="fixed top-0 border-b border-border left-0 py-3 w-full flex flex-col gap-3 justify-start items-center bg-background     z-50">
+      <section className="w-full max-w-[90rem] gap-4 flex justify-between items-center px-4">
         {/* Mobile Menu Button - Only visible on mobile */}
         <div className="md:hidden">
           <Sheet>
@@ -239,7 +239,7 @@ const Header = ({ user }: HeaderProps) => {
       </section>
 
       {/* Desktop Categories Navigation */}
-      <div className="md:flex hidden w-full mt-4 max-w-[110rem] justify-start items-start gap-6 px-4">
+      <div className="md:flex hidden w-full mt-4 max-w-[90rem] justify-start items-start gap-6 px-4">
         {loading && <p className="text-sm ">Loading...</p>}
         {error && (
           <p className="text-sm text-red-500">Failed to load categories</p>

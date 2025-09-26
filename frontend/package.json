@@ -66,6 +66,7 @@
     "remark-math": "^6.0.0",
     "shiki": "^3.12.2",
     "sonner": "^2.0.7",
+    "swiper": "^12.0.2",
     "swr": "^2.3.6",
     "tailwind-merge": "^3.3.1",
     "use-debounce": "^10.0.6",
