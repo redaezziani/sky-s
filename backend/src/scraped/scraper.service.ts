@@ -415,6 +415,7 @@ export class ScraperService {
                         altText: `${product.title} ${size} view ${idx + 1}`,
                         position: idx,
                       })),
+                      // nice 
                     },
                   },
                 ],
