@@ -11,6 +11,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { PaymentsModule } from './payments/payments.module';
 import { SettingsModule } from './settings/settings.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ScraperModule } from './scraped/scraped.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     PaymentsModule,
     SettingsModule,
     EventEmitterModule.forRoot(),
+    ScraperModule,
   ],
   controllers: [],
   providers: [],
