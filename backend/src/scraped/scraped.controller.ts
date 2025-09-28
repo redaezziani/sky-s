@@ -12,7 +12,7 @@ export class ScraperController {
   async scrapeParfums() {
     this.logger.log('Starting parfum scraping process...');
     try {
-      const result = await this.scraperService.scrapeAllParfums();
+      const result = await this.scraperService.scrapeNamshiCaps();
       return {
         success: true,
         message: 'Scraping completed successfully',
@@ -28,7 +28,7 @@ export class ScraperController {
     }
   }
 
-  @Get('status')
+  @Get('test-scrape')
   getScrapingStatus() {
     return this.scraperService.getScrapingStatus();
   }

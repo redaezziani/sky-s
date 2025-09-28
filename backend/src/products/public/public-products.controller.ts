@@ -2,7 +2,7 @@ import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PublicProductsService } from './public-products.service';
 import { PaginatedPublicProductsResponseDto, ProductDetailsDto, PublicProductDetailDto, PublicProductQueryDto } from '../dto/public-products.dto';
-
+import { RelatedProductsQueryDto } from '../dto/related-products';
 @ApiTags('Public Products')
 @Controller('public/products')
 export class PublicProductsController {
@@ -119,6 +119,35 @@ async getBestProducts(
   @Query('sortBy') sortBy: 'sales' | 'rating' = 'sales',
 ): Promise<PaginatedPublicProductsResponseDto> {
   return this.publicProductsService.getBestProducts({ page, limit, sortBy });
+}
+
+  @Get('/:identifier/related')
+@ApiOperation({
+  summary: 'Get related products (public endpoint)',
+  description:
+    'Fetch products related to the given product based on categories, price, and popularity',
+})
+@ApiParam({
+  name: 'identifier',
+  description: 'Product UUID or slug',
+  example: 'diverge-4-comp-carbon',
+})
+@ApiQuery({
+  name: 'limit',
+  required: false,
+  description: 'Number of related products',
+  example: 6,
+})
+@ApiResponse({
+  status: 200,
+  description: 'Related products retrieved successfully',
+  type: PaginatedPublicProductsResponseDto,
+})
+async getRelatedProducts(
+  @Param('identifier') identifier: string,
+  @Query() { limit }: RelatedProductsQueryDto,
+): Promise<PaginatedPublicProductsResponseDto> {
+  return this.publicProductsService.getRelatedProducts(identifier, limit);
 }
 
   @Get('/:identifier')

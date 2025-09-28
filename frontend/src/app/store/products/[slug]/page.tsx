@@ -1,29 +1,36 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import MainLayout from "@/components/store/main-layout";
 import swr from "swr";
 import { fetcher } from "@/lib/utils";
-import { useProductDetailsStore, Product } from "@/stores/public/product-details-store";
+import {
+  useProductDetailsStore,
+  Product,
+} from "@/stores/public/product-details-store";
 import ProductGallery from "@/components/store/product/product-gallery";
 import ProductDetails from "@/components/store/product/product-details";
+import { useHomeStore } from "@/stores/public/home-store";
+import { ProductCard } from "@/components/store/product/product-card";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }> | { slug: string };
 };
 
 const ProductPage = ({ params }: ProductPageProps) => {
-  // 💡 FIX: Handle params as Promise for Next.js 15+ compatibility
+  // Resolve slug param
   const resolvedParams = React.use(
     params instanceof Promise ? params : Promise.resolve(params)
   );
   const { slug } = resolvedParams;
 
-  // 💡 FIX: Use separate selectors to avoid object recreation
+  // Product details store
   const product = useProductDetailsStore((state) => state.product);
-  const resetSelections = useProductDetailsStore((state) => state.resetSelections);
+  const resetSelections = useProductDetailsStore(
+    (state) => state.resetSelections
+  );
 
-  // SWR Fetching
+  // Fetch product with SWR
   const apiUrl = `/public/products/${slug}`;
   const { error, isLoading } = swr<Product>(apiUrl, fetcher, {
     revalidateOnFocus: false,
@@ -32,10 +39,19 @@ const ProductPage = ({ params }: ProductPageProps) => {
     },
     onError: (err) => {
       console.error("Product fetch failed:", err);
-    }
+    },
   });
 
-  // Handle Loading State
+  // Related products store
+  const { relatedProducts, fetchRelatedProducts, loading } = useHomeStore();
+
+  // Fetch related products when product is loaded
+  useEffect(() => {
+    if (slug) {
+      fetchRelatedProducts(slug);
+    }
+  }, [slug, fetchRelatedProducts]);
+
   if (isLoading) {
     return (
       <MainLayout title="Loading..." description="Loading product details">
@@ -46,7 +62,6 @@ const ProductPage = ({ params }: ProductPageProps) => {
     );
   }
 
-  // Handle Error State (SWR error or product data not available)
   if (error || !product) {
     return (
       <MainLayout
@@ -62,13 +77,29 @@ const ProductPage = ({ params }: ProductPageProps) => {
 
   return (
     <MainLayout
-      title="product details"
-      description="Detailed information about the product"
+      title={product.name}
+      description={product.shortDesc ?? "Product details"}
     >
-      <div className="w-full justify-start  px-4 md:px-0 py-8">
-        <div className="grid max-w-6xl  lg:grid-cols-2 gap-12">
+      <div className="w-full px-4 md:px-0 py-8">
+        <div className="grid max-w-6xl lg:grid-cols-2 gap-12">
           <ProductGallery />
           <ProductDetails />
+        </div>
+
+        {/* Related Products */}
+        <div className="max-w-6xl mt-12">
+          <h2 className="text-xl font-semibold mb-4">Related Products</h2>
+          {loading ? (
+            <p>Loading related products...</p>
+          ) : relatedProducts.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+              {relatedProducts.map((rp) => (
+                <ProductCard key={rp.id} product={rp} />
+              ))}
+            </div>
+          ) : (
+            <p>No related products found.</p>
+          )}
         </div>
       </div>
     </MainLayout>

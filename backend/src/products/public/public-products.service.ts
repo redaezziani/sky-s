@@ -1,11 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { PaginatedPublicProductsResponseDto, ProductDetailsDto, PublicProductDetailDto, PublicProductQueryDto, PublicProductSummaryDto } from '../dto/public-products.dto';
+import {
+  PaginatedPublicProductsResponseDto,
+  ProductDetailsDto,
+  PublicProductDetailDto,
+  PublicProductQueryDto,
+  PublicProductSummaryDto,
+} from '../dto/public-products.dto';
 
 @Injectable()
 export class PublicProductsService {
   constructor(private prisma: PrismaService) {}
-
 
   async getLatestProducts(
     query: PublicProductQueryDto,
@@ -233,13 +238,19 @@ export class PublicProductsService {
     const transformedVariants = product.variants.map((variant) => ({
       id: variant.id,
       name: variant.name ?? '',
-      attributes: typeof variant.attributes === 'object' && variant.attributes !== null ? variant.attributes as Record<string, any> : {},
+      attributes:
+        typeof variant.attributes === 'object' && variant.attributes !== null
+          ? (variant.attributes as Record<string, any>)
+          : {},
       skus: variant.skus.map((sku) => ({
         id: sku.id,
         sku: sku.sku,
         price: Number(sku.price), // 👈 convert Decimal to number
         stock: sku.stock,
-        dimensions: typeof sku.dimensions === 'object' && sku.dimensions !== null ? sku.dimensions as Record<string, any> : {},
+        dimensions:
+          typeof sku.dimensions === 'object' && sku.dimensions !== null
+            ? (sku.dimensions as Record<string, any>)
+            : {},
         coverImage: sku.coverImage ?? undefined,
         images: sku.images.map((img) => img.url),
         createdAt: sku.createdAt,
@@ -287,134 +298,267 @@ export class PublicProductsService {
   }
 
   async getBestProducts(
-  query: PublicProductQueryDto,
-): Promise<PaginatedPublicProductsResponseDto> {
-  const {
-    page = 1,
-    limit = 12,
-    search,
-    categorySlug,
-    inStock = true,
-  } = query;
+    query: PublicProductQueryDto,
+  ): Promise<PaginatedPublicProductsResponseDto> {
+    const {
+      page = 1,
+      limit = 12,
+      search,
+      categorySlug,
+      inStock = true,
+    } = query;
 
-  const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
-  // Build base where clause
-  const where: any = {
-    isActive: true,
-    deletedAt: null,
-  };
-
-  // Search filter
-  if (search) {
-    where.OR = [
-      { name: { contains: search, mode: 'insensitive' } },
-      { shortDesc: { contains: search, mode: 'insensitive' } },
-      { description: { contains: search, mode: 'insensitive' } },
-    ];
-  }
-
-  // Category filter
-  if (categorySlug) {
-    where.categories = {
-      some: { slug: categorySlug, isActive: true },
+    // Build base where clause
+    const where: any = {
+      isActive: true,
+      deletedAt: null,
     };
-  }
 
-  // Stock filter
-  if (inStock) {
-    where.variants = {
-      some: {
-        isActive: true,
-        skus: { some: { isActive: true, stock: { gt: 0 } } },
-      },
-    };
-  }
+    // Search filter
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { shortDesc: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
 
-  // Fetch products with reviews
-  const products = await this.prisma.product.findMany({
-    where,
-    include: {
-      categories: { where: { isActive: true }, select: { id: true, name: true, slug: true } },
-      variants: {
-        where: { isActive: true },
-        include: {
-          skus: { where: { isActive: true }, select: { id: true, sku: true, price: true, comparePrice: true, stock: true } },
+    // Category filter
+    if (categorySlug) {
+      where.categories = {
+        some: { slug: categorySlug, isActive: true },
+      };
+    }
+
+    // Stock filter
+    if (inStock) {
+      where.variants = {
+        some: {
+          isActive: true,
+          skus: { some: { isActive: true, stock: { gt: 0 } } },
         },
+      };
+    }
+
+    // Fetch products with reviews
+    const products = await this.prisma.product.findMany({
+      where,
+      include: {
+        categories: {
+          where: { isActive: true },
+          select: { id: true, name: true, slug: true },
+        },
+        variants: {
+          where: { isActive: true },
+          include: {
+            skus: {
+              where: { isActive: true },
+              select: {
+                id: true,
+                sku: true,
+                price: true,
+                comparePrice: true,
+                stock: true,
+              },
+            },
+          },
+        },
+        reviews: { select: { rating: true } },
       },
-      reviews: { select: { rating: true } },
-    },
-  });
+    });
 
-  // Compute average rating for sorting
-  const productsWithRating = products.map((p) => {
-    const avgRating = p.reviews.length
-      ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length
-      : 0;
-    return { product: p, avgRating };
-  });
+    // Compute average rating for sorting
+    const productsWithRating = products.map((p) => {
+      const avgRating = p.reviews.length
+        ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length
+        : 0;
+      return { product: p, avgRating };
+    });
 
-  // Sort by rating descending, then by createdAt descending
-  productsWithRating.sort((a, b) => {
-    if (b.avgRating !== a.avgRating) return b.avgRating - a.avgRating;
-    return b.product.createdAt.getTime() - a.product.createdAt.getTime();
-  });
+    // Sort by rating descending, then by createdAt descending
+    productsWithRating.sort((a, b) => {
+      if (b.avgRating !== a.avgRating) return b.avgRating - a.avgRating;
+      return b.product.createdAt.getTime() - a.product.createdAt.getTime();
+    });
 
-  // Pagination
-  const paginatedProducts = productsWithRating.slice(skip, skip + limit).map((p) => p.product);
-  const total = productsWithRating.length;
+    // Pagination
+    const paginatedProducts = productsWithRating
+      .slice(skip, skip + limit)
+      .map((p) => p.product);
+    const total = productsWithRating.length;
 
-  // Transform products same as getLatestProducts
-  const transformedProducts: PublicProductSummaryDto[] = paginatedProducts.map((product) => {
-    const allSKUs = product.variants.flatMap((v) => v.skus);
-    const activeSKUs = allSKUs.filter((sku) => sku.stock > 0);
-    const prices = allSKUs.map((sku) => Number(sku.price));
-    const comparePrices = allSKUs
-      .map((sku) => sku.comparePrice)
-      .filter((price) => price !== null && price !== undefined)
-      .map((price) => Number(price));
-    const startingPrice = prices.length ? Math.min(...prices) : 0;
-    const comparePrice = comparePrices.length ? Math.min(...comparePrices) : undefined;
+    // Transform products same as getLatestProducts
+    const transformedProducts: PublicProductSummaryDto[] =
+      paginatedProducts.map((product) => {
+        const allSKUs = product.variants.flatMap((v) => v.skus);
+        const activeSKUs = allSKUs.filter((sku) => sku.stock > 0);
+        const prices = allSKUs.map((sku) => Number(sku.price));
+        const comparePrices = allSKUs
+          .map((sku) => sku.comparePrice)
+          .filter((price) => price !== null && price !== undefined)
+          .map((price) => Number(price));
+        const startingPrice = prices.length ? Math.min(...prices) : 0;
+        const comparePrice = comparePrices.length
+          ? Math.min(...comparePrices)
+          : undefined;
+
+        return {
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          shortDesc: product.shortDesc ?? undefined,
+          coverImage: product.coverImage ?? undefined,
+          isFeatured: product.isFeatured,
+          startingPrice,
+          comparePrice,
+          inStock: activeSKUs.length > 0,
+          categories: product.categories,
+          createdAt: product.createdAt,
+          variants: product.variants.map((v) => ({
+            id: v.id,
+            name: v.name ?? '',
+            skus: v.skus.map((sku) => ({
+              id: sku.id,
+              sku: sku.sku,
+              price: Number(sku.price),
+              comparePrice: sku.comparePrice
+                ? Number(sku.comparePrice)
+                : undefined,
+              stock: sku.stock,
+            })),
+          })),
+        };
+      });
 
     return {
-      id: product.id,
-      name: product.name,
-      slug: product.slug,
-      shortDesc: product.shortDesc ?? undefined,
-      coverImage: product.coverImage ?? undefined,
-      isFeatured: product.isFeatured,
-      startingPrice,
-      comparePrice,
-      inStock: activeSKUs.length > 0,
-      categories: product.categories,
-      createdAt: product.createdAt,
-      variants: product.variants.map((v) => ({
-        id: v.id,
-        name: v.name ?? '',
-        skus: v.skus.map((sku) => ({
-          id: sku.id,
-          sku: sku.sku,
-          price: Number(sku.price),
-          comparePrice: sku.comparePrice ? Number(sku.comparePrice) : undefined,
-          stock: sku.stock,
-        })),
-      })),
+      data: transformedProducts,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasNextPage: page * limit < total,
+        hasPrevPage: page > 1,
+      },
     };
-  });
+  }
 
-  return {
-    data: transformedProducts,
-    meta: {
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-      hasNextPage: page * limit < total,
-      hasPrevPage: page > 1,
-    },
-  };
-}
+  async getRelatedProducts(
+    identifier: string,
+    limit = 6,
+  ): Promise<PaginatedPublicProductsResponseDto> {
+    // 1. Find base product
+    const product = await this.prisma.product.findFirst({
+      where: {
+        OR: [{ id: identifier }, { slug: identifier }],
+        isActive: true,
+        deletedAt: null,
+      },
+      include: {
+        categories: { select: { id: true, slug: true } },
+        variants: { include: { skus: true } },
+        reviews: { select: { rating: true } },
+      },
+    });
 
+    if (!product) throw new NotFoundException('Product not found');
 
-  
+    // Compute starting price
+    const allSkus = product.variants.flatMap((v) => v.skus);
+    const prices = allSkus.map((sku) => Number(sku.price));
+    const startingPrice = prices.length ? Math.min(...prices) : 0;
+
+    // 2. Build query for related products
+    const related = await this.prisma.product.findMany({
+      where: {
+        id: { not: product.id }, // exclude self
+        isActive: true,
+        deletedAt: null,
+        categories: {
+          some: { id: { in: product.categories.map((c) => c.id) } },
+        },
+        variants: {
+          some: {
+            skus: {
+              some: {
+                price: {
+                  gte: startingPrice * 0.8,
+                  lte: startingPrice * 1.2,
+                },
+                stock: { gt: 0 },
+                isActive: true,
+              },
+            },
+          },
+        },
+      },
+      include: {
+        categories: true,
+        variants: {
+          include: {
+            skus: true,
+          },
+        },
+        reviews: { select: { rating: true } },
+      },
+      take: limit,
+      orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
+    });
+
+    // 3. Transform results (reuse mapper from latest/best)
+    const transformedProducts: PublicProductSummaryDto[] = related.map((p) => {
+      const allSKUs = p.variants.flatMap((v) => v.skus);
+      const activeSKUs = allSKUs.filter((sku) => sku.stock > 0);
+      const prices = allSKUs.map((sku) => Number(sku.price));
+      const comparePrices = allSKUs
+        .map((sku) => sku.comparePrice)
+        .filter((price) => price !== null && price !== undefined)
+        .map((price) => Number(price));
+      const startingPrice = prices.length ? Math.min(...prices) : 0;
+      const comparePrice = comparePrices.length
+        ? Math.min(...comparePrices)
+        : undefined;
+
+      return {
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        shortDesc: p.shortDesc ?? undefined,
+        coverImage: p.coverImage ?? undefined,
+        isFeatured: p.isFeatured,
+        startingPrice,
+        comparePrice,
+        inStock: activeSKUs.length > 0,
+        categories: p.categories,
+        createdAt: p.createdAt,
+        variants: p.variants.map((v) => ({
+          id: v.id,
+          name: v.name ?? '',
+          skus: v.skus.map((sku) => ({
+            id: sku.id,
+            sku: sku.sku,
+            price: Number(sku.price),
+            comparePrice: sku.comparePrice
+              ? Number(sku.comparePrice)
+              : undefined,
+            stock: sku.stock,
+          })),
+        })),
+      };
+    });
+
+    return {
+      data: transformedProducts,
+      meta: {
+        total: transformedProducts.length,
+        page: 1,
+        limit,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false,
+      },
+    };
+  }
 }

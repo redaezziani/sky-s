@@ -37,15 +37,18 @@ interface ProductsResponse {
 interface HomeStore {
   products: Product[];
   bestProducts: Product[];
+  relatedProducts: Product[];
   loading: boolean;
   error: string | null;
   fetchLatestProducts: (page?: number, limit?: number) => Promise<void>;
   fetchBestProducts: (page?: number, limit?: number) => Promise<void>;
+  fetchRelatedProducts: (identifier: string, limit?: number) => Promise<void>;
 }
 
 export const useHomeStore = create<HomeStore>((set) => ({
   products: [],
   bestProducts: [],
+  relatedProducts: [],
   loading: false,
   error: null,
 
@@ -78,6 +81,25 @@ export const useHomeStore = create<HomeStore>((set) => ({
       const data: ProductsResponse = res.data;
 
       set({ bestProducts: data.data });
+    } catch (err) {
+      set({
+        error: err instanceof Error ? err.message : "Something went wrong",
+      });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  fetchRelatedProducts: async (identifier: string, limit = 6) => {
+    try {
+      set({ loading: true, error: null });
+
+      const res = await axiosInstance.get(
+        `/public/products/${identifier}/related?limit=${limit}`
+      );
+      const data: ProductsResponse = res.data;
+
+      set({ relatedProducts: data.data });
     } catch (err) {
       set({
         error: err instanceof Error ? err.message : "Something went wrong",
