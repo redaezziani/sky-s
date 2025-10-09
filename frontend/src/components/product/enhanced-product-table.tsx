@@ -149,10 +149,28 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
       .reduce((total, sku) => total + (sku.stock || 0), 0);
   };
 
+  // Handle select all
+const handleSelectAll = (checked: boolean) => {
+  if (checked) {
+    // Select all product IDs
+    products.forEach((p) => selectProduct(p.id));
+  } else {
+    // Clear all selections
+    clearSelection();
+  }
+};
+
+
   const columns: TableColumn<Product>[] = [
     {
       key: "select",
-      label: "Select",
+      label: (
+         <Checkbox
+      checked={selectedProducts.length === products.length && products.length > 0}
+      onCheckedChange={(checked) => handleSelectAll(!!checked)}
+      aria-label="Select all products"
+    />
+      ),
       render: (product) => (
         <Checkbox
           checked={selectedProducts.includes(product.id)}

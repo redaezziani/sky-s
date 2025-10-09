@@ -1,7 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+
+
+
+:root{
+  --color-1 :oklch(59.229% 0.11206 228.004);
+  --color-2 :oklab(32.915% -0.0409 -0.04214);
+  --color-3 :oklch(77.751% 0.15953 166.602);
+  --color-4 :oklch(88.03% 0.1347 86.064);
+  --color-5 :oklch(64.755% 0.20418 11.05);
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -51,7 +62,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(63.383% 0.25393 17.874);
+  --primary: oklch(59.229% 0.11206 228.004);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -59,13 +70,13 @@
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: oklch(64.755% 0.20418 11.05);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --chart-1: oklch(63.383% 0.25393 17.874);
-  --chart-2: oklch(0.627 0.265 303.9);
-  --chart-3: oklch(0.985 0 0);
+  --chart-1: oklch(59.229% 0.11206 228.004);
+  --chart-2: oklch(32.915% -0.0409 -0.04214);
+  --chart-3: oklch(77.751% 0.15953 166.602);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.985 0 0);
@@ -85,7 +96,7 @@
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
 
-  --primary: oklch(63.383% 0.25393 17.874);
+  --primary: oklch(59.229% 0.11206 228.004);
   --primary-foreground: oklch(0.985 0 0);
 
   --secondary: oklch(0.269 0 0);
@@ -98,7 +109,7 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --chart-1: oklch(63.383% 0.25393 17.874);
+  --chart-1: oklch(59.229% 0.11206 228.004);
   --chart-2: oklch(0.627 0.265 303.9);
   --chart-3: oklch(0.985 0 0);
   --chart-4: oklch(0.627 0.265 303.9);
@@ -118,6 +129,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground ;
+    font-family: "Onest", sans-serif;
   }
 }

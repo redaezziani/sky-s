@@ -18,6 +18,12 @@ import { useLocale } from "@/components/local-lang-swither";
 import { getMessages } from "@/lib/locale";
 import { fetcher } from "@/lib/utils";
 
+
+interface CardType {
+  growth : number
+  count:number
+}
+
 // Hardcoded card keys
 const CARD_KEYS = ["totalOrders", "revenue", "activeUsers", "productsSold"];
 
@@ -38,9 +44,9 @@ export function SectionCards() {
   return (
     <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
       {CARD_KEYS.map((key, index) => {
-        const card = apiData[index];
+        const card:CardType = apiData[index];
         const TrendIcon = card.growth >= 0 ? IconTrendingUp : IconTrendingDown;
-        const trendValue = `${card.growth >= 0 ? "+" : ""}${card.growth}%`;
+        const trendValue = `${card.growth >= 0 ? "+" : ""}${card.growth.toFixed(2)}%`;
 
         return (
           <Card key={key} className="@container/card">

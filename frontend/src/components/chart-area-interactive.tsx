@@ -55,9 +55,9 @@ export function ChartAreaInteractive() {
 
   // Chart config
   const chartConfig = {
-    orders: { label: t.chartLabels.orders, color: "var(--primary)" },
-    revenue: { label: t.chartLabels.revenue, color: "#ff3fe1" },
-    products: { label: t.chartLabels.products, color: "var(--primary)" },
+    orders: { label: t.chartLabels.orders, color: "var(--chart-1)" },
+    revenue: { label: t.chartLabels.revenue, color: "var(--chart-1)" },
+    products: { label: t.chartLabels.products, color: "var(--chart-1)" },
   } satisfies ChartConfig;
 
   return (

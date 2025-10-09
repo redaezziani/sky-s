@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={` antialiased`}
       >
         <LocaleProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
