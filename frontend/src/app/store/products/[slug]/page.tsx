@@ -78,7 +78,7 @@ const ProductPage = ({ params }: ProductPageProps) => {
   return (
     <MainLayout
       title="Details Page"
-      description="Detailed view of the product"
+      description="Detailed view of the product & related items"
     >
       <div className="w-full px-4 md:px-0 py-4">
         <div className="grid w-full  md:max-w-6xl col-span-1 lg:grid-cols-3 gap-12">

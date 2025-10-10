@@ -31,7 +31,7 @@ const ProductGallery = () => {
 
   return (
     <div className="space-y-4 w-full md:max-w-[28rem] mx-left">
-      <div className="bg-gray-50 rounded overflow-hidden">
+      <div className="bg-gray-50 border border-input  rounded overflow-hidden">
         <img
           src={images[selectedImageIndex] || product.coverImage}
           alt={product.name}
@@ -47,7 +47,7 @@ const ProductGallery = () => {
             className={`aspect-auto bg-gray-50 overflow-hidden rounded border-2 transition-colors ${
               selectedImageIndex === idx
                 ? "border-primary/80"
-                : "border-transparent hover:border-gray-300"
+                : "border-input hover:border-gray-300"
             }`}
           >
             <img

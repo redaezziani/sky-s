@@ -10,6 +10,7 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import Image from "next/image";
+import { Button } from "../ui/button";
 
 export default function CartSheet() {
   const items = useCartStore((s) => s.items);
@@ -153,8 +154,8 @@ export default function CartSheet() {
                       <span className="text-sm font-medium text-gray-900">
                         ${item.price}
                       </span>
-                      <div className="flex items-center space-x-3">
-                        <div className="flex items-center border border-gray-300">
+                      <div className="flex  items-center space-x-3">
+                        <div className="flex items-center rounded-l rounded-r   border border-gray-300">
                           <button
                             onClick={() =>
                               updateQuantity(
@@ -173,7 +174,7 @@ export default function CartSheet() {
                             onClick={() =>
                               updateQuantity(item.skuId, item.quantity + 1)
                             }
-                            className="px-2 py-1 hover:bg-gray-50 text-sm"
+                            className="px-2 py-1  hover:bg-gray-50 text-sm"
                           >
                             +
                           </button>
@@ -215,14 +216,13 @@ export default function CartSheet() {
               {/* Action buttons */}
               <div className="space-y-2">
                 <SheetClose asChild>
-                  <button className="w-full flex justify-center items-center gap-1 bg-primary text-white py-3 text-sm font-medium hover:bg-primary transition-colors">
-                    Checkout
+                  <Button
+                  size={"lg"} className="w-full flex items-center justify-center space-x-2"
+                  >
+                    Checkout Page
                     
-                    <svg
                     
-                    className="inline w-5 h-5 "
-                    fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M8 4v2h4v2H6v2h6V8h2v2h8v6h-2v-4H4v6h14v-2h2v2h4v2H0v-2h2v-8h2V6h2V4h2z" fill="currentColor"/> </svg>
-                  </button>
+                  </Button>
                 </SheetClose>
                 <button
                   onClick={clearCart}
