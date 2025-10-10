@@ -157,8 +157,8 @@ export default function CartSheet() {
                       <div className="flex  items-center space-x-3">
                         <div className="flex items-center rounded-l rounded-r   border border-gray-300">
                           <button
-                            onClick={() =>
-                              updateQuantity(
+                            onClick={async () =>
+                              await updateQuantity(
                                 item.skuId,
                                 Math.max(1, item.quantity - 1)
                               )
@@ -171,8 +171,8 @@ export default function CartSheet() {
                             {item.quantity}
                           </span>
                           <button
-                            onClick={() =>
-                              updateQuantity(item.skuId, item.quantity + 1)
+                            onClick={async () =>
+                              await updateQuantity(item.skuId, item.quantity + 1)
                             }
                             className="px-2 py-1  hover:bg-gray-50 text-sm"
                           >
@@ -184,7 +184,7 @@ export default function CartSheet() {
 
                     {/* Remove button */}
                     <button
-                      onClick={() => removeItem(item.skuId)}
+                      onClick={async () => await removeItem(item.skuId)}
                       className="text-xs text-gray-500 hover:text-gray-700 underline"
                     >
                       Remove
@@ -225,7 +225,7 @@ export default function CartSheet() {
                   </Button>
                 </SheetClose>
                 <button
-                  onClick={clearCart}
+                  onClick={async () => await clearCart()}
                   className="w-full text-gray-600 py-2 text-xs hover:text-gray-900 transition-colors underline"
                 >
                   Clear bag

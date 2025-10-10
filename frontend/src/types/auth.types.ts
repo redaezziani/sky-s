@@ -36,6 +36,11 @@ export interface AuthResponse {
   user: User;
   tokens: AuthTokens;
   device?: UserDevice; // added
+  cart?: {
+    items: any[];
+    totalItems: number;
+    subtotal: number;
+  };
 }
 
 
