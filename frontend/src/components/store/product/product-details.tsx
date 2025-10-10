@@ -4,6 +4,7 @@ import React from "react";
 import { useProductDetailsStore, Variant } from "@/stores/public/product-details-store";
 import { useCartStore } from "@/stores/public/cart-store";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 // --- Utility Functions ---
 const getVariantDisplayValue = (variant: Variant) => {
@@ -89,7 +90,7 @@ const ProductDetails = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 col-span-2">
       {/* Category */}
       {product.categories.length > 0 && (
         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
@@ -156,55 +157,87 @@ const ProductDetails = () => {
         </div>
       )}
 
-      {/* Size selector */}
-      {currentVariant.skus.length > 0 && (
-        <div>
-          <h3 className="text-sm font-medium text-gray-900 mb-2">Size</h3>
-          <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-            {currentVariant.skus
-              .sort((a, b) => {
-                const sizeOrder: { [key: string]: number } = {
-                  XS: 1,
-                  S: 2,
-                  M: 3,
-                  L: 4,
-                  XL: 5,
-                };
-                return (
-                  (sizeOrder[a.dimensions.size] || 99) -
-                  (sizeOrder[b.dimensions.size] || 99)
-                );
-              })
-              .map((sku) => (
-                <button
-                  key={sku.id}
-                  onClick={() => setSelectedSkuId(sku.id)}
-                  disabled={sku.stock <= 0}
-                  className={`h-10 border text-sm font-medium transition-all ${
-                    selectedSkuId === sku.id
-                      ? "border-primary bg-primary text-white"
-                      : sku.stock > 0
-                      ? "border-gray-300 text-gray-900 hover:border-primary"
-                      : "border-gray-200 text-gray-400 cursor-not-allowed"
-                  }`}
-                >
-                  {sku.stock <= 0 ? (
-                    <span className="line-through">{sku.dimensions.size}</span>
-                  ) : (
-                    sku.dimensions.size
-                  )}
-                </button>
-              ))}
+      {/* Size/Volume selector - Only show if multiple SKUs exist OR if single SKU has size/volume variations */}
+      {(() => {
+        // Check if we have multiple SKUs or if SKUs have different size/volume values
+        const hasMultipleSizes = currentVariant.skus.length > 1;
+        const firstSku = currentVariant.skus[0];
+        const hasSizeOrVolume = firstSku?.dimensions?.size || (firstSku?.dimensions as any)?.volume;
+        
+        // Determine what type of dimension we're dealing with
+        const isVolumeProduct = currentVariant.skus.some(sku => (sku.dimensions as any).volume);
+        const isSizeProduct = currentVariant.skus.some(sku => sku.dimensions.size);
+        
+        // Only render if we have multiple SKUs and they have size/volume info
+        if (!hasMultipleSizes || !hasSizeOrVolume) return null;
+        
+        return (
+          <div>
+            <h3 className="text-sm font-medium text-gray-900 mb-2">
+              {isVolumeProduct ? 'Volume' : isSizeProduct ? 'Size' : 'Options'}
+            </h3>
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+              {currentVariant.skus
+                .sort((a, b) => {
+                  // Sort by size for clothing
+                  if (a.dimensions.size && b.dimensions.size) {
+                    const sizeOrder: { [key: string]: number } = {
+                      XS: 1, S: 2, M: 3, L: 4, XL: 5, XXL: 6,
+                    };
+                    return (
+                      (sizeOrder[a.dimensions.size] || 99) -
+                      (sizeOrder[b.dimensions.size] || 99)
+                    );
+                  }
+                  
+                  // Sort by volume for perfumes (30ml, 50ml, 100ml, etc.)
+                  const aVolume = (a.dimensions as any).volume;
+                  const bVolume = (b.dimensions as any).volume;
+                  if (aVolume && bVolume) {
+                    const volumeA = parseInt(aVolume.replace(/[^\d]/g, ''));
+                    const volumeB = parseInt(bVolume.replace(/[^\d]/g, ''));
+                    return volumeA - volumeB;
+                  }
+                  
+                  return 0;
+                })
+                .map((sku) => {
+                  // Prioritize volume over size for display
+                  const displayValue = (sku.dimensions as any).volume || sku.dimensions.size || 'N/A';
+                  
+                  return (
+                    <button
+                      key={sku.id}
+                      onClick={() => setSelectedSkuId(sku.id)}
+                      disabled={sku.stock <= 0}
+                      className={`h-10 border text-sm font-medium transition-all ${
+                        selectedSkuId === sku.id
+                          ? "border-primary bg-primary text-white"
+                          : sku.stock > 0
+                          ? "border-gray-300 text-gray-900 hover:border-primary"
+                          : "border-gray-200 text-gray-400 cursor-not-allowed"
+                      }`}
+                    >
+                      {sku.stock <= 0 ? (
+                        <span className="line-through">{displayValue}</span>
+                      ) : (
+                        displayValue
+                      )}
+                    </button>
+                  );
+                })}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Add to cart */}
-      <div className="space-y-3">
-        <button
+      <div className="space-y-3 md:max-w-md">
+        <Button
           onClick={handleAddToCart}
+          size={"lg"}
           disabled={!selectedSkuId || !product.inStock}
-          className="w-full bg-primary text-white flex gap-2 justify-center items-center py-3 text-sm font-medium tracking-wide transition-colors hover:bg-primary disabled:bg-gray-400"
+          className=" flex w-full justify-center items-center gap-2 py-3 text-sm font-medium"
         >
           <svg
             fill="none"
@@ -218,9 +251,12 @@ const ProductDetails = () => {
             />
           </svg>
           {product.inStock ? "Add to Bag" : "Out of Stock"}
-        </button>
+        </Button>
 
-        <button className="w-full border border-gray-300 flex gap-2 justify-center items-center text-gray-900 py-3 text-sm font-medium transition-colors hover:border-gray-900">
+        <Button
+          variant="outline"
+          size={"lg"}
+         className=" flex w-full justify-center items-center gap-2 py-3 text-sm font-medium">
           <svg
             className="w-5 h-5 cursor-pointer"
             fill="none"
@@ -233,7 +269,7 @@ const ProductDetails = () => {
             />
           </svg>
           Favorite Item
-        </button>
+        </Button>
       </div>
 
       {/* Full description */}

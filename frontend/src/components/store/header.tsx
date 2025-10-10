@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sheet";
 import CartSheet from "./cart-sheet";
 import { User } from "@/types/auth.types";
+import SearchProducts from "./product/search-products";
 
 interface HeaderProps {
   user: User | null;
@@ -164,8 +165,7 @@ const Header = ({ user }: HeaderProps) => {
 
         {/* Desktop Search - Hidden on mobile */}
         <div className="hidden md:flex justify-center cursor-pointer gap-2 items-center">
-          <Search className="w-5 h-5" />
-          <p className="underline">Search for products</p>
+          <SearchProducts/>
         </div>
 
         {/* Desktop Actions - Hidden on mobile */}
@@ -206,14 +206,14 @@ const Header = ({ user }: HeaderProps) => {
             <div className="flex gap-2">
               <Link
                 href="/auth/login"
-                className="font-medium hover:underline transition-all duration-200"
+                className="font-medium hover:underline text-sm opacity-70 transition-all duration-200"
               >
                 Login
               </Link>
               <span>/</span>
               <Link
                 href="/auth/register"
-                className="font-medium hover:underline transition-all duration-200"
+                className="font-medium hover:underline text-sm opacity-70 transition-all duration-200"
               >
                 Register
               </Link>
@@ -246,11 +246,11 @@ const Header = ({ user }: HeaderProps) => {
         )}
         {!loading &&
           !error &&
-          categories.map((category) => (
+          categories.slice(0, 5).map((category) => (
             <Link
               key={category.id}
               href={`/store/products?category=${category.slug}`}
-              className="hover:underline transition-all duration-200"
+              className="hover:underline text-sm underline-offset-2 opacity-70 hover:opacity-100 transition-all duration-200"
             >
               {category.name}
             </Link>

@@ -49,6 +49,26 @@ const categories = [
      
     ],
   },
+  {
+    name: 'Beauty & Fragrance',
+    slug: 'beauty-fragrance',
+    description: 'Beauty products, perfumes, and cosmetics',
+    info: { icon: 'beauty', color: '#e91e63' },
+    children: [
+      {
+        name: 'Perfumes',
+        slug: 'perfumes',
+        description: 'Luxury fragrances and perfumes',
+        info: { icon: 'fragrance', color: '#9c27b0' },
+      },
+      {
+        name: 'Skincare',
+        slug: 'skincare',
+        description: 'Skincare and beauty products',
+        info: { icon: 'skincare', color: '#ff5722' },
+      },
+    ],
+  },
 ];
 
 export async function seedCategories() {

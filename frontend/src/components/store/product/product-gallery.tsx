@@ -30,12 +30,12 @@ const ProductGallery = () => {
   if (!product) return null;
 
   return (
-    <div className="space-y-4 max-w-[28rem] mx-auto">
-      <div className="bg-gray-50 overflow-hidden">
+    <div className="space-y-4 w-full md:max-w-[28rem] mx-left">
+      <div className="bg-gray-50 rounded overflow-hidden">
         <img
           src={images[selectedImageIndex] || product.coverImage}
           alt={product.name}
-          className="w-full h-full object-cover scale-105 transition-transform duration-500"
+          className="w-full h-full   object-cover scale-105 transition-transform duration-500"
         />
       </div>
 
@@ -44,10 +44,10 @@ const ProductGallery = () => {
           <button
             key={idx}
             onClick={() => setSelectedImageIndex(idx)}
-            className={`aspect-square bg-gray-50 overflow-hidden border-2 transition-colors ${
+            className={`aspect-auto bg-gray-50 overflow-hidden rounded border-2 transition-colors ${
               selectedImageIndex === idx
-                ? "border-gray-900"
-                : "border-transparent hover:border-gray-400"
+                ? "border-primary/80"
+                : "border-transparent hover:border-gray-300"
             }`}
           >
             <img

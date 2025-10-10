@@ -6,8 +6,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import puppeteer, { Page } from 'puppeteer';
 
-// Define the structure for the Namshi product data
-interface NamshiProduct {
+// Define the structure for the Valentino perfume product data
+interface ValentinoPerfume {
   name: string;
   description: string;
   price: number;
@@ -15,23 +15,23 @@ interface NamshiProduct {
   discount: string;
   currency: string;
   rating: number;
-  sizes: string; // e.g., 'S@M@L'
+  volumes: string; // e.g., '50ml@100ml@150ml'
   quantity: number;
   cover_img: string;
   prev_imgs: string; // e.g., 'url1@url2@url3'
   category_id: number; // Placeholder category ID
   slug: string;
   shipping: string;
-  colors: string; // e.g., 'red@blue'
+  perfumeType: string; // e.g., 'Eau de Parfum@Eau de Toilette'
+  notes: string; // e.g., 'Rose@Vanilla@Musk'
 }
 
 @Injectable()
 export class ScraperService {
   private readonly logger = new Logger(ScraperService.name);
   
-  // 1. URL CHANGE: Updated Base URL
-  // Assuming the user wants the raw URL for 'bona_fide' products
-  private readonly baseUrl = 'https://www.namshi.com/uae-en/bona_fide'; 
+  // 1. URL CHANGE: Updated Base URL for Valentino perfumes
+  private readonly baseUrl = 'https://www.namshi.com/uae-en/beauty/valentino/'; 
   
   private readonly imagesDir = path.join(
     process.cwd(),
@@ -48,7 +48,7 @@ export class ScraperService {
   };
 
   // Hardcoded category ID (Use a valid UUID for your Prisma schema)
-  private readonly productCategoryId = 'aedd6b70-d4f6-44d3-8d3f-6dd9eeaf3bf7'; 
+  private readonly productCategoryId = 'b1997237-3211-4855-bbe5-135bffce0fc1'; 
 
   constructor(
     private readonly prisma: PrismaService,
@@ -71,7 +71,7 @@ export class ScraperService {
   // 🎯 MAIN PUPPETEER SCRAPING LOGIC
   // --------------------------------------------------------------------------------
 
-  async scrapeNamshiCaps(maxPages: number = 10, productsThreshold: number = 3) {
+  async scrapeValentinoPerfumes(maxPages: number = 1, productsThreshold: number = 3) {
     if (this.scrapingStatus.isRunning) {
       throw new Error('Scraping is already in progress');
     }
@@ -85,7 +85,7 @@ export class ScraperService {
     };
     
     let browser;
-    const allProducts: NamshiProduct[] = [];
+    const allProducts: ValentinoPerfume[] = [];
 
     try {
       // 1. Launch Browser
@@ -192,9 +192,26 @@ export class ScraperService {
   // --------------------------------------------------------------------------------
   // 📦 PUPPETEER EVALUATION CODE (Scrapes product data from one page)
   // --------------------------------------------------------------------------------
-  private async scrapeProductsFromPage(page: Page): Promise<NamshiProduct[]> {
-      return await page.evaluate((): NamshiProduct[] => {
+  private async scrapeProductsFromPage(page: Page): Promise<ValentinoPerfume[]> {
+      return await page.evaluate((): ValentinoPerfume[] => {
           const cleanImageUrl = (url: string): string => url.replace(/\?.*$/, '');
+          
+          // Helper function to generate detailed perfume descriptions
+          const generatePerfumeDescription = (brand: string, name: string, type: string): string => {
+              const descriptions = [
+                  `Discover the captivating essence of ${brand} ${name}, a luxurious fragrance that embodies sophistication and elegance. This exquisite ${type} opens with vibrant top notes that dance on the skin, revealing a heart of precious florals and exotic spices. The composition gracefully settles into a warm, sensual base that lingers throughout the day, creating an unforgettable olfactory signature.`,
+                  
+                  `Experience the timeless allure of ${brand} ${name}, a masterpiece of Italian craftsmanship. This enchanting ${type} captures the essence of romance and passion, weaving together rare ingredients to create a symphony of scent. Each spray unveils layers of complexity, from the initial burst of freshness to the deep, mysterious dry-down that speaks to the soul.`,
+                  
+                  `Immerse yourself in the world of ${brand} with ${name}, an extraordinary ${type} that redefines luxury fragrance. Crafted with the finest ingredients from around the globe, this scent tells a story of elegance, power, and seduction. The carefully balanced composition creates a harmonious blend that is both contemporary and timeless, perfect for those who appreciate the finer things in life.`
+              ];
+              return descriptions[Math.floor(Math.random() * descriptions.length)];
+          };
+          
+          // Helper function to generate short descriptions
+          const generateShortDescription = (brand: string, name: string, type: string, notes: string[]): string => {
+              return `Indulge in the luxurious ${brand} ${name} ${type}. A sophisticated blend featuring ${notes.slice(0, 3).join(', ')}, this captivating fragrance embodies elegance and refinement. Perfect for special occasions and daily wear, it leaves a lasting impression with its unique and memorable scent profile. Experience the art of Italian perfumery at its finest.`;
+          };
           
           // 2. SELECTOR CHANGE: Target the product boxes within the content wrapper
           const productElements = document.querySelectorAll(
@@ -206,7 +223,7 @@ export class ScraperService {
               return [];
           }
           
-          const productArray: NamshiProduct[] = [];
+          const productArray: ValentinoPerfume[] = [];
           
           productElements.forEach((element) => {
               // SELECTOR REFINEMENT: Updated selectors based on the new HTML
@@ -243,31 +260,50 @@ export class ScraperService {
               // Keep original_price logic as-is, which handles null/0 if no separate original price is found.
               const originalPriceValue = parseFloat(originalPrice.replace(/,/g, '')) || null; 
 
-              // Generate random/dummy data for required fields (unchanged)
-              const rating = Math.floor(Math.random() * 5) + 2;
-              const quantity = Math.floor(Math.random() * 300) + 1;
-              const sizeList = ['S', 'M', 'L', 'XL', 'XXL'];
-              const sizes = sizeList.sort(() => 0.5 - Math.random()).slice(0, 3).join('@');
+              // Generate perfume-specific data
+              const rating = Math.floor(Math.random() * 2) + 4; // High ratings for luxury perfumes (4-5)
+              const quantity = Math.floor(Math.random() * 50) + 5; // Lower stock for luxury items
+              
+              // Perfume volumes instead of clothing sizes
+              const volumeList = ['30ml', '50ml', '75ml', '100ml', '125ml', '150ml'];
+              const volumes = volumeList.sort(() => 0.5 - Math.random()).slice(0, 3).join('@');
+              
+              // Perfume types
+              const perfumeTypes = ['Eau de Parfum', 'Eau de Toilette', 'Parfum', 'Eau Fraiche'];
+              const perfumeType = perfumeTypes[Math.floor(Math.random() * perfumeTypes.length)];
+              
+              // Fragrance notes
+              const notesList = [
+                  'Rose', 'Jasmine', 'Vanilla', 'Musk', 'Sandalwood', 'Bergamot', 
+                  'Patchouli', 'Amber', 'Oud', 'Iris', 'Peony', 'White Tea',
+                  'Pink Pepper', 'Tuberose', 'Cedar', 'Vetiver', 'Orange Blossom'
+              ];
+              const selectedNotes = notesList.sort(() => 0.5 - Math.random()).slice(0, 5);
+              const notes = selectedNotes.join('@');
+              
               const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-              const colorList = ['red', 'yellow', 'green', 'blue', 'indigo', 'purple', 'pink', 'gray', 'black', 'white'];
-              const colors = colorList.sort(() => 0.5 - Math.random()).slice(0, 3).join('@');
+              
+              // Generate detailed descriptions
+              const detailedDescription = generatePerfumeDescription(brand, simpleName, perfumeType);
+              const shortDescription = generateShortDescription(brand, simpleName, perfumeType, selectedNotes);
               
               productArray.push({
                   name,
-                  description: `Stay Warm, Stay Stylish. Product: ${name}.`,
+                  description: detailedDescription,
                   price: price,
                   original_price: originalPriceValue,
                   discount: discount,
                   currency: currency,
                   rating,
-                  sizes,
+                  volumes,
                   quantity,
                   cover_img: images[0] || '',
                   prev_imgs: images.join('@'),
                   category_id: 3, // Dummy ID
                   slug,
                   shipping,
-                  colors,
+                  perfumeType,
+                  notes,
               });
           });
 
@@ -281,7 +317,7 @@ export class ScraperService {
   
   // Renamed to fit the new product type
   private async processAndSaveProduct(
-    product: NamshiProduct,
+    product: ValentinoPerfume,
     categoryId: string,
   ): Promise<void> {
     const existingProduct = await this.prisma.product.findUnique({
@@ -355,7 +391,7 @@ export class ScraperService {
 
         const result = await this.imageKit.uploadImage(file, {
           fileName,
-          folder: `products/namshi/${this.sanitizeFileName(productName)}`,
+          folder: `products/valentino-perfumes/${this.sanitizeFileName(productName)}`,
         });
 
         uploadedUrls.push(result.url);
@@ -377,63 +413,82 @@ export class ScraperService {
   
   // Adapted your original saveProductToDatabase to accept the new product structure
   private async saveProductToDatabase(
-    product: NamshiProduct,
+    product: ValentinoPerfume,
     imageUrls: string[],
     categoryId: string,
   ): Promise<void> {
-    const sizeArray = product.sizes.split('@');
-    const colorArray = product.colors.split('@');
+    const volumeArray = product.volumes.split('@');
+    const notesArray = product.notes.split('@');
 
-    // Create or connect to Color/Size attributes if necessary in your prisma setup,
-    // for simplicity, we focus on the Product and Variant creation.
+    // Generate detailed short description for perfumes
+    const shortDesc = `Experience the luxurious ${product.name} ${product.perfumeType}. A sophisticated blend featuring ${notesArray.slice(0, 3).join(', ')}, this captivating fragrance embodies elegance and refinement. Perfect for special occasions and daily wear, it leaves a lasting impression with its unique scent profile. ${product.shipping}`;
+
+    // Console log all the data we're trying to insert
+    console.log('=== PRODUCT DATA TO INSERT ===');
+    console.log('Product:', JSON.stringify(product, null, 2));
+    console.log('Image URLs:', imageUrls);
+    console.log('Category ID:', categoryId);
+    console.log('Volume Array:', volumeArray);
+    console.log('Notes Array:', notesArray);
+    console.log('Short Description:', shortDesc);
+    
+    const productData = {
+      name: product.name,
+      slug: product.slug,
+      description: product.description,
+      shortDesc: shortDesc,
+      coverImage: imageUrls[0],
+      isFeatured: product.rating > 4,
+      metaTitle: `${product.name} - Luxury ${product.perfumeType} | ${product.currency}`,
+      metaDesc: `${product.description.substring(0, 160)}...`,
+      isActive: false,
+      sortOrder: 0,
+      categories: {
+        connect: { id: '893538f2-54e6-4ff6-ae05-a529ed7848fa' },
+      },
+      variants: {
+        create: volumeArray.map((volume, index) => ({
+          name: `${volume} - ${product.perfumeType}`,
+          attributes: { 
+            volume, 
+            type: product.perfumeType,
+            notes: notesArray.join(', '),
+            concentration: product.perfumeType 
+          },
+          isActive: true,
+          sortOrder: index,
+          skus: {
+            create: [
+              {
+                sku: this.generateSku(product.name, volume),
+                price: product.price + (index * 20),
+                comparePrice: product.original_price ? product.original_price + (index * 25) : null, 
+                stock: product.quantity,
+                weight: this.getVolumeWeight(volume), 
+                dimensions: this.getVolumeDimensions(volume),
+                coverImage: imageUrls[0],
+                lowStockAlert: 2,
+                isActive: true,
+                images: {
+                  create: imageUrls.map((url, idx) => ({
+                    url,
+                    altText: `${product.name} ${volume} ${product.perfumeType} view ${idx + 1}`,
+                    position: idx,
+                  })),
+                },
+              },
+            ],
+          },
+        })),
+      },
+    };
+    
+    console.log('=== PRISMA CREATE DATA ===');
+    console.log(JSON.stringify(productData, null, 2));
+    console.log('===============================');
 
     await this.prisma.product.create({
-      data: {
-        name: product.name,
-        slug: product.slug,
-        description: product.description,
-        shortDesc: `A stylish ${product.colors.split('@')[0]} cap. ${product.shipping}`,
-        coverImage: imageUrls[0],
-        isFeatured: product.rating > 4, // Use rating as a proxy
-        metaTitle: `${product.name} - Buy ${product.currency}`,
-        metaDesc: product.description,
-        isActive: true,
-        sortOrder: 0,
-        categories: {
-          connect: { id: categoryId },
-        },
-        variants: {
-          create: sizeArray.map((size, index) => ({
-            name: `${size} / ${colorArray[index % colorArray.length]}`,
-            attributes: { size, color: colorArray[index % colorArray.length] },
-            isActive: true,
-            sortOrder: index,
-            skus: {
-              create: [
-                {
-                  sku: this.generateSku(product.name, size),
-                  price: product.price,
-                  // FIX: Changed from originalPrice to comparePrice to match the Prisma Schema
-                  comparePrice: product.original_price, 
-                  stock: product.quantity,
-                  weight: 300, 
-                  dimensions: { length: 20, width: 20, height: 10, size },
-                  coverImage: imageUrls[0],
-                  lowStockAlert: 2,
-                  isActive: true,
-                  images: {
-                    create: imageUrls.map((url, idx) => ({
-                      url,
-                      altText: `${product.name} ${size} view ${idx + 1}`,
-                      position: idx,
-                    })),
-                  },
-                },
-              ],
-            },
-          })),
-        },
-      },
+      data: productData,
     });
 
     this.logger.debug(`Saved product to database: ${product.name}`);
@@ -463,13 +518,34 @@ export class ScraperService {
     return mimeTypes[extension] || 'image/jpeg';
   }
 
-  private generateSku(title: string, size: string): string {
+  private generateSku(title: string, volume: string): string {
     const prefix = title
       .replace(/[^a-zA-Z0-9]/g, '')
       .toUpperCase()
       .substring(0, 8);
-    const sizeCode = size.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-    return `${prefix}-${sizeCode}-${Date.now()}`;
+    const volumeCode = volume.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    return `VAL-${prefix}-${volumeCode}-${Date.now()}`;
+  }
+
+  // Helper methods for perfume volume-based calculations
+  private getVolumeWeight(volume: string): number {
+    const volumeNum = parseInt(volume.replace('ml', ''));
+    // Base weight for packaging + liquid weight
+    return Math.round(50 + (volumeNum * 0.8)); // Approximate weight in grams
+  }
+
+  private getVolumeDimensions(volume: string): any {
+    const volumeNum = parseInt(volume.replace('ml', ''));
+    
+    if (volumeNum <= 30) {
+      return { length: 6, width: 4, height: 8, volume };
+    } else if (volumeNum <= 50) {
+      return { length: 7, width: 5, height: 10, volume };
+    } else if (volumeNum <= 100) {
+      return { length: 8, width: 6, height: 12, volume };
+    } else {
+      return { length: 9, width: 7, height: 14, volume };
+    }
   }
 
   getScrapingStatus() {

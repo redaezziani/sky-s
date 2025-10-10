@@ -10,7 +10,9 @@ const prisma = new PrismaClient();
 async function clearAll() {
   console.log('🧹 Clearing existing data...');
 
-  // Clear in reverse dependency order
+  // Clear in reverse dependency order (most dependent first)
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
   await prisma.productSKUImage.deleteMany();
   await prisma.productSKU.deleteMany();
   await prisma.productVariant.deleteMany();
@@ -29,8 +31,8 @@ async function seedAll() {
   await seedSettings();
   await seedUsers();
   await seedCategories();
-  await seedProducts();
-  await seedOrders();
+  // await seedProducts();
+  // await seedOrders();
 
   console.log('✅ All data seeded');
 }
