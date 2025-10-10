@@ -1,4 +1,3 @@
-// scraper.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ImageKitService } from '../common/services/imagekit.service';
@@ -6,8 +5,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import puppeteer, { Page } from 'puppeteer';
 
-// Define the structure for the Valentino perfume product data
-interface ValentinoPerfume {
+// Define the structure for the ONLY clothing product data
+interface OnlyClothingItem {
   name: string;
   description: string;
   price: number;
@@ -15,23 +14,24 @@ interface ValentinoPerfume {
   discount: string;
   currency: string;
   rating: number;
-  volumes: string; // e.g., '50ml@100ml@150ml'
+  sizes: string; // e.g., 'XS@S@M@L@XL'
+  colors: string; // e.g., 'Black@White@Blue'
   quantity: number;
   cover_img: string;
   prev_imgs: string; // e.g., 'url1@url2@url3'
   category_id: number; // Placeholder category ID
   slug: string;
   shipping: string;
-  perfumeType: string; // e.g., 'Eau de Parfum@Eau de Toilette'
-  notes: string; // e.g., 'Rose@Vanilla@Musk'
+  material: string; // e.g., '90% Polyamid, 10% Elasthan'
+  articleNumber: string; // Product number
 }
 
 @Injectable()
 export class ScraperService {
   private readonly logger = new Logger(ScraperService.name);
   
-  // 1. URL CHANGE: Updated Base URL for Valentino perfumes
-  private readonly baseUrl = 'https://www.namshi.com/uae-en/beauty/valentino/'; 
+  // 1. URL CHANGE: Updated Base URL for ONLY clothing
+  private readonly baseUrl = 'https://www.only.com/de-de/product/15107599_2076/breite-traager-bh'; 
   
   private readonly imagesDir = path.join(
     process.cwd(),
@@ -48,7 +48,7 @@ export class ScraperService {
   };
 
   // Hardcoded category ID (Use a valid UUID for your Prisma schema)
-  private readonly productCategoryId = 'b1997237-3211-4855-bbe5-135bffce0fc1'; 
+  private readonly productCategoryId = '3412b464-b8e6-44ff-9c87-7503c6986b7b'; 
 
   constructor(
     private readonly prisma: PrismaService,
@@ -68,10 +68,10 @@ export class ScraperService {
   private delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
   
   // --------------------------------------------------------------------------------
-  // 🎯 MAIN PUPPETEER SCRAPING LOGIC
+  // 🎯 MAIN PUPPETEER SCRAPING LOGIC (FIXED FOR VARIANT HANDLING)
   // --------------------------------------------------------------------------------
 
-  async scrapeValentinoPerfumes(maxPages: number = 1, productsThreshold: number = 3) {
+  async scrapeOnlyProductDetail(productUrl: string): Promise<OnlyClothingItem> {
     if (this.scrapingStatus.isRunning) {
       throw new Error('Scraping is already in progress');
     }
@@ -79,14 +79,13 @@ export class ScraperService {
     this.scrapingStatus = {
       isRunning: true,
       currentPage: 0,
-      totalProducts: 0,
+      totalProducts: 1,
       processedProducts: 0,
       errors: [],
     };
     
     let browser;
-    const allProducts: ValentinoPerfume[] = [];
-
+    
     try {
       // 1. Launch Browser
       browser = await puppeteer.launch({ 
@@ -99,89 +98,99 @@ export class ScraperService {
       });
       const page = await browser.newPage();
       
-      // Set User-Agent and increase timeout
+      // Set User-Agent and viewport
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+      await page.setViewport({ width: 1920, height: 1080 });
       
-      let currentPage = 1;
-      let hasNextPage = true;
-      const NAV_DELAY_MS = 3000;
+      this.logger.log(`Scraping product: ${productUrl}`);
+      
+      // 2. Navigate to product page
+      await page.goto(productUrl, { 
+          waitUntil: 'networkidle2',
+          timeout: 60000 
+      });
+      
+      // 3. Handle Cookies
+      await page.evaluate(() => {
+          const acceptButton = document.querySelector('#onetrust-accept-btn-handler') || 
+                               document.querySelector('.cookie-consent-button') ||
+                               document.querySelector('[data-cy="cookie-banner-accept"]');
+          if (acceptButton) {
+              (acceptButton as HTMLElement).click();
+          }
+      }).catch(e => this.logger.debug('No visible cookie banner found or click failed.'));
 
-      while (hasNextPage && currentPage <= maxPages) {
-          // Construct URL with page number, maintaining the base structure
-          const pageUrl = `${this.baseUrl}?page=${currentPage}`;
-          this.logger.log(`Scraping page ${currentPage}: ${pageUrl}`);
-          this.scrapingStatus.currentPage = currentPage;
+      // 4. Wait for product detail elements
+      await page.waitForSelector('.product-detail__title', { timeout: 10000 });
+      
+      // 5. Scrape static product details (runs once)
+      const baseProduct = await this.scrapeStaticProductDetails(page);
+      
+      // --- V A R I A N T   S C R A P I N G   L O G I C ---
+      
+      // Sets to collect unique data across all variants
+      const allImages: Set<string> = new Set();
+      const allSizes: Set<string> = new Set();
+      const allColors: Set<string> = new Set(); 
+
+      // Find all color options by their class and title
+      const colorOptionElements = await page.$$('.style-option[title*="Farbe auswählen:"]');
+      
+      if (colorOptionElements.length > 0) {
+        this.logger.log(`Found ${colorOptionElements.length} color variants to iterate through.`);
+        
+        for (let i = 0; i < colorOptionElements.length; i++) {
+          const colorEl = colorOptionElements[i];
           
-          if (currentPage > 1) {
-              this.logger.debug(`Waiting for ${NAV_DELAY_MS / 1000} seconds before next navigation...`);
-              await this.delay(NAV_DELAY_MS);
-          }
+          // Click the color option to load variant-specific images and sizes
+          await colorEl.click();
           
-          try {
-              // 2. Navigate
-              await page.goto(pageUrl, { 
-                  waitUntil: 'networkidle2',
-                  timeout: 60000 
-              });
-              
-              // 3. Handle Cookies (Attempt to close cookie banner)
-              await page.evaluate(() => {
-                  const acceptButton = document.querySelector('#onetrust-accept-btn-handler') || 
-                                       document.querySelector('.cookie-consent-button');
-                  if (acceptButton) {
-                      (acceptButton as HTMLElement).click();
-                  }
-              }).catch(e => this.logger.debug('No visible cookie banner found or click failed.'));
+          // Wait for the UI to update (images and size swatches change)
+          await this.delay(1500); // Increased delay for slower networks/rendering
+          await page.waitForSelector('.product-gallery-simple__image img, .variant-swatch .label', { timeout: 5000 }).catch(e => {
+            this.logger.warn(`Failed to wait for variant update on color ${i}. Proceeding.`);
+          });
+          
+          // Scrape variant-specific data (images and sizes for this color)
+          const variantData = await this.scrapeCurrentVariantData(page);
+          
+          // Aggregate
+          variantData.images.forEach(img => allImages.add(img));
+          variantData.sizes.forEach(size => allSizes.add(size));
+          allColors.add(variantData.color);
 
-              // 4. Wait for Products
-              // 2. SELECTOR CHANGE: Wait for the main content wrapper
-              await page.waitForSelector('.ProductListingContent_contentWrapper__eXQQ6', { timeout: 10000 });
-              
-              // 5. Scrape Products from Page
-              const pageProducts = await this.scrapeProductsFromPage(page);
-              this.logger.log(`Found ${pageProducts.length} products on page ${currentPage}`);
-              
-              allProducts.push(...pageProducts);
-              
-              // 6. Check Delimiter
-              if (pageProducts.length < productsThreshold) {
-                  this.logger.log(`Reached delimiter condition: only ${pageProducts.length} products found (threshold: ${productsThreshold})`);
-                  hasNextPage = false;
-              } else {
-                  currentPage++;
-              }
-          } catch (error) {
-              this.logger.error(`Error during page ${currentPage} scraping:`, error.message);
-              this.scrapingStatus.errors.push(`Page ${currentPage}: ${error.message}`);
-              // Stop on critical error like net::ERR_HTTP2_PROTOCOL_ERROR
-              break; 
-          }
-      }
+          this.logger.debug(`Scraped variant ${variantData.color}. Images: ${variantData.images.length}, Sizes: ${variantData.sizes.join(',')}`);
+        }
+        
+      } 
+      
+      // Always scrape the initial view's variant data if no explicit variants were found 
+      // or to ensure the data from the initially loaded page is included.
+      const initialVariantData = await this.scrapeCurrentVariantData(page);
+      initialVariantData.images.forEach(img => allImages.add(img));
+      initialVariantData.sizes.forEach(size => allSizes.add(size));
+      allColors.add(initialVariantData.color);
 
-      // 7. Process all products for DB save
-      this.scrapingStatus.totalProducts = allProducts.length;
-      this.logger.log(`Found total ${allProducts.length} products. Starting DB processing...`);
-
-      for (const product of allProducts) {
-          try {
-              // Note: detailed scraping is not needed here as all details are extracted at once
-              await this.processAndSaveProduct(product, this.productCategoryId);
-              this.scrapingStatus.processedProducts++;
-              this.logger.log(`Processed ${this.scrapingStatus.processedProducts}/${this.scrapingStatus.totalProducts} products`);
-          } catch (error) {
-              this.logger.error(`Error processing product ${product.name}:`, error.message);
-              this.scrapingStatus.errors.push(`Product ${product.name}: ${error.message}`);
-          }
-      }
-
-      return {
-          totalScraped: allProducts.length,
-          totalProcessed: this.scrapingStatus.processedProducts,
-          errors: this.scrapingStatus.errors,
+      // 6. Finalize the product object with aggregated data
+      const finalProduct: OnlyClothingItem = {
+          ...baseProduct,
+          sizes: Array.from(allSizes).join('@') || baseProduct.sizes,
+          colors: Array.from(allColors).join('@') || baseProduct.colors,
+          cover_img: Array.from(allImages)[0] || baseProduct.cover_img,
+          prev_imgs: Array.from(allImages).join('@'),
       };
+      
+      this.logger.log(`Successfully scraped product: ${finalProduct.name}. Total Images: ${allImages.size}, Total Sizes: ${allSizes.size}, Total Colors: ${allColors.size}`);
+      
+      // 7. Process and save to database
+      await this.processAndSaveProduct(finalProduct, this.productCategoryId);
+      this.scrapingStatus.processedProducts = 1;
+      
+      return finalProduct;
 
     } catch (error) {
-      this.logger.error('Error during main scraping process:', error.message);
+      this.logger.error('Error during product scraping:', error.message);
+      this.scrapingStatus.errors.push(error.message);
       throw error;
     } finally {
       if (browser) await browser.close();
@@ -189,135 +198,160 @@ export class ScraperService {
     }
   }
 
+  // Keep the old method for backward compatibility but mark as deprecated
+  async scrapeOnlyClothing(maxPages: number = 1, productsThreshold: number = 3) {
+    this.logger.warn('scrapeOnlyClothing is deprecated. Use scrapeOnlyProductDetail for individual products.');
+    throw new Error('This method is deprecated. Use scrapeOnlyProductDetail(url) to scrape individual product pages.');
+  }
+
   // --------------------------------------------------------------------------------
-  // 📦 PUPPETEER EVALUATION CODE (Scrapes product data from one page)
+  // 📦 PUPPETEER EVALUATION CODE - Extracts static product data (runs once)
   // --------------------------------------------------------------------------------
-  private async scrapeProductsFromPage(page: Page): Promise<ValentinoPerfume[]> {
-      return await page.evaluate((): ValentinoPerfume[] => {
-          const cleanImageUrl = (url: string): string => url.replace(/\?.*$/, '');
+  private async scrapeStaticProductDetails(page: Page): Promise<OnlyClothingItem> {
+      return await page.evaluate((): OnlyClothingItem => {
           
-          // Helper function to generate detailed perfume descriptions
-          const generatePerfumeDescription = (brand: string, name: string, type: string): string => {
-              const descriptions = [
-                  `Discover the captivating essence of ${brand} ${name}, a luxurious fragrance that embodies sophistication and elegance. This exquisite ${type} opens with vibrant top notes that dance on the skin, revealing a heart of precious florals and exotic spices. The composition gracefully settles into a warm, sensual base that lingers throughout the day, creating an unforgettable olfactory signature.`,
-                  
-                  `Experience the timeless allure of ${brand} ${name}, a masterpiece of Italian craftsmanship. This enchanting ${type} captures the essence of romance and passion, weaving together rare ingredients to create a symphony of scent. Each spray unveils layers of complexity, from the initial burst of freshness to the deep, mysterious dry-down that speaks to the soul.`,
-                  
-                  `Immerse yourself in the world of ${brand} with ${name}, an extraordinary ${type} that redefines luxury fragrance. Crafted with the finest ingredients from around the globe, this scent tells a story of elegance, power, and seduction. The carefully balanced composition creates a harmonious blend that is both contemporary and timeless, perfect for those who appreciate the finer things in life.`
-              ];
-              return descriptions[Math.floor(Math.random() * descriptions.length)];
-          };
+          // Extract product title
+          const titleElement = document.querySelector('.product-detail__title');
+          const name = titleElement?.textContent?.trim() || 'ONLY Product';
           
-          // Helper function to generate short descriptions
-          const generateShortDescription = (brand: string, name: string, type: string, notes: string[]): string => {
-              return `Indulge in the luxurious ${brand} ${name} ${type}. A sophisticated blend featuring ${notes.slice(0, 3).join(', ')}, this captivating fragrance embodies elegance and refinement. Perfect for special occasions and daily wear, it leaves a lasting impression with its unique and memorable scent profile. Experience the art of Italian perfumery at its finest.`;
-          };
+          // Extract price information
+          const priceElement = document.querySelector('.product-price__list-price span');
+          const priceText = priceElement?.textContent?.trim() || '0';
+          const priceMatch = priceText.match(/(\d+(?:[.,]\d+)?)/);
+          const price = priceMatch ? parseFloat(priceMatch[1].replace(',', '.')) : 0;
           
-          // 2. SELECTOR CHANGE: Target the product boxes within the content wrapper
-          const productElements = document.querySelectorAll(
-              '.ProductListingContent_contentWrapper__eXQQ6 .ProductBox_container__wiajf.ProductBox_boxContainer__p7PaQ'
-          );
+          // Extract currency
+          const currency = priceText.includes('€') ? '€' : 'EUR';
           
-          if (productElements.length === 0) {
-              console.error('No product elements found on this page.');
-              return [];
+          // Look for original price (sale items)
+          const originalPriceElement = document.querySelector('.product-price__original-price, .price-old');
+          const originalPriceText = originalPriceElement?.textContent?.trim() || '';
+          const originalPriceMatch = originalPriceText.match(/(\d+(?:[.,]\d+)?)/);
+          const originalPrice = originalPriceMatch ? parseFloat(originalPriceMatch[1].replace(',', '.')) : null;
+          
+          // Look for discount
+          const discountElement = document.querySelector('.product-detail__badge, .discount-badge');
+          const discount = discountElement?.textContent?.trim() || '';
+          
+          // Extract product description from accordion (if available)
+          let description = '';
+          let material = '';
+          let articleNumber = '';
+          
+          // Try to extract detailed description
+          const descriptionElement = document.querySelector('.product-description');
+          if (descriptionElement) {
+              const descText = descriptionElement.textContent?.trim() || '';
+              description = descText;
           }
           
-          const productArray: ValentinoPerfume[] = [];
+          // Extract material composition
+          const materialElement = document.querySelector('.fabric-composition');
+          if (materialElement) {
+              material = materialElement.textContent?.trim() || '';
+          }
           
-          productElements.forEach((element) => {
-              // SELECTOR REFINEMENT: Updated selectors based on the new HTML
-              const brand = element.querySelector('.ProductBox_brand__oDc9f')?.textContent?.trim() || '';
-              const simpleName = element.querySelector('.ProductBox_productTitle__6tQ3b')?.textContent?.trim() || '';
-              const name = `${brand} ${simpleName}`;
-
-              // Get images (unchanged, still looks correct)
-              const images = Array.from(
-                  new Set(
-                      Array.from(element.querySelectorAll('.ProductImage_imageContainer__B5pcR img'))
-                          .map(img => img.getAttribute('src'))
-                          .filter((src): src is string => !!src)
-                          .map(src => cleanImageUrl(src))
-                  )
-              );
-
-              // Extract price information
-              // SELECTOR REFINEMENT: ProductPrice_sellingPrice__y8kib is now the container
-              const priceContainer = element.querySelector('.ProductPrice_sellingPrice__y8kib');
-              const currency = priceContainer?.querySelector('.ProductPrice_currency__issmK')?.textContent?.trim() || '';
-              const value = priceContainer?.querySelector('.ProductPrice_value__hnFSS')?.textContent?.trim() || '0';
-              
-              // The original price (if available) seems to be absent in the current snippet's primary price display,
-              // but we'll stick to the old structure for now (assuming it might appear elsewhere or on sale items).
-              // Since the provided HTML only shows a single large price, 'originalPriceValue' might be 0/null often.
-              // For now, we'll keep the logic that looks for a 'preReductionPrice' or similar field if one exists.
-              const originalPrice = element.querySelector('.ProductPrice_preReductionPrice__S72wT')?.textContent?.trim() || '0';
-              const discount = element.querySelector('.ProductDiscountTag_text__pMIbD')?.textContent?.trim() || ''; // Use parent tag for the text content
-              const shipping = element.querySelector('.RotatingElements_container__cS80Q')?.textContent?.trim() || 'Paid Shipping';
-
-
-              const price = parseFloat(value.replace(/,/g, ''));
-              // Keep original_price logic as-is, which handles null/0 if no separate original price is found.
-              const originalPriceValue = parseFloat(originalPrice.replace(/,/g, '')) || null; 
-
-              // Generate perfume-specific data
-              const rating = Math.floor(Math.random() * 2) + 4; // High ratings for luxury perfumes (4-5)
-              const quantity = Math.floor(Math.random() * 50) + 5; // Lower stock for luxury items
-              
-              // Perfume volumes instead of clothing sizes
-              const volumeList = ['30ml', '50ml', '75ml', '100ml', '125ml', '150ml'];
-              const volumes = volumeList.sort(() => 0.5 - Math.random()).slice(0, 3).join('@');
-              
-              // Perfume types
-              const perfumeTypes = ['Eau de Parfum', 'Eau de Toilette', 'Parfum', 'Eau Fraiche'];
-              const perfumeType = perfumeTypes[Math.floor(Math.random() * perfumeTypes.length)];
-              
-              // Fragrance notes
-              const notesList = [
-                  'Rose', 'Jasmine', 'Vanilla', 'Musk', 'Sandalwood', 'Bergamot', 
-                  'Patchouli', 'Amber', 'Oud', 'Iris', 'Peony', 'White Tea',
-                  'Pink Pepper', 'Tuberose', 'Cedar', 'Vetiver', 'Orange Blossom'
-              ];
-              const selectedNotes = notesList.sort(() => 0.5 - Math.random()).slice(0, 5);
-              const notes = selectedNotes.join('@');
-              
-              const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-              
-              // Generate detailed descriptions
-              const detailedDescription = generatePerfumeDescription(brand, simpleName, perfumeType);
-              const shortDescription = generateShortDescription(brand, simpleName, perfumeType, selectedNotes);
-              
-              productArray.push({
-                  name,
-                  description: detailedDescription,
-                  price: price,
-                  original_price: originalPriceValue,
-                  discount: discount,
-                  currency: currency,
-                  rating,
-                  volumes,
-                  quantity,
-                  cover_img: images[0] || '',
-                  prev_imgs: images.join('@'),
-                  category_id: 3, // Dummy ID
-                  slug,
-                  shipping,
-                  perfumeType,
-                  notes,
-              });
-          });
-
-          return productArray;
+          // Extract article number
+          const articleElement = document.querySelector('.article-number');
+          if (articleElement) {
+              const articleText = articleElement.textContent?.trim() || '';
+              const articleMatch = articleText.match(/Produktnummer:\s*(\d+)/);
+              if (articleMatch) {
+                  articleNumber = articleMatch[1];
+              }
+          }
+          
+          // Fallback values if not found
+          if (!description) {
+              description = `Discover the stylish ${name} from ONLY. This versatile piece offers exceptional quality and comfort, perfect for any occasion.`;
+          }
+          
+          if (!material) {
+              material = '90% Polyamide, 10% Elastane'; 
+          }
+          
+          if (!articleNumber) {
+              // Try to extract from URL or generate
+              const urlMatch = window.location.href.match(/\/(\d+)_/);
+              articleNumber = urlMatch ? urlMatch[1] : `${Math.floor(Math.random() * 90000000) + 10000000}`;
+          }
+          
+          // Generate slug from name
+          const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+          
+          // Generate realistic values
+          const rating = Math.floor(Math.random() * 2) + 4; // 4-5 stars
+          const quantity = Math.floor(Math.random() * 20) + 5; // 5-25 in stock
+          
+          // Initial placeholders for variant data (will be overwritten by variant loop)
+          return {
+              name,
+              description,
+              price,
+              original_price: originalPrice,
+              discount,
+              currency,
+              rating,
+              sizes: '',
+              colors: '',
+              quantity,
+              cover_img: '',
+              prev_imgs: '',
+              category_id: 4,
+              slug,
+              shipping: 'Kostenlose Lieferung für Bestellungen über 60 €',
+              material,
+              articleNumber,
+          };
       });
   }
 
+  // --------------------------------------------------------------------------------
+  // 📦 PUPPETEER EVALUATION CODE - Extracts variant-specific data (runs in a loop)
+  // --------------------------------------------------------------------------------
+  private async scrapeCurrentVariantData(page: Page): Promise<{ images: string[], sizes: string[], color: string }> {
+    return await page.evaluate(() => {
+        const cleanImageUrl = (url: string): string => url.replace(/\?.*$/, '').replace(/&key=.*$/, '');
+        
+        // 1. Extract current color
+        const colorAnnotation = document.querySelector('.product-detail__color-annotation');
+        const currentColor = colorAnnotation?.textContent?.trim().split(' / ')[1] || 'Unknown';
+
+        // 2. Extract available sizes for this color
+        const sizeElements = document.querySelectorAll('.variant-swatch .label');
+        const availableSizes: string[] = Array.from(sizeElements)
+            .map(sizeEl => sizeEl.textContent?.trim())
+            .filter((size): size is string => !!size);
+        
+        // 3. Extract product images from gallery for this color
+        // Targets both main image and thumbnail images
+        const imageElements = document.querySelectorAll('.product-gallery-simple__image img, .product-gallery-simple__thumbnail-slide img');
+        
+        const images = Array.from(
+            new Set(
+                Array.from(imageElements)
+                    .map(img => img.getAttribute('src') || img.getAttribute('data-src'))
+                    .filter((src): src is string => !!src && src.includes('only.com'))
+                    .map(src => cleanImageUrl(src))
+            )
+        );
+        
+        // Deduplicate and return
+        return { 
+            images: Array.from(new Set(images)), 
+            sizes: Array.from(new Set(availableSizes)), 
+            color: currentColor 
+        };
+    });
+}
+  
   // --------------------------------------------------------------------------------
   // 💾 IMAGE AND DATABASE PERSISTENCE (Only the save function needed a change)
   // --------------------------------------------------------------------------------
   
   // Renamed to fit the new product type
   private async processAndSaveProduct(
-    product: ValentinoPerfume,
+    product: OnlyClothingItem,
     categoryId: string,
   ): Promise<void> {
     const existingProduct = await this.prisma.product.findUnique({
@@ -391,7 +425,7 @@ export class ScraperService {
 
         const result = await this.imageKit.uploadImage(file, {
           fileName,
-          folder: `products/valentino-perfumes/${this.sanitizeFileName(productName)}`,
+          folder: `products/only-clothing/${this.sanitizeFileName(productName)}`,
         });
 
         uploadedUrls.push(result.url);
@@ -411,25 +445,25 @@ export class ScraperService {
     return uploadedUrls;
   }
   
-  // Adapted your original saveProductToDatabase to accept the new product structure
+  // Adapted to save clothing products to database
   private async saveProductToDatabase(
-    product: ValentinoPerfume,
+    product: OnlyClothingItem,
     imageUrls: string[],
     categoryId: string,
   ): Promise<void> {
-    const volumeArray = product.volumes.split('@');
-    const notesArray = product.notes.split('@');
+    const sizeArray = product.sizes.split('@');
+    const colorArray = product.colors.split('@');
 
-    // Generate detailed short description for perfumes
-    const shortDesc = `Experience the luxurious ${product.name} ${product.perfumeType}. A sophisticated blend featuring ${notesArray.slice(0, 3).join(', ')}, this captivating fragrance embodies elegance and refinement. Perfect for special occasions and daily wear, it leaves a lasting impression with its unique scent profile. ${product.shipping}`;
+    // Generate detailed short description for clothing
+    const shortDesc = `Discover the stylish ${product.name} from ONLY. Made with high-quality ${product.material}, this versatile piece offers both comfort and style. Available in multiple sizes and colors. ${product.shipping}. Article number: ${product.articleNumber}`;
 
     // Console log all the data we're trying to insert
     console.log('=== PRODUCT DATA TO INSERT ===');
     console.log('Product:', JSON.stringify(product, null, 2));
     console.log('Image URLs:', imageUrls);
     console.log('Category ID:', categoryId);
-    console.log('Volume Array:', volumeArray);
-    console.log('Notes Array:', notesArray);
+    console.log('Size Array:', sizeArray);
+    console.log('Color Array:', colorArray);
     console.log('Short Description:', shortDesc);
     
     const productData = {
@@ -439,47 +473,50 @@ export class ScraperService {
       shortDesc: shortDesc,
       coverImage: imageUrls[0],
       isFeatured: product.rating > 4,
-      metaTitle: `${product.name} - Luxury ${product.perfumeType} | ${product.currency}`,
+      metaTitle: `${product.name} - ONLY Fashion | ${product.currency}`,
       metaDesc: `${product.description.substring(0, 160)}...`,
       isActive: false,
       sortOrder: 0,
       categories: {
-        connect: { id: '893538f2-54e6-4ff6-ae05-a529ed7848fa' },
+        connect: { id: '3412b464-b8e6-44ff-9c87-7503c6986b7b' },
       },
       variants: {
-        create: volumeArray.map((volume, index) => ({
-          name: `${volume} - ${product.perfumeType}`,
-          attributes: { 
-            volume, 
-            type: product.perfumeType,
-            notes: notesArray.join(', '),
-            concentration: product.perfumeType 
-          },
-          isActive: true,
-          sortOrder: index,
-          skus: {
-            create: [
-              {
-                sku: this.generateSku(product.name, volume),
-                price: product.price + (index * 20),
-                comparePrice: product.original_price ? product.original_price + (index * 25) : null, 
-                stock: product.quantity,
-                weight: this.getVolumeWeight(volume), 
-                dimensions: this.getVolumeDimensions(volume),
-                coverImage: imageUrls[0],
-                lowStockAlert: 2,
-                isActive: true,
-                images: {
-                  create: imageUrls.map((url, idx) => ({
-                    url,
-                    altText: `${product.name} ${volume} ${product.perfumeType} view ${idx + 1}`,
-                    position: idx,
-                  })),
+        create: sizeArray.flatMap((size, sizeIndex) => 
+          colorArray.map((color, colorIndex) => ({
+            name: `${size} - ${color}`,
+            attributes: { 
+              size, 
+              color,
+              material: product.material,
+              articleNumber: product.articleNumber,
+              brand: 'ONLY'
+            },
+            isActive: true,
+            sortOrder: sizeIndex * colorArray.length + colorIndex,
+            skus: {
+              create: [
+                {
+                  sku: this.generateSku(product.name, `${size}-${color}`),
+                  price: product.price,
+                  comparePrice: product.original_price, 
+                  stock: product.quantity,
+                  weight: this.getClothingWeight(size), 
+                  dimensions: this.getClothingDimensions(size),
+                  coverImage: imageUrls[0],
+                  lowStockAlert: 2,
+                  isActive: true,
+                  images: {
+                    create: imageUrls.map((url, idx) => ({
+                      url,
+                      altText: `${product.name} ${size} ${color} view ${idx + 1}`,
+                      position: idx,
+                    })),
+                  },
                 },
-              },
-            ],
-          },
-        })),
+              ],
+            },
+          }))
+        ),
       },
     };
     
@@ -518,34 +555,38 @@ export class ScraperService {
     return mimeTypes[extension] || 'image/jpeg';
   }
 
-  private generateSku(title: string, volume: string): string {
+  private generateSku(title: string, variant: string): string {
     const prefix = title
       .replace(/[^a-zA-Z0-9]/g, '')
       .toUpperCase()
       .substring(0, 8);
-    const volumeCode = volume.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-    return `VAL-${prefix}-${volumeCode}-${Date.now()}`;
+    const variantCode = variant.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    return `ONLY-${prefix}-${variantCode}-${Date.now()}`;
   }
 
-  // Helper methods for perfume volume-based calculations
-  private getVolumeWeight(volume: string): number {
-    const volumeNum = parseInt(volume.replace('ml', ''));
-    // Base weight for packaging + liquid weight
-    return Math.round(50 + (volumeNum * 0.8)); // Approximate weight in grams
+  // Helper methods for clothing size-based calculations
+  private getClothingWeight(size: string): number {
+    const sizeWeights: Record<string, number> = {
+      'XS': 150,
+      'S': 180,
+      'M': 220,
+      'L': 250,
+      'XL': 300,
+      'XXL': 350
+    };
+    return sizeWeights[size] || 200; // Default weight in grams
   }
 
-  private getVolumeDimensions(volume: string): any {
-    const volumeNum = parseInt(volume.replace('ml', ''));
-    
-    if (volumeNum <= 30) {
-      return { length: 6, width: 4, height: 8, volume };
-    } else if (volumeNum <= 50) {
-      return { length: 7, width: 5, height: 10, volume };
-    } else if (volumeNum <= 100) {
-      return { length: 8, width: 6, height: 12, volume };
-    } else {
-      return { length: 9, width: 7, height: 14, volume };
-    }
+  private getClothingDimensions(size: string): any {
+    const sizeDimensions: Record<string, any> = {
+      'XS': { length: 25, width: 20, height: 2, size },
+      'S': { length: 27, width: 22, height: 2, size },
+      'M': { length: 30, width: 25, height: 2, size },
+      'L': { length: 32, width: 27, height: 2, size },
+      'XL': { length: 35, width: 30, height: 3, size },
+      'XXL': { length: 38, width: 32, height: 3, size }
+    };
+    return sizeDimensions[size] || { length: 30, width: 25, height: 2, size };
   }
 
   getScrapingStatus() {

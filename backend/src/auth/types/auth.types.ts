@@ -22,6 +22,11 @@ export interface AuthResponse {
     isEmailVerified: boolean;
   };
   tokens: AuthTokens;
+  cart?: {
+    items: any[];
+    totalItems: number;
+    subtotal: number;
+  };
 }
 
 export interface RequestUser {

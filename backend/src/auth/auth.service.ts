@@ -23,13 +23,15 @@ import { UserDeviceDto } from './dto/response.dto';
 
 import * as geoip from 'geoip-lite';
 import { EmailService } from 'src/common/services/email.service';
+import { CartService } from '../cart/cart.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-     private readonly emailService: EmailService,
+    private readonly emailService: EmailService,
+    private readonly cartService: CartService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
@@ -146,6 +148,11 @@ export class AuthService {
     // Generate tokens linked to device
     const tokens = await this.generateTokens(user, device.id);
 
+    // Get user's cart for sync
+    const cartItems = await this.cartService.getUserCart(user.id);
+    const cartCount = await this.cartService.getCartItemCount(user.id);
+    const cartSubtotal = await this.cartService.getCartSubtotal(user.id);
+
     return {
       user: {
         id: user.id,
@@ -155,6 +162,11 @@ export class AuthService {
         isEmailVerified: user.isEmailVerified,
       },
       tokens,
+      cart: {
+        items: cartItems,
+        totalItems: cartCount,
+        subtotal: cartSubtotal,
+      },
       device: {
         id: device.id,
         ip: device.ip,

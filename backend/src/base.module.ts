@@ -11,7 +11,8 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { PaymentsModule } from './payments/payments.module';
 import { SettingsModule } from './settings/settings.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { ScraperModule } from './scraped/scraped.module';
+import { CartModule } from './cart/cart.module';
+import { ScrapedModule } from './scraped/scraped.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { ScraperModule } from './scraped/scraped.module';
     PaymentsModule,
     SettingsModule,
     EventEmitterModule.forRoot(),
-    ScraperModule,
+    ScrapedModule,
+    CartModule,
   ],
   controllers: [],
   providers: [],
