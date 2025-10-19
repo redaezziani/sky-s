@@ -37,11 +37,12 @@ import { EditProductDialog } from "@/components/product/edit-product-dialog";
 import PaginationTable from "@/components/pagination-table";
 import { useSearchQuery } from "@/hooks/use-search-query";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
+import Link from "next/link";
 interface EnhancedProductTableProps {
   // Remove the callback props since we'll handle them internally
 }
 
-export function EnhancedProductTable({}: EnhancedProductTableProps) {
+export function EnhancedProductTable({ }: EnhancedProductTableProps) {
   const [search, setSearch] = useSearchQuery("q", 400);
   const {
     products,
@@ -150,26 +151,26 @@ export function EnhancedProductTable({}: EnhancedProductTableProps) {
   };
 
   // Handle select all
-const handleSelectAll = (checked: boolean) => {
-  if (checked) {
-    // Select all product IDs
-    products.forEach((p) => selectProduct(p.id));
-  } else {
-    // Clear all selections
-    clearSelection();
-  }
-};
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      // Select all product IDs
+      products.forEach((p) => selectProduct(p.id));
+    } else {
+      // Clear all selections
+      clearSelection();
+    }
+  };
 
 
   const columns: TableColumn<Product>[] = [
     {
       key: "select",
       label: (
-         <Checkbox
-      checked={selectedProducts.length === products.length && products.length > 0}
-      onCheckedChange={(checked) => handleSelectAll(!!checked)}
-      aria-label="Select all products"
-    />
+        <Checkbox
+          checked={selectedProducts.length === products.length && products.length > 0}
+          onCheckedChange={(checked) => handleSelectAll(!!checked)}
+          aria-label="Select all products"
+        />
       ),
       render: (product) => (
         <Checkbox
@@ -200,9 +201,11 @@ const handleSelectAll = (checked: boolean) => {
               </div>
             )}
             <div className="flex flex-col w-full">
-              <div className="font-medium line-clamp-1 truncate">
+              <Link
+                href={`/dashboard/products/${product.slug}`}
+                className="font-medium line-clamp-1 truncate">
                 {product.name}
-              </div>
+              </Link>
               <div className="text-sm text-muted-foreground">
                 {product.slug}
               </div>
@@ -212,7 +215,7 @@ const handleSelectAll = (checked: boolean) => {
                 </div>
               )}
             </div>
-          </div>
+          </div >
         );
       },
     },
@@ -270,7 +273,7 @@ const handleSelectAll = (checked: boolean) => {
       label: "Status",
       render: (product) => (
         <div className="flex items-center gap-2">
-           <Badge variant={"secondary"}>
+          <Badge variant={"secondary"}>
             {product.isActive ? (
               <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
             ) : (

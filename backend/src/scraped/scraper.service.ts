@@ -247,11 +247,11 @@ export class ScraperService {
 
       // Extract product title
       const titleElement = document.querySelector('.product-title');
-      [cite_start]const name = titleElement?.textContent?.replace('&nbsp;', '').trim() || 'Mason Garments Product'; // [cite: 1]
+      const name = titleElement?.textContent?.replace('&nbsp;', '').trim() || 'Mason Garments Product'; // [cite: 1]
 
       // Extract price information
       const priceElement = document.querySelector('.price-list sale-price');
-      [cite_start]// Use price-list.sale-price selector for the price, which is 425 EUR [cite: 4]
+      // Use price-list.sale-price selector for the price, which is 425 EUR [cite: 4]
       const priceText = priceElement?.textContent?.trim().replace('Sale price', '') || '0 EUR';
       const priceMatch = priceText.match(/(\d+(?:[.,]\d+)?)/);
       const price = priceMatch ? parseFloat(priceMatch[1].replace(',', '.')) : 0;
@@ -260,8 +260,8 @@ export class ScraperService {
       const currency = priceText.includes('EUR') ? 'EUR' : '€';
 
       // Look for original price (compare at price)
-      [cite_start]// Note: The HTML shows the same price for sale and regular price, so it's not discounted [cite: 4]
-      const originalPriceElement = document.querySelector('.price-list compare-at-price:not([hidden])'); 
+      // Note: The HTML shows the same price for sale and regular price, so it's not discounted [cite: 4]
+      const originalPriceElement = document.querySelector('.price-list compare-at-price:not([hidden])');
       const originalPriceText = originalPriceElement?.textContent?.trim().replace('Regular price', '') || '';
       const originalPriceMatch = originalPriceText.match(/(\d+(?:[.,]\d+)?)/);
       const originalPrice = originalPriceMatch ? parseFloat(originalPriceMatch[1].replace(',', '.')) : null;
@@ -274,13 +274,13 @@ export class ScraperService {
       const descriptionElement = document.querySelector('#description_area .prose');
       if (descriptionElement) {
         // Extract all text content, clean up excessive newlines/spaces, and trim
-        description = descriptionElement.textContent?.replace(/\n\s*\n/g, '\n').trim() || ''; [cite_start]// [cite: 2, 3, 4]
+        description = descriptionElement.textContent?.replace(/\n\s*\n/g, '\n').trim() || '';// [cite: 2, 3, 4]
       }
 
       // Extract material composition from "PRODUCT DETAILS" accordion
       let material = '';
-      [cite_start]// Selector for the content of the "PRODUCT DETAILS" accordion, specifically the list items [cite: 25]
-      const materialListItems = document.querySelectorAll('#product_details .accordion__content li'); 
+      // Selector for the content of the "PRODUCT DETAILS" accordion, specifically the list items [cite: 25]
+      const materialListItems = document.querySelectorAll('#product_details .accordion__content li');
       if (materialListItems.length > 0) {
         // Find the list item that mentions the material composition
         const materialItem = Array.from(materialListItems).find(li =>
@@ -289,12 +289,12 @@ export class ScraperService {
           li.textContent?.toLowerCase().includes('leather')
         );
         if (materialItem) {
-          material = materialItem.textContent?.trim() || 'Suede, nubuck and leather upper from Italian tanneries'; [cite_start]// [cite: 25]
+          material = materialItem.textContent?.trim() || 'Suede, nubuck and leather upper from Italian tanneries';// [cite: 25]
         }
       }
       if (!material) {
         // Fallback to the explicit description from the details
-        material = 'Suede, nubuck and leather upper from Italian tanneries'; [cite_start]// [cite: 25]
+        material = 'Suede, nubuck and leather upper from Italian tanneries';// [cite: 25]
       }
 
 
@@ -311,7 +311,7 @@ export class ScraperService {
 
 
       // Extract initial cover image from the main product gallery for a fallback
-      [cite_start]// Targeting the image inside the initial product-gallery__media element [cite: 66]
+      // Targeting the image inside the initial product-gallery__media element [cite: 66]
       const initialCoverImageElement = document.querySelector('.product-gallery__media.is-initial img');
       const initialCoverImg = cleanImageUrl(initialCoverImageElement?.getAttribute('src') || initialCoverImageElement?.getAttribute('data-src') || '');
 
@@ -320,21 +320,21 @@ export class ScraperService {
       const quantity = Math.floor(Math.random() * 20) + 10; // 10-30 in stock
 
       // Extract shipping text (from the accordion)
-      [cite_start]// The shipping details are in a table inside the shipping_and_payment accordion [cite: 37, 38]
+      // The shipping details are in a table inside the shipping_and_payment accordion [cite: 37, 38]
       const shippingDetailsElement = document.querySelector('#shipping_and_payment .accordion__content');
       let shipping = 'See shipping details.';
       if (shippingDetailsElement) {
-         const firstParagraph = shippingDetailsElement.querySelector('p');
-         const table = shippingDetailsElement.querySelector('table');
-         
-         const text = (firstParagraph?.textContent?.trim() || '') + ' ' + (table?.textContent?.trim() || '');
-         // Clean up excess whitespace and format
-         shipping = text.replace(/\s+/g, ' ').trim().substring(0, 300);
+        const firstParagraph = shippingDetailsElement.querySelector('p');
+        const table = shippingDetailsElement.querySelector('table');
+
+        const text = (firstParagraph?.textContent?.trim() || '') + ' ' + (table?.textContent?.trim() || '');
+        // Clean up excess whitespace and format
+        shipping = text.replace(/\s+/g, ' ').trim().substring(0, 300);
       }
       if (!shipping || shipping.length < 50) {
-        shipping = 'Mason Garments provides worldwide shipping through local carriers. All shipping services provide a tracking number. See shipping table for details.'; [cite_start]// [cite: 37, 38]
+        shipping = 'Mason Garments provides worldwide shipping through local carriers. All shipping services provide a tracking number. See shipping table for details.';// [cite: 37, 38]
       }
-      
+
 
       // Initial placeholders for variant data (will be overwritten by variant loop)
       return {
@@ -374,13 +374,12 @@ export class ScraperService {
 
       // 1. Extract current color
       let currentColor = 'Unknown';
-      
+
       // FIX: Use standard DOM traversal instead of non-standard :has()/:contains() selector.
       const colorLabel = Array.from(document.querySelectorAll('.variant-picker__option .h-stack > p.text-subdued'))
-        .find(p => p.textContent?.trim() === 'Color:'); [cite_start]// [cite: 6]
+        .find(p => p.textContent?.trim() === 'Color:');
 
       if (colorLabel && colorLabel.nextElementSibling) {
-        [cite_start]// The color text is expected in the <span> immediately following the <p>Color:</p> [cite: 6]
         const colorTextElement = colorLabel.nextElementSibling;
         if (colorTextElement.textContent?.trim()) {
           currentColor = colorTextElement.textContent.trim();
@@ -390,29 +389,26 @@ export class ScraperService {
       // Fallback: look for the alt text of the selected image swatch
       if (currentColor === 'Unknown' || !currentColor) {
         const selectedColorSwatchImg = document.querySelector('.variant-picker__option-values a.media-swatch.is-selected img');
-        const altText = selectedColorSwatchImg?.getAttribute('alt'); 
+        const altText = selectedColorSwatchImg?.getAttribute('alt');
         if (altText) {
-          [cite_start]// Example alt: "Genova Multicolore Black - Mason Garments" [cite: 7]
           const colorMatch = altText.match(/Genova\s+(.*)\s-\sMason/i);
           if (colorMatch && colorMatch[1]) {
             currentColor = colorMatch[1].trim();
           }
         }
       }
-      
+
       // Fallback to name if all else fails
       if (currentColor === 'Unknown' || !currentColor) {
         const titleElement = document.querySelector('.product-title');
-        const name = titleElement?.textContent?.replace('&nbsp;', '').trim() || ''; [cite_start]// [cite: 1]
+        const name = titleElement?.textContent?.replace('&nbsp;', '').trim() || '';// [cite: 1]
         // Match anything after 'Genova' in the title
-        const nameColorMatch = name.match(/Genova\s+(.*)\s*/i); 
+        const nameColorMatch = name.match(/Genova\s+(.*)\s*/i);
         if (nameColorMatch && nameColorMatch[1]) {
           currentColor = nameColorMatch[1].trim();
         }
       }
 
-      // 2. Extract available sizes for this color (should reflect current selection status)
-      [cite_start]// Targeting only the active, non-disabled size swatches [cite: 11, 12]
       const sizeElements = document.querySelectorAll('.variant-picker__option-values .block-swatch:not(.is-disabled) span');
       const availableSizes: string[] = Array.from(sizeElements)
         .map(sizeEl => sizeEl.textContent?.trim())
@@ -420,7 +416,7 @@ export class ScraperService {
 
       // 3. Extract product images from gallery for this variant
       // Targets the main image and any other gallery-related image element
-      const imageElements = document.querySelectorAll('product-gallery-image img, .flickity-slider img'); [cite_start]// [cite: 67, 68, 69, 70]
+      const imageElements = document.querySelectorAll('product-gallery-image img, .flickity-slider img');// [cite: 67, 68, 69, 70]
 
       const images = Array.from(
         new Set(
@@ -565,7 +561,7 @@ export class ScraperService {
     }
 
     // Generate detailed short description for shoes
-    const shortDesc = `Handmade in Italy, the Mason Garments ${product.name} sneakers feature a premium ${product.material} upper and custom rubber outsole. Recommended to take one size up. Available in sizes ${sizeArray[0]}-${sizeArray[sizeArray.length - 1]}.`; [cite_start]// [cite: 25, 27]
+    const shortDesc = `Handmade in Italy, the Mason Garments ${product.name} sneakers feature a premium ${product.material} upper and custom rubber outsole. Recommended to take one size up. Available in sizes ${sizeArray[0]}-${sizeArray[sizeArray.length - 1]}.`;// [cite: 25, 27]
 
     // Console log all the data we're trying to insert
     console.log('=== PRODUCT DATA TO INSERT ===');
