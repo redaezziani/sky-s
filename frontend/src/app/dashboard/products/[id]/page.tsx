@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { axiosInstance } from '@/lib/utils';
 import { IconCircleCheckFilled } from '@tabler/icons-react';
 import { SKUImageGallery } from '@/components/product/id/preview-iamges';
+import Link from 'next/link';
 
 // Types
 type Sku = {
@@ -104,13 +105,20 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   }
 
   return (
-    <div className=" space-y-8  px-4 ">
+    <div className=" space-y-8 mt-4 md:mt-0  px-4 ">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <Link
+            href={"/dashboard/products"}
+          >
+            <Button
+
+              variant="ghost" size="icon">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+
         </div>
         <div className="flex  gap-2">
           <Button variant="outline" size="sm">
@@ -364,7 +372,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </div>
             </CardContent>
           </Card>
-          <SKUImageGallery variants={product.variants} imagesPerPage={6}/>
+          <SKUImageGallery variants={product.variants} imagesPerPage={6} />
         </div>
       </div>
     </div>
