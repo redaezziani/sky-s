@@ -31,6 +31,7 @@ export async function seedOrders() {
     },
   });
   if (!products.length) {
+    console.log('No active products found, skipping order seeding.');
     return;
   }
 
@@ -93,6 +94,8 @@ export async function seedOrders() {
         },
       },
     });
+
+    console.log("test")
 
     console.log(
       `✅ Created order ${order.orderNumber} on ${createdAt.toDateString()}`,

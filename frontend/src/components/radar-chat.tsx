@@ -4,11 +4,10 @@ import * as React from "react";
 import useSWR from "swr";
 import { TrendingUp } from "lucide-react";
 import {
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  Radar,
-  Tooltip,
+  Label,
+  PolarRadiusAxis,
+  RadialBar,
+  RadialBarChart,
 } from "recharts";
 
 import {
@@ -59,25 +58,36 @@ export function ChartTopProductsRadar() {
   );
 
   const processedData = React.useMemo(() => {
-    if (!topProductsMetrics) return [];
-    return topProductsMetrics.map((item: any) => ({
-      label:
-        item.label.length > 20 ? item.label.slice(0, 20) + "..." : item.label,
-      totalOrdered: item.totalOrdered,
-      totalRevenue: item.totalRevenue,
-      fullLabel: item.label,
-    }));
+    if (!topProductsMetrics || topProductsMetrics.length === 0) return [];
+    
+    // Take top 2 products for stacked radial chart
+    const topTwo = topProductsMetrics.slice(0, 2);
+    return [{
+      product1: topTwo[0]?.totalOrdered || 0,
+      product2: topTwo[1]?.totalOrdered || 0,
+      product1Name: topTwo[0]?.label || "Product 1",
+      product2Name: topTwo[1]?.label || "Product 2",
+    }];
   }, [topProductsMetrics]);
 
+  const totalOrders = React.useMemo(() => {
+    if (processedData.length === 0) return 0;
+    return processedData[0].product1 + processedData[0].product2;
+  }, [processedData]);
+
   const chartConfig = {
-    totalOrdered: {
-      label: t.labels.totalOrdered || "Total Ordered",
-      color: "var(--primary)",
+    product1: {
+      label: processedData[0]?.product1Name || "Product 1",
+      color: "var(--chart-1)",
+    },
+    product2: {
+      label: processedData[0]?.product2Name || "Product 2",
+      color: "var(--chart-2)",
     },
   } satisfies ChartConfig;
 
   return (
-    <Card className="@container/card">
+    <Card className="@container/card flex flex-col">
       <CardHeader className="flex items-center justify-between">
         <div className="space-y-1">
           <CardTitle className="text-lg">{t.title}</CardTitle>
@@ -111,23 +121,62 @@ export function ChartTopProductsRadar() {
         </div>
       </CardHeader>
 
-      <CardContent className="pb-0">
+      <CardContent className="flex flex-1 items-center pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
+          className="mx-auto aspect-square w-full max-w-[250px]"
         >
-          <RadarChart data={processedData}>
-            <PolarGrid />
-            <PolarAngleAxis dataKey="label" />
-            <Radar
-              name={chartConfig.totalOrdered.label}
-              dataKey="totalOrdered"
-              fill={chartConfig.totalOrdered.color}
-              fillOpacity={0.6}
-              dot={{ r: 4, fillOpacity: 1 }}
+          <RadialBarChart
+            data={processedData}
+            endAngle={180}
+            innerRadius={80}
+            outerRadius={130}
+          >
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
             />
-            <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
-          </RadarChart>
+            <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
+              <Label
+                content={({ viewBox }) => {
+                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                    return (
+                      <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle">
+                        <tspan
+                          x={viewBox.cx}
+                          y={(viewBox.cy || 0) - 16}
+                          className="fill-foreground text-2xl font-bold"
+                        >
+                          {totalOrders.toLocaleString()}
+                        </tspan>
+                        <tspan
+                          x={viewBox.cx}
+                          y={(viewBox.cy || 0) + 4}
+                          className="fill-muted-foreground"
+                        >
+                          {t.labels.totalOrdered || "Total Orders"}
+                        </tspan>
+                      </text>
+                    );
+                  }
+                }}
+              />
+            </PolarRadiusAxis>
+            <RadialBar
+              dataKey="product1"
+              stackId="a"
+              cornerRadius={5}
+              fill="var(--color-product1)"
+              className="stroke-transparent stroke-2"
+            />
+            <RadialBar
+              dataKey="product2"
+              fill="var(--color-product2)"
+              stackId="a"
+              cornerRadius={5}
+              className="stroke-transparent stroke-2"
+            />
+          </RadialBarChart>
         </ChartContainer>
       </CardContent>
 

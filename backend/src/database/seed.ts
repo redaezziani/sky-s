@@ -28,11 +28,11 @@ async function seedAll() {
   console.log('🌱 Seeding all data...');
 
   // Seed in dependency order
-  await seedSettings();
-  await seedUsers();
-  await seedCategories();
-  // await seedProducts();
-  // await seedOrders();
+  // await seedSettings();
+  // await seedUsers();
+  // await seedCategories();
+
+  await seedOrders();
 
   console.log('✅ All data seeded');
 }

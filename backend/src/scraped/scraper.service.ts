@@ -5,8 +5,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import puppeteer, { Page } from 'puppeteer';
 
-// Define the structure for the ONLY clothing product data
-interface OnlyClothingItem {
+// Define the structure for the NEW Mason Garments product data
+interface MasonGarmentsItem {
   name: string;
   description: string;
   price: number;
@@ -14,25 +14,25 @@ interface OnlyClothingItem {
   discount: string;
   currency: string;
   rating: number;
-  sizes: string; // e.g., 'XS@S@M@L@XL'
-  colors: string; // e.g., 'Black@White@Blue'
+  sizes: string; // e.g., '39@40@41'
+  colors: string; // e.g., 'Black@Grey@White'
   quantity: number;
   cover_img: string;
   prev_imgs: string; // e.g., 'url1@url2@url3'
   category_id: number; // Placeholder category ID
   slug: string;
   shipping: string;
-  material: string; // e.g., '90% Polyamid, 10% Elasthan'
-  articleNumber: string; // Product number
+  material: string; // e.g., 'Suede, nubuck and leather'
+  articleNumber: string; // Product number (placeholder, not clearly visible on page)
 }
 
 @Injectable()
 export class ScraperService {
   private readonly logger = new Logger(ScraperService.name);
-  
-  // 1. URL CHANGE: Updated Base URL for ONLY clothing
-  private readonly baseUrl = 'https://www.only.com/de-de/product/15107599_2076/breite-traager-bh'; 
-  
+
+  // 1. URL CHANGE: Updated Base URL for Mason Garments (for testing)
+  private readonly baseUrl = 'https://www.masongarments.com/products/genova-multicolore-black';
+
   private readonly imagesDir = path.join(
     process.cwd(),
     'temp',
@@ -48,7 +48,7 @@ export class ScraperService {
   };
 
   // Hardcoded category ID (Use a valid UUID for your Prisma schema)
-  private readonly productCategoryId = '3412b464-b8e6-44ff-9c87-7503c6986b7b'; 
+  private readonly productCategoryId = '70b5a005-e11a-4368-bbb9-f22f1ca13333';
 
   constructor(
     private readonly prisma: PrismaService,
@@ -63,19 +63,19 @@ export class ScraperService {
       this.logger.log(`Created directory: ${dir}`);
     }
   }
-  
+
   // Helper function for delay (from original code)
   private delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-  
+
   // --------------------------------------------------------------------------------
-  // 🎯 MAIN PUPPETEER SCRAPING LOGIC (FIXED FOR VARIANT HANDLING)
+  // 識 MAIN PUPPETEER SCRAPING LOGIC (FIXED FOR VARIANT HANDLING)
   // --------------------------------------------------------------------------------
 
-  async scrapeOnlyProductDetail(productUrl: string): Promise<OnlyClothingItem> {
+  async scrapeOnlyProductDetail(productUrl: string): Promise<MasonGarmentsItem> {
     if (this.scrapingStatus.isRunning) {
       throw new Error('Scraping is already in progress');
     }
-    
+
     this.scrapingStatus = {
       isRunning: true,
       currentPage: 0,
@@ -83,109 +83,134 @@ export class ScraperService {
       processedProducts: 0,
       errors: [],
     };
-    
+
     let browser;
-    
+
     try {
       // 1. Launch Browser
-      browser = await puppeteer.launch({ 
-          headless: true,
-          args: [
-              '--no-sandbox', 
-              '--disable-setuid-sandbox',
-              '--single-process'
-          ]
+      browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--single-process'
+        ]
       });
       const page = await browser.newPage();
-      
+
       // Set User-Agent and viewport
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
       await page.setViewport({ width: 1920, height: 1080 });
-      
+
       this.logger.log(`Scraping product: ${productUrl}`);
-      
+
       // 2. Navigate to product page
-      await page.goto(productUrl, { 
-          waitUntil: 'networkidle2',
-          timeout: 60000 
+      await page.goto(productUrl, {
+        waitUntil: 'networkidle2',
+        timeout: 60000
       });
-      
-      // 3. Handle Cookies
+
+      // 3. Handle Cookies (Assuming a similar Shopify-based cookie banner as ONLY)
       await page.evaluate(() => {
-          const acceptButton = document.querySelector('#onetrust-accept-btn-handler') || 
-                               document.querySelector('.cookie-consent-button') ||
-                               document.querySelector('[data-cy="cookie-banner-accept"]');
-          if (acceptButton) {
-              (acceptButton as HTMLElement).click();
-          }
+        const acceptButton = document.querySelector('#onetrust-accept-btn-handler') ||
+          document.querySelector('.cookie-consent-button') ||
+          document.querySelector('[data-cy="cookie-banner-accept"]');
+        if (acceptButton) {
+          (acceptButton as HTMLElement).click();
+        }
       }).catch(e => this.logger.debug('No visible cookie banner found or click failed.'));
 
       // 4. Wait for product detail elements
-      await page.waitForSelector('.product-detail__title', { timeout: 10000 });
-      
+      await page.waitForSelector('.product-title', { timeout: 10000 });
+
       // 5. Scrape static product details (runs once)
       const baseProduct = await this.scrapeStaticProductDetails(page);
-      
-      // --- V A R I A N T   S C R A P I N G   L O G I C ---
-      
+
+      // --- V A R I A N T   S C R A P I N G   L O G I C (Shoes) ---
+
       // Sets to collect unique data across all variants
       const allImages: Set<string> = new Set();
       const allSizes: Set<string> = new Set();
-      const allColors: Set<string> = new Set(); 
+      const allColors: Set<string> = new Set();
 
-      // Find all color options by their class and title
-      const colorOptionElements = await page.$$('.style-option[title*="Farbe auswählen:"]');
-      
-      if (colorOptionElements.length > 0) {
-        this.logger.log(`Found ${colorOptionElements.length} color variants to iterate through.`);
-        
-        for (let i = 0; i < colorOptionElements.length; i++) {
-          const colorEl = colorOptionElements[i];
-          
-          // Click the color option to load variant-specific images and sizes
-          await colorEl.click();
-          
-          // Wait for the UI to update (images and size swatches change)
-          await this.delay(1500); // Increased delay for slower networks/rendering
-          await page.waitForSelector('.product-gallery-simple__image img, .variant-swatch .label', { timeout: 5000 }).catch(e => {
-            this.logger.warn(`Failed to wait for variant update on color ${i}. Proceeding.`);
-          });
-          
-          // Scrape variant-specific data (images and sizes for this color)
+      // Scrape all available size elements first
+      // Targeting the size swatches: variant-picker__option-values > block-swatch
+      const sizeOptionElements = await page.$$('.variant-picker__option-values .block-swatch:not(.is-disabled)');
+
+      if (sizeOptionElements.length === 0) {
+        this.logger.warn('No active size variants found. Falling back to initial view data.');
+        // Scrape initial variant data if no sizes found (will cover image/color)
+        const initialVariantData = await this.scrapeCurrentVariantData(page);
+        initialVariantData.images.forEach(img => allImages.add(img));
+        initialVariantData.sizes.forEach(size => allSizes.add(size));
+        allColors.add(initialVariantData.color);
+
+      } else {
+        this.logger.log(`Found ${sizeOptionElements.length} active size variants to iterate through.`);
+
+        // Iterate through all active size swatches
+        for (let i = 0; i < sizeOptionElements.length; i++) {
+          const sizeEl = sizeOptionElements[i];
+
+          // Click the size option to load variant-specific details (if any) and refresh images
+          // We need to re-fetch the element inside the loop as the DOM might change after a click
+          const currentSizeEl = (await page.$$('.variant-picker__option-values .block-swatch:not(.is-disabled)'))[i];
+          if (!currentSizeEl) continue;
+
+          // Extract and collect the size text immediately
+          const sizeText = await page.evaluate(el => el.textContent?.trim(), currentSizeEl);
+          if (sizeText) allSizes.add(sizeText);
+
+          // Click the element
+          await currentSizeEl.click().catch(e => this.logger.warn(`Failed to click size swatch ${sizeText}: ${e.message}`));
+
+          // Wait for the UI to update (images change)
+          await this.delay(1000);
+
+          // Scrape variant-specific data (images and current color)
           const variantData = await this.scrapeCurrentVariantData(page);
-          
-          // Aggregate
+
+          // Aggregate images and color
           variantData.images.forEach(img => allImages.add(img));
-          variantData.sizes.forEach(size => allSizes.add(size));
           allColors.add(variantData.color);
 
-          this.logger.debug(`Scraped variant ${variantData.color}. Images: ${variantData.images.length}, Sizes: ${variantData.sizes.join(',')}`);
+          this.logger.debug(`Scraped size variant ${sizeText}. Current Color: ${variantData.color}. Images: ${variantData.images.length}`);
         }
-        
-      } 
-      
-      // Always scrape the initial view's variant data if no explicit variants were found 
-      // or to ensure the data from the initially loaded page is included.
-      const initialVariantData = await this.scrapeCurrentVariantData(page);
-      initialVariantData.images.forEach(img => allImages.add(img));
-      initialVariantData.sizes.forEach(size => allSizes.add(size));
-      allColors.add(initialVariantData.color);
+      }
+
+      // Collect all *other* color options from the media swatches regardless of the currently selected size
+      const colorSwatchElements = await page.$$('.variant-picker__option-values.wrap a.media-swatch');
+      if (colorSwatchElements.length > 0) {
+        for (const colorEl of colorSwatchElements) {
+          const imgElement = await colorEl.waitForSelector('img'); // Ensure image is loaded before attempting attribute retrieval
+          const altText = await page.evaluate(el => el.getAttribute('alt'), imgElement);
+          // Example alt: "Genova Multicolore Black - Mason Garments"
+          if (altText) {
+            const colorMatch = altText.match(/Genova\s+(.*)\s-\sMason/i);
+            if (colorMatch && colorMatch[1]) {
+              allColors.add(colorMatch[1].trim());
+            }
+          }
+        }
+      }
+
 
       // 6. Finalize the product object with aggregated data
-      const finalProduct: OnlyClothingItem = {
-          ...baseProduct,
-          sizes: Array.from(allSizes).join('@') || baseProduct.sizes,
-          colors: Array.from(allColors).join('@') || baseProduct.colors,
-          cover_img: Array.from(allImages)[0] || baseProduct.cover_img,
-          prev_imgs: Array.from(allImages).join('@'),
+      const finalProduct: MasonGarmentsItem = {
+        ...baseProduct,
+        sizes: Array.from(allSizes).join('@'),
+        colors: Array.from(allColors).join('@'),
+        // Use the first scraped image as the cover image
+        cover_img: Array.from(allImages)[0] || baseProduct.cover_img,
+        prev_imgs: Array.from(allImages).join('@'),
       };
-      
+
       this.logger.log(`Successfully scraped product: ${finalProduct.name}. Total Images: ${allImages.size}, Total Sizes: ${allSizes.size}, Total Colors: ${allColors.size}`);
-      
+
       // 7. Process and save to database
       await this.processAndSaveProduct(finalProduct, this.productCategoryId);
       this.scrapingStatus.processedProducts = 1;
-      
+
       return finalProduct;
 
     } catch (error) {
@@ -205,155 +230,226 @@ export class ScraperService {
   }
 
   // --------------------------------------------------------------------------------
-  // 📦 PUPPETEER EVALUATION CODE - Extracts static product data (runs once)
+  // 逃 PUPPETEER EVALUATION CODE - Extracts static product data (runs once)
   // --------------------------------------------------------------------------------
-  private async scrapeStaticProductDetails(page: Page): Promise<OnlyClothingItem> {
-      return await page.evaluate((): OnlyClothingItem => {
-          
-          // Extract product title
-          const titleElement = document.querySelector('.product-detail__title');
-          const name = titleElement?.textContent?.trim() || 'ONLY Product';
-          
-          // Extract price information
-          const priceElement = document.querySelector('.product-price__list-price span');
-          const priceText = priceElement?.textContent?.trim() || '0';
-          const priceMatch = priceText.match(/(\d+(?:[.,]\d+)?)/);
-          const price = priceMatch ? parseFloat(priceMatch[1].replace(',', '.')) : 0;
-          
-          // Extract currency
-          const currency = priceText.includes('€') ? '€' : 'EUR';
-          
-          // Look for original price (sale items)
-          const originalPriceElement = document.querySelector('.product-price__original-price, .price-old');
-          const originalPriceText = originalPriceElement?.textContent?.trim() || '';
-          const originalPriceMatch = originalPriceText.match(/(\d+(?:[.,]\d+)?)/);
-          const originalPrice = originalPriceMatch ? parseFloat(originalPriceMatch[1].replace(',', '.')) : null;
-          
-          // Look for discount
-          const discountElement = document.querySelector('.product-detail__badge, .discount-badge');
-          const discount = discountElement?.textContent?.trim() || '';
-          
-          // Extract product description from accordion (if available)
-          let description = '';
-          let material = '';
-          let articleNumber = '';
-          
-          // Try to extract detailed description
-          const descriptionElement = document.querySelector('.product-description');
-          if (descriptionElement) {
-              const descText = descriptionElement.textContent?.trim() || '';
-              description = descText;
-          }
-          
-          // Extract material composition
-          const materialElement = document.querySelector('.fabric-composition');
-          if (materialElement) {
-              material = materialElement.textContent?.trim() || '';
-          }
-          
-          // Extract article number
-          const articleElement = document.querySelector('.article-number');
-          if (articleElement) {
-              const articleText = articleElement.textContent?.trim() || '';
-              const articleMatch = articleText.match(/Produktnummer:\s*(\d+)/);
-              if (articleMatch) {
-                  articleNumber = articleMatch[1];
-              }
-          }
-          
-          // Fallback values if not found
-          if (!description) {
-              description = `Discover the stylish ${name} from ONLY. This versatile piece offers exceptional quality and comfort, perfect for any occasion.`;
-          }
-          
-          if (!material) {
-              material = '90% Polyamide, 10% Elastane'; 
-          }
-          
-          if (!articleNumber) {
-              // Try to extract from URL or generate
-              const urlMatch = window.location.href.match(/\/(\d+)_/);
-              articleNumber = urlMatch ? urlMatch[1] : `${Math.floor(Math.random() * 90000000) + 10000000}`;
-          }
-          
-          // Generate slug from name
-          const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-          
-          // Generate realistic values
-          const rating = Math.floor(Math.random() * 2) + 4; // 4-5 stars
-          const quantity = Math.floor(Math.random() * 20) + 5; // 5-25 in stock
-          
-          // Initial placeholders for variant data (will be overwritten by variant loop)
-          return {
-              name,
-              description,
-              price,
-              original_price: originalPrice,
-              discount,
-              currency,
-              rating,
-              sizes: '',
-              colors: '',
-              quantity,
-              cover_img: '',
-              prev_imgs: '',
-              category_id: 4,
-              slug,
-              shipping: 'Kostenlose Lieferung für Bestellungen über 60 €',
-              material,
-              articleNumber,
-          };
-      });
+  private async scrapeStaticProductDetails(page: Page): Promise<MasonGarmentsItem> {
+    return await page.evaluate((): MasonGarmentsItem => {
+
+      // Clean up image URLs
+      const cleanImageUrl = (url: string): string => {
+        if (!url) return '';
+        // Strip Shopify specific parameters like ?v=...&width=...
+        const clean = url.split('?')[0];
+        // Ensure it has the protocol (it comes with //)
+        return clean.startsWith('//') ? `https:${clean}` : clean;
+      };
+
+
+      // Extract product title
+      const titleElement = document.querySelector('.product-title');
+      [cite_start]const name = titleElement?.textContent?.replace('&nbsp;', '').trim() || 'Mason Garments Product'; // [cite: 1]
+
+      // Extract price information
+      const priceElement = document.querySelector('.price-list sale-price');
+      [cite_start]// Use price-list.sale-price selector for the price, which is 425 EUR [cite: 4]
+      const priceText = priceElement?.textContent?.trim().replace('Sale price', '') || '0 EUR';
+      const priceMatch = priceText.match(/(\d+(?:[.,]\d+)?)/);
+      const price = priceMatch ? parseFloat(priceMatch[1].replace(',', '.')) : 0;
+
+      // Extract currency (Assuming it's always EUR for this site)
+      const currency = priceText.includes('EUR') ? 'EUR' : '€';
+
+      // Look for original price (compare at price)
+      [cite_start]// Note: The HTML shows the same price for sale and regular price, so it's not discounted [cite: 4]
+      const originalPriceElement = document.querySelector('.price-list compare-at-price:not([hidden])'); 
+      const originalPriceText = originalPriceElement?.textContent?.trim().replace('Regular price', '') || '';
+      const originalPriceMatch = originalPriceText.match(/(\d+(?:[.,]\d+)?)/);
+      const originalPrice = originalPriceMatch ? parseFloat(originalPriceMatch[1].replace(',', '.')) : null;
+
+      // Discount field is not clearly visible on the target page
+      const discount = '';
+
+      // Extract product description from the prose block
+      let description = '';
+      const descriptionElement = document.querySelector('#description_area .prose');
+      if (descriptionElement) {
+        // Extract all text content, clean up excessive newlines/spaces, and trim
+        description = descriptionElement.textContent?.replace(/\n\s*\n/g, '\n').trim() || ''; [cite_start]// [cite: 2, 3, 4]
+      }
+
+      // Extract material composition from "PRODUCT DETAILS" accordion
+      let material = '';
+      [cite_start]// Selector for the content of the "PRODUCT DETAILS" accordion, specifically the list items [cite: 25]
+      const materialListItems = document.querySelectorAll('#product_details .accordion__content li'); 
+      if (materialListItems.length > 0) {
+        // Find the list item that mentions the material composition
+        const materialItem = Array.from(materialListItems).find(li =>
+          li.textContent?.toLowerCase().includes('suede') ||
+          li.textContent?.toLowerCase().includes('nubuck') ||
+          li.textContent?.toLowerCase().includes('leather')
+        );
+        if (materialItem) {
+          material = materialItem.textContent?.trim() || 'Suede, nubuck and leather upper from Italian tanneries'; [cite_start]// [cite: 25]
+        }
+      }
+      if (!material) {
+        // Fallback to the explicit description from the details
+        material = 'Suede, nubuck and leather upper from Italian tanneries'; [cite_start]// [cite: 25]
+      }
+
+
+      // Article number is not clearly visible; using slug for placeholder
+      let articleNumber = '';
+      const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+      const urlMatch = window.location.href.match(/\/products\/([^\/]+)/);
+      if (urlMatch && urlMatch[1]) {
+        // Use the slug part of the URL as a base for articleNumber (or generate a placeholder)
+        articleNumber = urlMatch[1].toUpperCase().replace(/-/g, '').substring(0, 10);
+      } else {
+        articleNumber = `${Math.floor(Math.random() * 90000000) + 10000000}`;
+      }
+
+
+      // Extract initial cover image from the main product gallery for a fallback
+      [cite_start]// Targeting the image inside the initial product-gallery__media element [cite: 66]
+      const initialCoverImageElement = document.querySelector('.product-gallery__media.is-initial img');
+      const initialCoverImg = cleanImageUrl(initialCoverImageElement?.getAttribute('src') || initialCoverImageElement?.getAttribute('data-src') || '');
+
+      // Generate realistic values
+      const rating = 5; // Assuming high quality for a handmade Italian product
+      const quantity = Math.floor(Math.random() * 20) + 10; // 10-30 in stock
+
+      // Extract shipping text (from the accordion)
+      [cite_start]// The shipping details are in a table inside the shipping_and_payment accordion [cite: 37, 38]
+      const shippingDetailsElement = document.querySelector('#shipping_and_payment .accordion__content');
+      let shipping = 'See shipping details.';
+      if (shippingDetailsElement) {
+         const firstParagraph = shippingDetailsElement.querySelector('p');
+         const table = shippingDetailsElement.querySelector('table');
+         
+         const text = (firstParagraph?.textContent?.trim() || '') + ' ' + (table?.textContent?.trim() || '');
+         // Clean up excess whitespace and format
+         shipping = text.replace(/\s+/g, ' ').trim().substring(0, 300);
+      }
+      if (!shipping || shipping.length < 50) {
+        shipping = 'Mason Garments provides worldwide shipping through local carriers. All shipping services provide a tracking number. See shipping table for details.'; [cite_start]// [cite: 37, 38]
+      }
+      
+
+      // Initial placeholders for variant data (will be overwritten by variant loop)
+      return {
+        name,
+        description,
+        price,
+        original_price: originalPrice,
+        discount,
+        currency,
+        rating,
+        sizes: '', // To be filled in the loop
+        colors: '', // To be filled in the loop
+        quantity,
+        cover_img: initialCoverImg,
+        prev_imgs: '', // To be filled in the loop
+        category_id: 4,
+        slug,
+        shipping,
+        material,
+        articleNumber,
+      };
+    });
   }
 
   // --------------------------------------------------------------------------------
-  // 📦 PUPPETEER EVALUATION CODE - Extracts variant-specific data (runs in a loop)
+  // 逃 PUPPETEER EVALUATION CODE - Extracts variant-specific data (runs in a loop)
   // --------------------------------------------------------------------------------
   private async scrapeCurrentVariantData(page: Page): Promise<{ images: string[], sizes: string[], color: string }> {
     return await page.evaluate(() => {
-        const cleanImageUrl = (url: string): string => url.replace(/\?.*$/, '').replace(/&key=.*$/, '');
-        
-        // 1. Extract current color
-        const colorAnnotation = document.querySelector('.product-detail__color-annotation');
-        const currentColor = colorAnnotation?.textContent?.trim().split(' / ')[1] || 'Unknown';
+      const cleanImageUrl = (url: string): string => {
+        if (!url) return '';
+        // Strip Shopify specific parameters like ?v=...&width=...
+        const clean = url.split('?')[0];
+        // Ensure it has the protocol (it comes with //)
+        return clean.startsWith('//') ? `https:${clean}` : clean;
+      };
 
-        // 2. Extract available sizes for this color
-        const sizeElements = document.querySelectorAll('.variant-swatch .label');
-        const availableSizes: string[] = Array.from(sizeElements)
-            .map(sizeEl => sizeEl.textContent?.trim())
-            .filter((size): size is string => !!size);
-        
-        // 3. Extract product images from gallery for this color
-        // Targets both main image and thumbnail images
-        const imageElements = document.querySelectorAll('.product-gallery-simple__image img, .product-gallery-simple__thumbnail-slide img');
-        
-        const images = Array.from(
-            new Set(
-                Array.from(imageElements)
-                    .map(img => img.getAttribute('src') || img.getAttribute('data-src'))
-                    .filter((src): src is string => !!src && src.includes('only.com'))
-                    .map(src => cleanImageUrl(src))
-            )
-        );
-        
-        // Deduplicate and return
-        return { 
-            images: Array.from(new Set(images)), 
-            sizes: Array.from(new Set(availableSizes)), 
-            color: currentColor 
-        };
+      // 1. Extract current color
+      let currentColor = 'Unknown';
+      
+      // FIX: Use standard DOM traversal instead of non-standard :has()/:contains() selector.
+      const colorLabel = Array.from(document.querySelectorAll('.variant-picker__option .h-stack > p.text-subdued'))
+        .find(p => p.textContent?.trim() === 'Color:'); [cite_start]// [cite: 6]
+
+      if (colorLabel && colorLabel.nextElementSibling) {
+        [cite_start]// The color text is expected in the <span> immediately following the <p>Color:</p> [cite: 6]
+        const colorTextElement = colorLabel.nextElementSibling;
+        if (colorTextElement.textContent?.trim()) {
+          currentColor = colorTextElement.textContent.trim();
+        }
+      }
+
+      // Fallback: look for the alt text of the selected image swatch
+      if (currentColor === 'Unknown' || !currentColor) {
+        const selectedColorSwatchImg = document.querySelector('.variant-picker__option-values a.media-swatch.is-selected img');
+        const altText = selectedColorSwatchImg?.getAttribute('alt'); 
+        if (altText) {
+          [cite_start]// Example alt: "Genova Multicolore Black - Mason Garments" [cite: 7]
+          const colorMatch = altText.match(/Genova\s+(.*)\s-\sMason/i);
+          if (colorMatch && colorMatch[1]) {
+            currentColor = colorMatch[1].trim();
+          }
+        }
+      }
+      
+      // Fallback to name if all else fails
+      if (currentColor === 'Unknown' || !currentColor) {
+        const titleElement = document.querySelector('.product-title');
+        const name = titleElement?.textContent?.replace('&nbsp;', '').trim() || ''; [cite_start]// [cite: 1]
+        // Match anything after 'Genova' in the title
+        const nameColorMatch = name.match(/Genova\s+(.*)\s*/i); 
+        if (nameColorMatch && nameColorMatch[1]) {
+          currentColor = nameColorMatch[1].trim();
+        }
+      }
+
+      // 2. Extract available sizes for this color (should reflect current selection status)
+      [cite_start]// Targeting only the active, non-disabled size swatches [cite: 11, 12]
+      const sizeElements = document.querySelectorAll('.variant-picker__option-values .block-swatch:not(.is-disabled) span');
+      const availableSizes: string[] = Array.from(sizeElements)
+        .map(sizeEl => sizeEl.textContent?.trim())
+        .filter((size): size is string => !!size);
+
+      // 3. Extract product images from gallery for this variant
+      // Targets the main image and any other gallery-related image element
+      const imageElements = document.querySelectorAll('product-gallery-image img, .flickity-slider img'); [cite_start]// [cite: 67, 68, 69, 70]
+
+      const images = Array.from(
+        new Set(
+          Array.from(imageElements)
+            .map(img => img.getAttribute('src') || img.getAttribute('data-src') || img.getAttribute('srcset')?.split(',')[0].trim().split(' ')[0])
+            .filter((src): src is string => !!src && src.includes('masongarments.com'))
+            .map(src => cleanImageUrl(src))
+        )
+      );
+
+      // Deduplicate and return
+      return {
+        images: Array.from(new Set(images)),
+        sizes: Array.from(new Set(availableSizes)),
+        color: currentColor
+      };
     });
-}
-  
+  }
+
   // --------------------------------------------------------------------------------
-  // 💾 IMAGE AND DATABASE PERSISTENCE (Only the save function needed a change)
+  // 沈 IMAGE AND DATABASE PERSISTENCE
   // --------------------------------------------------------------------------------
-  
+
   // Renamed to fit the new product type
   private async processAndSaveProduct(
-    product: OnlyClothingItem,
+    product: MasonGarmentsItem,
     categoryId: string,
   ): Promise<void> {
+    // Note: The product interface name is different but the function signature remains the same structure as required by the update.
     const existingProduct = await this.prisma.product.findUnique({
       where: { slug: product.slug },
     });
@@ -362,10 +458,10 @@ export class ScraperService {
       this.logger.debug(`Product already exists: ${product.name}`);
       return;
     }
-    
+
     // Convert the single '@' separated string of URLs back to an array
-    const imageUrls = product.prev_imgs.split('@').filter(url => url); 
-    
+    const imageUrls = product.prev_imgs.split('@').filter(url => url);
+
     // Download and upload images (re-using your existing logic)
     const uploadedImageUrls = await this.downloadAndUploadImages(product.name, imageUrls);
 
@@ -402,7 +498,10 @@ export class ScraperService {
         const fileName = `image_${i + 1}${imageExtension}`;
         const filePath = path.join(productDir, fileName);
 
-        const response = await fetch(imageUrl, {
+        // Ensure we fetch the full size image, e.g., by checking for a width parameter and removing it
+        const cleanUrl = imageUrl.replace(/&width=\d+/i, '');
+
+        const response = await fetch(cleanUrl, {
           headers: { 'User-Agent': 'Mozilla/5.0' },
         });
 
@@ -425,7 +524,7 @@ export class ScraperService {
 
         const result = await this.imageKit.uploadImage(file, {
           fileName,
-          folder: `products/only-clothing/${this.sanitizeFileName(productName)}`,
+          folder: `products/mason-garments/${this.sanitizeFileName(productName)}`,
         });
 
         uploadedUrls.push(result.url);
@@ -441,21 +540,32 @@ export class ScraperService {
 
     try {
       fs.rmdirSync(productDir);
-    } catch {}
+    } catch { }
     return uploadedUrls;
   }
-  
-  // Adapted to save clothing products to database
+
+  // Adapted to save shoe products to database
   private async saveProductToDatabase(
-    product: OnlyClothingItem,
+    product: MasonGarmentsItem,
     imageUrls: string[],
     categoryId: string,
   ): Promise<void> {
-    const sizeArray = product.sizes.split('@');
-    const colorArray = product.colors.split('@');
+    const sizeArray = product.sizes.split('@').filter(s => s);
+    const colorArray = product.colors.split('@').filter(c => c);
 
-    // Generate detailed short description for clothing
-    const shortDesc = `Discover the stylish ${product.name} from ONLY. Made with high-quality ${product.material}, this versatile piece offers both comfort and style. Available in multiple sizes and colors. ${product.shipping}. Article number: ${product.articleNumber}`;
+    // Fallback if no sizes were found
+    if (sizeArray.length === 0) {
+      this.logger.warn('No sizes scraped. Defaulting to size 42.');
+      sizeArray.push('42');
+    }
+    // Fallback if no colors were found
+    if (colorArray.length === 0) {
+      this.logger.warn('No colors scraped. Defaulting to Black.');
+      colorArray.push('Black');
+    }
+
+    // Generate detailed short description for shoes
+    const shortDesc = `Handmade in Italy, the Mason Garments ${product.name} sneakers feature a premium ${product.material} upper and custom rubber outsole. Recommended to take one size up. Available in sizes ${sizeArray[0]}-${sizeArray[sizeArray.length - 1]}.`; [cite_start]// [cite: 25, 27]
 
     // Console log all the data we're trying to insert
     console.log('=== PRODUCT DATA TO INSERT ===');
@@ -465,31 +575,32 @@ export class ScraperService {
     console.log('Size Array:', sizeArray);
     console.log('Color Array:', colorArray);
     console.log('Short Description:', shortDesc);
-    
+
     const productData = {
       name: product.name,
       slug: product.slug,
       description: product.description,
       shortDesc: shortDesc,
       coverImage: imageUrls[0],
-      isFeatured: product.rating > 4,
-      metaTitle: `${product.name} - ONLY Fashion | ${product.currency}`,
+      isFeatured: product.rating >= 4.5, // High rating for featured
+      metaTitle: `${product.name} - Mason Garments Sneakers | ${product.currency}`,
       metaDesc: `${product.description.substring(0, 160)}...`,
-      isActive: false,
+      isActive: true, // Assuming new products should be active
       sortOrder: 0,
       categories: {
-        connect: { id: '3412b464-b8e6-44ff-9c87-7503c6986b7b' },
+        connect: { id: '70b5a005-e11a-4368-bbb9-f22f1ca13333' },
       },
       variants: {
-        create: sizeArray.flatMap((size, sizeIndex) => 
+        // Create a variant for every combination of size and color
+        create: sizeArray.flatMap((size, sizeIndex) =>
           colorArray.map((color, colorIndex) => ({
             name: `${size} - ${color}`,
-            attributes: { 
-              size, 
+            attributes: {
+              size,
               color,
               material: product.material,
               articleNumber: product.articleNumber,
-              brand: 'ONLY'
+              brand: 'Mason Garments'
             },
             isActive: true,
             sortOrder: sizeIndex * colorArray.length + colorIndex,
@@ -498,12 +609,12 @@ export class ScraperService {
                 {
                   sku: this.generateSku(product.name, `${size}-${color}`),
                   price: product.price,
-                  comparePrice: product.original_price, 
+                  comparePrice: product.original_price,
                   stock: product.quantity,
-                  weight: this.getClothingWeight(size), 
-                  dimensions: this.getClothingDimensions(size),
+                  weight: this.getShoeWeight(size),
+                  dimensions: this.getShoeDimensions(size),
                   coverImage: imageUrls[0],
-                  lowStockAlert: 2,
+                  lowStockAlert: 5,
                   isActive: true,
                   images: {
                     create: imageUrls.map((url, idx) => ({
@@ -519,7 +630,7 @@ export class ScraperService {
         ),
       },
     };
-    
+
     console.log('=== PRISMA CREATE DATA ===');
     console.log(JSON.stringify(productData, null, 2));
     console.log('===============================');
@@ -530,9 +641,9 @@ export class ScraperService {
 
     this.logger.debug(`Saved product to database: ${product.name}`);
   }
-  
+
   // --------------------------------------------------------------------------------
-  // ⚙️ UTILITIES (Kept from your original service)
+  // 笞呻ｸUTILITIES (Adapted for Shoes)
   // --------------------------------------------------------------------------------
 
   private sanitizeFileName(name: string): string {
@@ -561,33 +672,36 @@ export class ScraperService {
       .toUpperCase()
       .substring(0, 8);
     const variantCode = variant.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-    return `ONLY-${prefix}-${variantCode}-${Date.now()}`;
+    return `MG-${prefix}-${variantCode}-${Date.now()}`;
   }
 
-  // Helper methods for clothing size-based calculations
-  private getClothingWeight(size: string): number {
-    const sizeWeights: Record<string, number> = {
-      'XS': 150,
-      'S': 180,
-      'M': 220,
-      'L': 250,
-      'XL': 300,
-      'XXL': 350
-    };
-    return sizeWeights[size] || 200; // Default weight in grams
+  // Helper methods for shoe size-based calculations
+  private getShoeWeight(size: string): number {
+    const sizeNumber = parseInt(size, 10);
+    // Base weight for a sneaker, increases slightly with size
+    const baseWeight = 850;
+    if (sizeNumber < 40) return baseWeight - 50;
+    if (sizeNumber > 45) return baseWeight + 150;
+    return baseWeight + (sizeNumber - 40) * 25; // Weight in grams
   }
 
-  private getClothingDimensions(size: string): any {
-    const sizeDimensions: Record<string, any> = {
-      'XS': { length: 25, width: 20, height: 2, size },
-      'S': { length: 27, width: 22, height: 2, size },
-      'M': { length: 30, width: 25, height: 2, size },
-      'L': { length: 32, width: 27, height: 2, size },
-      'XL': { length: 35, width: 30, height: 3, size },
-      'XXL': { length: 38, width: 32, height: 3, size }
-    };
-    return sizeDimensions[size] || { length: 30, width: 25, height: 2, size };
+  private getShoeDimensions(size: string): any {
+    const sizeNumber = parseInt(size, 10);
+    // Base dimensions for a shoebox, increases slightly with size
+    const baseLength = 30;
+    const baseWidth = 20;
+    const baseHeight = 12;
+
+    const length = baseLength + Math.floor((sizeNumber - 40) * 0.5);
+    const width = baseWidth;
+    const height = baseHeight;
+
+    return { length, width, height, size }; // Dimensions in cm
   }
+
+  // Keep old names for backward compatibility with existing usage if any
+  private getClothingWeight = this.getShoeWeight;
+  private getClothingDimensions = this.getShoeDimensions;
 
   getScrapingStatus() {
     return this.scrapingStatus;

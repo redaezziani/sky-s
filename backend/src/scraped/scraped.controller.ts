@@ -12,7 +12,7 @@ export class ScrapedController {
   async scrapeParfums(): Promise<{ success: boolean; message: string; data?: any; error?: string }> {
     this.logger.log('Starting parfum scraping process...');
     try {
-      const result = await this.scraperService.scrapeOnlyProductDetail("https://www.only.com/de-de/product/15277952_2161/kapuze-tief-angesetzte-schulter-jacke");
+      const result = await this.scraperService.scrapeOnlyProductDetail("https://www.masongarments.com/products/genova-multicolore-black");
       return {
         success: true,
         message: 'Scraping completed successfully',

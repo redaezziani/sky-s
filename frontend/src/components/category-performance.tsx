@@ -109,7 +109,7 @@ export function ChartCategoryPerformance() {
   };
 
   return (
-    <Card className="@container/card">
+    <Card className="@container/card max-h-96">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
@@ -155,7 +155,7 @@ export function ChartCategoryPerformance() {
       </CardHeader>
 
       <CardContent className="px-3 pt-0 pb-3 sm:px-4">
-        <ChartContainer config={chartConfig} className="w-full h-[400px]">
+        <ChartContainer config={chartConfig} className="w-full h-[300px]">
           <BarChart
             data={processedData}
             margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
