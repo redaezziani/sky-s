@@ -1,6 +1,10 @@
 "use client";
 
-import { IconDotsVertical, IconLogout } from "@tabler/icons-react";
+import {
+  IconDotsVertical,
+  IconLogout,
+  IconSettings,
+} from "@tabler/icons-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -22,7 +26,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 import { getMessages } from "@/lib/locale";
-import { useLocale } from "@/components/local-lang-swither"; 
+import { useLocale } from "@/components/local-lang-swither";
 
 export function NavUser({
   user,
@@ -94,6 +98,16 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
+
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => {
+                router.push("/dashboard/settings");
+              }}
+            >
+              <IconSettings />
+              {t.sidebar.navUser.settings ?? "Settings"}
+            </DropdownMenuItem>
 
             <DropdownMenuSeparator />
 

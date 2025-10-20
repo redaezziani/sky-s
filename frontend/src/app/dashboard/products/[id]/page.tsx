@@ -1,17 +1,34 @@
-'use client'
-import { useEffect, useState } from 'react';
-import React from 'react';
-import { ArrowLeft, Package, DollarSign, Warehouse, Star, Calendar, Image as ImageIcon, Ruler, Edit, Trash2 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Separator } from '@/components/ui/separator';
+"use client";
+import { useEffect, useState } from "react";
+import React from "react";
+import {
+  ArrowLeft,
+  Package,
+  DollarSign,
+  Warehouse,
+  Star,
+  Calendar,
+  Image as ImageIcon,
+  Ruler,
+  Edit,
+  Trash2,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
 // import { Alert, AlertDescription } from '@/components/ui/alert';
-import { axiosInstance } from '@/lib/utils';
-import { IconCircleCheckFilled } from '@tabler/icons-react';
-import { SKUImageGallery } from '@/components/product/id/preview-iamges';
-import Link from 'next/link';
+import { axiosInstance } from "@/lib/utils";
+import { IconCircleCheckFilled } from "@tabler/icons-react";
+import { SKUImageGallery } from "@/components/product/id/preview-iamges";
+import Link from "next/link";
 
 // Types
 type Sku = {
@@ -57,7 +74,11 @@ type Product = {
   updatedAt: string;
 };
 
-export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function ProductDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -67,10 +88,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const res = await axiosInstance.get(`/public/products/${resolvedParams.id}`);
+        const res = await axiosInstance.get(
+          `/public/products/${resolvedParams.id}`
+        );
         setProduct(res.data);
       } catch (err) {
-        setError('Failed to load product details');
+        setError("Failed to load product details");
         console.error(err);
       } finally {
         setLoading(false);
@@ -109,16 +132,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link
-            href={"/dashboard/products"}
-          >
-            <Button
-
-              variant="ghost" size="icon">
+          <Link href={"/dashboard/products"}>
+            <Button variant="ghost" size="icon">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-
         </div>
         <div className="flex  gap-2">
           <Button variant="outline" size="sm">
@@ -136,11 +154,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Starting Price</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Starting Price
+            </CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${product.startingPrice.toFixed(2)}</div>
+            <div className="text-2xl font-bold">
+              ${product.startingPrice.toFixed(2)}
+            </div>
           </CardContent>
         </Card>
 
@@ -151,14 +173,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{product.totalStock}</div>
-            <Badge variant={product.inStock ? "secondary" : "destructive"} className="mt-2">
+            <Badge
+              variant={product.inStock ? "secondary" : "destructive"}
+              className="mt-2"
+            >
               {product.inStock ? (
                 <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
               ) : (
                 <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" />
               )}{" "}
               {product.inStock ? "In Stock" : "Out of Stock"}
-
             </Badge>
           </CardContent>
         </Card>
@@ -169,15 +193,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{product.avgRating.toFixed(1)}</div>
+            <div className="text-2xl font-bold">
+              {product.avgRating.toFixed(1)}
+            </div>
             <div className="flex gap-1 mt-2">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`h-4 w-4 ${i < Math.floor(product.avgRating)
-                    ? "fill-yellow-400 text-yellow-400"
-                    : "text-gray-300"
-                    }`}
+                  className={`h-4 w-4 ${
+                    i < Math.floor(product.avgRating)
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-300"
+                  }`}
                 />
               ))}
             </div>
@@ -192,7 +219,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           <CardContent>
             <div className="text-2xl font-bold">{product.variants.length}</div>
             <p className="text-xs text-muted-foreground mt-2">
-              {product.variants.reduce((acc, v) => acc + v.skus.length, 0)} SKUs total
+              {product.variants.reduce((acc, v) => acc + v.skus.length, 0)} SKUs
+              total
             </p>
           </CardContent>
         </Card>
@@ -209,22 +237,30 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Description</label>
+                <label className="text-sm font-medium text-muted-foreground">
+                  Description
+                </label>
                 <p className="mt-1">{product.description}</p>
               </div>
               <Separator />
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Short Description</label>
+                <label className="text-sm font-medium text-muted-foreground">
+                  Short Description
+                </label>
                 <p className="mt-1">{product.shortDesc}</p>
               </div>
               <Separator />
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <label className="text-sm font-medium text-muted-foreground">Meta Title</label>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Meta Title
+                  </label>
                   <p className="mt-1 text-sm">{product.metaTitle}</p>
                 </div>
                 <div className="flex-1">
-                  <label className="text-sm font-medium text-muted-foreground">Meta Description</label>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Meta Description
+                  </label>
                   <p className="mt-1 text-sm">{product.metaDesc}</p>
                 </div>
               </div>
@@ -235,7 +271,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           <Card>
             <CardHeader>
               <CardTitle>Variants & SKUs</CardTitle>
-              <CardDescription>Manage product variants and stock keeping units</CardDescription>
+              <CardDescription>
+                Manage product variants and stock keeping units
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {product.variants.map((variant) => (
@@ -253,7 +291,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                           ))}
                         {Object.entries(variant.attributes).length > 2 && (
                           <Badge variant="secondary">
-                            +{Object.entries(variant.attributes).length - 2} more
+                            +{Object.entries(variant.attributes).length - 2}{" "}
+                            more
                           </Badge>
                         )}
                       </div>
@@ -278,15 +317,23 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                             <p className="font-mono text-sm">{sku.sku}</p>
                           </div>
                           <div>
-                            <p className="text-xs text-muted-foreground">Price</p>
-                            <p className="font-semibold">${sku.price.toFixed(2)}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Price
+                            </p>
+                            <p className="font-semibold">
+                              ${sku.price.toFixed(2)}
+                            </p>
                           </div>
                           <div>
-                            <p className="text-xs text-muted-foreground">Stock</p>
+                            <p className="text-xs text-muted-foreground">
+                              Stock
+                            </p>
                             <p className="font-semibold">{sku.stock} units</p>
                           </div>
                           <div>
-                            <p className="text-xs text-muted-foreground">Size</p>
+                            <p className="text-xs text-muted-foreground">
+                              Size
+                            </p>
                             <p className="text-sm">{sku.dimensions.size}</p>
                           </div>
                         </div>

@@ -3,12 +3,7 @@
 import * as React from "react";
 import useSWR from "swr";
 import { TrendingUp } from "lucide-react";
-import {
-  Label,
-  PolarRadiusAxis,
-  RadialBar,
-  RadialBarChart,
-} from "recharts";
+import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts";
 
 import {
   Card,
@@ -59,20 +54,33 @@ export function ChartTopProductsRadar() {
 
   const processedData = React.useMemo(() => {
     if (!topProductsMetrics || topProductsMetrics.length === 0) return [];
-    
-    // Take top 2 products for stacked radial chart
-    const topTwo = topProductsMetrics.slice(0, 2);
-    return [{
-      product1: topTwo[0]?.totalOrdered || 0,
-      product2: topTwo[1]?.totalOrdered || 0,
-      product1Name: topTwo[0]?.label || "Product 1",
-      product2Name: topTwo[1]?.label || "Product 2",
-    }];
+    // Take top 5 products for stacked radial chart
+    const topFive = topProductsMetrics.slice(0, 5);
+    return [
+      {
+        product1: topFive[0]?.totalOrdered || 0,
+        product2: topFive[1]?.totalOrdered || 0,
+        product3: topFive[2]?.totalOrdered || 0,
+        product4: topFive[3]?.totalOrdered || 0,
+        product5: topFive[4]?.totalOrdered || 0,
+        product1Name: topFive[0]?.label || "Product 1",
+        product2Name: topFive[1]?.label || "Product 2",
+        product3Name: topFive[2]?.label || "Product 3",
+        product4Name: topFive[3]?.label || "Product 4",
+        product5Name: topFive[4]?.label || "Product 5",
+      },
+    ];
   }, [topProductsMetrics]);
 
   const totalOrders = React.useMemo(() => {
     if (processedData.length === 0) return 0;
-    return processedData[0].product1 + processedData[0].product2;
+    return (
+      processedData[0].product1 +
+      processedData[0].product2 +
+      processedData[0].product3 +
+      processedData[0].product4 +
+      processedData[0].product5
+    );
   }, [processedData]);
 
   const chartConfig = {
@@ -84,10 +92,22 @@ export function ChartTopProductsRadar() {
       label: processedData[0]?.product2Name || "Product 2",
       color: "var(--chart-2)",
     },
+    product3: {
+      label: processedData[0]?.product3Name || "Product 3",
+      color: "var(--chart-3)",
+    },
+    product4: {
+      label: processedData[0]?.product4Name || "Product 4",
+      color: "var(--chart-4)",
+    },
+    product5: {
+      label: processedData[0]?.product5Name || "Product 5",
+      color: "var(--chart-5)",
+    },
   } satisfies ChartConfig;
 
   return (
-    <Card className="@container/card flex flex-col">
+    <Card className="@container/card flex flex-col max-h-[27rem]">
       <CardHeader className="flex items-center justify-between">
         <div className="space-y-1">
           <CardTitle className="text-lg">{t.title}</CardTitle>
@@ -124,7 +144,7 @@ export function ChartTopProductsRadar() {
       <CardContent className="flex flex-1 items-center pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square w-full max-w-[250px]"
+          className="mx-auto aspect-square w-full max-w-[230px]"
         >
           <RadialBarChart
             data={processedData}
@@ -172,6 +192,27 @@ export function ChartTopProductsRadar() {
             <RadialBar
               dataKey="product2"
               fill="var(--color-product2)"
+              stackId="a"
+              cornerRadius={5}
+              className="stroke-transparent stroke-2"
+            />
+            <RadialBar
+              dataKey="product3"
+              fill="var(--color-product3)"
+              stackId="a"
+              cornerRadius={5}
+              className="stroke-transparent stroke-2"
+            />
+            <RadialBar
+              dataKey="product4"
+              fill="var(--color-product4)"
+              stackId="a"
+              cornerRadius={5}
+              className="stroke-transparent stroke-2"
+            />
+            <RadialBar
+              dataKey="product5"
+              fill="var(--color-product5)"
               stackId="a"
               cornerRadius={5}
               className="stroke-transparent stroke-2"

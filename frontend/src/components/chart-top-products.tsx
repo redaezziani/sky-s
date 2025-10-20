@@ -107,11 +107,11 @@ export function ChartTopProducts() {
     if (!topProductsMetrics || topProductsMetrics.length === 0) return [];
 
     const chartColors = [
-      "oklch(0.4422 0.1021 254.51)",
-      "oklch(88.03% 0.1347 86.064)",
-      "oklch(var(--chart-3))",
-      "oklch(var(--chart-4))",
-      "oklch(var(--chart-5))",
+      "var(--chart-1)",
+      "var(--chart-2)",
+      "var(--chart-3)",
+      "var(--chart-4)",
+      "var(--chart-5)",
     ];
 
     // Sort by totalOrdered (highest first) and take top 5
@@ -136,7 +136,7 @@ export function ChartTopProducts() {
   );
 
   return (
-    <Card className="@container/card max-h-96">
+    <Card className="@container/card max-h-[27rem]">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
@@ -144,7 +144,8 @@ export function ChartTopProducts() {
               {t.title || "Top 5 Products"}
             </CardTitle>
             <CardDescription className="text-sm">
-              {t.description || "Breakdown of top-selling products by total orders."}
+              {t.description ||
+                "Breakdown of top-selling products by total orders."}
             </CardDescription>
           </div>
           {/* Time Range Selector */}

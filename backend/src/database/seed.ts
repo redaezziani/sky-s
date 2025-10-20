@@ -34,7 +34,7 @@ async function seedAll() {
   // await seedUsers();
   // await seedCategories();
   // await seedProducts();
-  // await seedOrders();
+  await seedOrders();
   await seedReviews(); // Add this
 
   console.log('✅ All data seeded');
@@ -46,7 +46,8 @@ async function main() {
   try {
     const args = process.argv.slice(2);
     const shouldClear = args.includes('--clear') || args.includes('-c');
-    const shouldSeed = args.includes('--seed') || args.includes('-s') || args.length === 0;
+    const shouldSeed =
+      args.includes('--seed') || args.includes('-s') || args.length === 0;
 
     if (shouldClear) {
       await clearAll();

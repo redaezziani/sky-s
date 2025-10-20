@@ -99,7 +99,7 @@ export function ChartCategoryPerformance() {
     },
     totalRevenue: {
       label: t.labels?.totalRevenue || "Total Revenue",
-      color: "#ff3fe1",
+      color: "var(--chart-2)",
     },
     totalProducts: {
       label: t.labels?.totalProducts || "Total Products",
@@ -109,7 +109,7 @@ export function ChartCategoryPerformance() {
   };
 
   return (
-    <Card className="@container/card max-h-96">
+    <Card className="@container/card max-h-[27rem]">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
