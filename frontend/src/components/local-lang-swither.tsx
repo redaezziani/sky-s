@@ -1,17 +1,18 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { useLocale as useNextIntlLocale } from "next-intl";
-import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Locale } from "@/lib/locale";
+import { setUserLocale } from "@/services/locale";
 
 // Locales list
 const localesList: { key: Locale; label: string }[] = [
   { key: "en", label: "EN" },
   { key: "es", label: "ES" },
   { key: "fr", label: "FR" },
+  { key: "ar", label: "AR" },
 ];
 
 // ---------- Locale Switcher ----------
@@ -19,11 +20,16 @@ export type LocaleSwitcherProps = {
   className?: string;
 };
 
+// ---------- useLocale Hook ----------
+export const useLocale = () => {
+  const locale = useNextIntlLocale() as Locale;
+  return { locale };
+};
+
 export const LocaleSwitcher = ({ className }: LocaleSwitcherProps) => {
   const currentLocale = useNextIntlLocale() as Locale;
-  const router = useRouter();
-  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     setMounted(true);
@@ -31,12 +37,12 @@ export const LocaleSwitcher = ({ className }: LocaleSwitcherProps) => {
 
   const handleClick = useCallback(
     (newLocale: Locale) => {
-      // Remove current locale prefix from pathname
-      const pathWithoutLocale = pathname.replace(/^\/(en|es|fr)/, '');
-      // Navigate to new locale
-      router.push(`/${newLocale}${pathWithoutLocale || '/'}`);
+      startTransition(async () => {
+        await setUserLocale(newLocale);
+        window.location.reload();
+      });
     },
-    [pathname, router]
+    []
   );
 
   if (!mounted) return null;
@@ -57,6 +63,7 @@ export const LocaleSwitcher = ({ className }: LocaleSwitcherProps) => {
             aria-label={label}
             className="relative h-6 w-6 rounded-full"
             onClick={() => handleClick(key)}
+            disabled={isPending}
           >
             {isActive && (
               <motion.div

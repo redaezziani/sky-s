@@ -35,6 +35,7 @@ export function NavUser({
   const { logout } = useAuth();
   const router = useRouter();
   const t = useTranslations('sidebar.navUser');
+  const tLinks = useTranslations('sidebar.links');
 
   const handleLogout = async () => {
     try {
@@ -101,7 +102,7 @@ export function NavUser({
               }}
             >
               <IconSettings />
-              {t('settings', { defaultValue: 'Settings' })}
+              {tLinks('settings')}
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />

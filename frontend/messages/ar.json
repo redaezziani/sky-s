@@ -1,0 +1,614 @@
+{
+  "sidebar": {
+    "storeManager": "مدير المتجر",
+    "user": "المستخدم",
+    "links": {
+      "dashboard": "لوحة التحكم",
+      "users": "المستخدمون",
+      "roles": "الأدوار",
+      "categories": "الفئات",
+      "products": "المنتجات",
+      "productVariants": "أشكال المنتجات",
+      "skus": "الأكواد والمخزون",
+      "orders": "الطلبات",
+      "orderItems": "عناصر الطلبات",
+      "reviews": "التقييمات",
+      "analytics": "التحليلات",
+      "settings": "الإعدادات"
+    },
+    "navUser": {
+      "logout": "تسجيل الخروج",
+      "logoutWarningTitle": "تحذير تسجيل الخروج",
+      "logoutWarningDesc": "لقد قمت بتسجيل الخروج محليًا، لكن قد يكون تسجيل الخروج من الخادم قد فشل."
+    }
+  },
+  "pagination": {
+    "rowsPerPage": "صفوف لكل صفحة",
+    "selectRows": "اختر الصفوف",
+    "of": "/",
+    "firstPage": "الصفحة الأولى",
+    "prevPage": "الصفحة السابقة",
+    "nextPage": "الصفحة التالية",
+    "lastPage": "الصفحة الأخيرة"
+  },
+  "multiImageUploader": {
+    "dropHere": "أسقط صورك هنا",
+    "selectImages": "اختر الصور",
+    "formats": "SVG، PNG، JPG أو GIF (بحد أقصى {maxSizeMB}ميجابايت)",
+    "errors": {
+      "maxSize": "{name} يتجاوز الحد الأقصى لحجم الملف"
+    }
+  },
+  "pages": {
+    "forgotPassword": {
+      "title": "إعادة تعيين كلمة المرور",
+      "description": {
+        "initial": "أدخل عنوان بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين",
+        "success": "تحقق من بريدك الإلكتروني للحصول على رابط إعادة تعيين كلمة المرور"
+      },
+      "sending": "جاري إرسال رابط إعادة التعيين...",
+      "sent": "تم إرسال البريد الإلكتروني!",
+      "sendLink": "إرسال رابط إعادة التعيين",
+      "email": "البريد الإلكتروني",
+      "toast": {
+        "successTitle": "تم إرسال رابط إعادة التعيين!",
+        "successDescription": "إذا كان هناك حساب بهذا البريد الإلكتروني، فقد أرسلنا رابط إعادة تعيين كلمة المرور.",
+        "failedTitle": "فشل إرسال رابط إعادة التعيين",
+        "failedDescription": "حدث خطأ. يرجى المحاولة مرة أخرى."
+      },
+      "messages": {
+        "sentTitle": "تم إرسال رابط إعادة التعيين",
+        "sentDescription": "لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى {email}. يرجى التحقق من بريدك الإلكتروني واتباع التعليمات."
+      },
+      "actions": {
+        "sendAnotherLink": "إرسال رابط آخر",
+        "rememberPassword": "تتذكر كلمة المرور؟",
+        "signIn": "تسجيل الدخول"
+      }
+    },
+    "login": {
+      "title": "تسجيل الدخول",
+      "description": "أدخل بريدك الإلكتروني وكلمة المرور للوصول إلى حسابك",
+      "loggingIn": "جاري تسجيل الدخول...",
+      "login": "دخول",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "forgotPassword": "نسيت كلمة المرور؟",
+      "noAccount": "ليس لديك حساب؟",
+      "signUp": "إنشاء حساب",
+      "toast": {
+        "failed": "فشل تسجيل الدخول",
+        "invalid": "البريد الإلكتروني أو كلمة المرور غير صحيحة."
+      }
+    },
+    "skus": {
+      "title": "إدارة الأكواد والمخزون",
+      "description": "إدارة أكواد المنتجات والأسعار ومستويات المخزون",
+      "components": {
+        "skuTable": {
+          "title": "قائمة الأكواد",
+          "table": {
+            "selectRow": "اختر هذا الصف",
+            "sku": "الكود",
+            "productVariant": "المنتج / الشكل",
+            "pricing": "التسعير",
+            "cost": "التكلفة",
+            "stock": "المخزون",
+            "units": "الوحدات",
+            "alert": "تنبيه",
+            "details": "التفاصيل",
+            "weight": "الوزن",
+            "dimensions": "الأبعاد",
+            "status": "الحالة",
+            "active": "نشط",
+            "inactive": "غير نشط",
+            "searchPlaceholder": "بحث عن كود...",
+            "empty": "لم يتم العثور على أكواد",
+            "deleteSelected": "حذف {0} محددة",
+            "addSKU": "إضافة كود",
+            "edit": "تعديل",
+            "delete": "حذف",
+            "openMenu": "فتح قائمة الإجراءات",
+            "created": "تاريخ الإنشاء",
+            "actions": "الإجراءات"
+          },
+          "dialogs": {
+            "deleteTitle": "حذف الكود",
+            "deleteDesc": "هل أنت متأكد من رغبتك في حذف هذا الكود؟ لا يمكن التراجع عن هذا الإجراء.",
+            "bulkDeleteTitle": "حذف الأكواد المحددة",
+            "bulkDeleteDesc": "هل أنت متأكد من رغبتك في حذف الأكواد المحددة البالغ عددها {0}؟ لا يمكن التراجع عن هذا الإجراء.",
+            "cancel": "إلغاء",
+            "delete": "حذف"
+          },
+          "toast": {
+            "skuDeleted": "تم حذف الكود",
+            "skuDeleteFailed": "فشل حذف الكود",
+            "bulkDeleted": "تم حذف {0} أكواد",
+            "bulkDeleteFailed": "فشل حذف الأكواد المحددة"
+          },
+          "stock": {
+            "inStock": "متوفر",
+            "lowStock": "مخزون منخفض",
+            "outOfStock": "نفذ المخزون"
+          }
+        }
+      },
+      "dialogs": {
+        "createSKU": {
+          "title": "إنشاء كود",
+          "description": "إضافة كود جديد لشكل منتج وتحديد معلومات التسعير والمخزون.",
+          "fields": {
+            "productVariant": "شكل المنتج",
+            "sku": "رمز الكود (اختياري)",
+            "barcode": "الباركود (اختياري)",
+            "price": "السعر",
+            "comparePrice": "سعر المقارنة (اختياري)",
+            "costPrice": "سعر التكلفة (اختياري)",
+            "stock": "كمية المخزون",
+            "lowStockAlert": "تنبيه المخزون المنخفض",
+            "weight": "الوزن (اختياري)",
+            "dimensions": "الأبعاد (اختياري)",
+            "isActive": "نشط",
+            "images": "صور الكود (اختياري)"
+          },
+          "placeholders": {
+            "sku": "مثال: TSHIRT-COT-M-BLK",
+            "barcode": "مثال: 1234567890123",
+            "dimensions": "{\"length\":10,\"width\":5,\"height\":2}"
+          },
+          "submit": {
+            "creating": "جاري الإنشاء...",
+            "create": "إنشاء كود",
+            "cancel": "إلغاء"
+          }
+        },
+        "editSKU": {
+          "title": "تعديل الكود",
+          "description": "تحديث تفاصيل الكود والتسعير والمخزون والصور.",
+          "fields": {
+            "variant": "شكل المنتج",
+            "sku": "رمز الكود",
+            "barcode": "الباركود",
+            "price": "السعر",
+            "comparePrice": "سعر المقارنة",
+            "costPrice": "سعر التكلفة",
+            "stock": "المخزون",
+            "lowStockAlert": "تنبيه المخزون المنخفض",
+            "weight": "الوزن",
+            "dimensions": "الأبعاد",
+            "isActive": "نشط",
+            "images": "الصور"
+          },
+          "placeholders": {
+            "selectVariant": "اختر شكل منتج",
+            "sku": "أدخل رمز الكود",
+            "barcode": "أدخل الباركود",
+            "dimensions": "{\"length\":10,\"width\":5,\"height\":2}"
+          },
+          "actions": {
+            "update": "تحديث الكود",
+            "updating": "جاري التحديث...",
+            "cancel": "إلغاء",
+            "deleteImage": "حذف الصورة"
+          },
+          "toast": {
+            "success": "تم تحديث الكود بنجاح",
+            "failed": "فشل تحديث الكود",
+            "imageDeleted": "تم حذف الصورة",
+            "imageDeleteFailed": "فشل حذف الصورة"
+          }
+        }
+      },
+      "stock": {
+        "inStock": "متوفر",
+        "lowStock": "مخزون منخفض",
+        "outOfStock": "نفذ المخزون"
+      }
+    },
+    "orders": {
+      "title": "إدارة الطلبات",
+      "description": "إدارة طلبات العملاء والمدفوعات ومعلومات الشحن",
+      "components": {
+        "ordersTable": {
+          "title": "قائمة الطلبات",
+          "table": {
+            "selectRow": "اختر هذا الصف",
+            "orderNumber": "رقم الطلب",
+            "status": "الحالة",
+            "paymentStatus": "الدفع",
+            "total": "المجموع",
+            "createdAt": "تاريخ الإنشاء",
+            "actions": "الإجراءات",
+            "searchPlaceholder": "بحث برقم الطلب أو المستخدم أو الحالة...",
+            "empty": "لم يتم العثور على طلبات",
+            "deleteSelected": "حذف {0} محددة",
+            "viewInvoice": "عرض الفاتورة",
+            "cancelOrder": "إلغاء الطلب"
+          },
+          "dialogs": {
+            "deleteTitle": "حذف الطلب",
+            "deleteDesc": "هل أنت متأكد من رغبتك في حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء.",
+            "bulkDeleteTitle": "حذف الطلبات المحددة",
+            "bulkDeleteDesc": "هل أنت متأكد من رغبتك في حذف الطلبات المحددة البالغ عددها {0}؟ لا يمكن التراجع عن هذا الإجراء.",
+            "cancel": "إلغاء",
+            "delete": "حذف"
+          },
+          "toast": {
+            "success": "تم حذف الطلب بنجاح",
+            "failed": "فشل حذف الطلب",
+            "bulkDeleted": "تم حذف {0} طلبات بنجاح",
+            "bulkDeleteFailed": "فشل حذف الطلبات المحددة"
+          }
+        }
+      },
+      "dialogs": {
+        "orderDetails": {
+          "title": "تفاصيل الطلب #{orderNumber}",
+          "viewDetails": "عرض التفاصيل",
+          "sections": {
+            "generalInfo": "المعلومات العامة",
+            "shippingInfo": "معلومات الشحن",
+            "billingInfo": "معلومات الفوترة",
+            "items": "عناصر الطلب",
+            "totals": "الإجماليات",
+            "deliveryLocation": "موقع التسليم"
+          },
+          "fields": {
+            "status": "الحالة",
+            "payment": "الدفع",
+            "user": "المستخدم",
+            "createdAt": "تاريخ الإنشاء",
+            "name": "الاسم",
+            "email": "البريد الإلكتروني",
+            "phone": "الهاتف",
+            "address": "العنوان",
+            "subtotal": "المجموع الفرعي",
+            "tax": "الضريبة",
+            "shipping": "الشحن",
+            "discount": "الخصم",
+            "total": "المجموع الكلي"
+          },
+          "labels": {
+            "qty": "الكمية: {qty}"
+          }
+        },
+        "createOrder": {
+          "trigger": "إضافة طلب",
+          "title": "إنشاء طلب جديد",
+          "description": "إضافة طلب جديد. يمكنك تحديد منتجات متعددة ومعلومات الشحن.",
+          "sections": {
+            "user": "المستخدم",
+            "orderItems": "عناصر الطلب",
+            "delivery": "التوصيل",
+            "shipping": "معلومات الشحن",
+            "billing": "معلومات الفوترة",
+            "notes": "الملاحظات",
+            "trackingNumber": "رقم التتبع"
+          },
+          "fields": {
+            "sku": "الكود",
+            "quantity": "الكمية",
+            "deliveryLat": "خط العرض",
+            "deliveryLng": "خط الطول",
+            "deliveryPlace": "المكان",
+            "shippingName": "اسم الشحن",
+            "shippingEmail": "بريد الشحن الإلكتروني",
+            "shippingPhone": "هاتف الشحن",
+            "shippingAddress": "عنوان الشحن (JSON)",
+            "billingName": "اسم الفوترة",
+            "billingEmail": "بريد الفوترة الإلكتروني",
+            "billingAddress": "عنوان الفوترة (JSON)"
+          },
+          "actions": {
+            "addItem": "إضافة عنصر",
+            "removeItem": "إزالة",
+            "cancel": "إلغاء",
+            "create": "إنشاء طلب",
+            "creating": "جاري الإنشاء..."
+          },
+          "placeholders": {
+            "selectUser": "اختر مستخدم",
+            "selectSKU": "اختر كود"
+          },
+          "errors": {
+            "userRequired": "الرجاء اختيار مستخدم",
+            "skuRequired": "الرجاء اختيار كود",
+            "quantityMin": "يجب أن تكون الكمية 1 على الأقل"
+          },
+          "status": {
+            "detectingLocation": "جاري تحديد الموقع...",
+            "locationError": "فشل الحصول على الموقع"
+          },
+          "toast": {
+            "success": "تم إنشاء الطلب",
+            "failed": "فشل إنشاء الطلب"
+          }
+        },
+        "updateOrder": {
+          "trigger": "تعديل الطلب",
+          "title": "تحديث الطلب #{orderNumber}",
+          "description": "تعديل طلب موجود. يمكنك تغيير تفاصيل الشحن والعناصر.",
+          "sections": {
+            "shippingInfo": "معلومات الشحن",
+            "billingInfo": "معلومات الفوترة",
+            "delivery": "موقع التسليم",
+            "status": "الحالة",
+            "notes": "الملاحظات",
+            "trackingNumber": "رقم التتبع"
+          },
+          "fields": {
+            "status": "حالة الطلب",
+            "paymentStatus": "حالة الدفع",
+            "shippingName": "اسم الشحن",
+            "shippingEmail": "بريد الشحن الإلكتروني",
+            "shippingPhone": "هاتف الشحن",
+            "shippingAddress": "عنوان الشحن (JSON)",
+            "billingName": "اسم الفوترة",
+            "billingEmail": "بريد الفوترة الإلكتروني",
+            "billingAddress": "عنوان الفوترة (JSON)",
+            "deliveryLat": "خط العرض",
+            "deliveryLng": "خط الطول",
+            "deliveryPlace": "المكان",
+            "notes": "الملاحظات",
+            "trackingNumber": "رقم التتبع",
+            "sku": "الكود",
+            "quantity": "الكمية"
+          },
+          "actions": {
+            "saveChanges": "حفظ التغييرات",
+            "cancel": "إلغاء",
+            "addItem": "إضافة عنصر",
+            "removeItem": "إزالة"
+          },
+          "placeholders": {
+            "selectStatus": "اختر الحالة",
+            "selectPaymentStatus": "اختر حالة الدفع",
+            "selectSKU": "اختر كود"
+          },
+          "errors": {
+            "statusRequired": "حالة الطلب مطلوبة",
+            "paymentStatusRequired": "حالة الدفع مطلوبة",
+            "skuRequired": "الكود مطلوب",
+            "quantityMin": "يجب أن تكون الكمية 1 على الأقل"
+          },
+          "toast": {
+            "success": "تم تحديث الطلب بنجاح",
+            "failed": "فشل تحديث الطلب"
+          }
+        }
+      }
+    },
+    "orderItems": {
+      "title": "إدارة عناصر الطلبات",
+      "description": "إدارة تفاصيل وكمية وسعر العناصر المدرجة في الطلب",
+      "components": {
+        "orderItemsTable": {
+          "title": "قائمة عناصر الطلبات",
+          "table": {
+            "selectRow": "اختر هذا الصف",
+            "orderNumber": "رقم الطلب",
+            "sku": "الكود / اسم المنتج",
+            "quantity": "الكمية",
+            "unitPrice": "سعر الوحدة",
+            "totalPrice": "المجموع",
+            "actions": "الإجراءات",
+            "searchPlaceholder": "بحث بالكود أو اسم المنتج...",
+            "empty": "لم يتم العثور على عناصر طلبات",
+            "deleteSelected": "حذف {0} عناصر محددة"
+          },
+          "dialogs": {
+            "deleteTitle": "حذف عنصر الطلب",
+            "deleteDesc": "هل أنت متأكد من رغبتك في حذف عنصر الطلب هذا؟ لا يمكن التراجع عن هذا الإجراء.",
+            "bulkDeleteTitle": "حذف عناصر الطلبات المحددة",
+            "bulkDeleteDesc": "هل أنت متأكد من رغبتك في حذف عناصر الطلبات المحددة البالغ عددها {0}؟ لا يمكن التراجع عن هذا الإجراء.",
+            "cancel": "إلغاء",
+            "delete": "حذف"
+          },
+          "toast": {
+            "itemDeleted": "تم حذف عنصر الطلب",
+            "itemDeleteFailed": "فشل حذف عنصر الطلب",
+            "bulkDeleted": "تم حذف {0} عناصر طلبات",
+            "bulkDeleteFailed": "فشل حذف عناصر الطلبات"
+          }
+        }
+      }
+    },
+    "analytics": {
+      "components": {
+        "sectionCards": {
+          "totalOrders": {
+            "title": "إجمالي الطلبات",
+            "description": "الطلبات المقدمة في آخر 30 يومًا"
+          },
+          "revenue": {
+            "title": "الإيرادات",
+            "description": "الإيرادات المحققة في آخر 30 يومًا"
+          },
+          "activeUsers": {
+            "title": "المستخدمون النشطون",
+            "description": "المستخدمون الذين سجلوا الدخول خلال آخر 30 يومًا"
+          },
+          "productsSold": {
+            "title": "المنتجات المباعة",
+            "description": "إجمالي المنتجات المباعة في آخر 30 يومًا"
+          }
+        },
+        "chartAreaInteractive": {
+          "title": "التحليلات",
+          "description": {
+            "desktop": "الإجمالي للفترة المحددة",
+            "mobile": "الفترة المحددة"
+          },
+          "periods": {
+            "90d": "آخر 3 أشهر",
+            "30d": "آخر 30 يومًا",
+            "7d": "آخر 7 أيام"
+          },
+          "chartLabels": {
+            "orders": "الطلبات",
+            "revenue": "الإيرادات",
+            "products": "المنتجات"
+          },
+          "selectPeriodPlaceholder": "اختر الفترة"
+        },
+        "chartTopProducts": {
+          "title": "أفضل 10 منتجات",
+          "description": "المنتجات الأكثر طلبًا",
+          "selectPeriodPlaceholder": "اختر الفترة",
+          "periods": {
+            "90d": "آخر 3 أشهر",
+            "30d": "آخر 30 يومًا",
+            "7d": "آخر 7 أيام"
+          },
+          "labels": {
+            "totalOrdered": "إجمالي الطلبات"
+          }
+        },
+        "chartTopProductsRadar": {
+          "title": "أفضل 10 منتجات",
+          "description": "المنتجات الأكثر طلبًا",
+          "selectPeriodPlaceholder": "اختر الفترة",
+          "periods": {
+            "90d": "آخر 3 أشهر",
+            "30d": "آخر 30 يومًا",
+            "7d": "آخر 7 أيام"
+          },
+          "labels": {
+            "totalOrdered": "إجمالي الطلبات"
+          },
+          "labelSuffix": "الفترة"
+        },
+        "chartCategoryPerformance": {
+          "title": "أداء الفئات",
+          "description": "مقاييس الأداء حسب فئة المنتج للفترة المحددة",
+          "selectPeriodPlaceholder": "اختر الفترة",
+          "periods": {
+            "90d": "آخر 3 أشهر",
+            "30d": "آخر 30 يومًا",
+            "7d": "آخر 7 أيام"
+          },
+          "labels": {
+            "totalOrders": "إجمالي الطلبات",
+            "totalRevenue": "إجمالي الإيرادات",
+            "totalProducts": "إجمالي المنتجات"
+          }
+        }
+      }
+    },
+    "settings": {
+      "title": "الإعدادات",
+      "description": "إدارة إعدادات التطبيق الخاصة بك",
+      "auth": {
+        "title": "المصادقة",
+        "changePassword": {
+          "currentPassword": "كلمة المرور الحالية",
+          "newPassword": "كلمة المرور الجديدة",
+          "save": "حفظ",
+          "saving": "جاري الحفظ..."
+        },
+        "logout": {
+          "currentDevice": {
+            "label": "تسجيل الخروج من الجهاز الحالي",
+            "button": "تسجيل الخروج",
+            "processing": "جاري المعالجة..."
+          },
+          "allDevices": {
+            "label": "تسجيل الخروج من جميع الأجهزة",
+            "button": "تسجيل الخروج من الكل",
+            "processing": "جاري المعالجة..."
+          }
+        },
+        "toast": {
+          "passwordChanged": "تم تغيير كلمة المرور بنجاح",
+          "passwordChangeFailed": "فشل تغيير كلمة المرور",
+          "logoutSuccess": "تم تسجيل الخروج بنجاح",
+          "logoutFailed": "فشل تسجيل الخروج",
+          "logoutAllSuccess": "تم تسجيل الخروج من جميع الأجهزة بنجاح",
+          "logoutAllFailed": "فشل تسجيل الخروج من جميع الأجهزة"
+        }
+      }
+    },
+    "variants": {
+      "components": {
+        "variantTable": {
+          "title": "قائمة الأشكال",
+          "table": {
+            "selectRow": "اختر الصف",
+            "name": "الاسم",
+            "attributes": "الخصائص",
+            "skus": "الكود",
+            "status": "الحالة",
+            "created": "تاريخ الإنشاء",
+            "actions": "الإجراءات",
+            "openMenu": "فتح القائمة",
+            "edit": "تعديل",
+            "delete": "حذف",
+            "searchPlaceholder": "بحث بالاسم أو المنتج",
+            "active": "نشط",
+            "inactive": "غير نشط"
+          },
+          "toast": {
+            "deleted": "تم حذف الشكل",
+            "deleteFailed": "فشل حذف الشكل",
+            "bulkDeleted": "تم حذف {0} أشكال",
+            "bulkDeleteFailed": "فشل حذف أشكال متعددة"
+          },
+          "dialogs": {
+            "deleteTitle": "حذف الشكل؟",
+            "deleteDesc": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف الشكل نهائيًا.",
+            "bulkDeleteTitle": "حذف الأشكال المحددة؟",
+            "bulkDeleteDesc": "أنت على وشك حذف {0} أشكال. لا يمكن التراجع عن هذا الإجراء.",
+            "cancel": "إلغاء",
+            "delete": "حذف"
+          }
+        },
+        "dialogs": {
+          "createProductVariant": {
+            "title": "إنشاء شكل منتج",
+            "description": "أضف شكل منتج جديد وحدد خصائصه ومعلومات المخزون.",
+            "fields": {
+              "product": "المنتج",
+              "name": "اسم الشكل",
+              "attributes": "الخصائص",
+              "sortOrder": "ترتيب العرض",
+              "isActive": "نشط"
+            },
+            "placeholders": {
+              "selectProduct": "اختر منتج",
+              "name": "مثال: أحمر / مقاس M",
+              "attributeName": "اسم الخاصية",
+              "attributeValue": "قيمة الخاصية"
+            },
+            "hints": {
+              "name": "اسم الشكل اختياري",
+              "attributes": "يمكنك إضافة خصائص اختيارية للشكل",
+              "sortOrder": "حدد ترتيب العرض برقم",
+              "isActive": "إذا تم التعطيل، فلن يكون مرئيًا"
+            },
+            "actions": {
+              "addAttribute": "إضافة خاصية",
+              "removeAttribute": "إزالة"
+            },
+            "submit": {
+              "creating": "جاري الإنشاء...",
+              "create": "إنشاء",
+              "cancel": "إلغاء"
+            },
+            "toast": {
+              "variantCreated": "تم إنشاء الشكل بنجاح",
+              "variantCreateFailed": "فشل إنشاء الشكل"
+            }
+          }
+        }
+      }
+    },
+    "common": {
+      "unknownProduct": "منتج غير معروف",
+      "noAttributes": "لا توجد خصائص"
+    }
+  },
+  "app": {
+    "title": "متجر سكاي - منصة تجارة إلكترونية مفتوحة المصدر",
+    "description": "متجر سكاي هو منصة تجارة إلكترونية حديثة وقابلة للتوسع ومفتوحة المصدر مبنية باستخدام Next.js و Prisma. توفر ميزات مثل إدارة المنتجات ومعالجة الطلبات ومصادقة المستخدم."
+  }
+}

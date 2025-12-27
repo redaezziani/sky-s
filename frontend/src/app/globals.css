@@ -4,6 +4,15 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Arabic Font */
+@font-face {
+  font-family: 'Arabic Font';
+  src: url('/font/arabic-font.otf') format('opentype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --color-1: oklch(75.26% 0.1653 29.644);
   --color-2: oklab(32.915% -0.0409 -0.04214);
@@ -129,5 +138,12 @@
   body {
     @apply bg-background text-foreground;
     font-family: "Onest", sans-serif;
+  }
+
+  /* Apply Arabic font when lang is ar */
+  :root:has(html[lang="ar"]) body,
+  html[lang="ar"] body {
+    font-family: "Arabic Font", "Onest", sans-serif;
+    direction: rtl;
   }
 }
