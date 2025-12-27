@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/select";
 import { Edit } from "lucide-react";
 import { Loader } from "../loader";
+import { useLocale } from "@/components/local-lang-swither";
+import { getMessages } from "@/lib/locale";
 
 interface EditUserDialogProps {
   user: User | null;
@@ -35,6 +37,9 @@ export function EditUserDialog({ user }: EditUserDialogProps) {
   const [role, setRole] = useState<UserRole>(UserRole.USER);
   const [isActive, setIsActive] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+  const { locale } = useLocale();
+  const lang = getMessages(locale);
+  const t = lang.pages?.users?.dialogs?.editUser || {};
 
   useEffect(() => {
     if (user) {
@@ -78,15 +83,15 @@ export function EditUserDialog({ user }: EditUserDialogProps) {
       <DialogTrigger asChild>
         <span className="relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden">
           <Edit className="mr-2 h-4 w-4" />
-          Edit
+          {t.trigger || "Edit"}
         </span>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit User</DialogTitle>
+          <DialogTitle>{t.title || "Edit User"}</DialogTitle>
           <DialogDescription>
-            Update user account information.
+            {t.description || "Update user account information."}
           </DialogDescription>
         </DialogHeader>
 
@@ -94,24 +99,24 @@ export function EditUserDialog({ user }: EditUserDialogProps) {
           <div className="grid gap-4 py-4">
             {/* Name */}
             <div className="grid gap-2">
-              <Label htmlFor="edit-name">Name *</Label>
+              <Label htmlFor="edit-name">{t.fields?.name || "Name"} *</Label>
               <Input
                 id="edit-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Enter full name"
+                placeholder={t.placeholders?.name || "Enter full name"}
                 required
               />
             </div>
 
             {/* Email - Read only in edit mode */}
             <div className="grid gap-2">
-              <Label htmlFor="edit-email">Email</Label>
+              <Label htmlFor="edit-email">{t.fields?.email || "Email"}</Label>
               <Input
                 id="edit-email"
                 type="email"
                 value={user?.email || ""}
-                placeholder="Email cannot be changed"
+                placeholder={t.placeholders?.emailDisabled || "Email cannot be changed"}
                 disabled
                 className="bg-muted"
               />
@@ -119,28 +124,28 @@ export function EditUserDialog({ user }: EditUserDialogProps) {
 
             {/* Password */}
             <div className="grid gap-2">
-              <Label htmlFor="edit-password">Password</Label>
+              <Label htmlFor="edit-password">{t.fields?.password || "Password"}</Label>
               <Input
                 id="edit-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Leave blank to keep current password"
+                placeholder={t.placeholders?.password || "Leave blank to keep current password"}
                 minLength={6}
               />
             </div>
 
             {/* Role */}
             <div className="grid gap-2">
-              <Label htmlFor="edit-role">Role</Label>
+              <Label htmlFor="edit-role">{t.fields?.role || "Role"}</Label>
               <Select value={role} onValueChange={(value) => setRole(value as UserRole)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select role" />
+                  <SelectValue placeholder={t.placeholders?.role || "Select role"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={UserRole.USER}>User</SelectItem>
-                  <SelectItem value={UserRole.MODERATOR}>Moderator</SelectItem>
-                  <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
+                  <SelectItem value={UserRole.USER}>{t.roles?.user || "User"}</SelectItem>
+                  <SelectItem value={UserRole.MODERATOR}>{t.roles?.moderator || "Moderator"}</SelectItem>
+                  <SelectItem value={UserRole.ADMIN}>{t.roles?.admin || "Admin"}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -152,7 +157,7 @@ export function EditUserDialog({ user }: EditUserDialogProps) {
                 checked={isActive}
                 onCheckedChange={setIsActive}
               />
-              <Label htmlFor="edit-isActive">Active User</Label>
+              <Label htmlFor="edit-isActive">{t.fields?.isActive || "Active User"}</Label>
             </div>
           </div>
 
@@ -163,15 +168,15 @@ export function EditUserDialog({ user }: EditUserDialogProps) {
               onClick={handleClose}
               disabled={loading}
             >
-              Cancel
+              {t.actions?.cancel || "Cancel"}
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ?   <span className="flex items-center">
                                <Loader size={16} />
                                 <span className="ml-2">
-                                  Updating...
+                                  {t.actions?.updating || "Updating..."}
                                 </span>
-                            </span>: "Update User"}
+                            </span>: (t.actions?.update || "Update User")}
             </Button>
           </DialogFooter>
         </form>

@@ -29,6 +29,8 @@ import { EditUserDialog } from "@/components/user/edit-user-dialog";
 import PaginationTable from "@/components/pagination-table";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
 import { useSearchQuery } from "@/hooks/use-search-query";
+import { useLocale } from "@/components/local-lang-swither";
+import { getMessages } from "@/lib/locale";
 
 interface EnhancedUserTableProps {
   // Remove the callback props since we'll handle them internally
@@ -55,6 +57,9 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
     setPageSize,
     toggleUserStatus,
   } = useUsersStore();
+  const { locale } = useLocale();
+  const lang = getMessages(locale);
+  const t = lang.pages?.users?.components?.userTable || {};
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -79,64 +84,67 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
   const handleDeleteUser = async (id: string) => {
     try {
       await deleteUser(id);
-      toast.success("User deleted successfully");
+      toast.success(t.toast?.deleted || "User deleted successfully");
       setDeleteDialogOpen(false);
       setUserToDelete(null);
     } catch (error) {
-      toast.error("Failed to delete user");
+      toast.error(t.toast?.deleteFailed || "Failed to delete user");
     }
   };
 
   const handleToggleStatus = async (id: string) => {
     try {
       await toggleUserStatus(id);
-      toast.success("User status updated successfully");
+      toast.success(t.toast?.statusUpdated || "User status updated successfully");
     } catch (error) {
-      toast.error("Failed to update user status");
+      toast.error(t.toast?.statusUpdateFailed || "Failed to update user status");
     }
   };
 
   const handleBulkDelete = async () => {
     try {
       await bulkDeleteUsers(selectedUsers);
-      toast.success(`${selectedUsers.length} users deleted successfully`);
+      toast.success(
+        t.toast?.bulkDeleted?.replace('{0}', String(selectedUsers.length)) ||
+        `${selectedUsers.length} users deleted successfully`
+      );
       setBulkDeleteDialogOpen(false);
     } catch (error) {
-      toast.error("Failed to delete users");
+      toast.error(t.toast?.bulkDeleteFailed || "Failed to delete users");
     }
   };
 
   const columns: TableColumn<User>[] = [
     {
       key: "select",
-      label: "Select",
+      label: t.table?.select || "Select",
       render: (user) => (
         <Checkbox
           checked={selectedUsers.includes(user.id)}
           onCheckedChange={() => selectUser(user.id)}
-          aria-label="Select user"
+          aria-label={t.table?.selectRow || "Select user"}
         />
       ),
     },
     {
       key: "name",
-      label: "Name",
+      label: t.table?.name || "Name",
       render: (user) => <div className="font-medium">{user.name}</div>,
     },
     {
       key: "email",
-      label: "Email",
+      label: t.table?.email || "Email",
       render: (user) => (
         <div className="text-sm text-muted-foreground">{user.email}</div>
       ),
     },
     {
       key: "role",
-      label: "Role",
+      label: t.table?.role || "Role",
       render: (user) => (
         <Badge
           variant={
-            user.role === "ADMIN" ? "secondary" : 
+            user.role === "ADMIN" ? "secondary" :
             user.role === "MODERATOR" ? "secondary" : "secondary"
           }
         >
@@ -146,16 +154,16 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
     },
     {
       key: "status",
-      label: "Status",
+      label: t.table?.status || "Status",
       render: (user) => (
         <div className="flex items-center gap-2">
           <Badge variant={user.isActive ? "secondary" : "secondary"}>
-            {user.isActive ? "Active" : "Inactive"}
+            {user.isActive ? (t.table?.active || "Active") : (t.table?.inactive || "Inactive")}
           </Badge>
           {user.isEmailVerified && (
              <Badge variant={"secondary"}>
             {user.isEmailVerified ? <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" /> : <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" /> }
-          {user.isEmailVerified ? "Email Verified" : "Email Unverified"}
+          {user.isEmailVerified ? (t.table?.emailVerified || "Email Verified") : (t.table?.emailUnverified || "Email Unverified")}
         </Badge>
           )}
         </div>
@@ -163,12 +171,12 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
     },
     {
       key: "stats",
-      label: "Activity",
+      label: t.table?.activity || "Activity",
       render: (user) => (
         <div className="text-xs text-muted-foreground">
           {user._count && (
             <div>
-              Orders: {user._count.orders} | Reviews: {user._count.reviews}
+              {t.table?.orders || "Orders"}: {user._count.orders} | {t.table?.reviews || "Reviews"}: {user._count.reviews}
             </div>
           )}
         </div>
@@ -176,19 +184,19 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
     },
     {
       key: "lastLogin",
-      label: "Last Login",
+      label: t.table?.lastLogin || "Last Login",
       render: (user) => {
         const date = user.lastLoginAt ? new Date(user.lastLoginAt) : null;
         return (
           <div className="text-sm text-muted-foreground">
-            {date ? date.toLocaleDateString() : "Never"}
+            {date ? date.toLocaleDateString() : (t.table?.never || "Never")}
           </div>
         );
       },
     },
     {
       key: "createdAt",
-      label: "Created",
+      label: t.table?.created || "Created",
       render: (user) => {
         const date = new Date(user.createdAt);
         return (
@@ -200,12 +208,12 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
     },
     {
       key: "actions",
-      label: "Actions",
+      label: t.table?.actions || "Actions",
       render: (user) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
+              <span className="sr-only">{t.table?.openMenu || "Open menu"}</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -216,7 +224,7 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
               />
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleToggleStatus(user.id)}>
-              {user.isActive ? "Deactivate" : "Activate"}
+              {user.isActive ? (t.table?.deactivate || "Deactivate") : (t.table?.activate || "Activate")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
@@ -226,7 +234,7 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
               className="text-destructive"
             >
               <Trash2 className="mr-2 h-4 w-4" />
-              Delete
+              {t.table?.delete || "Delete"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -240,14 +248,14 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
   return (
     <div className="space-y-4">
       <DataTable
-        title="User Management"
+        title={t.title || "User Management"}
         data={users}
         columns={columns}
         searchKeys={["name", "email", "role"]}
         searchValue={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search users by name, email, or role..."
-        emptyMessage="No users found"
+        searchPlaceholder={t.table?.searchPlaceholder || "Search users by name, email, or role..."}
+        emptyMessage={t.table?.empty || "No users found"}
         showCount={true}
         customHeader={
           <div className="flex items-center gap-2">
@@ -258,7 +266,8 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
                 className="flex items-center gap-2"
               >
                 <Trash2 className="h-4 w-4" />
-                Delete Selected ({selectedUsers.length})
+                {t.table?.deleteSelected?.replace('{0}', String(selectedUsers.length)) ||
+                  `Delete Selected (${selectedUsers.length})`}
               </Button>
             )}
             <CreateUserDialog />
@@ -269,18 +278,17 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t.dialogs?.deleteTitle || "Are you sure?"}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              user.
+              {t.dialogs?.deleteDesc || "This action cannot be undone. This will permanently delete the user."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t.dialogs?.cancel || "Cancel"}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => userToDelete && handleDeleteUser(userToDelete)}
             >
-              Delete
+              {t.dialogs?.delete || "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -294,17 +302,17 @@ export function EnhancedUserTable({}: EnhancedUserTableProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Delete {selectedUsers.length} users?
+              {t.dialogs?.bulkDeleteTitle?.replace('{0}', String(selectedUsers.length)) ||
+                `Delete ${selectedUsers.length} users?`}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              selected users.
+              {t.dialogs?.bulkDeleteDesc || "This action cannot be undone. This will permanently delete the selected users."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t.dialogs?.cancel || "Cancel"}</AlertDialogCancel>
             <AlertDialogAction onClick={handleBulkDelete}>
-              Delete All
+              {t.dialogs?.deleteAll || "Delete All"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

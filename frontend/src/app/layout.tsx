@@ -23,9 +23,10 @@ export default async function RootLayout({
 }) {
   const messages = await getMessages();
   const locale = await getUserLocale();
+  const direction = locale === 'ar' ? 'rtl' : 'ltr';
 
   return (
-    <html lang={locale}>
+    <html lang={locale} dir={direction}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

@@ -32,6 +32,9 @@ import PaginationTable from "@/components/pagination-table";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
 import Link from "next/link";
 import { useSearchQuery } from "@/hooks/use-search-query";
+import { useLocale } from "@/components/local-lang-swither";
+import { getMessages } from "@/lib/locale";
+
 interface EnhancedProductVariantTableProps {
   // Remove the callback props since we'll handle them internally
 }
@@ -39,6 +42,10 @@ interface EnhancedProductVariantTableProps {
 export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps) {
   const { products, loading, error, fetchProducts, deleteVariant } =
     useProductVariantsStore();
+  const { locale } = useLocale();
+  const lang = getMessages(locale);
+  const t = lang.pages?.variants?.components?.variantTable || {};
+  const tCommon = lang.pages?.common || {};
 
   // Local pagination state for variants
   const [variantCurrentPage, setVariantCurrentPage] = useState(1);
@@ -109,11 +116,11 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
   const handleDeleteProductVariant = async (id: string) => {
     try {
       await deleteVariant(id);
-      toast.success("Product variant deleted successfully");
+      toast.success(t.toast?.deleted || "Product variant deleted successfully");
       setDeleteDialogOpen(false);
       setProductVariantToDelete(null);
     } catch (error) {
-      toast.error("Failed to delete product variant");
+      toast.error(t.toast?.deleteFailed || "Failed to delete product variant");
     }
   };
 
@@ -121,12 +128,13 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
     try {
       await Promise.all(selectedVariantIds.map((id) => deleteVariant(id)));
       toast.success(
+        t.toast?.bulkDeleted?.replace('{0}', String(selectedVariantIds.length)) ||
         `${selectedVariantIds.length} product variants deleted successfully`
       );
       setBulkDeleteDialogOpen(false);
       setSelectedVariantIds([]);
     } catch (error) {
-      toast.error("Failed to delete selected product variants");
+      toast.error(t.toast?.bulkDeleteFailed || "Failed to delete selected product variants");
     }
   };
 
@@ -160,13 +168,13 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
               );
             }
           }}
-          aria-label="Select row"
+          aria-label={t.table?.selectRow || "Select row"}
         />
       ),
     },
     {
       key: "name",
-      label: "Name",
+      label: t.table?.name || "Name",
       render: (variant) => (
         <div className="flex items-center space-x-2">
           <Package className="h-4 w-4 text-muted-foreground" />
@@ -179,7 +187,7 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
                 className="hover:underline transition-all duration-500 ease-in-out"
                 href={`/dashboard/products?q=${variant.productName}`}
               >
-                {variant.productName || "Unknown Product"}
+                {variant.productName || tCommon.unknownProduct || "Unknown Product"}
               </Link>
             </div>
           </div>
@@ -188,11 +196,11 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
     },
     {
       key: "attributes",
-      label: "Attributes",
+      label: t.table?.attributes || "Attributes",
       render: (variant) => {
         const attributes = variant.attributes;
         if (!attributes || Object.keys(attributes).length === 0) {
-          return <span className="text-muted-foreground">No attributes</span>;
+          return <span className="text-muted-foreground">{tCommon.noAttributes || "No attributes"}</span>;
         }
         return (
           <div className="flex flex-wrap gap-1">
@@ -207,7 +215,7 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
     },
     {
       key: "skuCount",
-      label: "SKUs",
+      label: t.table?.skus || "SKUs",
       render: (variant) => {
         const count = variant.skus?.length || 0;
         return (
@@ -219,7 +227,7 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
     },
     {
       key: "isActive",
-      label: "Status",
+      label: t.table?.status || "Status",
       render: (variant) => {
         const isActive = variant.isActive;
         return (
@@ -229,7 +237,7 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
             ) : (
               <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" />
             )}
-            {isActive ? "Active" : "Inactive"}
+            {isActive ? (t.table?.active || "Active") : (t.table?.inactive || "Inactive")}
           </Badge>
         );
       },
@@ -241,7 +249,7 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
     },
     {
       key: "createdAt",
-      label: "Created",
+      label: t.table?.created || "Created",
       render: (variant) => {
         const date = new Date(variant.createdAt);
         return date.toLocaleDateString();
@@ -249,12 +257,12 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
     },
     {
       key: "actions",
-      label: "Actions",
+      label: t.table?.actions || "Actions",
       render: (variant) => (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
+                <span className="sr-only">{t.table?.openMenu || "Open menu"}</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -263,14 +271,14 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
                 onClick={() => handleEditProductVariant(variant)}
               >
                 <Edit className="mr-2 h-4 w-4" />
-                Edit
+                {t.table?.edit || "Edit"}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => openDeleteDialog(variant.id)}
                 className="text-red-600"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                {t.table?.delete || "Delete"}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -285,13 +293,13 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
   return (
     <div className="space-y-4">
       <DataTable
-        title="Product Variants"
+        title={t.title || "Product Variants"}
         columns={columns}
         data={paginatedVariants}
         searchKeys={["name", "productName"]}
         searchValue={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search variants..."
+        searchPlaceholder={t.table?.searchPlaceholder || "Search variants..."}
         customHeader={
           <div className="flex gap-2 items-center justify-between">
             <div className="flex items-center gap-2 space-x-2">
@@ -326,7 +334,7 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
             </div>
             <Button onClick={() => setIsCreateDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              Add Product Variant
+              {t.table?.addVariant || "Add Product Variant"}
             </Button>
           </div>
         }
@@ -346,14 +354,13 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t.dialogs?.deleteTitle || "Are you sure?"}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              product variant and all associated data.
+              {t.dialogs?.deleteDesc || "This action cannot be undone. This will permanently delete the product variant and all associated data."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t.dialogs?.cancel || "Cancel"}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() =>
                 productVariantToDelete &&
@@ -361,7 +368,7 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
               }
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              {t.dialogs?.delete || "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -375,20 +382,20 @@ export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Delete Selected Product Variants
+              {t.dialogs?.bulkDeleteTitle || "Delete Selected Product Variants"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {selectedVariantIds.length}{" "}
-              product variant(s)? This action cannot be undone.
+              {t.dialogs?.bulkDeleteDesc?.replace('{0}', String(selectedVariantIds.length)) ||
+                `Are you sure you want to delete ${selectedVariantIds.length} product variant(s)? This action cannot be undone.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t.dialogs?.cancel || "Cancel"}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleBulkDelete}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete {selectedVariantIds.length} Product Variant(s)
+              {t.dialogs?.delete || "Delete"} {selectedVariantIds.length}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

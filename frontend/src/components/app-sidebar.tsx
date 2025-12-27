@@ -1,8 +1,8 @@
 // frontend/src/components/app-sidebar.tsx
 
-"use client";
+'use client';
 
-import type * as React from "react";
+import type * as React from 'react';
 import {
   IconDashboard,
   IconUsers,
@@ -16,11 +16,11 @@ import {
   IconTag,
   IconBoxSeam,
   IconClipboardList,
-  IconSettings2,
-} from "@tabler/icons-react";
+  IconSettings,
+} from '@tabler/icons-react';
 
-import { NavMain } from "@/components/nav-main";
-import { NavUser } from "@/components/nav-user";
+import { NavMain } from '@/components/nav-main';
+import { NavUser } from '@/components/nav-user';
 import {
   Sidebar,
   SidebarContent,
@@ -29,22 +29,24 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { useAuth } from "@/hooks/use-auth";
+} from '@/components/ui/sidebar';
+import { useAuth } from '@/hooks/use-auth';
 
-import { useTranslations } from "next-intl";
+import { useTranslations } from 'next-intl';
+import { useLocale } from '@/components/local-lang-swither';
 import {
   publicRoutes,
   authenticatedRoutes,
   roleProtectedRoutes,
-} from "@/lib/routes";
-import { UserRole, User } from "@/types/auth.types";
+} from '@/lib/routes';
+import { UserRole, User } from '@/types/auth.types';
 
 export function AppSidebar({
   user,
   ...props
 }: React.ComponentProps<typeof Sidebar> & { user: User | null }) {
   const t = useTranslations('sidebar');
+  const { locale } = useLocale();
 
   const isRouteAccessible = (url: string) => {
     if (!user) return false;
@@ -62,80 +64,84 @@ export function AppSidebar({
   const navMainData = [
     {
       title: t('links.dashboard'),
-      url: "/dashboard",
+      url: '/dashboard',
       icon: IconDashboard,
-      active: isRouteAccessible("/dashboard"),
+      active: isRouteAccessible('/dashboard'),
     },
     {
       title: t('links.users'),
-      url: "/dashboard/users",
+      url: '/dashboard/users',
       icon: IconUsers,
-      active: isRouteAccessible("/dashboard/users"),
+      active: isRouteAccessible('/dashboard/users'),
     },
     {
       title: t('links.roles'),
-      url: "/dashboard/roles",
+      url: '/dashboard/roles',
       icon: IconShield,
-      active: isRouteAccessible("/dashboard/roles"),
+      active: isRouteAccessible('/dashboard/roles'),
     },
     {
       title: t('links.categories'),
-      url: "/dashboard/categories",
+      url: '/dashboard/categories',
       icon: IconCategory,
-      active: isRouteAccessible("/dashboard/categories"),
+      active: isRouteAccessible('/dashboard/categories'),
     },
     {
       title: t('links.products'),
-      url: "/dashboard/products",
+      url: '/dashboard/products',
       icon: IconPackage,
-      active: isRouteAccessible("/dashboard/products"),
+      active: isRouteAccessible('/dashboard/products'),
     },
     {
       title: t('links.productVariants'),
-      url: "/dashboard/product-variants",
+      url: '/dashboard/product-variants',
       icon: IconTag,
-      active: isRouteAccessible("/dashboard/product-variants"),
+      active: isRouteAccessible('/dashboard/product-variants'),
     },
     {
       title: t('links.skus'),
-      url: "/dashboard/skus",
+      url: '/dashboard/skus',
       icon: IconBoxSeam,
-      active: isRouteAccessible("/dashboard/skus"),
+      active: isRouteAccessible('/dashboard/skus'),
     },
     {
       title: t('links.orders'),
-      url: "/dashboard/orders",
+      url: '/dashboard/orders',
       icon: IconShoppingCart,
-      active: isRouteAccessible("/dashboard/orders"),
+      active: isRouteAccessible('/dashboard/orders'),
     },
     {
       title: t('links.orderItems'),
-      url: "/dashboard/order-items",
+      url: '/dashboard/order-items',
       icon: IconClipboardList,
-      active: isRouteAccessible("/dashboard/order-items"),
+      active: isRouteAccessible('/dashboard/order-items'),
     },
     {
       title: t('links.reviews'),
-      url: "/dashboard/reviews",
+      url: '/dashboard/reviews',
       icon: IconStar,
       active: false,
     },
     {
       title: t('links.analytics'),
-      url: "/dashboard/analytics",
+      url: '/dashboard/analytics',
       icon: IconChartLine,
-      active: isRouteAccessible("/dashboard/analytics"),
+      active: isRouteAccessible('/dashboard/analytics'),
     },
     {
       title: t('links.settings'),
-      url: "/dashboard/settings",
-      icon: IconSettings2,
-      active: isRouteAccessible("/dashboard/settings"),
+      url: '/dashboard/settings',
+      icon: IconSettings,
+      active: isRouteAccessible('/dashboard/settings'),
     },
   ];
 
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar
+      side={locale === 'ar' ? 'right' : 'left'}
+      collapsible="offcanvas"
+      {...props}
+    >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -181,12 +187,12 @@ export function AppSidebar({
               ? {
                   name: user.name ?? t('user'),
                   email: user.email,
-                  avatar: "/avatars/default.jpg",
+                  avatar: '/avatars/default.jpg',
                 }
               : {
                   name: t('user'),
-                  email: "user@example.com",
-                  avatar: "/avatars/default.jpg",
+                  email: 'user@example.com',
+                  avatar: '/avatars/default.jpg',
                 }
           }
         />

@@ -160,6 +160,10 @@
             "creating": "Creating...",
             "create": "Create SKU",
             "cancel": "Cancel"
+          },
+          "toast": {
+            "skuCreated": "SKU created successfully",
+            "skuCreateFailed": "Failed to create SKU"
           }
         },
         "editSKU": {
@@ -530,6 +534,8 @@
       }
     },
     "variants": {
+      "title": "Product Variants Management",
+      "description": "Manage product variants and their attributes",
       "components": {
         "variantTable": {
           "title": "Variant List",
@@ -546,7 +552,8 @@
             "delete": "Delete",
             "searchPlaceholder": "Search by name or product",
             "active": "Active",
-            "inactive": "Inactive"
+            "inactive": "Inactive",
+            "addVariant": "Add Product Variant"
           },
           "toast": {
             "deleted": "Variant deleted",
@@ -599,6 +606,301 @@
               "variantCreated": "Variante créée avec succès",
               "variantCreateFailed": "Échec de la création de la variante"
             }
+          },
+          "editProductVariant": {
+            "title": "Edit Product Variant",
+            "description": "Update the product variant information and attributes.",
+            "fields": {
+              "product": "Product",
+              "name": "Name (Optional)",
+              "nameDescription": "A descriptive name for this variant. If not provided, it will be auto-generated.",
+              "attributes": "Attributes",
+              "attributesDescription": "Define attributes like size, color, material, etc.",
+              "sortOrder": "Sort Order",
+              "sortOrderDescription": "Used to control the display order of variants.",
+              "isActive": "Active",
+              "isActiveDescription": "Whether this variant is active and available for use."
+            },
+            "placeholders": {
+              "selectProduct": "Select a product",
+              "name": "e.g., Large - Red",
+              "attributeName": "Attribute name (e.g., size)",
+              "attributeValue": "Value (e.g., Large)"
+            },
+            "actions": {
+              "addAttribute": "Add Attribute",
+              "remove": "Remove",
+              "cancel": "Cancel",
+              "update": "Update Product Variant",
+              "updating": "Updating..."
+            },
+            "toast": {
+              "variantUpdated": "Product variant updated successfully",
+              "variantUpdateFailed": "Failed to update product variant"
+            }
+          }
+        }
+      }
+    },
+    "products": {
+      "title": "Products Management",
+      "description": "Manage your product catalog, pricing, and inventory",
+      "components": {
+        "productTable": {
+          "title": "Product Management",
+          "table": {
+            "selectAll": "Select all products",
+            "selectRow": "Select product",
+            "product": "Product",
+            "price": "Price",
+            "stock": "Stock",
+            "variants": "Variants",
+            "variantsLabel": "variants",
+            "status": "Status",
+            "performance": "Performance",
+            "created": "Created",
+            "actions": "Actions",
+            "openMenu": "Open menu",
+            "edit": "Edit",
+            "activate": "Activate",
+            "deactivate": "Deactivate",
+            "feature": "Feature",
+            "unfeature": "Unfeature",
+            "delete": "Delete",
+            "active": "Active",
+            "inactive": "Inactive",
+            "featured": "Featured",
+            "skus": "SKUs",
+            "noPricing": "no pricing",
+            "noStock": "no stock",
+            "units": "units",
+            "searchPlaceholder": "Search products by name, slug, or description...",
+            "empty": "No products found",
+            "deleteSelected": "Delete Selected ({0})"
+          },
+          "toast": {
+            "deleted": "Product deleted successfully",
+            "deleteFailed": "Failed to delete product",
+            "statusUpdated": "Product status updated successfully",
+            "statusUpdateFailed": "Failed to update product status",
+            "featuredUpdated": "Product featured status updated successfully",
+            "featuredUpdateFailed": "Failed to update product featured status",
+            "bulkDeleted": "{0} products deleted successfully",
+            "bulkDeleteFailed": "Failed to delete products"
+          },
+          "dialogs": {
+            "deleteTitle": "Are you sure?",
+            "deleteDesc": "This action cannot be undone. This will permanently delete the product and all its variants and SKUs.",
+            "bulkDeleteTitle": "Delete {0} products?",
+            "bulkDeleteDesc": "This action cannot be undone. This will permanently delete the selected products and all their variants and SKUs.",
+            "cancel": "Cancel",
+            "delete": "Delete",
+            "deleteAll": "Delete All"
+          }
+        }
+      },
+      "dialogs": {
+        "createProduct": {
+          "trigger": "Add Product",
+          "title": "Create New Product",
+          "description": "Add a new product to your catalog. You can add variants and pricing later.",
+          "fields": {
+            "name": "Product Name",
+            "slug": "Slug",
+            "slugDescription": "URL-friendly version of the name. Auto-generated if left empty.",
+            "shortDesc": "Short Description",
+            "description": "Description",
+            "coverImage": "Cover Image URL",
+            "metaTitle": "Meta Title (SEO)",
+            "metaDesc": "Meta Description (SEO)",
+            "sortOrder": "Sort Order",
+            "sortOrderDescription": "Lower numbers appear first",
+            "categories": "Categories",
+            "isActive": "Active Status",
+            "isActiveDescription": "Active products are visible to customers",
+            "isFeatured": "Featured Product",
+            "isFeaturedDescription": "Featured products appear prominently"
+          },
+          "placeholders": {
+            "name": "Wireless Bluetooth Headphones",
+            "slug": "wireless-bluetooth-headphones",
+            "shortDesc": "Premium wireless headphones with 30h battery life",
+            "description": "High-quality wireless headphones with noise cancellation...",
+            "coverImage": "https://example.com/images/headphones.jpg",
+            "metaTitle": "Best Wireless Headphones 2024",
+            "metaDesc": "Discover our premium wireless headphones with exceptional sound quality..."
+          },
+          "errors": {
+            "nameRequired": "Product name is required",
+            "nameTooLong": "Name is too long (max 255 characters)",
+            "sortOrderNegative": "Sort order cannot be negative"
+          },
+          "actions": {
+            "cancel": "Cancel",
+            "create": "Create Product",
+            "creating": "Creating..."
+          },
+          "toast": {
+            "success": "Product created successfully",
+            "failed": "Failed to create product"
+          }
+        },
+        "editProduct": {
+          "title": "Edit Product",
+          "description": "Update the product information and settings.",
+          "fields": {
+            "name": "Product Name",
+            "shortDesc": "Short Description",
+            "description": "Description",
+            "coverImage": "Cover Image URL",
+            "metaTitle": "Meta Title (SEO)",
+            "metaDesc": "Meta Description (SEO)",
+            "sortOrder": "Sort Order",
+            "sortOrderDescription": "Lower numbers appear first",
+            "categories": "Categories",
+            "isActive": "Active Status",
+            "isActiveDescription": "Active products are visible to customers",
+            "isFeatured": "Featured Product",
+            "isFeaturedDescription": "Featured products appear prominently"
+          },
+          "placeholders": {
+            "name": "Wireless Bluetooth Headphones",
+            "shortDesc": "Premium wireless headphones with 30h battery life",
+            "description": "High-quality wireless headphones with noise cancellation...",
+            "coverImage": "https://example.com/images/headphones.jpg",
+            "metaTitle": "Best Wireless Headphones 2024",
+            "metaDesc": "Discover our premium wireless headphones with exceptional sound quality..."
+          },
+          "errors": {
+            "nameRequired": "Product name is required",
+            "nameTooLong": "Name is too long (max 255 characters)",
+            "sortOrderNegative": "Sort order cannot be negative"
+          },
+          "actions": {
+            "cancel": "Cancel",
+            "update": "Update Product",
+            "updating": "Updating..."
+          },
+          "toast": {
+            "success": "Product updated successfully",
+            "failed": "Failed to update product"
+          }
+        }
+      }
+    },
+    "users": {
+      "title": "User Management",
+      "description": "Manage user accounts, roles, and permissions",
+      "components": {
+        "userTable": {
+          "title": "User Management",
+          "table": {
+            "select": "Select",
+            "selectRow": "Select user",
+            "name": "Name",
+            "email": "Email",
+            "role": "Role",
+            "status": "Status",
+            "activity": "Activity",
+            "lastLogin": "Last Login",
+            "created": "Created",
+            "actions": "Actions",
+            "openMenu": "Open menu",
+            "active": "Active",
+            "inactive": "Inactive",
+            "emailVerified": "Email Verified",
+            "emailUnverified": "Email Unverified",
+            "orders": "Orders",
+            "reviews": "Reviews",
+            "never": "Never",
+            "activate": "Activate",
+            "deactivate": "Deactivate",
+            "delete": "Delete",
+            "searchPlaceholder": "Search users by name, email, or role...",
+            "empty": "No users found",
+            "deleteSelected": "Delete Selected ({0})"
+          },
+          "toast": {
+            "deleted": "User deleted successfully",
+            "deleteFailed": "Failed to delete user",
+            "statusUpdated": "User status updated successfully",
+            "statusUpdateFailed": "Failed to update user status",
+            "bulkDeleted": "{0} users deleted successfully",
+            "bulkDeleteFailed": "Failed to delete users"
+          },
+          "dialogs": {
+            "deleteTitle": "Are you sure?",
+            "deleteDesc": "This action cannot be undone. This will permanently delete the user.",
+            "bulkDeleteTitle": "Delete {0} users?",
+            "bulkDeleteDesc": "This action cannot be undone. This will permanently delete the selected users.",
+            "cancel": "Cancel",
+            "delete": "Delete",
+            "deleteAll": "Delete All"
+          }
+        }
+      },
+      "dialogs": {
+        "createUser": {
+          "trigger": "Add User",
+          "title": "Add New User",
+          "description": "Create a new user account with the required information.",
+          "fields": {
+            "name": "Name",
+            "email": "Email",
+            "password": "Password",
+            "role": "Role",
+            "isActive": "Active User"
+          },
+          "placeholders": {
+            "name": "Enter full name",
+            "email": "Enter email address",
+            "password": "Enter password (min 6 characters)",
+            "role": "Select role"
+          },
+          "roles": {
+            "user": "User",
+            "moderator": "Moderator",
+            "admin": "Admin"
+          },
+          "errors": {
+            "requiredFields": "Please fill in all required fields",
+            "passwordLength": "Password must be at least 6 characters long"
+          },
+          "actions": {
+            "cancel": "Cancel",
+            "create": "Create User",
+            "creating": "Creating..."
+          },
+          "toast": {
+            "success": "User created successfully"
+          }
+        },
+        "editUser": {
+          "trigger": "Edit",
+          "title": "Edit User",
+          "description": "Update user account information.",
+          "fields": {
+            "name": "Name",
+            "email": "Email",
+            "password": "Password",
+            "role": "Role",
+            "isActive": "Active User"
+          },
+          "placeholders": {
+            "name": "Enter full name",
+            "emailDisabled": "Email cannot be changed",
+            "password": "Leave blank to keep current password",
+            "role": "Select role"
+          },
+          "roles": {
+            "user": "User",
+            "moderator": "Moderator",
+            "admin": "Admin"
+          },
+          "actions": {
+            "cancel": "Cancel",
+            "update": "Update User",
+            "updating": "Updating..."
           }
         }
       }

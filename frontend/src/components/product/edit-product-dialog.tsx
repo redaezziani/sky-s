@@ -20,6 +20,8 @@ import { useProductsStore, type Product, type UpdateProductPayload } from "@/sto
 import { useCategoriesStore } from "@/stores/categories-store";
 import { toast } from "sonner";
 import { Loader } from "../loader";
+import { useLocale } from "@/components/local-lang-swither";
+import { getMessages } from "@/lib/locale";
 
 interface EditProductDialogProps {
   product: Product | null;
@@ -30,6 +32,9 @@ interface EditProductDialogProps {
 export function EditProductDialog({ product, open, onClose }: EditProductDialogProps) {
   const { updateProduct, loading } = useProductsStore();
   const { categories, fetchCategories } = useCategoriesStore();
+  const { locale } = useLocale();
+  const lang = getMessages(locale);
+  const t = lang.pages?.products?.dialogs?.editProduct || {};
 
   // Form state
   const [formData, setFormData] = useState({
@@ -116,15 +121,15 @@ export function EditProductDialog({ product, open, onClose }: EditProductDialogP
     };
 
     if (!formData.name.trim()) {
-      newErrors.name = "Product name is required";
+      newErrors.name = t.errors?.nameRequired || "Product name is required";
     }
 
     if (formData.name.length > 255) {
-      newErrors.name = "Name is too long";
+      newErrors.name = t.errors?.nameTooLong || "Name is too long";
     }
 
     if (formData.sortOrder < 0) {
-      newErrors.sortOrder = "Sort order cannot be negative";
+      newErrors.sortOrder = t.errors?.sortOrderNegative || "Sort order cannot be negative";
     }
 
     setErrors(newErrors);
@@ -149,10 +154,10 @@ export function EditProductDialog({ product, open, onClose }: EditProductDialogP
       };
 
       await updateProduct(product.id, payload);
-      toast.success("Product updated successfully");
+      toast.success(t.toast?.success || "Product updated successfully");
       onClose();
     } catch (error) {
-      toast.error("Failed to update product");
+      toast.error(t.toast?.failed || "Failed to update product");
     }
   };
 
@@ -160,17 +165,17 @@ export function EditProductDialog({ product, open, onClose }: EditProductDialogP
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Product</DialogTitle>
+          <DialogTitle>{t.title || "Edit Product"}</DialogTitle>
           <DialogDescription>
-            Update the product information and settings.
+            {t.description || "Update the product information and settings."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Product Name</Label>
+            <Label htmlFor="name">{t.fields?.name || "Product Name"}</Label>
             <Input
               id="name"
-              placeholder="Wireless Bluetooth Headphones"
+              placeholder={t.placeholders?.name || "Wireless Bluetooth Headphones"}
               value={formData.name}
               onChange={(e) => {
                 setFormData(prev => ({ ...prev, name: e.target.value }));
@@ -186,20 +191,20 @@ export function EditProductDialog({ product, open, onClose }: EditProductDialogP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="shortDesc">Short Description</Label>
+            <Label htmlFor="shortDesc">{t.fields?.shortDesc || "Short Description"}</Label>
             <Input
               id="shortDesc"
-              placeholder="Premium wireless headphones with 30h battery life"
+              placeholder={t.placeholders?.shortDesc || "Premium wireless headphones with 30h battery life"}
               value={formData.shortDesc}
               onChange={(e) => setFormData(prev => ({ ...prev, shortDesc: e.target.value }))}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t.fields?.description || "Description"}</Label>
             <Textarea
               id="description"
-              placeholder="High-quality wireless headphones with noise cancellation..."
+              placeholder={t.placeholders?.description || "High-quality wireless headphones with noise cancellation..."}
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               className="resize-none"
@@ -208,10 +213,10 @@ export function EditProductDialog({ product, open, onClose }: EditProductDialogP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="coverImage">Cover Image URL</Label>
+            <Label htmlFor="coverImage">{t.fields?.coverImage || "Cover Image URL"}</Label>
             <Input
               id="coverImage"
-              placeholder="https://example.com/images/headphones.jpg"
+              placeholder={t.placeholders?.coverImage || "https://example.com/images/headphones.jpg"}
               value={formData.coverImage}
               onChange={(e) => setFormData(prev => ({ ...prev, coverImage: e.target.value }))}
             />
@@ -219,17 +224,17 @@ export function EditProductDialog({ product, open, onClose }: EditProductDialogP
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="metaTitle">Meta Title (SEO)</Label>
+              <Label htmlFor="metaTitle">{t.fields?.metaTitle || "Meta Title (SEO)"}</Label>
               <Input
                 id="metaTitle"
-                placeholder="Best Wireless Headphones 2024"
+                placeholder={t.placeholders?.metaTitle || "Best Wireless Headphones 2024"}
                 value={formData.metaTitle}
                 onChange={(e) => setFormData(prev => ({ ...prev, metaTitle: e.target.value }))}
               />
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="sortOrder">Sort Order</Label>
+              <Label htmlFor="sortOrder">{t.fields?.sortOrder || "Sort Order"}</Label>
               <Input
                 id="sortOrder"
                 type="number"
@@ -245,7 +250,7 @@ export function EditProductDialog({ product, open, onClose }: EditProductDialogP
                 className={errors.sortOrder ? "border-destructive" : ""}
               />
               <p className="text-xs text-muted-foreground">
-                Lower numbers appear first
+                {t.fields?.sortOrderDescription || "Lower numbers appear first"}
               </p>
               {errors.sortOrder && (
                 <p className="text-sm text-destructive">{errors.sortOrder}</p>
@@ -254,10 +259,10 @@ export function EditProductDialog({ product, open, onClose }: EditProductDialogP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="metaDesc">Meta Description (SEO)</Label>
+            <Label htmlFor="metaDesc">{t.fields?.metaDesc || "Meta Description (SEO)"}</Label>
             <Textarea
               id="metaDesc"
-              placeholder="Discover our premium wireless headphones with exceptional sound quality..."
+              placeholder={t.placeholders?.metaDesc || "Discover our premium wireless headphones with exceptional sound quality..."}
               value={formData.metaDesc}
               onChange={(e) => setFormData(prev => ({ ...prev, metaDesc: e.target.value }))}
               className="resize-none"
@@ -267,7 +272,7 @@ export function EditProductDialog({ product, open, onClose }: EditProductDialogP
 
           {/* Categories */}
           <div className="space-y-2">
-            <Label>Categories</Label>
+            <Label>{t.fields?.categories || "Categories"}</Label>
             <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto border rounded-md p-3">
               {categories.map((category) => (
                 <div key={category.id} className="flex items-center space-x-2">
@@ -290,9 +295,9 @@ export function EditProductDialog({ product, open, onClose }: EditProductDialogP
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
-                <Label className="text-base">Active Status</Label>
+                <Label className="text-base">{t.fields?.isActive || "Active Status"}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Active products are visible to customers
+                  {t.fields?.isActiveDescription || "Active products are visible to customers"}
                 </p>
               </div>
               <Switch
@@ -303,9 +308,9 @@ export function EditProductDialog({ product, open, onClose }: EditProductDialogP
 
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
-                <Label className="text-base">Featured Product</Label>
+                <Label className="text-base">{t.fields?.isFeatured || "Featured Product"}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Featured products appear prominently
+                  {t.fields?.isFeaturedDescription || "Featured products appear prominently"}
                 </p>
               </div>
               <Switch
@@ -321,16 +326,16 @@ export function EditProductDialog({ product, open, onClose }: EditProductDialogP
               variant="outline"
               onClick={onClose}
             >
-              Cancel
+              {t.actions?.cancel || "Cancel"}
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <>
                   <Loader className="mr-2 h-4 w-4" />
-                  Updating...
+                  {t.actions?.updating || "Updating..."}
                 </>
               ) : (
-                "Update Product"
+                t.actions?.update || "Update Product"
               )}
             </Button>
           </DialogFooter>

@@ -160,6 +160,10 @@
             "creating": "جاري الإنشاء...",
             "create": "إنشاء كود",
             "cancel": "إلغاء"
+          },
+          "toast": {
+            "skuCreated": "تم إنشاء الكود بنجاح",
+            "skuCreateFailed": "فشل إنشاء الكود"
           }
         },
         "editSKU": {
@@ -529,6 +533,8 @@
       }
     },
     "variants": {
+      "title": "إدارة أشكال المنتجات",
+      "description": "إدارة أشكال المنتجات وخصائصها",
       "components": {
         "variantTable": {
           "title": "قائمة الأشكال",
@@ -545,7 +551,8 @@
             "delete": "حذف",
             "searchPlaceholder": "بحث بالاسم أو المنتج",
             "active": "نشط",
-            "inactive": "غير نشط"
+            "inactive": "غير نشط",
+            "addVariant": "إضافة شكل منتج"
           },
           "toast": {
             "deleted": "تم حذف الشكل",
@@ -598,6 +605,301 @@
               "variantCreated": "تم إنشاء الشكل بنجاح",
               "variantCreateFailed": "فشل إنشاء الشكل"
             }
+          },
+          "editProductVariant": {
+            "title": "تعديل شكل المنتج",
+            "description": "تحديث معلومات شكل المنتج والخصائص.",
+            "fields": {
+              "product": "المنتج",
+              "name": "الاسم (اختياري)",
+              "nameDescription": "اسم وصفي لهذا الشكل. إذا لم يتم تقديمه، سيتم إنشاؤه تلقائيًا.",
+              "attributes": "الخصائص",
+              "attributesDescription": "حدد خصائص مثل الحجم واللون والمادة وما إلى ذلك.",
+              "sortOrder": "ترتيب الفرز",
+              "sortOrderDescription": "يستخدم للتحكم في ترتيب عرض الأشكال.",
+              "isActive": "نشط",
+              "isActiveDescription": "ما إذا كان هذا الشكل نشطًا ومتاحًا للاستخدام."
+            },
+            "placeholders": {
+              "selectProduct": "اختر منتج",
+              "name": "مثال: كبير - أحمر",
+              "attributeName": "اسم الخاصية (مثال: الحجم)",
+              "attributeValue": "القيمة (مثال: كبير)"
+            },
+            "actions": {
+              "addAttribute": "إضافة خاصية",
+              "remove": "إزالة",
+              "cancel": "إلغاء",
+              "update": "تحديث شكل المنتج",
+              "updating": "جاري التحديث..."
+            },
+            "toast": {
+              "variantUpdated": "تم تحديث شكل المنتج بنجاح",
+              "variantUpdateFailed": "فشل تحديث شكل المنتج"
+            }
+          }
+        }
+      }
+    },
+    "products": {
+      "title": "إدارة المنتجات",
+      "description": "إدارة كتالوج المنتجات والأسعار والمخزون",
+      "components": {
+        "productTable": {
+          "title": "إدارة المنتجات",
+          "table": {
+            "selectAll": "اختر جميع المنتجات",
+            "selectRow": "اختر المنتج",
+            "product": "المنتج",
+            "price": "السعر",
+            "stock": "المخزون",
+            "variants": "الأشكال",
+            "variantsLabel": "أشكال",
+            "status": "الحالة",
+            "performance": "الأداء",
+            "created": "تاريخ الإنشاء",
+            "actions": "الإجراءات",
+            "openMenu": "فتح القائمة",
+            "edit": "تعديل",
+            "activate": "تفعيل",
+            "deactivate": "إلغاء التفعيل",
+            "feature": "إبراز",
+            "unfeature": "إلغاء الإبراز",
+            "delete": "حذف",
+            "active": "نشط",
+            "inactive": "غير نشط",
+            "featured": "مميز",
+            "skus": "الأكواد",
+            "noPricing": "لا يوجد سعر",
+            "noStock": "لا يوجد مخزون",
+            "units": "وحدة",
+            "searchPlaceholder": "بحث عن المنتجات بالاسم أو الرابط أو الوصف...",
+            "empty": "لم يتم العثور على منتجات",
+            "deleteSelected": "حذف {0} محددة"
+          },
+          "toast": {
+            "deleted": "تم حذف المنتج بنجاح",
+            "deleteFailed": "فشل حذف المنتج",
+            "statusUpdated": "تم تحديث حالة المنتج بنجاح",
+            "statusUpdateFailed": "فشل تحديث حالة المنتج",
+            "featuredUpdated": "تم تحديث حالة الإبراز بنجاح",
+            "featuredUpdateFailed": "فشل تحديث حالة الإبراز",
+            "bulkDeleted": "تم حذف {0} منتجات بنجاح",
+            "bulkDeleteFailed": "فشل حذف المنتجات"
+          },
+          "dialogs": {
+            "deleteTitle": "هل أنت متأكد؟",
+            "deleteDesc": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف المنتج وجميع أشكاله وأكواده نهائيًا.",
+            "bulkDeleteTitle": "حذف {0} منتجات؟",
+            "bulkDeleteDesc": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف المنتجات المحددة وجميع أشكالها وأكوادها نهائيًا.",
+            "cancel": "إلغاء",
+            "delete": "حذف",
+            "deleteAll": "حذف الكل"
+          }
+        }
+      },
+      "dialogs": {
+        "createProduct": {
+          "trigger": "إضافة منتج",
+          "title": "إنشاء منتج جديد",
+          "description": "أضف منتجًا جديدًا إلى الكتالوج الخاص بك. يمكنك إضافة الأشكال والأسعار لاحقًا.",
+          "fields": {
+            "name": "اسم المنتج",
+            "slug": "الرابط",
+            "slugDescription": "نسخة مناسبة لعناوين URL من الاسم. يتم إنشاؤها تلقائيًا إذا تركت فارغة.",
+            "shortDesc": "وصف مختصر",
+            "description": "الوصف",
+            "coverImage": "رابط صورة الغلاف",
+            "metaTitle": "عنوان الميتا (SEO)",
+            "metaDesc": "وصف الميتا (SEO)",
+            "sortOrder": "ترتيب الفرز",
+            "sortOrderDescription": "الأرقام الأقل تظهر أولاً",
+            "categories": "الفئات",
+            "isActive": "حالة النشاط",
+            "isActiveDescription": "المنتجات النشطة مرئية للعملاء",
+            "isFeatured": "منتج مميز",
+            "isFeaturedDescription": "المنتجات المميزة تظهر بشكل بارز"
+          },
+          "placeholders": {
+            "name": "سماعات بلوتوث لاسلكية",
+            "slug": "wireless-bluetooth-headphones",
+            "shortDesc": "سماعات لاسلكية فاخرة مع بطارية تدوم 30 ساعة",
+            "description": "سماعات لاسلكية عالية الجودة مع إلغاء الضوضاء...",
+            "coverImage": "https://example.com/images/headphones.jpg",
+            "metaTitle": "أفضل سماعات لاسلكية 2024",
+            "metaDesc": "اكتشف سماعاتنا اللاسلكية الفاخرة بجودة صوت استثنائية..."
+          },
+          "errors": {
+            "nameRequired": "اسم المنتج مطلوب",
+            "nameTooLong": "الاسم طويل جدًا (الحد الأقصى 255 حرفًا)",
+            "sortOrderNegative": "لا يمكن أن يكون ترتيب الفرز سالبًا"
+          },
+          "actions": {
+            "cancel": "إلغاء",
+            "create": "إنشاء منتج",
+            "creating": "جاري الإنشاء..."
+          },
+          "toast": {
+            "success": "تم إنشاء المنتج بنجاح",
+            "failed": "فشل إنشاء المنتج"
+          }
+        },
+        "editProduct": {
+          "title": "تعديل المنتج",
+          "description": "تحديث معلومات وإعدادات المنتج.",
+          "fields": {
+            "name": "اسم المنتج",
+            "shortDesc": "وصف مختصر",
+            "description": "الوصف",
+            "coverImage": "رابط صورة الغلاف",
+            "metaTitle": "عنوان الميتا (SEO)",
+            "metaDesc": "وصف الميتا (SEO)",
+            "sortOrder": "ترتيب الفرز",
+            "sortOrderDescription": "الأرقام الأقل تظهر أولاً",
+            "categories": "الفئات",
+            "isActive": "حالة النشاط",
+            "isActiveDescription": "المنتجات النشطة مرئية للعملاء",
+            "isFeatured": "منتج مميز",
+            "isFeaturedDescription": "المنتجات المميزة تظهر بشكل بارز"
+          },
+          "placeholders": {
+            "name": "سماعات بلوتوث لاسلكية",
+            "shortDesc": "سماعات لاسلكية فاخرة مع بطارية تدوم 30 ساعة",
+            "description": "سماعات لاسلكية عالية الجودة مع إلغاء الضوضاء...",
+            "coverImage": "https://example.com/images/headphones.jpg",
+            "metaTitle": "أفضل سماعات لاسلكية 2024",
+            "metaDesc": "اكتشف سماعاتنا اللاسلكية الفاخرة بجودة صوت استثنائية..."
+          },
+          "errors": {
+            "nameRequired": "اسم المنتج مطلوب",
+            "nameTooLong": "الاسم طويل جدًا (الحد الأقصى 255 حرفًا)",
+            "sortOrderNegative": "لا يمكن أن يكون ترتيب الفرز سالبًا"
+          },
+          "actions": {
+            "cancel": "إلغاء",
+            "update": "تحديث المنتج",
+            "updating": "جاري التحديث..."
+          },
+          "toast": {
+            "success": "تم تحديث المنتج بنجاح",
+            "failed": "فشل تحديث المنتج"
+          }
+        }
+      }
+    },
+    "users": {
+      "title": "إدارة المستخدمين",
+      "description": "إدارة حسابات المستخدمين والأدوار والصلاحيات",
+      "components": {
+        "userTable": {
+          "title": "إدارة المستخدمين",
+          "table": {
+            "select": "اختر",
+            "selectRow": "اختر المستخدم",
+            "name": "الاسم",
+            "email": "البريد الإلكتروني",
+            "role": "الدور",
+            "status": "الحالة",
+            "activity": "النشاط",
+            "lastLogin": "آخر تسجيل دخول",
+            "created": "تاريخ الإنشاء",
+            "actions": "الإجراءات",
+            "openMenu": "فتح القائمة",
+            "active": "نشط",
+            "inactive": "غير نشط",
+            "emailVerified": "البريد الإلكتروني موثق",
+            "emailUnverified": "البريد الإلكتروني غير موثق",
+            "orders": "الطلبات",
+            "reviews": "المراجعات",
+            "never": "أبدًا",
+            "activate": "تفعيل",
+            "deactivate": "إلغاء التفعيل",
+            "delete": "حذف",
+            "searchPlaceholder": "بحث عن المستخدمين بالاسم أو البريد الإلكتروني أو الدور...",
+            "empty": "لم يتم العثور على مستخدمين",
+            "deleteSelected": "حذف {0} محددة"
+          },
+          "toast": {
+            "deleted": "تم حذف المستخدم بنجاح",
+            "deleteFailed": "فشل حذف المستخدم",
+            "statusUpdated": "تم تحديث حالة المستخدم بنجاح",
+            "statusUpdateFailed": "فشل تحديث حالة المستخدم",
+            "bulkDeleted": "تم حذف {0} مستخدمين بنجاح",
+            "bulkDeleteFailed": "فشل حذف المستخدمين"
+          },
+          "dialogs": {
+            "deleteTitle": "هل أنت متأكد؟",
+            "deleteDesc": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف المستخدم نهائيًا.",
+            "bulkDeleteTitle": "حذف {0} مستخدمين؟",
+            "bulkDeleteDesc": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف المستخدمين المحددين نهائيًا.",
+            "cancel": "إلغاء",
+            "delete": "حذف",
+            "deleteAll": "حذف الكل"
+          }
+        }
+      },
+      "dialogs": {
+        "createUser": {
+          "trigger": "إضافة مستخدم",
+          "title": "إضافة مستخدم جديد",
+          "description": "إنشاء حساب مستخدم جديد بالمعلومات المطلوبة.",
+          "fields": {
+            "name": "الاسم",
+            "email": "البريد الإلكتروني",
+            "password": "كلمة المرور",
+            "role": "الدور",
+            "isActive": "مستخدم نشط"
+          },
+          "placeholders": {
+            "name": "أدخل الاسم الكامل",
+            "email": "أدخل عنوان البريد الإلكتروني",
+            "password": "أدخل كلمة المرور (على الأقل 6 أحرف)",
+            "role": "اختر الدور"
+          },
+          "roles": {
+            "user": "مستخدم",
+            "moderator": "مشرف",
+            "admin": "مدير"
+          },
+          "errors": {
+            "requiredFields": "يرجى ملء جميع الحقول المطلوبة",
+            "passwordLength": "يجب أن تكون كلمة المرور 6 أحرف على الأقل"
+          },
+          "actions": {
+            "cancel": "إلغاء",
+            "create": "إنشاء مستخدم",
+            "creating": "جاري الإنشاء..."
+          },
+          "toast": {
+            "success": "تم إنشاء المستخدم بنجاح"
+          }
+        },
+        "editUser": {
+          "trigger": "تعديل",
+          "title": "تعديل المستخدم",
+          "description": "تحديث معلومات حساب المستخدم.",
+          "fields": {
+            "name": "الاسم",
+            "email": "البريد الإلكتروني",
+            "password": "كلمة المرور",
+            "role": "الدور",
+            "isActive": "مستخدم نشط"
+          },
+          "placeholders": {
+            "name": "أدخل الاسم الكامل",
+            "emailDisabled": "لا يمكن تغيير البريد الإلكتروني",
+            "password": "اتركه فارغًا للحفاظ على كلمة المرور الحالية",
+            "role": "اختر الدور"
+          },
+          "roles": {
+            "user": "مستخدم",
+            "moderator": "مشرف",
+            "admin": "مدير"
+          },
+          "actions": {
+            "cancel": "إلغاء",
+            "update": "تحديث المستخدم",
+            "updating": "جاري التحديث..."
           }
         }
       }

@@ -36,6 +36,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { useLocale } from "@/components/local-lang-swither";
+import { getMessages } from "@/lib/locale";
 
 const editProductVariantSchema = z.object({
   productId: z.string().min(1, "Product is required"),
@@ -62,6 +64,9 @@ export function EditProductVariantDialog({
   const { updateVariant, loading } = useProductVariantsStore();
   const { products, fetchProducts } = useProductsStore();
   const [attributes, setAttributes] = useState<Record<string, string>>({});
+  const { locale } = useLocale();
+  const t =
+    getMessages(locale).pages.variants.components.dialogs.editProductVariant;
 
   const form = useForm<EditProductVariantFormData>({
     resolver: zodResolver(editProductVariantSchema),
@@ -134,10 +139,10 @@ export function EditProductVariantDialog({
         sortOrder: data.sortOrder,
       });
 
-      toast.success("Product variant updated successfully");
+      toast.success(t.toast.variantUpdated);
       onOpenChange(false);
     } catch (error) {
-      toast.error("Failed to update product variant");
+      toast.error(t.toast.variantUpdateFailed);
     }
   };
 
@@ -155,9 +160,9 @@ export function EditProductVariantDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Edit Product Variant</DialogTitle>
+          <DialogTitle>{t.title}</DialogTitle>
           <DialogDescription>
-            Update the product variant information and attributes.
+            {t.description}
           </DialogDescription>
         </DialogHeader>
 
@@ -171,11 +176,11 @@ export function EditProductVariantDialog({
               name="productId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Product</FormLabel>
+                  <FormLabel>{t.fields.product}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger className="w-full max-w-[600px] truncate">
-                        <SelectValue placeholder="Select a product" />
+                        <SelectValue placeholder={t.placeholders.selectProduct} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -200,13 +205,12 @@ export function EditProductVariantDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name (Optional)</FormLabel>
+                  <FormLabel>{t.fields.name}</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Large - Red" {...field} />
+                    <Input placeholder={t.placeholders.name} {...field} />
                   </FormControl>
                   <FormDescription>
-                    A descriptive name for this variant. If not provided, it
-                    will be auto-generated.
+                    {t.fields.nameDescription}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -215,23 +219,23 @@ export function EditProductVariantDialog({
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <FormLabel>Attributes</FormLabel>
+                <FormLabel>{t.fields.attributes}</FormLabel>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={handleAddAttribute}
                 >
-                  Add Attribute
+                  {t.actions.addAttribute}
                 </Button>
               </div>
               <FormDescription>
-                Define attributes like size, color, material, etc.
+                {t.fields.attributesDescription}
               </FormDescription>
               {Object.entries(attributes).map(([key, value], index) => (
                 <div key={index} className="flex items-center space-x-2">
                   <Input
-                    placeholder="Attribute name (e.g., size)"
+                    placeholder={t.placeholders.attributeName}
                     value={key}
                     onChange={(e) =>
                       handleUpdateAttribute(key, e.target.value, value)
@@ -239,7 +243,7 @@ export function EditProductVariantDialog({
                     className="flex-1"
                   />
                   <Input
-                    placeholder="Value (e.g., Large)"
+                    placeholder={t.placeholders.attributeValue}
                     value={value}
                     onChange={(e) =>
                       handleUpdateAttribute(key, key, e.target.value)
@@ -252,7 +256,7 @@ export function EditProductVariantDialog({
                     size="sm"
                     onClick={() => handleRemoveAttribute(key)}
                   >
-                    Remove
+                    {t.actions.remove}
                   </Button>
                 </div>
               ))}
@@ -263,7 +267,7 @@ export function EditProductVariantDialog({
               name="sortOrder"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Sort Order</FormLabel>
+                  <FormLabel>{t.fields.sortOrder}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -275,7 +279,7 @@ export function EditProductVariantDialog({
                     />
                   </FormControl>
                   <FormDescription>
-                    Used to control the display order of variants.
+                    {t.fields.sortOrderDescription}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -288,9 +292,9 @@ export function EditProductVariantDialog({
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">Active</FormLabel>
+                    <FormLabel className="text-base">{t.fields.isActive}</FormLabel>
                     <FormDescription>
-                      Whether this variant is active and available for use.
+                      {t.fields.isActiveDescription}
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -309,10 +313,10 @@ export function EditProductVariantDialog({
                 variant="outline"
                 onClick={() => handleOpenChange(false)}
               >
-                Cancel
+                {t.actions.cancel}
               </Button>
               <Button type="submit" disabled={loading}>
-                {loading ? "Updating..." : "Update Product Variant"}
+                {loading ? t.actions.updating : t.actions.update}
               </Button>
             </DialogFooter>
           </form>

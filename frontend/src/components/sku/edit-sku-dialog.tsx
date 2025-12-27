@@ -35,7 +35,8 @@ import useProductVariantsStore, {
   type ProductSKU,
 } from "@/stores/product-variants-store";
 import { toast } from "sonner";
-import { useTranslations } from "next-intl";
+import { useLocale } from "@/components/local-lang-swither";
+import { getMessages } from "@/lib/locale";
 import { Trash2 } from "lucide-react";
 import { MultiImageUploader } from "../multy-image-file";
 
@@ -76,7 +77,9 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
   const [existingImages, setExistingImages] = useState<
     { id: string; url: string }[]
   >([]);
-  const t = useTranslations('pages.skus.dialogs.editSKU');
+  const { locale } = useLocale();
+  const lang = getMessages(locale);
+  const t = lang.pages?.skus?.dialogs?.editSKU || {};
 
   const form = useForm<EditSKUFormData>({
     resolver: zodResolver(editSKUSchema),
@@ -146,11 +149,11 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
       selectedImages.forEach((file) => formData.append("images", file));
 
       await updateSKU(sku.id, formData);
-      toast.success(t('toast.success'));
+      toast.success(t.toast?.success || "SKU updated");
       onOpenChange(false);
       setSelectedImages([]);
     } catch {
-      toast.error(t.toast?.skuUpdateFailed || "Failed to update SKU");
+      toast.error(t.toast?.failed || "Failed to update SKU");
     }
   };
 
@@ -179,8 +182,8 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
-          <DialogTitle>{t.editSKU.title}</DialogTitle>
-          <DialogDescription>{t.editSKU.description}</DialogDescription>
+          <DialogTitle>{t.title}</DialogTitle>
+          <DialogDescription>{t.description}</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -191,7 +194,7 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
               name="variantId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t.editSKU.fields.productVariant}</FormLabel>
+                  <FormLabel>{t.fields?.variant}</FormLabel>
                   <FormControl>
                     <Controller
                       name="variantId"
@@ -204,7 +207,7 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
                           <SelectTrigger className="w-full max-w-[400px]">
                             <SelectValue
                               className="truncate"
-                              placeholder={t.editSKU.placeholders.selectVariant}
+                              placeholder={t.placeholders?.selectVariant}
                             />
                           </SelectTrigger>
                           <SelectContent className="w-full max-w-[400px]">
@@ -236,15 +239,15 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
                   name={name as keyof EditSKUFormData}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t.editSKU.fields[name]}</FormLabel>
+                      <FormLabel>{t.fields?.[name]}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder={t.editSKU.placeholders[name]}
+                          placeholder={t.placeholders?.[name]}
                           {...field}
                         />
                       </FormControl>
                       <FormDescription>
-                        {t.editSKU.fields[name]}
+                        {t.fields?.[name]}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -262,7 +265,7 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
                   name={name as keyof EditSKUFormData}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t.editSKU.fields[name]}</FormLabel>
+                      <FormLabel>{t.fields?.[name]}</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -279,7 +282,7 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
                         />
                       </FormControl>
                       <FormDescription>
-                        {t.editSKU.fields[name]}
+                        {t.fields?.[name]}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -297,7 +300,7 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
                   name={name as keyof EditSKUFormData}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t.editSKU.fields[name]}</FormLabel>
+                      <FormLabel>{t.fields?.[name]}</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -309,7 +312,7 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
                         />
                       </FormControl>
                       <FormDescription>
-                        {t.editSKU.fields[name]}
+                        {t.fields?.[name]}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -325,7 +328,7 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
                 name="weight"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t.editSKU.fields.weight}</FormLabel>
+                    <FormLabel>{t.fields?.weight}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -341,7 +344,7 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
                         }
                       />
                     </FormControl>
-                    <FormDescription>{t.editSKU.fields.weight}</FormDescription>
+                    <FormDescription>{t.fields?.weight}</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -351,16 +354,16 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
                 name="dimensions"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t.editSKU.fields.dimensions}</FormLabel>
+                    <FormLabel>{t.fields?.dimensions}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder={t.editSKU.placeholders.dimensions}
+                        placeholder={t.placeholders?.dimensions}
                         value={field.value ?? ""}
                         onChange={field.onChange}
                       />
                     </FormControl>
                     <FormDescription>
-                      {t.editSKU.fields.dimensions}
+                      {t.fields?.dimensions}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -376,10 +379,10 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">
-                      {t.editSKU.fields.isActive}
+                      {t.fields?.isActive}
                     </FormLabel>
                     <FormDescription>
-                      {t.editSKU.fields.isActiveDescription}
+                      {t.fields?.isActiveDescription}
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -395,7 +398,7 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
             {/* Images */}
             {existingImages.length > 0 && (
               <div>
-                <FormLabel>{t.editSKU.fields.existingImages}</FormLabel>
+                <FormLabel>{t.fields?.existingImages}</FormLabel>
                 <div className="grid grid-cols-4 gap-4 mt-2">
                   {existingImages.map((img) => (
                     <div key={img.id} className="relative">
@@ -423,7 +426,7 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
             )}
 
             <FormItem>
-              <FormLabel>{t.editSKU.fields.images}</FormLabel>
+              <FormLabel>{t.fields?.images}</FormLabel>
               <FormControl>
                 <MultiImageUploader
                   value={selectedImages}
@@ -433,7 +436,7 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
                 />
               </FormControl>
               <FormDescription>
-                {t.editSKU.fields.imagesDescription}
+                {t.fields?.imagesDescription}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -444,12 +447,12 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
                 variant="outline"
                 onClick={() => handleOpenChange(false)}
               >
-                {t.editSKU.actions.cancel}
+                {t.actions?.cancel}
               </Button>
               <Button type="submit" disabled={loading}>
                 {loading
-                  ? t.editSKU.actions.updating
-                  : t.editSKU.actions.update}
+                  ? t.actions?.updating
+                  : t.actions?.update}
               </Button>
             </DialogFooter>
           </form>

@@ -29,6 +29,8 @@ import { useProductsStore, type CreateProductPayload } from "@/stores/products-s
 import { useCategoriesStore } from "@/stores/categories-store";
 import { toast } from "sonner";
 import { Loader } from "../loader";
+import { useLocale } from "@/components/local-lang-swither";
+import { getMessages } from "@/lib/locale";
 
 interface CreateProductDialogProps {
   trigger?: React.ReactNode;
@@ -44,6 +46,9 @@ export function CreateProductDialog({
   const { createProduct, loading } = useProductsStore();
   const { categories, fetchCategories } = useCategoriesStore();
   const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const { locale } = useLocale();
+  const lang = getMessages(locale);
+  const t = lang.pages?.products?.dialogs?.createProduct || {};
 
   // Use external state if provided, otherwise use internal state
   const isDialogOpen =
@@ -132,15 +137,15 @@ export function CreateProductDialog({
     };
 
     if (!formData.name.trim()) {
-      newErrors.name = "Product name is required";
+      newErrors.name = t.errors?.nameRequired || "Product name is required";
     }
 
     if (formData.name.length > 255) {
-      newErrors.name = "Name is too long";
+      newErrors.name = t.errors?.nameTooLong || "Name is too long";
     }
 
     if (formData.sortOrder < 0) {
-      newErrors.sortOrder = "Sort order cannot be negative";
+      newErrors.sortOrder = t.errors?.sortOrderNegative || "Sort order cannot be negative";
     }
 
     setErrors(newErrors);
@@ -166,8 +171,8 @@ export function CreateProductDialog({
       };
 
       await createProduct(payload);
-      toast.success("Product created successfully");
-      
+      toast.success(t.toast?.success || "Product created successfully");
+
       // Reset form
       setFormData({
         name: "",
@@ -192,10 +197,10 @@ export function CreateProductDialog({
         metaDesc: "",
         sortOrder: "",
       });
-      
+
       setIsDialogOpen(false);
     } catch (error) {
-      toast.error("Failed to create product");
+      toast.error(t.toast?.failed || "Failed to create product");
     }
   };
 
@@ -205,24 +210,24 @@ export function CreateProductDialog({
         {trigger || (
           <Button className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
-            Add Product
+            {t.trigger || "Add Product"}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Product</DialogTitle>
+          <DialogTitle>{t.title || "Create New Product"}</DialogTitle>
           <DialogDescription>
-            Add a new product to your catalog. You can add variants and pricing later.
+            {t.description || "Add a new product to your catalog. You can add variants and pricing later."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Product Name</Label>
+              <Label htmlFor="name">{t.fields?.name || "Product Name"}</Label>
               <Input
                 id="name"
-                placeholder="Wireless Bluetooth Headphones"
+                placeholder={t.placeholders?.name || "Wireless Bluetooth Headphones"}
                 value={formData.name}
                 onChange={(e) => handleNameChange(e.target.value)}
                 className={errors.name ? "border-destructive" : ""}
@@ -231,18 +236,18 @@ export function CreateProductDialog({
                 <p className="text-sm text-destructive">{errors.name}</p>
               )}
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="slug">Slug</Label>
+              <Label htmlFor="slug">{t.fields?.slug || "Slug"}</Label>
               <Input
                 id="slug"
-                placeholder="wireless-bluetooth-headphones"
+                placeholder={t.placeholders?.slug || "wireless-bluetooth-headphones"}
                 value={formData.slug}
                 onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
                 className={errors.slug ? "border-destructive" : ""}
               />
               <p className="text-xs text-muted-foreground">
-                URL-friendly version of the name. Auto-generated if left empty.
+                {t.fields?.slugDescription || "URL-friendly version of the name. Auto-generated if left empty."}
               </p>
               {errors.slug && (
                 <p className="text-sm text-destructive">{errors.slug}</p>
@@ -251,20 +256,20 @@ export function CreateProductDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="shortDesc">Short Description</Label>
+            <Label htmlFor="shortDesc">{t.fields?.shortDesc || "Short Description"}</Label>
             <Input
               id="shortDesc"
-              placeholder="Premium wireless headphones with 30h battery life"
+              placeholder={t.placeholders?.shortDesc || "Premium wireless headphones with 30h battery life"}
               value={formData.shortDesc}
               onChange={(e) => setFormData(prev => ({ ...prev, shortDesc: e.target.value }))}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t.fields?.description || "Description"}</Label>
             <Textarea
               id="description"
-              placeholder="High-quality wireless headphones with noise cancellation..."
+              placeholder={t.placeholders?.description || "High-quality wireless headphones with noise cancellation..."}
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               className="resize-none"
@@ -273,10 +278,10 @@ export function CreateProductDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="coverImage">Cover Image URL</Label>
+            <Label htmlFor="coverImage">{t.fields?.coverImage || "Cover Image URL"}</Label>
             <Input
               id="coverImage"
-              placeholder="https://example.com/images/headphones.jpg"
+              placeholder={t.placeholders?.coverImage || "https://example.com/images/headphones.jpg"}
               value={formData.coverImage}
               onChange={(e) => setFormData(prev => ({ ...prev, coverImage: e.target.value }))}
             />
@@ -284,17 +289,17 @@ export function CreateProductDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="metaTitle">Meta Title (SEO)</Label>
+              <Label htmlFor="metaTitle">{t.fields?.metaTitle || "Meta Title (SEO)"}</Label>
               <Input
                 id="metaTitle"
-                placeholder="Best Wireless Headphones 2024"
+                placeholder={t.placeholders?.metaTitle || "Best Wireless Headphones 2024"}
                 value={formData.metaTitle}
                 onChange={(e) => setFormData(prev => ({ ...prev, metaTitle: e.target.value }))}
               />
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="sortOrder">Sort Order</Label>
+              <Label htmlFor="sortOrder">{t.fields?.sortOrder || "Sort Order"}</Label>
               <Input
                 id="sortOrder"
                 type="number"
@@ -304,7 +309,7 @@ export function CreateProductDialog({
                 className={errors.sortOrder ? "border-destructive" : ""}
               />
               <p className="text-xs text-muted-foreground">
-                Lower numbers appear first
+                {t.fields?.sortOrderDescription || "Lower numbers appear first"}
               </p>
               {errors.sortOrder && (
                 <p className="text-sm text-destructive">{errors.sortOrder}</p>
@@ -313,10 +318,10 @@ export function CreateProductDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="metaDesc">Meta Description (SEO)</Label>
+            <Label htmlFor="metaDesc">{t.fields?.metaDesc || "Meta Description (SEO)"}</Label>
             <Textarea
               id="metaDesc"
-              placeholder="Discover our premium wireless headphones with exceptional sound quality..."
+              placeholder={t.placeholders?.metaDesc || "Discover our premium wireless headphones with exceptional sound quality..."}
               value={formData.metaDesc}
               onChange={(e) => setFormData(prev => ({ ...prev, metaDesc: e.target.value }))}
               className="resize-none"
@@ -326,7 +331,7 @@ export function CreateProductDialog({
 
           {/* Categories */}
           <div className="space-y-2">
-            <Label>Categories</Label>
+            <Label>{t.fields?.categories || "Categories"}</Label>
             <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto border rounded-md p-3">
               {categories.map((category) => (
                 <div key={category.id} className="flex items-center space-x-2">
@@ -349,9 +354,9 @@ export function CreateProductDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
-                <Label className="text-base">Active Status</Label>
+                <Label className="text-base">{t.fields?.isActive || "Active Status"}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Active products are visible to customers
+                  {t.fields?.isActiveDescription || "Active products are visible to customers"}
                 </p>
               </div>
               <Switch
@@ -362,9 +367,9 @@ export function CreateProductDialog({
 
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
-                <Label className="text-base">Featured Product</Label>
+                <Label className="text-base">{t.fields?.isFeatured || "Featured Product"}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Featured products appear prominently
+                  {t.fields?.isFeaturedDescription || "Featured products appear prominently"}
                 </p>
               </div>
               <Switch
@@ -380,16 +385,16 @@ export function CreateProductDialog({
               variant="outline"
               onClick={() => setIsDialogOpen(false)}
             >
-              Cancel
+              {t.actions?.cancel || "Cancel"}
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <>
                   <Loader className="mr-2 h-4 w-4" />
-                  Creating...
+                  {t.actions?.creating || "Creating..."}
                 </>
               ) : (
-                "Create Product"
+                t.actions?.create || "Create Product"
               )}
             </Button>
           </DialogFooter>
