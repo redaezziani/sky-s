@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { XIcon, ImageIcon, UploadIcon, AlertCircleIcon } from "lucide-react";
-import { useLocale } from "@/components/local-lang-swither";
-import { getMessages } from "@/lib/locale";
+import { useTranslations } from "next-intl";
 
 export interface MultiImageUploaderProps {
   value?: File[];
@@ -19,8 +18,7 @@ export function MultiImageUploader({
   maxFiles = 6,
   maxSizeMB = 5,
 }: MultiImageUploaderProps) {
-  const { locale } = useLocale();
-  const t = getMessages(locale).multiImageUploader;
+  const t = useTranslations('multiImageUploader');
 
   const [files, setFiles] = useState<File[]>(value);
   const [errors, setErrors] = useState<string[]>([]);
@@ -37,7 +35,7 @@ export function MultiImageUploader({
 
     newFiles.forEach((file) => {
       if (file.size > maxSizeMB * 1024 * 1024) {
-        newErrors.push(t.errors.maxSize.replace("{name}", file.name));
+        newErrors.push(t('errors.maxSize', { name: file.name }));
       } else {
         validFiles.push(file);
       }
@@ -76,9 +74,9 @@ export function MultiImageUploader({
             <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full border bg-background">
               <ImageIcon className="h-5 w-5 opacity-60" />
             </div>
-            <p className="text-sm font-medium">{t.dropHere}</p>
+            <p className="text-sm font-medium">{t('dropHere')}</p>
             <p className="text-xs text-muted-foreground">
-              {t.formats.replace("{maxSizeMB}", String(maxSizeMB))}
+              {t('formats', { maxSizeMB: String(maxSizeMB) })}
             </p>
             <Button
               variant="outline"
@@ -88,7 +86,7 @@ export function MultiImageUploader({
                 document.getElementById("multi-upload-input")?.click()
               }
             >
-              <UploadIcon className="mr-1 h-4 w-4" /> {t.selectImages}
+              <UploadIcon className="mr-1 h-4 w-4" /> {t('selectImages')}
             </Button>
           </label>
         ) : (

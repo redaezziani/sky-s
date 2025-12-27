@@ -24,9 +24,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { AuthService } from "@/services/auth.service";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-
-import { getMessages } from "@/lib/locale";
-import { useLocale } from "@/components/local-lang-swither";
+import { useTranslations } from "next-intl";
 
 export function NavUser({
   user,
@@ -36,10 +34,7 @@ export function NavUser({
   const { isMobile } = useSidebar();
   const { logout } = useAuth();
   const router = useRouter();
-
-  // ✅ reactive locale from context
-  const { locale } = useLocale();
-  const t = getMessages(locale);
+  const t = useTranslations('sidebar.navUser');
 
   const handleLogout = async () => {
     try {
@@ -49,8 +44,8 @@ export function NavUser({
     } catch (error) {
       logout();
       router.push("/");
-      toast.error(t.sidebar.navUser.logoutWarningTitle, {
-        description: t.sidebar.navUser.logoutWarningDesc,
+      toast.error(t('logoutWarningTitle'), {
+        description: t('logoutWarningDesc'),
       });
     }
   };
@@ -106,14 +101,14 @@ export function NavUser({
               }}
             >
               <IconSettings />
-              {t.sidebar.navUser.settings ?? "Settings"}
+              {t('settings', { defaultValue: 'Settings' })}
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
 
             <DropdownMenuItem onClick={handleLogout}>
               <IconLogout />
-              {t.sidebar.navUser.logout}
+              {t('logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

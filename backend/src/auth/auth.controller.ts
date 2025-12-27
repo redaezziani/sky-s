@@ -13,28 +13,12 @@ import {
 } from '@nestjs/common';
 import {
   ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiUnauthorizedResponse,
-  ApiBadRequestResponse,
-  ApiConflictResponse,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
-  RegisterDto,
   LoginDto,
-  RefreshTokenDto,
-  ForgotPasswordDto,
-  ResetPasswordDto,
-  VerifyEmailDto,
 } from './dto/auth.dto';
 import {
-  AuthResponseDto,
-  AuthTokensDto,
-  MessageResponseDto,
-  TokenValidationResponseDto,
-  UserResponseDto,
   UserDeviceDto,
 } from './dto/response.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -47,14 +31,6 @@ import { Request, Response } from 'express';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
-  @Post('register')
-  @HttpCode(HttpStatus.CREATED)
-  async register(
-    @Body(new ValidationPipe()) registerDto: RegisterDto,
-  ): Promise<AuthResponse> {
-    return this.authService.register(registerDto);
-  }
 
   @Post('login')
   @UseGuards(LocalAuthGuard)
@@ -130,46 +106,6 @@ export class AuthController {
   ): Promise<{ message: string }> {
     await this.authService.logoutAll(user.id);
     return { message: 'Logged out from all devices successfully' };
-  }
-
-  @Post('forgot-password')
-  @HttpCode(HttpStatus.OK)
-  async forgotPassword(
-    @Body(new ValidationPipe()) forgotPasswordDto: ForgotPasswordDto,
-  ): Promise<{ message: string }> {
-    await this.authService.forgotPassword(forgotPasswordDto);
-    return {
-      message: 'If the email exists, a password reset link has been sent',
-    };
-  }
-
-  @Post('reset-password')
-  @HttpCode(HttpStatus.OK)
-  async resetPassword(
-    @Body(new ValidationPipe()) resetPasswordDto: ResetPasswordDto,
-  ): Promise<{ message: string }> {
-    await this.authService.resetPassword(resetPasswordDto);
-    return { message: 'Password reset successfully' };
-  }
-
-  @Post('verify-email')
-  @HttpCode(HttpStatus.OK)
-  async verifyEmail(
-    @Body(new ValidationPipe()) verifyEmailDto: VerifyEmailDto,
-  ): Promise<{ message: string }> {
-    await this.authService.verifyEmail(verifyEmailDto.token);
-    return { message: 'Email verified successfully' };
-  }
-
-  @Post('resend-verification')
-  @HttpCode(HttpStatus.OK)
-  async resendEmailVerification(
-    @Body('email') email: string,
-  ): Promise<{ message: string }> {
-    await this.authService.resendEmailVerification(email);
-    return {
-      message: 'If the email exists, a verification link has been sent',
-    };
   }
 
   @Get('profile')

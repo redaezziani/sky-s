@@ -35,8 +35,7 @@ import useProductVariantsStore, {
   type ProductSKU,
 } from "@/stores/product-variants-store";
 import { toast } from "sonner";
-import { useLocale } from "@/components/local-lang-swither";
-import { getMessages } from "@/lib/locale";
+import { useTranslations } from "next-intl";
 import { Trash2 } from "lucide-react";
 import { MultiImageUploader } from "../multy-image-file";
 
@@ -77,8 +76,7 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
   const [existingImages, setExistingImages] = useState<
     { id: string; url: string }[]
   >([]);
-  const { locale } = useLocale();
-  const t = getMessages(locale).pages.skus.dialogs;
+  const t = useTranslations('pages.skus.dialogs.editSKU');
 
   const form = useForm<EditSKUFormData>({
     resolver: zodResolver(editSKUSchema),
@@ -148,7 +146,7 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
       selectedImages.forEach((file) => formData.append("images", file));
 
       await updateSKU(sku.id, formData);
-      toast.success(t.toast?.skuUpdated || "SKU updated successfully");
+      toast.success(t('toast.success'));
       onOpenChange(false);
       setSelectedImages([]);
     } catch {

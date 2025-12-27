@@ -2,14 +2,9 @@ import { UserRole } from "@/types/auth.types";
 
 export const publicRoutes = [
   "/auth/login",
-  "/auth/register",
-  "/auth/forgot-password",
-  "/auth/reset-password",
-  "/auth/verify-email",
-  "/auth/resend-verification",
 ];
 
-export const authenticatedRoutes = ["/profile", "/dashboard"];
+export const authenticatedRoutes = ["/dashboard"];
 
 export const roleProtectedRoutes = {
   "/dashboard/users": [UserRole.ADMIN],

@@ -1,20 +1,13 @@
 import {
   Injectable,
-  ConflictException,
   UnauthorizedException,
-  NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { secrets } from '../config/secrets';
 import {
-  RegisterDto,
   LoginDto,
-  ForgotPasswordDto,
-  ResetPasswordDto,
   RefreshTokenDto,
 } from './dto/auth.dto';
 import { JwtPayload, AuthTokens, AuthResponse } from './types/auth.types';
@@ -22,65 +15,13 @@ import { User } from '@prisma/client';
 import { UserDeviceDto } from './dto/response.dto';
 
 import * as geoip from 'geoip-lite';
-import { EmailService } from 'src/common/services/email.service';
-import { CartService } from '../cart/cart.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-    private readonly emailService: EmailService,
-    private readonly cartService: CartService,
   ) {}
-
-  async register(registerDto: RegisterDto): Promise<AuthResponse> {
-    const { email, password, name } = registerDto;
-
-    // Check if user already exists
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      throw new ConflictException('User with this email already exists');
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(
-      password,
-      secrets.BcryptSaltRounds,
-    );
-
-    // Generate email verification token
-    const emailVerificationToken = randomBytes(32).toString('hex');
-    const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
-    // Create user
-    const user = await this.prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        name,
-        emailVerificationToken,
-        emailVerificationExpires,
-      },
-    });
-
-    // Generate tokens
-    const tokens = await this.generateTokens(user);
-
-    return {
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        isEmailVerified: user.isEmailVerified,
-      },
-      tokens,
-    };
-  }
 
   async login(
     loginDto: LoginDto,
@@ -93,6 +34,11 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user || !user.isActive)
       throw new UnauthorizedException('Invalid credentials');
+
+    // Admin-only check
+    if (user.role !== 'ADMIN') {
+      throw new UnauthorizedException('Access denied. Admin privileges required.');
+    }
 
     // Check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -148,11 +94,6 @@ export class AuthService {
     // Generate tokens linked to device
     const tokens = await this.generateTokens(user, device.id);
 
-    // Get user's cart for sync
-    const cartItems = await this.cartService.getUserCart(user.id);
-    const cartCount = await this.cartService.getCartItemCount(user.id);
-    const cartSubtotal = await this.cartService.getCartSubtotal(user.id);
-
     return {
       user: {
         id: user.id,
@@ -162,11 +103,6 @@ export class AuthService {
         isEmailVerified: user.isEmailVerified,
       },
       tokens,
-      cart: {
-        items: cartItems,
-        totalItems: cartCount,
-        subtotal: cartSubtotal,
-      },
       device: {
         id: device.id,
         ip: device.ip,
@@ -183,9 +119,8 @@ export class AuthService {
     const { refreshToken } = refreshTokenDto;
 
     // Verify refresh token
-    let payload: JwtPayload;
     try {
-      payload = this.jwtService.verify(refreshToken, {
+      this.jwtService.verify(refreshToken, {
         secret: secrets.JwtRefreshSecret,
       });
     } catch (error) {
@@ -227,139 +162,6 @@ export class AuthService {
     await this.prisma.refreshToken.deleteMany({
       where: { userId },
     });
-  }
-
-  async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<void> {
-    const { email } = forgotPasswordDto;
-
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (!user || !user.isActive) {
-      // Don't reveal if user exists or not for security
-      return;
-    }
-
-    // Generate password reset token
-    const resetToken = randomBytes(32).toString('hex');
-    const resetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: {
-        passwordResetToken: resetToken,
-        passwordResetExpires: resetExpires,
-      },
-    });
-
-    // TODO: Send password reset email
-    const resetUrl = `${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
-  const html = `
-    <p>Hello ${user.name},</p>
-    <p>You requested a password reset. Click the link below to reset your password:</p>
-    <a href="${resetUrl}">Reset Password</a>
-    <p>If you did not request this, please ignore this email.</p>
-  `;
-
-  await this.emailService.sendEmail(user.email, 'Password Reset', html);
-    console.log(`Password reset token for ${email}: ${resetToken}`);
-  }
-
-  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<void> {
-    const { token, newPassword } = resetPasswordDto;
-
-    const user = await this.prisma.user.findFirst({
-      where: {
-        passwordResetToken: token,
-        passwordResetExpires: {
-          gt: new Date(),
-        },
-        isActive: true,
-      },
-    });
-
-    if (!user) {
-      throw new BadRequestException('Invalid or expired reset token');
-    }
-
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(
-      newPassword,
-      secrets.BcryptSaltRounds,
-    );
-
-    // Update user password and clear reset token
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: {
-        password: hashedPassword,
-        passwordResetToken: null,
-        passwordResetExpires: null,
-      },
-    });
-
-    // Logout from all devices
-    await this.logoutAll(user.id);
-  }
-
-  async verifyEmail(token: string): Promise<void> {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        emailVerificationToken: token,
-        emailVerificationExpires: {
-          gt: new Date(),
-        },
-        isActive: true,
-      },
-    });
-
-    if (!user) {
-      throw new BadRequestException('Invalid or expired verification token');
-    }
-
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: {
-        isEmailVerified: true,
-        emailVerificationToken: null,
-        emailVerificationExpires: null,
-      },
-    });
-  }
-
-  async resendEmailVerification(email: string): Promise<void> {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (!user || !user.isActive || user.isEmailVerified) {
-      return; // Don't reveal user information
-    }
-
-    // Generate new verification token
-    const emailVerificationToken = randomBytes(32).toString('hex');
-    const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: {
-        emailVerificationToken,
-        emailVerificationExpires,
-      },
-    });
-
-    const verifyUrl = `${process.env.FRONTEND_URL}/auth/verify-email?token=${emailVerificationToken}`;
-  const html = `
-    <p>Hello ${user.name},</p>
-    <p>Please verify your email by clicking the link below:</p>
-    <a href="${verifyUrl}">Verify Email</a>
-  `;
-
-  await this.emailService.sendEmail(user.email, 'Verify Your Email', html);
-    console.log(
-      `Email verification token for ${email}: ${emailVerificationToken}`,
-    );
   }
 
   async validateUser(email: string, password: string): Promise<User | null> {

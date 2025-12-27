@@ -32,8 +32,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
 
-import { getMessages } from "@/lib/locale";
-import { useLocale } from "@/components/local-lang-swither";
+import { useTranslations } from "next-intl";
 import {
   publicRoutes,
   authenticatedRoutes,
@@ -45,8 +44,7 @@ export function AppSidebar({
   user,
   ...props
 }: React.ComponentProps<typeof Sidebar> & { user: User | null }) {
-  const { locale } = useLocale();
-  const t = getMessages(locale);
+  const t = useTranslations('sidebar');
 
   const isRouteAccessible = (url: string) => {
     if (!user) return false;
@@ -63,73 +61,73 @@ export function AppSidebar({
 
   const navMainData = [
     {
-      title: t.sidebar.links.dashboard,
+      title: t('links.dashboard'),
       url: "/dashboard",
       icon: IconDashboard,
       active: isRouteAccessible("/dashboard"),
     },
     {
-      title: t.sidebar.links.users,
+      title: t('links.users'),
       url: "/dashboard/users",
       icon: IconUsers,
       active: isRouteAccessible("/dashboard/users"),
     },
     {
-      title: t.sidebar.links.roles,
+      title: t('links.roles'),
       url: "/dashboard/roles",
       icon: IconShield,
       active: isRouteAccessible("/dashboard/roles"),
     },
     {
-      title: t.sidebar.links.categories,
+      title: t('links.categories'),
       url: "/dashboard/categories",
       icon: IconCategory,
       active: isRouteAccessible("/dashboard/categories"),
     },
     {
-      title: t.sidebar.links.products,
+      title: t('links.products'),
       url: "/dashboard/products",
       icon: IconPackage,
       active: isRouteAccessible("/dashboard/products"),
     },
     {
-      title: t.sidebar.links.productVariants,
+      title: t('links.productVariants'),
       url: "/dashboard/product-variants",
       icon: IconTag,
       active: isRouteAccessible("/dashboard/product-variants"),
     },
     {
-      title: t.sidebar.links.skus,
+      title: t('links.skus'),
       url: "/dashboard/skus",
       icon: IconBoxSeam,
       active: isRouteAccessible("/dashboard/skus"),
     },
     {
-      title: t.sidebar.links.orders,
+      title: t('links.orders'),
       url: "/dashboard/orders",
       icon: IconShoppingCart,
       active: isRouteAccessible("/dashboard/orders"),
     },
     {
-      title: t.sidebar.links.orderItems,
+      title: t('links.orderItems'),
       url: "/dashboard/order-items",
       icon: IconClipboardList,
       active: isRouteAccessible("/dashboard/order-items"),
     },
     {
-      title: t.sidebar.links.reviews,
+      title: t('links.reviews'),
       url: "/dashboard/reviews",
       icon: IconStar,
       active: false,
     },
     {
-      title: t.sidebar.links.analytics,
+      title: t('links.analytics'),
       url: "/dashboard/analytics",
       icon: IconChartLine,
       active: isRouteAccessible("/dashboard/analytics"),
     },
     {
-      title: t.sidebar.links.settings,
+      title: t('links.settings'),
       url: "/dashboard/settings",
       icon: IconSettings2,
       active: isRouteAccessible("/dashboard/settings"),
@@ -164,7 +162,7 @@ export function AppSidebar({
                   />
                 </svg>
                 <span className="text-base font-semibold">
-                  {t.sidebar.storeManager}
+                  {t('storeManager')}
                 </span>
               </a>
             </SidebarMenuButton>
@@ -181,12 +179,12 @@ export function AppSidebar({
           user={
             user
               ? {
-                  name: user.name ?? t.sidebar.user,
+                  name: user.name ?? t('user'),
                   email: user.email,
                   avatar: "/avatars/default.jpg",
                 }
               : {
-                  name: t.sidebar.user,
+                  name: t('user'),
                   email: "user@example.com",
                   avatar: "/avatars/default.jpg",
                 }

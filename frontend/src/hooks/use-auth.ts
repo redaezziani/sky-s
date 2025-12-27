@@ -1,9 +1,9 @@
 // src/hooks/use-auth.ts
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
-import { User, AuthResponse, UserDevice } from "@/types/auth.types";
-import { AuthService } from "@/services/auth.service";
-import { useCartStore } from "@/stores/public/cart-store";
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
+import { User, AuthResponse, UserDevice } from '@/types/auth.types';
+import { AuthService } from '@/services/auth.service';
+import { useCartStore } from '@/stores/public/cart-store';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -19,7 +19,7 @@ export function useAuth() {
       setUser(profile);
       setIsAuthenticated(true);
     } catch (error) {
-      console.error("Failed to fetch profile:", error);
+      console.error('Failed to fetch profile:', error);
       clearAuthData();
       setUser(null);
       setIsAuthenticated(false);
@@ -27,8 +27,6 @@ export function useAuth() {
       setIsLoading(false);
     }
   };
-
-
 
   const login = async (authResponse: AuthResponse) => {
     setUser(authResponse.user);
@@ -41,7 +39,7 @@ export function useAuth() {
     const cartStore = useCartStore.getState();
     await cartStore.setUser(authResponse.user.id, authResponse);
 
-    toast.success("Logged in successfully", {
+    toast.success('Logged in successfully', {
       description: `Welcome back, ${
         authResponse.user.name || authResponse.user.email
       }!`,
@@ -58,7 +56,7 @@ export function useAuth() {
       setUser(null);
       setDevice(null);
       setIsAuthenticated(false);
-      
+
       // Clear cart user
       const cartStore = useCartStore.getState();
       cartStore.setUser('');
@@ -73,7 +71,7 @@ export function useAuth() {
       setUser(null);
       setDevice(null);
       setIsAuthenticated(false);
-      
+
       // Clear cart user
       const cartStore = useCartStore.getState();
       cartStore.setUser('');
@@ -81,18 +79,18 @@ export function useAuth() {
   };
 
   const clearAuthData = () => {
-    localStorage.removeItem("user_data");
-    localStorage.removeItem("device_data");
+    localStorage.removeItem('user_data');
+    localStorage.removeItem('device_data');
   };
 
   const saveUserData = (userData: User) => {
-    localStorage.setItem("user_data", JSON.stringify(userData));
+    localStorage.setItem('user_data', JSON.stringify(userData));
   };
 
   const saveDeviceData = (deviceData: UserDevice | null) => {
     if (deviceData)
-      localStorage.setItem("device_data", JSON.stringify(deviceData));
-    else localStorage.removeItem("device_data");
+      localStorage.setItem('device_data', JSON.stringify(deviceData));
+    else localStorage.removeItem('device_data');
   };
 
   return {

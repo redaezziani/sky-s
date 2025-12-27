@@ -19,8 +19,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { useLocale } from "@/components/local-lang-swither";
-import { getMessages } from "@/lib/locale";
+import { useTranslations } from "next-intl";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Select,
@@ -33,9 +32,7 @@ import {
 import { fetcher } from "@/lib/utils";
 
 export function ChartTopProductsRadar() {
-  const { locale } = useLocale();
-  const t =
-    getMessages(locale).pages.analytics.components.chartTopProductsRadar;
+  const t = useTranslations('pages.analytics.components.chartTopProductsRadar');
 
   const [timeRange, setTimeRange] = React.useState("30d");
   const [period, setPeriod] = React.useState(30);
@@ -110,8 +107,8 @@ export function ChartTopProductsRadar() {
     <Card className="@container/card flex flex-col max-h-[27rem]">
       <CardHeader className="flex items-center justify-between">
         <div className="space-y-1">
-          <CardTitle className="text-lg">{t.title}</CardTitle>
-          <CardDescription className="text-sm">{t.description}</CardDescription>
+          <CardTitle className="text-lg">{t('title')}</CardTitle>
+          <CardDescription className="text-sm">{t('description')}</CardDescription>
         </div>
 
         <div className="flex items-center gap-2">
@@ -123,19 +120,19 @@ export function ChartTopProductsRadar() {
             size="sm"
             className="hidden @[500px]/card:flex"
           >
-            <ToggleGroupItem value="90d">{t.periods["90d"]}</ToggleGroupItem>
-            <ToggleGroupItem value="30d">{t.periods["30d"]}</ToggleGroupItem>
-            <ToggleGroupItem value="7d">{t.periods["7d"]}</ToggleGroupItem>
+            <ToggleGroupItem value="90d">{t('periods.90d')}</ToggleGroupItem>
+            <ToggleGroupItem value="30d">{t('periods.30d')}</ToggleGroupItem>
+            <ToggleGroupItem value="7d">{t('periods.7d')}</ToggleGroupItem>
           </ToggleGroup>
 
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger className="w-32 h-8 @[500px]/card:hidden" size="sm">
-              <SelectValue placeholder={t.selectPeriodPlaceholder} />
+              <SelectValue placeholder={t('selectPeriodPlaceholder')} />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
-              <SelectItem value="90d">{t.periods["90d"]}</SelectItem>
-              <SelectItem value="30d">{t.periods["30d"]}</SelectItem>
-              <SelectItem value="7d">{t.periods["7d"]}</SelectItem>
+              <SelectItem value="90d">{t('periods.90d')}</SelectItem>
+              <SelectItem value="30d">{t('periods.30d')}</SelectItem>
+              <SelectItem value="7d">{t('periods.7d')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -174,7 +171,7 @@ export function ChartTopProductsRadar() {
                           y={(viewBox.cy || 0) + 4}
                           className="fill-muted-foreground"
                         >
-                          {t.labels.totalOrdered || "Total Orders"}
+                          {t('labels.totalOrdered')}
                         </tspan>
                       </text>
                     );
@@ -226,7 +223,7 @@ export function ChartTopProductsRadar() {
           Trending up by 5.2% <TrendingUp className="h-4 w-4" />
         </div>
         <div className="text-muted-foreground flex items-center gap-2 leading-none">
-          {t.periods[timeRange]} {t.labelSuffix}
+          {t(`periods.${timeRange}`)} {t('labelSuffix')}
         </div>
       </CardFooter>
     </Card>

@@ -18,8 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { useLocale } from "@/components/local-lang-swither";
-import { getMessages } from "@/lib/locale";
+import { useTranslations } from "next-intl";
 import { fetcher } from "@/lib/utils";
 
 // --- Product Data Type ---
@@ -84,8 +83,7 @@ function ProductProgressBar({ data, totalOrders }: ProductProgressBarProps) {
 // =================================================================
 
 export function ChartTopProducts() {
-  const { locale } = useLocale();
-  const t = getMessages(locale).pages.analytics.components.chartTopProducts;
+  const t = useTranslations('pages.analytics.components.chartTopProducts');
 
   const [timeRange, setTimeRange] = React.useState("90d");
   const [period, setPeriod] = React.useState(90);
@@ -141,11 +139,10 @@ export function ChartTopProducts() {
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <CardTitle className="text-lg">
-              {t.title || "Top 5 Products"}
+              {t('title')}
             </CardTitle>
             <CardDescription className="text-sm">
-              {t.description ||
-                "Breakdown of top-selling products by total orders."}
+              {t('description')}
             </CardDescription>
           </div>
           {/* Time Range Selector */}
@@ -159,13 +156,13 @@ export function ChartTopProducts() {
               className="hidden @[500px]/card:flex"
             >
               <ToggleGroupItem value="90d" className="px-3 py-1 text-xs">
-                {t.periods?.["90d"] || "90D"}
+                {t('periods.90d')}
               </ToggleGroupItem>
               <ToggleGroupItem value="30d" className="px-3 py-1 text-xs">
-                {t.periods?.["30d"] || "30D"}
+                {t('periods.30d')}
               </ToggleGroupItem>
               <ToggleGroupItem value="7d" className="px-3 py-1 text-xs">
-                {t.periods?.["7d"] || "7D"}
+                {t('periods.7d')}
               </ToggleGroupItem>
             </ToggleGroup>
 
@@ -175,18 +172,18 @@ export function ChartTopProducts() {
                 size="sm"
               >
                 <SelectValue
-                  placeholder={t.selectPeriodPlaceholder || "Select period"}
+                  placeholder={t('selectPeriodPlaceholder')}
                 />
               </SelectTrigger>
               <SelectContent className="rounded-xl">
                 <SelectItem value="90d">
-                  {t.periods?.["90d"] || "90 Days"}
+                  {t('periods.90d')}
                 </SelectItem>
                 <SelectItem value="30d">
-                  {t.periods?.["30d"] || "30 Days"}
+                  {t('periods.30d')}
                 </SelectItem>
                 <SelectItem value="7d">
-                  {t.periods?.["7d"] || "7 Days"}
+                  {t('periods.7d')}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -201,7 +198,7 @@ export function ChartTopProducts() {
             {totalOrders.toLocaleString()}
           </div>
           <div className="text-sm text-muted-foreground">
-            {t.labels?.totalOrdered || "Total Orders"} (Top 5)
+            {t('labels.totalOrdered')} (Top 5)
           </div>
         </div>
 
@@ -231,7 +228,7 @@ export function ChartTopProducts() {
               {/* Order count for the product */}
               <span className="font-medium shrink-0 ml-4">
                 {item.totalOrdered.toLocaleString()}{" "}
-                {t.labels?.orders || "Orders"}
+                {t('labels.orders')}
               </span>
             </div>
           ))}

@@ -33,8 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import useProductVariantsStore from "@/stores/product-variants-store";
 import { toast } from "sonner";
-import { useLocale } from "@/components/local-lang-swither";
-import { getMessages } from "@/lib/locale";
+import { useTranslations } from "next-intl";
 import { ScanBarcode } from "lucide-react";
 import { MultiImageUploader } from "../multy-image-file";
 
@@ -63,8 +62,7 @@ interface CreateSKUDialogProps {
 export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
   const { createSKU, loading, products } = useProductVariantsStore();
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const { locale } = useLocale();
-  const t = getMessages(locale).pages.skus.dialogs;
+  const t = useTranslations('pages.skus.dialogs.createSKU');
 
   const form = useForm<CreateSKUFormData>({
     resolver: zodResolver(createSKUSchema),
@@ -112,12 +110,12 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
       selectedImages.forEach((file) => formData.append("images", file));
 
       await createSKU(data.variantId, formData);
-      toast.success(t.toast?.skuCreated || "SKU created successfully");
+      toast.success(t('toast.skuCreated'));
       onOpenChange(false);
       form.reset();
       setSelectedImages([]);
     } catch {
-      toast.error(t.toast?.skuCreateFailed || "Failed to create SKU");
+      toast.error(t('toast.skuCreateFailed'));
     }
   };
 
@@ -130,8 +128,8 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t.createSKU.title}</DialogTitle>
-          <DialogDescription>{t.description}</DialogDescription>
+          <DialogTitle>{t('title')}</DialogTitle>
+          <DialogDescription>{t('description')}</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -142,7 +140,7 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
               name="variantId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t.createSKU.fields.productVariant}</FormLabel>
+                  <FormLabel>{t('fields.productVariant')}</FormLabel>
                   <FormControl>
                     <Controller
                       name="variantId"
@@ -154,9 +152,7 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
                         >
                           <SelectTrigger>
                             <SelectValue
-                              placeholder={
-                                t.createSKU.placeholders.selectVariant
-                              }
+                              placeholder={t('placeholders.selectVariant')}
                             />
                           </SelectTrigger>
                           <SelectContent>
@@ -186,16 +182,16 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
                     <FormItem>
                       <FormLabel>
                         <ScanBarcode className="inline-block mb-1" size={16} />
-                        {t.createSKU.fields[name]}{" "}
+                        {t(`fields.${name}`)}{" "}
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder={t.createSKU.placeholders[name]}
+                          placeholder={t(`placeholders.${name}`)}
                           {...field}
                         />
                       </FormControl>
                       <FormDescription>
-                        {t.createSKU.fields[name]}
+                        {t(`fields.${name}`)}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -213,7 +209,7 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
                   name={name as keyof CreateSKUFormData}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t.createSKU.fields[name]}</FormLabel>
+                      <FormLabel>{t(`fields.${name}`)}</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -230,7 +226,7 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
                         />
                       </FormControl>
                       <FormDescription>
-                        {t.createSKU.fields[name]}
+                        {t(`fields.${name}`)}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -248,7 +244,7 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
                   name={name as keyof CreateSKUFormData}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t.createSKU.fields[name]}</FormLabel>
+                      <FormLabel>{t(`fields.${name}`)}</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -260,7 +256,7 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
                         />
                       </FormControl>
                       <FormDescription>
-                        {t.createSKU.fields[name]}
+                        {t(`fields.${name}`)}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -276,7 +272,7 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
                 name="weight"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t.createSKU.fields.weight}</FormLabel>
+                    <FormLabel>{t('fields.weight')}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -293,7 +289,7 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
                       />
                     </FormControl>
                     <FormDescription>
-                      {t.createSKU.fields.weight}
+                      {t('fields.weight')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -304,16 +300,16 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
                 name="dimensions"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t.createSKU.fields.dimensions}</FormLabel>
+                    <FormLabel>{t('fields.dimensions')}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder={t.createSKU.placeholders.dimensions}
+                        placeholder={t('placeholders.dimensions')}
                         value={field.value ?? ""}
                         onChange={field.onChange}
                       />
                     </FormControl>
                     <FormDescription>
-                      {t.createSKU.fields.dimensions}
+                      {t('fields.dimensions')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -329,10 +325,10 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">
-                      {t.createSKU.fields.isActive}
+                      {t('fields.isActive')}
                     </FormLabel>
                     <FormDescription>
-                      {t.createSKU.fields.isActiveDescription}
+                      {t('fields.isActiveDescription')}
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -346,7 +342,7 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
             />
 
             <FormItem>
-              <FormLabel>{t.createSKU.fields.images}</FormLabel>
+              <FormLabel>{t('fields.images')}</FormLabel>
               <FormControl>
                 <MultiImageUploader
                   value={selectedImages}
@@ -356,7 +352,7 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
                 />
               </FormControl>
               <FormDescription>
-                {t.createSKU.fields.imagesDescription}
+                {t('fields.imagesDescription')}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -367,12 +363,12 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
                 variant="outline"
                 onClick={() => handleOpenChange(false)}
               >
-                {t.createSKU.submit.cancel}
+                {t('submit.cancel')}
               </Button>
               <Button type="submit" disabled={loading}>
                 {loading
-                  ? t.createSKU.submit.creating
-                  : t.createSKU.submit.create}
+                  ? t('submit.creating')
+                  : t('submit.create')}
               </Button>
             </DialogFooter>
           </form>

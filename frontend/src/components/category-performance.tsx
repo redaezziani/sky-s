@@ -25,8 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { useLocale } from "@/components/local-lang-swither";
-import { getMessages } from "@/lib/locale";
+import { useTranslations } from "next-intl";
 import { fetcher } from "@/lib/utils";
 
 const truncateText = (text: string, maxLength: number): string => {
@@ -35,9 +34,7 @@ const truncateText = (text: string, maxLength: number): string => {
 };
 
 export function ChartCategoryPerformance() {
-  const { locale } = useLocale();
-  const t =
-    getMessages(locale).pages.analytics.components.chartCategoryPerformance;
+  const t = useTranslations('pages.analytics.components.chartCategoryPerformance');
 
   const [timeRange, setTimeRange] = React.useState("30d");
   const [period, setPeriod] = React.useState(30);
@@ -94,15 +91,15 @@ export function ChartCategoryPerformance() {
 
   const chartConfig = {
     totalOrders: {
-      label: t.labels?.totalOrders || "Total Orders",
+      label: t('labels.totalOrders'),
       color: "var(--chart-1)",
     },
     totalRevenue: {
-      label: t.labels?.totalRevenue || "Total Revenue",
+      label: t('labels.totalRevenue'),
       color: "var(--chart-2)",
     },
     totalProducts: {
-      label: t.labels?.totalProducts || "Total Products",
+      label: t('labels.totalProducts'),
       color: "var(--chart-3)",
     },
     label: { color: "var(--foreground)" },
@@ -113,9 +110,9 @@ export function ChartCategoryPerformance() {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <CardTitle className="text-lg">{t.title}</CardTitle>
+            <CardTitle className="text-lg">{t('title')}</CardTitle>
             <CardDescription className="text-sm">
-              {t.description}
+              {t('description')}
             </CardDescription>
           </div>
           <CardAction className="shrink-0">
@@ -128,13 +125,13 @@ export function ChartCategoryPerformance() {
               className="hidden @[500px]/card:flex"
             >
               <ToggleGroupItem value="90d" className="px-3 py-1 text-xs">
-                {t.periods["90d"]}
+                {t('periods.90d')}
               </ToggleGroupItem>
               <ToggleGroupItem value="30d" className="px-3 py-1 text-xs">
-                {t.periods["30d"]}
+                {t('periods.30d')}
               </ToggleGroupItem>
               <ToggleGroupItem value="7d" className="px-3 py-1 text-xs">
-                {t.periods["7d"]}
+                {t('periods.7d')}
               </ToggleGroupItem>
             </ToggleGroup>
             <Select value={timeRange} onValueChange={setTimeRange}>
@@ -142,12 +139,12 @@ export function ChartCategoryPerformance() {
                 className="w-32 h-8 @[500px]/card:hidden"
                 size="sm"
               >
-                <SelectValue placeholder={t.selectPeriodPlaceholder} />
+                <SelectValue placeholder={t('selectPeriodPlaceholder')} />
               </SelectTrigger>
               <SelectContent className="rounded-xl">
-                <SelectItem value="90d">{t.periods["90d"]}</SelectItem>
-                <SelectItem value="30d">{t.periods["30d"]}</SelectItem>
-                <SelectItem value="7d">{t.periods["7d"]}</SelectItem>
+                <SelectItem value="90d">{t('periods.90d')}</SelectItem>
+                <SelectItem value="30d">{t('periods.30d')}</SelectItem>
+                <SelectItem value="7d">{t('periods.7d')}</SelectItem>
               </SelectContent>
             </Select>
           </CardAction>
@@ -199,7 +196,7 @@ export function ChartCategoryPerformance() {
                                 backgroundColor: chartConfig.totalOrders.color,
                               }}
                             />
-                            {t.labels?.totalOrders || "Total Orders"}:
+                            {t('labels.totalOrders')}:
                           </span>
                           <span className="font-medium">
                             {data.totalOrders}
@@ -213,7 +210,7 @@ export function ChartCategoryPerformance() {
                                 backgroundColor: chartConfig.totalRevenue.color,
                               }}
                             />
-                            {t.labels?.totalRevenue || "Total Revenue"}:
+                            {t('labels.totalRevenue')}:
                           </span>
                           <span className="font-medium">
                             ${data.totalRevenue?.toFixed(2) || "0.00"}
@@ -228,7 +225,7 @@ export function ChartCategoryPerformance() {
                                   chartConfig.totalProducts.color,
                               }}
                             />
-                            {t.labels?.totalProducts || "Total Products"}:
+                            {t('labels.totalProducts')}:
                           </span>
                           <span className="font-medium">
                             {data.totalProducts}

@@ -7,8 +7,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { secrets } from '../config/secrets';
-import { EmailService } from 'src/common/services/email.service';
-import { CartService } from '../cart/cart.service';
 
 @Module({
   imports: [
@@ -24,8 +22,6 @@ import { CartService } from '../cart/cart.service';
     PrismaService,
     JwtStrategy,
     LocalStrategy,
-    EmailService,
-    CartService,
   ],
   exports: [AuthService, JwtModule],
 })

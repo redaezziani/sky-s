@@ -14,8 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { useLocale } from "@/components/local-lang-swither";
-import { getMessages } from "@/lib/locale";
+import { useTranslations } from "next-intl";
 import { fetcher } from "@/lib/utils";
 
 
@@ -30,8 +29,7 @@ const CARD_KEYS = ["totalOrders", "revenue", "activeUsers", "productsSold"];
 export function SectionCards() {
   const [period, setPeriod] = React.useState(30);
 
-  const { locale } = useLocale();
-  const t = getMessages(locale).pages.analytics.components.sectionCards;
+  const t = useTranslations('pages.analytics.components.sectionCards');
 
   const { data: apiData } = useSWR(
     `/analytics/cards?period=${period}`,
@@ -51,7 +49,7 @@ export function SectionCards() {
         return (
           <Card key={key} className="@container/card">
             <CardHeader>
-              <CardDescription>{t[key].title}</CardDescription>
+              <CardDescription>{t(`${key}.title`)}</CardDescription>
               <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
                 {typeof card.count === "number"
                   ? card.count.toLocaleString(undefined, {
@@ -68,7 +66,7 @@ export function SectionCards() {
               </CardAction>
             </CardHeader>
             <CardFooter className="flex-col items-start gap-1.5 text-sm">
-              <div className="text-muted-foreground">{t[key].description}</div>
+              <div className="text-muted-foreground">{t(`${key}.description`)}</div>
             </CardFooter>
           </Card>
         );

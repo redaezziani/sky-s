@@ -1,59 +1,18 @@
-//local-lang-provider.tsx
-
 "use client";
 
-import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { motion } from "motion/react";
-import {
-  useCallback,
-  useEffect,
-  useState,
-  createContext,
-  useContext,
-} from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useLocale as useNextIntlLocale } from "next-intl";
+import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Locale, DEFAULT_LOCALE } from "@/lib/locale";
+import { Locale } from "@/lib/locale";
 
 // Locales list
 const localesList: { key: Locale; label: string }[] = [
   { key: "en", label: "EN" },
-  { key: "ja", label: "JA" },
+  { key: "es", label: "ES" },
   { key: "fr", label: "FR" },
 ];
-
-// ---------- Locale Context ----------
-type LocaleContextType = {
-  locale: Locale;
-  setLocale: (locale: Locale) => void;
-};
-
-const LocaleContext = createContext<LocaleContextType | undefined>(undefined);
-
-export const LocaleProvider = ({ children }: { children: React.ReactNode }) => {
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
-
-  useEffect(() => {
-    const saved = (localStorage.getItem("locale") as Locale) || DEFAULT_LOCALE;
-    setLocaleState(saved);
-  }, []);
-
-  const setLocale = (newLocale: Locale) => {
-    setLocaleState(newLocale);
-    localStorage.setItem("locale", newLocale);
-  };
-
-  return (
-    <LocaleContext.Provider value={{ locale, setLocale }}>
-      {children}
-    </LocaleContext.Provider>
-  );
-};
-
-export const useLocale = (): LocaleContextType => {
-  const context = useContext(LocaleContext);
-  if (!context) throw new Error("useLocale must be used inside LocaleProvider");
-  return context;
-};
 
 // ---------- Locale Switcher ----------
 export type LocaleSwitcherProps = {
@@ -61,7 +20,9 @@ export type LocaleSwitcherProps = {
 };
 
 export const LocaleSwitcher = ({ className }: LocaleSwitcherProps) => {
-  const { locale, setLocale } = useLocale();
+  const currentLocale = useNextIntlLocale() as Locale;
+  const router = useRouter();
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -70,9 +31,12 @@ export const LocaleSwitcher = ({ className }: LocaleSwitcherProps) => {
 
   const handleClick = useCallback(
     (newLocale: Locale) => {
-      setLocale(newLocale);
+      // Remove current locale prefix from pathname
+      const pathWithoutLocale = pathname.replace(/^\/(en|es|fr)/, '');
+      // Navigate to new locale
+      router.push(`/${newLocale}${pathWithoutLocale || '/'}`);
     },
-    [setLocale]
+    [pathname, router]
   );
 
   if (!mounted) return null;
@@ -85,7 +49,7 @@ export const LocaleSwitcher = ({ className }: LocaleSwitcherProps) => {
       )}
     >
       {localesList.map(({ key, label }) => {
-        const isActive = key === locale;
+        const isActive = key === currentLocale;
         return (
           <button
             key={key}
