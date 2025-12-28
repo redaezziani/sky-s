@@ -7,12 +7,16 @@ import { cn } from "@/lib/utils";
 import { Locale } from "@/lib/locale";
 import { setUserLocale } from "@/services/locale";
 
-// Locales list
-const localesList: { key: Locale; label: string }[] = [
-  { key: "en", label: "EN" },
-  { key: "es", label: "ES" },
-  { key: "fr", label: "FR" },
-  { key: "ar", label: "AR" },
+// Locales list with native labels
+const localesList: {
+  key: Locale;
+  label: string;
+  nativeLabel: string;
+}[] = [
+  { key: "en", label: "EN", nativeLabel: "إن" },
+  { key: "es", label: "ES", nativeLabel: "إس" },
+  { key: "fr", label: "FR", nativeLabel: "فر" },
+  { key: "ar", label: "AR", nativeLabel: "عر" },
 ];
 
 // ---------- Locale Switcher ----------
@@ -54,8 +58,9 @@ export const LocaleSwitcher = ({ className }: LocaleSwitcherProps) => {
         className
       )}
     >
-      {localesList.map(({ key, label }) => {
+      {localesList.map(({ key, label, nativeLabel }) => {
         const isActive = key === currentLocale;
+        const displayLabel = currentLocale === "ar" ? nativeLabel : label;
         return (
           <button
             key={key}
@@ -78,7 +83,7 @@ export const LocaleSwitcher = ({ className }: LocaleSwitcherProps) => {
                 isActive ? "text-foreground" : "text-muted-foreground"
               )}
             >
-              {label}
+              {displayLabel}
             </span>
           </button>
         );

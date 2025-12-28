@@ -39,11 +39,6 @@ export function useAuth() {
     const cartStore = useCartStore.getState();
     await cartStore.setUser(authResponse.user.id, authResponse);
 
-    toast.success('Logged in successfully', {
-      description: `Welcome back, ${
-        authResponse.user.name || authResponse.user.email
-      }!`,
-    });
     // ✅ After successful login, trigger the profile fetch and redirect.
     // We'll let the redirect happen automatically on the successful login response.
   };

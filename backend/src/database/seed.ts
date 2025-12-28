@@ -29,13 +29,12 @@ async function clearAll() {
 async function seedAll() {
   console.log('🌱 Seeding all data...');
 
-  // Seed in dependency order
-  // await seedSettings();
-  // await seedUsers();
-  // await seedCategories();
-  // await seedProducts();
-  await seedOrders();
-  await seedReviews(); // Add this
+  await seedSettings();
+  await seedUsers();
+  await seedCategories();
+  await seedProducts();
+  // await seedOrders();
+  // await seedReviews(); // Add this
 
   console.log('✅ All data seeded');
 }

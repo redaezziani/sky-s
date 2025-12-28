@@ -147,9 +147,9 @@ export function EnhancedProductTable({ }: EnhancedProductTableProps) {
 
   const formatPrice = (price: number | undefined) => {
     if (price === undefined) return "N/A";
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("ar-MA", {
       style: "currency",
-      currency: "USD",
+      currency: "MAD",
     }).format(price);
   };
 

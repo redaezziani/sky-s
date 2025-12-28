@@ -13,6 +13,8 @@ import { PdfService } from 'src/common/services/pdf.service';
 import { ImageKitService } from 'src/common/services/imagekit.service';
 import { PaymentService } from 'src/payments/payments.service';
 import { CreatePaymentDto } from 'src/payments/dto/create-payment.dto';
+import * as fs from 'fs';
+import * as path from 'path';
 import { console } from 'inspector';
 import { Logger } from '@nestjs/common';
 import { CancelOrderDto } from './dto/cancel-order.dto';
@@ -36,7 +38,7 @@ export class OrdersService {
   }
   async create(
     createOrderDto: CreateOrderDto,
-  ): Promise<OrderResponseDto & { payment?: any; checkoutUrl?: string }> {
+  ): Promise<OrderResponseDto & { payment?: any }> {
     const orderNumber = await this.generateOrderNumber();
 
     // Batch fetch SKUs and include necessary relations
@@ -48,10 +50,6 @@ export class OrdersService {
           include: {
             product: true,
           },
-        },
-        images: {
-          where: { position: 0 }, // Assuming position 0 is the cover image
-          select: { url: true },
         },
       },
     });
@@ -135,48 +133,21 @@ export class OrdersService {
       data: { invoiceUrl: url, invoiceFileId: fileId },
     });
 
-    // inside OrdersService.create(...)
+    // Create cash payment
     if (createOrderDto.method) {
-      // Prepare items for Stripe Checkout
-      const stripeItems =
-        createOrderDto.items?.map((item) => {
-          const sku = skus.find((s) => s.id === item.skuId)!;
-          // Use the coverImage property that was fetched
-          const coverImage =
-            sku.images?.[0]?.url ?? sku.coverImage ?? undefined;
-
-          return {
-            productName: sku.variant.product.name,
-            unitPrice: sku.price.toNumber(),
-            quantity: item.quantity,
-            // Include the cover image URL to pass to the payment service
-            coverImage: coverImage,
-          };
-        }) || [];
-
       const paymentDto: CreatePaymentDto = {
         method: createOrderDto.method,
         orderId: order.id,
         amount: totalAmount.toNumber(),
         currency: 'USD',
         userId: createOrderDto.userId,
-        redirectToCheckout: createOrderDto.redirectToCheckout ?? false,
-        items: stripeItems,
       };
 
       const payment = await this.paymentService.createPayment(paymentDto);
 
-      if (createOrderDto.redirectToCheckout && payment.checkoutUrl) {
-        return {
-          ...this.formatOrderResponse(order),
-          payment,
-          checkoutUrl: payment.checkoutUrl,
-        };
-      }
-
       return { ...this.formatOrderResponse(order), payment };
     }
-    // Ensure a return statement for code paths where createOrderDto.method is not provided
+
     return {
       ...this.formatOrderResponse(order),
     };
@@ -330,7 +301,20 @@ export class OrdersService {
     });
     // lets delete old invoice and generate a new one
     if (order.invoiceFileId) {
-      await this.imageKitService.deleteImage(order.invoiceFileId);
+      try {
+        // Delete local PDF file instead of ImageKit
+        const pdfPath = path.resolve(
+          process.cwd(),
+          'public/pdfs/orders',
+          order.invoiceFileId,
+        );
+        if (fs.existsSync(pdfPath)) {
+          fs.unlinkSync(pdfPath);
+          console.log(`✅ Deleted old PDF: ${pdfPath}`);
+        }
+      } catch (error) {
+        console.error('Error deleting old PDF:', error);
+      }
     }
     const { url, fileId } = await this.pdfService.generateOrderPdf({
       ...updatedOrder,
@@ -374,30 +358,10 @@ export class OrdersService {
 
     // Cancel related payments (if any)
     for (const payment of order.payments) {
-      if (payment.method === 'CASH') {
-        // mark cash as cancelled
-        await this.prisma.payment.update({
-          where: { id: payment.id },
-          data: { status: PaymentStatus.CANCELLED },
-        });
-      } else {
-        // Stripe or other provider
-        if (payment.transactionId) {
-          await this.paymentService.cancelPayment(
-            payment.method,
-            payment.transactionId,
-          );
-        } else {
-          this.logger.warn(
-            `Payment ${payment.id} has no transactionId, skipping cancel.`,
-          );
-        }
-
-        await this.prisma.payment.update({
-          where: { id: payment.id },
-          data: { status: PaymentStatus.CANCELLED },
-        });
-      }
+      await this.prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: PaymentStatus.CANCELLED },
+      });
     }
 
     return this.prisma.order.update({

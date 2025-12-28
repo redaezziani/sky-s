@@ -4,8 +4,16 @@ import { BaseModule } from './base.module';
 // import { secrets } from './config/secrets';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+
 async function bootstrap() {
-  const app = await NestFactory.create(BaseModule);
+  const app = await NestFactory.create<NestExpressApplication>(BaseModule);
+
+  // Serve static files from public directory
+  app.useStaticAssets(join(__dirname, '..', 'public'), {
+    prefix: '/',
+  });
 
   // Global validation pipe
   app.useGlobalPipes(

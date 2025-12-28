@@ -291,6 +291,7 @@
             "trackingNumber": "Tracking Number"
           },
           "fields": {
+            "barcode": "Barcode Scanner",
             "sku": "SKU",
             "quantity": "Quantity",
             "deliveryLat": "Latitude",
@@ -313,7 +314,11 @@
           },
           "placeholders": {
             "selectUser": "Select User",
-            "selectSKU": "Select SKU"
+            "selectSKU": "Select SKU",
+            "scanBarcode": "Scan or type barcode..."
+          },
+          "hints": {
+            "barcodeScanner": "Scan a product barcode to quickly add it to the order"
           },
           "errors": {
             "userRequired": "Please select a user",
@@ -457,16 +462,17 @@
           "selectPeriodPlaceholder": "Select period"
         },
         "chartTopProducts": {
-          "title": "Top 10 Products",
-          "description": "Most ordered products ",
+          "title": "Top Products",
+          "description": "View the most popular products by order count",
           "selectPeriodPlaceholder": "Select period",
           "periods": {
-            "90d": "Last 3 months",
-            "30d": "Last 30 days",
-            "7d": "Last 7 days"
+            "90d": "90 Days",
+            "30d": "30 Days",
+            "7d": "7 Days"
           },
           "labels": {
-            "totalOrdered": "Total Ordered"
+            "totalOrdered": "Total Ordered",
+            "orders": "orders"
           }
         },
         "chartTopProductsRadar": {
@@ -784,6 +790,57 @@
           "toast": {
             "success": "Product updated successfully",
             "failed": "Failed to update product"
+          }
+        }
+      },
+      "productDetails": {
+        "header": {
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "quickStats": {
+          "startingPrice": "Starting Price",
+          "totalStock": "Total Stock",
+          "avgRating": "Avg Rating",
+          "variants": "Variants",
+          "inStock": "In Stock",
+          "outOfStock": "Out of Stock",
+          "skusTotal": "SKUs total"
+        },
+        "sections": {
+          "productInformation": "Product Information",
+          "variantsAndSkus": "Variants & SKUs",
+          "variantsDescription": "Manage product variants and stock keeping units",
+          "coverImage": "Cover Image",
+          "categories": "Categories",
+          "metadata": "Metadata"
+        },
+        "fields": {
+          "description": "Description",
+          "shortDescription": "Short Description",
+          "metaTitle": "Meta Title",
+          "metaDescription": "Meta Description",
+          "sku": "SKU",
+          "price": "Price",
+          "stock": "Stock",
+          "size": "Size",
+          "units": "units",
+          "more": "more",
+          "created": "Created",
+          "updated": "Updated",
+          "productId": "Product ID"
+        },
+        "errors": {
+          "loadFailed": "Failed to load product details",
+          "notFound": "Product not found"
+        },
+        "skuImageGallery": {
+          "title": "SKU Images",
+          "description": "All product variant images ({count} total)",
+          "pagination": {
+            "previous": "Previous",
+            "next": "Next",
+            "page": "Page {current} of {total}"
           }
         }
       }

@@ -29,6 +29,9 @@ import { axiosInstance } from "@/lib/utils";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
 import { SKUImageGallery } from "@/components/product/id/preview-iamges";
 import Link from "next/link";
+import { getMessages } from "@/lib/locale";
+import { useLocale } from "@/components/local-lang-swither";
+import { motion, PanInfo } from "framer-motion";
 
 // Types
 type Sku = {
@@ -79,10 +82,32 @@ export default function ProductDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { locale } = useLocale();
+  const t = getMessages(locale).pages.products.productDetails;
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const resolvedParams = React.use(params);
+
+  const CARD_KEYS = ['startingPrice', 'totalStock', 'avgRating', 'variants'];
+
+  const handleDragEnd = (
+    event: MouseEvent | TouchEvent | PointerEvent,
+    info: PanInfo
+  ) => {
+    const threshold = 50; // Lower threshold for easier swiping
+    const swipeVelocity = 500; // Velocity threshold
+
+    // Check if user swiped with enough velocity or distance
+    if (info.offset.x > threshold || info.velocity.x > swipeVelocity) {
+      // Swiped right - go to previous card
+      setCurrentIndex((prev) => (prev - 1 + CARD_KEYS.length) % CARD_KEYS.length);
+    } else if (info.offset.x < -threshold || info.velocity.x < -swipeVelocity) {
+      // Swiped left - go to next card
+      setCurrentIndex((prev) => (prev + 1) % CARD_KEYS.length);
+    }
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -93,7 +118,7 @@ export default function ProductDetailPage({
         );
         setProduct(res.data);
       } catch (err) {
-        setError("Failed to load product details");
+        setError(t.errors.loadFailed);
         console.error(err);
       } finally {
         setLoading(false);
@@ -141,35 +166,166 @@ export default function ProductDetailPage({
         <div className="flex  gap-2">
           <Button variant="outline" size="sm">
             <Edit className="h-4 w-4 mr-2" />
-            Edit
+            {t.header.edit}
           </Button>
           <Button variant="destructive" size="sm">
             <Trash2 className="h-4 w-4 mr-2" />
-            Delete
+            {t.header.delete}
           </Button>
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      {/* Mobile: Stacked cards with drag */}
+      <div className="relative md:hidden px-4" style={{ height: '180px' }}>
+        {CARD_KEYS.map((key, index) => {
+          const offset = index - currentIndex;
+          const absOffset = Math.abs(offset);
+
+          const renderCardContent = () => {
+            switch (key) {
+              case 'startingPrice':
+                return (
+                  <>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        {t.quickStats.startingPrice}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {new Intl.NumberFormat(locale, {
+                          style: "currency",
+                          currency: "MAD",
+                        }).format(product.startingPrice)}
+                      </div>
+                    </CardContent>
+                  </>
+                );
+              case 'totalStock':
+                return (
+                  <>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        {t.quickStats.totalStock}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{product.totalStock}</div>
+                      <Badge
+                        variant={product.inStock ? "secondary" : "destructive"}
+                        className="mt-2"
+                      >
+                        {product.inStock ? (
+                          <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400 h-3 w-3" />
+                        ) : (
+                          <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400 h-3 w-3" />
+                        )}{" "}
+                        {product.inStock ? t.quickStats.inStock : t.quickStats.outOfStock}
+                      </Badge>
+                    </CardContent>
+                  </>
+                );
+              case 'avgRating':
+                return (
+                  <>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        {t.quickStats.avgRating}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {product.avgRating.toFixed(1)}
+                      </div>
+                      <div className="flex gap-1 mt-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-4 w-4 ${
+                              i < Math.floor(product.avgRating)
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </CardContent>
+                  </>
+                );
+              case 'variants':
+                return (
+                  <>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        {t.quickStats.variants}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{product.variants.length}</div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {product.variants.reduce((acc, v) => acc + v.skus.length, 0)} {t.quickStats.skusTotal}
+                      </p>
+                    </CardContent>
+                  </>
+                );
+            }
+          };
+
+          return (
+            <motion.div
+              key={key}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.7}
+              onDragEnd={handleDragEnd}
+              animate={{
+                x: offset * 20,
+                scale: 1 - absOffset * 0.05,
+                rotateZ: offset * 2,
+                opacity: absOffset > 2 ? 0 : 1 - absOffset * 0.2,
+                zIndex: CARD_KEYS.length - absOffset,
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 30,
+              }}
+              className="absolute inset-0"
+              style={{
+                cursor: "grab",
+              }}
+              whileTap={{ cursor: "grabbing" }}
+            >
+              <Card className="h-full">
+                {renderCardContent()}
+              </Card>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Desktop: Grid layout */}
+      <div className="hidden md:grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="h-35">
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">
-              Starting Price
+              {t.quickStats.startingPrice}
             </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${product.startingPrice.toFixed(2)}
+              {new Intl.NumberFormat(locale, {
+                style: "currency",
+                currency: "MAD",
+              }).format(product.startingPrice)}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Stock</CardTitle>
-            <Warehouse className="h-4 w-4 text-muted-foreground" />
+        <Card className="h-35">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">{t.quickStats.totalStock}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{product.totalStock}</div>
@@ -178,19 +334,18 @@ export default function ProductDetailPage({
               className="mt-2"
             >
               {product.inStock ? (
-                <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+                <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400 h-3 w-3" />
               ) : (
-                <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" />
+                <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400 h-3 w-3" />
               )}{" "}
-              {product.inStock ? "In Stock" : "Out of Stock"}
+              {product.inStock ? t.quickStats.inStock : t.quickStats.outOfStock}
             </Badge>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Rating</CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
+        <Card className="h-35">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">{t.quickStats.avgRating}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -211,16 +366,14 @@ export default function ProductDetailPage({
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Variants</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+        <Card className="h-35">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">{t.quickStats.variants}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{product.variants.length}</div>
             <p className="text-xs text-muted-foreground mt-2">
-              {product.variants.reduce((acc, v) => acc + v.skus.length, 0)} SKUs
-              total
+              {product.variants.reduce((acc, v) => acc + v.skus.length, 0)} {t.quickStats.skusTotal}
             </p>
           </CardContent>
         </Card>
@@ -233,19 +386,19 @@ export default function ProductDetailPage({
           {/* Product Info */}
           <Card>
             <CardHeader>
-              <CardTitle>Product Information</CardTitle>
+              <CardTitle>{t.sections.productInformation}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-muted-foreground">
-                  Description
+                  {t.fields.description}
                 </label>
                 <p className="mt-1">{product.description}</p>
               </div>
               <Separator />
               <div>
                 <label className="text-sm font-medium text-muted-foreground">
-                  Short Description
+                  {t.fields.shortDescription}
                 </label>
                 <p className="mt-1">{product.shortDesc}</p>
               </div>
@@ -253,13 +406,13 @@ export default function ProductDetailPage({
               <div className="flex gap-2">
                 <div className="flex-1">
                   <label className="text-sm font-medium text-muted-foreground">
-                    Meta Title
+                    {t.fields.metaTitle}
                   </label>
                   <p className="mt-1 text-sm">{product.metaTitle}</p>
                 </div>
                 <div className="flex-1">
                   <label className="text-sm font-medium text-muted-foreground">
-                    Meta Description
+                    {t.fields.metaDescription}
                   </label>
                   <p className="mt-1 text-sm">{product.metaDesc}</p>
                 </div>
@@ -270,9 +423,9 @@ export default function ProductDetailPage({
           {/* Variants & SKUs */}
           <Card>
             <CardHeader>
-              <CardTitle>Variants & SKUs</CardTitle>
+              <CardTitle>{t.sections.variantsAndSkus}</CardTitle>
               <CardDescription>
-                Manage product variants and stock keeping units
+                {t.sections.variantsDescription}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -292,12 +445,12 @@ export default function ProductDetailPage({
                         {Object.entries(variant.attributes).length > 2 && (
                           <Badge variant="secondary">
                             +{Object.entries(variant.attributes).length - 2}{" "}
-                            more
+                            {t.fields.more}
                           </Badge>
                         )}
                       </div>
                     </div>
-                    <Badge>{variant.skus.length} SKUs</Badge>
+                    <Badge>{variant.skus.length} {t.fields.sku}s</Badge>
                   </div>
 
                   <div className="space-y-3">
@@ -313,26 +466,29 @@ export default function ProductDetailPage({
                         />
                         <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div>
-                            <p className="text-xs text-muted-foreground">SKU</p>
+                            <p className="text-xs text-muted-foreground">{t.fields.sku}</p>
                             <p className="font-mono text-sm">{sku.sku}</p>
                           </div>
                           <div>
                             <p className="text-xs text-muted-foreground">
-                              Price
+                              {t.fields.price}
                             </p>
                             <p className="font-semibold">
-                              ${sku.price.toFixed(2)}
+                              {new Intl.NumberFormat(locale, {
+                                style: "currency",
+                                currency: "MAD",
+                              }).format(sku.price)}
                             </p>
                           </div>
                           <div>
                             <p className="text-xs text-muted-foreground">
-                              Stock
+                              {t.fields.stock}
                             </p>
-                            <p className="font-semibold">{sku.stock} units</p>
+                            <p className="font-semibold">{sku.stock} {t.fields.units}</p>
                           </div>
                           <div>
                             <p className="text-xs text-muted-foreground">
-                              Size
+                              {t.fields.size}
                             </p>
                             <p className="text-sm">{sku.dimensions.size}</p>
                           </div>
@@ -357,7 +513,7 @@ export default function ProductDetailPage({
           {/* Cover Image */}
           <Card>
             <CardHeader>
-              <CardTitle>Cover Image</CardTitle>
+              <CardTitle>{t.sections.coverImage}</CardTitle>
             </CardHeader>
             <CardContent>
               <img
@@ -371,7 +527,7 @@ export default function ProductDetailPage({
           {/* Categories */}
           <Card>
             <CardHeader>
-              <CardTitle>Categories</CardTitle>
+              <CardTitle>{t.sections.categories}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
@@ -387,13 +543,13 @@ export default function ProductDetailPage({
           {/* Metadata */}
           <Card>
             <CardHeader>
-              <CardTitle>Metadata</CardTitle>
+              <CardTitle>{t.sections.metadata}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-muted-foreground">Created</p>
+                  <p className="text-muted-foreground">{t.fields.created}</p>
                   <p className="font-medium">
                     {new Date(product.createdAt).toLocaleDateString()}
                   </p>
@@ -403,7 +559,7 @@ export default function ProductDetailPage({
               <div className="flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-muted-foreground">Updated</p>
+                  <p className="text-muted-foreground">{t.fields.updated}</p>
                   <p className="font-medium">
                     {new Date(product.updatedAt).toLocaleDateString()}
                   </p>
@@ -413,7 +569,7 @@ export default function ProductDetailPage({
               <div className="flex items-center gap-2 text-sm">
                 <Package className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-muted-foreground">Product ID</p>
+                  <p className="text-muted-foreground">{t.fields.productId}</p>
                   <p className="font-mono text-xs">{product.id}</p>
                 </div>
               </div>

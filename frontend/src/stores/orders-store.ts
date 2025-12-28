@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { axiosInstance } from "@/lib/utils";
-import { getStripe } from "@/lib/stripe";
 
 export enum OrderStatus {
   PENDING,
@@ -106,9 +105,7 @@ interface OrderWithPdf extends Order {
     status: string;
     amount: number;
     currency: string;
-    clientSecret?: string; // for Stripe PaymentIntent
   };
-  checkoutUrl?: string; // optional checkout redirect URL
 }
 
 interface OrdersStore {
@@ -215,9 +212,6 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
       const res = await axiosInstance.post<OrderWithPdf>("/orders", orderData);
       set({ orders: [res.data, ...get().orders], loading: false });
       console.log("Create Order Response:", res.data);
-      if (res.data.checkoutUrl) {
-        window.location.href = res.data.checkoutUrl;
-      }
 
       return res.data.id;
     } catch (err: any) {

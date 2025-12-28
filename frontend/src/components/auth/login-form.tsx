@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { cn } from '@/lib/utils';
@@ -72,6 +72,7 @@ SubmitButton.displayName = 'SubmitButton';
 
 export const LoginForm = memo<LoginFormProps>(({ className }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
   const isSubmittingRef = useRef(false);
   const t = useTranslations('pages.login');
@@ -95,7 +96,11 @@ export const LoginForm = memo<LoginFormProps>(({ className }) => {
         const response = await AuthService.login({ ...data });
         await login(response);
 
-        // router.push('/dashboard');
+        // Get the return URL from query params or default to dashboard
+        const returnUrl = searchParams?.get('returnUrl');
+        const redirectTo = returnUrl ? decodeURIComponent(returnUrl) : '/dashboard';
+
+        router.push(redirectTo);
       } catch (error: any) {
         console.error('Login error:', error);
         toast.error(t('toast.failed'), {
@@ -105,7 +110,7 @@ export const LoginForm = memo<LoginFormProps>(({ className }) => {
         isSubmittingRef.current = false;
       }
     },
-    [router, login, t],
+    [router, login, t, searchParams],
   );
 
   return (

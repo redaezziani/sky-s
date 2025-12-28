@@ -130,18 +130,18 @@ export function EnhancedOrderItemsTable({
       key: "unitPrice",
       label: t.table.unitPrice,
       render: (item) =>
-        new Intl.NumberFormat(locale === "ja" ? "ja-JP" : "en-US", {
+        new Intl.NumberFormat(locale, {
           style: "currency",
-          currency: "USD",
+          currency: "MAD",
         }).format(item.unitPrice),
     },
     {
       key: "totalPrice",
       label: t.table.totalPrice,
       render: (item) =>
-        new Intl.NumberFormat(locale === "ja" ? "ja-JP" : "en-US", {
+        new Intl.NumberFormat(locale, {
           style: "currency",
-          currency: "USD",
+          currency: "MAD",
         }).format(item.totalPrice),
     },
     {

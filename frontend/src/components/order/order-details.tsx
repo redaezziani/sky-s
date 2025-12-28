@@ -24,10 +24,10 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
   const { locale } = useLocale();
   const t = getMessages(locale).pages.orders.dialogs.orderDetails;
 
-  const formatCurrency = (amount: number, currency: string) =>
+  const formatCurrency = (amount: number) =>
     new Intl.NumberFormat(locale, {
       style: "currency",
-      currency,
+      currency: "MAD",
     }).format(amount);
 
   return (
@@ -152,11 +152,11 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                     </p>
                     <p className="text-xs">
                       {t.labels.qty.replace("{qty}", String(item.quantity))} ×{" "}
-                      {formatCurrency(item.unitPrice, order.currency)}
+                      {formatCurrency(item.unitPrice)}
                     </p>
                   </div>
                   <p className="font-medium">
-                    {formatCurrency(item.totalPrice, order.currency)}
+                    {formatCurrency(item.totalPrice)}
                   </p>
                 </div>
               ))}
@@ -184,23 +184,23 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
             <div className="grid grid-cols-2 gap-4 mt-2 text-sm">
               <div>
                 <p className="text-muted-foreground">{t.fields.subtotal}</p>
-                <p>{formatCurrency(order.subtotal, order.currency)}</p>
+                <p>{formatCurrency(order.subtotal)}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">{t.fields.tax}</p>
-                <p>{formatCurrency(order.taxAmount, order.currency)}</p>
+                <p>{formatCurrency(order.taxAmount)}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">{t.fields.shipping}</p>
-                <p>{formatCurrency(order.shippingAmount, order.currency)}</p>
+                <p>{formatCurrency(order.shippingAmount)}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">{t.fields.discount}</p>
-                <p>{formatCurrency(order.discountAmount, order.currency)}</p>
+                <p>{formatCurrency(order.discountAmount)}</p>
               </div>
               <div className="col-span-2 flex justify-between font-semibold text-base mt-2">
                 <span>{t.fields.total}</span>
-                <span>{formatCurrency(order.totalAmount, order.currency)}</span>
+                <span>{formatCurrency(order.totalAmount)}</span>
               </div>
             </div>
           </section>

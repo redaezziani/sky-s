@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { getMessages } from '@/lib/locale';
+import { useLocale } from '@/components/local-lang-swither';
 
 type ImageGalleryProps = {
   variants: Array<{
@@ -15,6 +17,8 @@ type ImageGalleryProps = {
 };
 
 export function SKUImageGallery({ variants, imagesPerPage = 6 }: ImageGalleryProps) {
+  const { locale } = useLocale();
+  const t = getMessages(locale).pages.products.productDetails.skuImageGallery;
   const [currentPage, setCurrentPage] = useState(1);
 
   const allImages = variants.flatMap((variant) =>
@@ -34,8 +38,8 @@ export function SKUImageGallery({ variants, imagesPerPage = 6 }: ImageGalleryPro
   return (
     <Card>
       <CardHeader>
-        <CardTitle>SKU Images</CardTitle>
-        <CardDescription>All product variant images ({allImages.length} total)</CardDescription>
+        <CardTitle>{t.title}</CardTitle>
+        <CardDescription>{t.description.replace('{count}', String(allImages.length))}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-2">
@@ -64,10 +68,12 @@ export function SKUImageGallery({ variants, imagesPerPage = 6 }: ImageGalleryPro
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
             >
-              Previous
+              {t.pagination.previous}
             </Button>
             <span className="text-sm text-muted-foreground px-2">
-              Page {currentPage} of {totalPages}
+              {t.pagination.page
+                .replace('{current}', String(currentPage))
+                .replace('{total}', String(totalPages))}
             </span>
             <Button
               variant="outline"
@@ -75,7 +81,7 @@ export function SKUImageGallery({ variants, imagesPerPage = 6 }: ImageGalleryPro
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
             >
-              Next
+              {t.pagination.next}
             </Button>
           </div>
         )}

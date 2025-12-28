@@ -1,21 +1,6 @@
 // src/payment/dto/create-payment.dto.ts
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsBoolean, ValidateNested, ArrayNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 import { PaymentMethod } from '@prisma/client';
-import { Type } from 'class-transformer';
-
-class PaymentItemDto {
-  @IsNotEmpty()
-  productName: string;
-
-  @IsNumber()
-  unitPrice: number;
-
-  @IsNumber()
-  quantity: number;
-  @IsOptional()
-  @IsString()
-  coverImage?: string; // Add this new field
-}
 
 export class CreatePaymentDto {
   @IsNotEmpty()
@@ -24,7 +9,7 @@ export class CreatePaymentDto {
   @IsNotEmpty()
   userId: string;
 
-  @IsEnum(PaymentMethod, { message: 'method must be STRIPE or CASH' })
+  @IsEnum(PaymentMethod, { message: 'method must be CASH' })
   method: PaymentMethod;
 
   @IsNumber()
@@ -32,15 +17,4 @@ export class CreatePaymentDto {
 
   @IsOptional()
   currency?: string = 'USD';
-
-  // ✅ New fields for Stripe Checkout
-  @IsOptional()
-  @IsBoolean()
-  redirectToCheckout?: boolean = false;
-
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => PaymentItemDto)
-  @ArrayNotEmpty()
-  items?: PaymentItemDto[];
 }

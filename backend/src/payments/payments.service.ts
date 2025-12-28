@@ -1,39 +1,60 @@
 // src/payment/payment.service.ts
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PaymentStrategy } from './strategies/payment-strategy.interface';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { Payment } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class PaymentService {
-  private strategies: Map<string, PaymentStrategy> = new Map();
+  constructor(
+    private cashStrategy: PaymentStrategy,
+    private prisma: PrismaService,
+  ) {}
 
-  constructor(strategies: PaymentStrategy[]) {
-    strategies.forEach((s) => this.strategies.set(s.method, s));
+  async createPayment(dto: CreatePaymentDto): Promise<Payment> {
+    return this.cashStrategy.create(dto);
   }
 
-  async createPayment(
-    dto: CreatePaymentDto,
-  ): Promise<Payment & { checkoutUrl?: string }> {
-    const strategy = this.strategies.get(dto.method);
-    if (!strategy) throw new BadRequestException('Unsupported payment method');
-    return strategy.create(dto);
-  }
+  async confirmPayment(method: string, transactionId: string): Promise<Payment> {
+    // Find the payment first to validate it exists
+    const payment = await this.prisma.payment.findFirst({
+      where: { transactionId },
+    });
 
-  async confirmPayment(method: string, transactionId: string) {
-    const strategy = this.strategies.get(method);
-    if (!strategy?.confirm) {
-      throw new BadRequestException('Confirm not supported for this method');
+    if (!payment) {
+      throw new NotFoundException(
+        `Payment with transaction ID "${transactionId}" not found`,
+      );
     }
-    return strategy.confirm(transactionId);
-  }
 
-  async cancelPayment(method: string, transactionId: string) {
-    const strategy = this.strategies.get(method);
-    if (!strategy?.cancel) {
-      throw new BadRequestException('Cancel not supported for this method');
+    // Check if payment is already completed
+    if (payment.status === 'COMPLETED') {
+      throw new BadRequestException(
+        `Payment with transaction ID "${transactionId}" is already completed`,
+      );
     }
-    return strategy.cancel(transactionId);
+
+    // Check if payment is in a failed state
+    if (payment.status === 'FAILED' || payment.status === 'CANCELLED') {
+      throw new BadRequestException(
+        `Cannot confirm payment with status "${payment.status}"`,
+      );
+    }
+
+    // Validate payment method matches
+    if (payment.method !== method) {
+      throw new BadRequestException(
+        `Payment method mismatch. Expected "${payment.method}", got "${method}"`,
+      );
+    }
+
+    // Update payment status to completed
+    return this.prisma.payment.update({
+      where: { id: payment.id },
+      data: {
+        status: 'COMPLETED',
+      },
+    });
   }
-  
 }

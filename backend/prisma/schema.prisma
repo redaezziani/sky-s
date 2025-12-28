@@ -339,7 +339,6 @@ model PriceHistory {
 }
 
 enum PaymentMethod {
-  STRIPE
   CASH
 }
 

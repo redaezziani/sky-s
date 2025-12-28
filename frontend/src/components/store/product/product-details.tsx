@@ -284,7 +284,7 @@ const ProductDetails = () => {
             Free Delivery & Returns
           </summary>
           <p className="mt-2 text-gray-600">
-            Free delivery on orders over $100. Free returns within 30 days.
+            Free delivery on orders over 1000 MAD. Free returns within 30 days.
           </p>
         </details>
 

@@ -107,10 +107,10 @@ export function EnhancedOrderTable() {
     }
   };
 
-  const formatCurrency = (amount: number, currency: string) =>
-    new Intl.NumberFormat(locale === "ja" ? "ja-JP" : "en-US", {
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat(locale, {
       style: "currency",
-      currency,
+      currency: "MAD",
     }).format(amount);
 
   const getOrderStatusLabel = (status: string) =>
@@ -206,7 +206,7 @@ export function EnhancedOrderTable() {
       label: t.components?.ordersTable?.table?.total ?? "Total",
       render: (order) => (
         <span className="font-medium">
-          {formatCurrency(order.totalAmount, order.currency)}
+          {formatCurrency(order.totalAmount)}
         </span>
       ),
     },

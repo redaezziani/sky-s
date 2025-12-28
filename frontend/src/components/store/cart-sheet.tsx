@@ -152,7 +152,10 @@ export default function CartSheet() {
                     {/* Price and quantity row */}
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-sm font-medium text-gray-900">
-                        ${item.price}
+                        {new Intl.NumberFormat("ar-MA", {
+                          style: "currency",
+                          currency: "MAD",
+                        }).format(item.price)}
                       </span>
                       <div className="flex  items-center space-x-3">
                         <div className="flex items-center rounded-l rounded-r   border border-gray-300">

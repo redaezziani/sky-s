@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useState, useMemo, useCallback, ReactNode } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useState, useMemo, useCallback, ReactNode } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -17,9 +17,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { IconSearch, IconX } from "@tabler/icons-react";
+} from '@/components/ui/table';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { IconSearch, IconX } from '@tabler/icons-react';
+import { useLocale } from '@/components/local-lang-swither';
 
 export interface TableColumn<T> {
   key: string;
@@ -61,28 +62,31 @@ export function DataTable<T extends object>({
   data,
   columns,
   searchKeys,
-  searchPlaceholder = "Search...",
+  searchPlaceholder = 'Search...',
   filters = [],
   onRowClick,
   actions,
   showCount = true,
   emptyMessage,
-  className = "",
+  className = '',
   customHeader,
   searchValue,
   onSearchChange,
 }: DataTableProps<T>) {
+  const { locale } = useLocale();
+  const isRTL = locale === 'ar';
+
   // fallback internal state if not controlled
-  const [internalSearch, setInternalSearch] = useState("");
+  const [internalSearch, setInternalSearch] = useState('');
   const searchTerm = searchValue ?? internalSearch;
 
   const [filterValues, setFilterValues] = useState<Record<string, string>>(
-    filters.reduce((acc, filter) => ({ ...acc, [filter.key]: "all" }), {})
+    filters.reduce((acc, filter) => ({ ...acc, [filter.key]: 'all' }), {}),
   );
 
   const getNestedValue = useCallback((obj: T, path: string): unknown => {
-    return path.split(".").reduce((curr: unknown, key: string) => {
-      if (curr && typeof curr === "object" && key in curr) {
+    return path.split('.').reduce((curr: unknown, key: string) => {
+      if (curr && typeof curr === 'object' && key in curr) {
         return (curr as Record<string, unknown>)[key];
       }
       return undefined;
@@ -101,7 +105,7 @@ export function DataTable<T extends object>({
 
       const matchesFilters = filters.every((filter) => {
         const filterValue = filterValues[filter.key];
-        if (filterValue === "all") return true;
+        if (filterValue === 'all') return true;
         return filter.getValue(item) === filterValue;
       });
 
@@ -111,18 +115,18 @@ export function DataTable<T extends object>({
 
   const clearFilters = () => {
     if (!searchValue) {
-      setInternalSearch("");
+      setInternalSearch('');
     } else {
-      onSearchChange?.("");
+      onSearchChange?.('');
     }
 
     setFilterValues(
-      filters.reduce((acc, filter) => ({ ...acc, [filter.key]: "all" }), {})
+      filters.reduce((acc, filter) => ({ ...acc, [filter.key]: 'all' }), {}),
     );
   };
 
   const hasActiveFilters =
-    searchTerm || Object.values(filterValues).some((value) => value !== "all");
+    searchTerm || Object.values(filterValues).some((value) => value !== 'all');
 
   const handleFilterChange = (filterKey: string, value: string) => {
     setFilterValues((prev) => ({ ...prev, [filterKey]: value }));
@@ -131,7 +135,7 @@ export function DataTable<T extends object>({
   const renderCell = (item: T, column: TableColumn<T>) => {
     if (column.render) return column.render(item);
     const value = getNestedValue(item, column.key);
-    if (value === null || value === undefined) return "N/A";
+    if (value === null || value === undefined) return 'N/A';
     return String(value);
   };
 
@@ -200,10 +204,12 @@ export function DataTable<T extends object>({
             <TableHeader>
               <TableRow>
                 {columns.map((column) => (
-                  <TableHead key={column.key}>{column.label}</TableHead>
+                  <TableHead key={column.key} className={isRTL ? 'text-right' : ''}>
+                    {column.label}
+                  </TableHead>
                 ))}
                 {actions && (
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className={isRTL ? 'text-left' : 'text-right'}>Actions</TableHead>
                 )}
               </TableRow>
             </TableHeader>
@@ -224,18 +230,18 @@ export function DataTable<T extends object>({
                 filteredData.map((item, index) => (
                   <TableRow
                     key={
-                      ("id" in item ? String((item as any).id) : undefined) ||
+                      ('id' in item ? String((item as any).id) : undefined) ||
                       `row-${index}`
                     }
                     className={
-                      onRowClick ? "cursor-pointer hover:bg-muted/50" : ""
+                      onRowClick ? 'cursor-pointer hover:bg-muted/50' : ''
                     }
                     onClick={() => onRowClick?.(item)}
                   >
                     {columns.map((column) => (
                       <TableCell
                         key={column.key}
-                        className={column.key === "id" ? "font-medium" : ""}
+                        className={column.key === 'id' ? 'font-medium' : ''}
                       >
                         {renderCell(item, column)}
                       </TableCell>

@@ -290,6 +290,7 @@
             "trackingNumber": "رقم التتبع"
           },
           "fields": {
+            "barcode": "ماسح الباركود",
             "sku": "الكود",
             "quantity": "الكمية",
             "deliveryLat": "خط العرض",
@@ -312,7 +313,11 @@
           },
           "placeholders": {
             "selectUser": "اختر مستخدم",
-            "selectSKU": "اختر كود"
+            "selectSKU": "اختر كود",
+            "scanBarcode": "امسح أو اكتب الباركود..."
+          },
+          "hints": {
+            "barcodeScanner": "امسح باركود المنتج لإضافته بسرعة إلى الطلب"
           },
           "errors": {
             "userRequired": "الرجاء اختيار مستخدم",
@@ -456,16 +461,17 @@
           "selectPeriodPlaceholder": "اختر الفترة"
         },
         "chartTopProducts": {
-          "title": "أفضل 10 منتجات",
-          "description": "المنتجات الأكثر طلبًا",
+          "title": "أفضل المنتجات",
+          "description": "عرض المنتجات الأكثر شعبية حسب عدد الطلبات",
           "selectPeriodPlaceholder": "اختر الفترة",
           "periods": {
-            "90d": "آخر 3 أشهر",
-            "30d": "آخر 30 يومًا",
-            "7d": "آخر 7 أيام"
+            "90d": "90 يومًا",
+            "30d": "30 يومًا",
+            "7d": "7 أيام"
           },
           "labels": {
-            "totalOrdered": "إجمالي الطلبات"
+            "totalOrdered": "إجمالي الطلبات",
+            "orders": "طلبات"
           }
         },
         "chartTopProductsRadar": {
@@ -783,6 +789,57 @@
           "toast": {
             "success": "تم تحديث المنتج بنجاح",
             "failed": "فشل تحديث المنتج"
+          }
+        }
+      },
+      "productDetails": {
+        "header": {
+          "edit": "تعديل",
+          "delete": "حذف"
+        },
+        "quickStats": {
+          "startingPrice": "السعر الابتدائي",
+          "totalStock": "المخزون الكلي",
+          "avgRating": "متوسط التقييم",
+          "variants": "الأصناف",
+          "inStock": "متوفر",
+          "outOfStock": "غير متوفر",
+          "skusTotal": "إجمالي وحدات SKU"
+        },
+        "sections": {
+          "productInformation": "معلومات المنتج",
+          "variantsAndSkus": "الأصناف ووحدات SKU",
+          "variantsDescription": "إدارة أصناف المنتج ووحدات حفظ المخزون",
+          "coverImage": "الصورة الرئيسية",
+          "categories": "الفئات",
+          "metadata": "البيانات الوصفية"
+        },
+        "fields": {
+          "description": "الوصف",
+          "shortDescription": "وصف مختصر",
+          "metaTitle": "عنوان الميتا",
+          "metaDescription": "وصف الميتا",
+          "sku": "SKU",
+          "price": "السعر",
+          "stock": "المخزون",
+          "size": "الحجم",
+          "units": "وحدات",
+          "more": "المزيد",
+          "created": "تاريخ الإنشاء",
+          "updated": "تاريخ التحديث",
+          "productId": "معرف المنتج"
+        },
+        "errors": {
+          "loadFailed": "فشل تحميل تفاصيل المنتج",
+          "notFound": "المنتج غير موجود"
+        },
+        "skuImageGallery": {
+          "title": "صور SKU",
+          "description": "جميع صور أصناف المنتج ({count} إجمالي)",
+          "pagination": {
+            "previous": "السابق",
+            "next": "التالي",
+            "page": "صفحة {current} من {total}"
           }
         }
       }

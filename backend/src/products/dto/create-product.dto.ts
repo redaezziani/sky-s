@@ -8,7 +8,7 @@ import {
   ValidateNested,
   Min,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateProductDto {
@@ -104,6 +104,16 @@ export class CreateProductVariantDto {
 
   @ApiPropertyOptional({ description: 'Variant attributes as JSON object' })
   @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return value;
+      }
+    }
+    return value;
+  })
   attributes?: Record<string, any>;
 
   @ApiPropertyOptional({
@@ -165,6 +175,16 @@ export class CreateProductSKUDto {
   weight?: number;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return value;
+      }
+    }
+    return value;
+  })
   dimensions?: Record<string, any>;
 
   @IsOptional()
@@ -300,6 +320,16 @@ export class UpdateProductSKUDto {
 
   @ApiPropertyOptional({ description: 'Dimensions object' })
   @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return value;
+      }
+    }
+    return value;
+  })
   dimensions?: Record<string, any>;
 
   @ApiPropertyOptional({ description: 'SKU active status', default: true })

@@ -19,7 +19,7 @@ import {
   Setting,
 } from "@/stores/settings-store";
 import { useLocale } from "@/components/local-lang-swither";
-import { getMessages } from "@/lib/locale";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { IconLogout } from "@tabler/icons-react";
@@ -42,7 +42,7 @@ export default function SettingsPage() {
   const { logout, logoutAll } = useAuth();
 
   const { locale } = useLocale();
-  const t = getMessages(locale).pages.settings;
+  const t = useTranslations('pages.settings');
 
   const [localSettings, setLocalSettings] = useState<Record<string, any>>({});
   const [loadingKeys, setLoadingKeys] = useState<Record<string, boolean>>({});
@@ -83,16 +83,12 @@ export default function SettingsPage() {
       }
       await updateSetting(setting.key, payload);
       toast.success(
-        `${t.title}: "${setting.label?.[locale] ?? setting.key}" ${
-          t.auth?.toast?.passwordChanged || "saved successfully"
-        }`
+        `${t('title')}: "${setting.label?.[locale] ?? setting.key}" saved successfully`
       );
     } catch (err) {
       console.error(err);
       toast.error(
-        `${t.title}: "${setting.label?.[locale] ?? setting.key}" ${
-          t.auth?.toast?.passwordChangeFailed || "failed"
-        }`
+        `${t('title')}: "${setting.label?.[locale] ?? setting.key}" failed to save`
       );
     } finally {
       setLoadingKeys((prev) => ({ ...prev, [setting.key]: false }));
@@ -103,8 +99,8 @@ export default function SettingsPage() {
     <section className="flex flex-col gap-4 w-full px-6 py-4">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold">{t.title}</h1>
-          <p className="text-muted-foreground">{t.description}</p>
+          <h1 className="text-2xl font-semibold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
       </div>
 
@@ -133,9 +129,7 @@ export default function SettingsPage() {
                 >
                   <SelectTrigger id={setting.key}>
                     <SelectValue
-                      placeholder={
-                        t.auth?.changePassword?.saving || "Select an option"
-                      }
+                      placeholder="Select an option"
                     />
                   </SelectTrigger>
                   <SelectContent>
@@ -172,8 +166,8 @@ export default function SettingsPage() {
                 variant={"secondary"}
               >
                 {loadingKeys[setting.key]
-                  ? t.auth?.changePassword?.saving || "Saving..."
-                  : t.auth?.changePassword?.save || "Save"}
+                  ? t('auth.changePassword.saving')
+                  : t('auth.changePassword.save')}
               </Button>
             </div>
           </div>
@@ -187,7 +181,7 @@ export default function SettingsPage() {
           <div className="flex-1 flex gap-2">
             <div className="flex-1 flex flex-col gap-2">
               <Label htmlFor="currentPassword">
-                {t.auth.changePassword.currentPassword}
+                {t('auth.changePassword.currentPassword')}
               </Label>
               <Input
                 id="currentPassword"
@@ -200,7 +194,7 @@ export default function SettingsPage() {
             </div>
             <div className="flex-1 flex flex-col gap-2">
               <Label htmlFor="newPassword">
-                {t.auth.changePassword.newPassword}
+                {t('auth.changePassword.newPassword')}
               </Label>
               <Input
                 id="newPassword"
@@ -219,11 +213,11 @@ export default function SettingsPage() {
                   localSettings.currentPassword,
                   localSettings.newPassword
                 );
-                toast.success(t.auth.toast.passwordChanged);
+                toast.success(t('auth.toast.passwordChanged'));
                 handleChange("currentPassword", "");
                 handleChange("newPassword", "");
               } catch (err: any) {
-                toast.error(err.message || t.auth.toast.passwordChangeFailed);
+                toast.error(err.message || t('auth.toast.passwordChangeFailed'));
               } finally {
                 setLoadingKeys((prev) => ({
                   ...prev,
@@ -238,22 +232,22 @@ export default function SettingsPage() {
             }
           >
             {loadingKeys.changePassword
-              ? t.auth.changePassword.saving
-              : t.auth.changePassword.save}
+              ? t('auth.changePassword.saving')
+              : t('auth.changePassword.save')}
           </Button>
         </div>
 
         {/* Logout Current Device */}
         <div className="flex flex-col gap-2">
-          <Label>{t.auth.logout.currentDevice.label}</Label>
+          <Label>{t('auth.logout.currentDevice.label')}</Label>
           <Button
             onClick={async () => {
               try {
                 setLoadingKeys((prev) => ({ ...prev, logout: true }));
                 await logout();
-                toast.success(t.auth.toast.logoutSuccess);
+                toast.success(t('auth.toast.logoutSuccess'));
               } catch (err: any) {
-                toast.error(err.message || t.auth.toast.logoutFailed);
+                toast.error(err.message || t('auth.toast.logoutFailed'));
               } finally {
                 setLoadingKeys((prev) => ({ ...prev, logout: false }));
               }
@@ -264,23 +258,23 @@ export default function SettingsPage() {
           >
             <IconLogout />
             {loadingKeys.logout
-              ? t.auth.logout.currentDevice.processing
-              : t.auth.logout.currentDevice.button}
+              ? t('auth.logout.currentDevice.processing')
+              : t('auth.logout.currentDevice.button')}
           </Button>
         </div>
 
         {/* Logout All Devices */}
         <div className="flex flex-col gap-2">
-          <Label>{t.auth.logout.allDevices.label}</Label>
+          <Label>{t('auth.logout.allDevices.label')}</Label>
           <Button
             variant={"destructive"}
             onClick={async () => {
               try {
                 setLoadingKeys((prev) => ({ ...prev, logoutAll: true }));
                 await logoutAll();
-                toast.success(t.auth.toast.logoutAllSuccess);
+                toast.success(t('auth.toast.logoutAllSuccess'));
               } catch (err: any) {
-                toast.error(err.message || t.auth.toast.logoutAllFailed);
+                toast.error(err.message || t('auth.toast.logoutAllFailed'));
               } finally {
                 setLoadingKeys((prev) => ({ ...prev, logoutAll: false }));
               }
@@ -290,8 +284,8 @@ export default function SettingsPage() {
           >
             <IconLogout />
             {loadingKeys.logoutAll
-              ? t.auth.logout.allDevices.processing
-              : t.auth.logout.allDevices.button}
+              ? t('auth.logout.allDevices.processing')
+              : t('auth.logout.allDevices.button')}
           </Button>
         </div>
       </Card>
@@ -300,7 +294,7 @@ export default function SettingsPage() {
       <Card className="mt-4 grid md:grid-cols-3 gap-2 p-3">
         {devices.length === 0 ? (
           <p className="text-muted-foreground">
-            {t.auth.devices.empty || "No devices found."}
+            No devices found.
           </p>
         ) : (
           devices.map((device) => (

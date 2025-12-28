@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import useSWR from "swr";
+import * as React from 'react';
+import useSWR from 'swr';
 import {
   Card,
   CardAction,
@@ -9,17 +9,18 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { useTranslations } from "next-intl";
-import { fetcher } from "@/lib/utils";
+} from '@/components/ui/select';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { useLocale } from '@/components/local-lang-swither';
+import { getMessages } from '@/lib/locale';
+import { fetcher } from '@/lib/utils';
 
 // --- Product Data Type ---
 type ProductItem = {
@@ -33,7 +34,7 @@ type ProductItem = {
 // Helper function to truncate text
 const truncateText = (text: string, maxLength: number) => {
   if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + "...";
+  return text.slice(0, maxLength) + '...';
 };
 
 // =================================================================
@@ -58,7 +59,7 @@ function ProductProgressBar({ data, totalOrders }: ProductProgressBarProps) {
       const percentage = (item.totalOrdered / totalOrders) * 100;
       return `${percentage}fr`;
     })
-    .join(" ");
+    .join(' ');
 
   return (
     <div
@@ -83,21 +84,23 @@ function ProductProgressBar({ data, totalOrders }: ProductProgressBarProps) {
 // =================================================================
 
 export function ChartTopProducts() {
-  const t = useTranslations('pages.analytics.components.chartTopProducts');
+  const { locale } = useLocale();
+  const lang = getMessages(locale);
+  const t = lang.pages?.analytics?.components?.chartTopProducts || {};
 
-  const [timeRange, setTimeRange] = React.useState("90d");
+  const [timeRange, setTimeRange] = React.useState('90d');
   const [period, setPeriod] = React.useState(90);
 
   React.useEffect(() => {
-    if (timeRange === "90d") setPeriod(90);
-    else if (timeRange === "30d") setPeriod(30);
+    if (timeRange === '90d') setPeriod(90);
+    else if (timeRange === '30d') setPeriod(30);
     else setPeriod(7);
   }, [timeRange]);
 
   const { data: topProductsMetrics } = useSWR(
     `/analytics/top-products-metrics?period=${period}`,
     fetcher,
-    { refreshInterval: 60000 }
+    { refreshInterval: 60000 },
   );
 
   // Process data to get the top 5 products and assign colors
@@ -105,21 +108,21 @@ export function ChartTopProducts() {
     if (!topProductsMetrics || topProductsMetrics.length === 0) return [];
 
     const chartColors = [
-      "var(--chart-1)",
-      "var(--chart-2)",
-      "var(--chart-3)",
-      "var(--chart-4)",
-      "var(--chart-5)",
+      'var(--chart-1)',
+      'var(--chart-2)',
+      'var(--chart-3)',
+      'var(--chart-4)',
+      'var(--chart-5)',
     ];
 
     // Sort by totalOrdered (highest first) and take top 5
     const sortedData = [...topProductsMetrics].sort(
-      (a: any, b: any) => b.totalOrdered - a.totalOrdered
+      (a: any, b: any) => b.totalOrdered - a.totalOrdered,
     );
 
     return sortedData.slice(0, 5).map((item: any, index: number) => ({
       label: item.label,
-      productName: truncateText(item.label || "", 30),
+      productName: truncateText(item.label || '', 30),
       totalOrdered: item.totalOrdered,
       totalRevenue: item.totalRevenue,
       color: chartColors[index % chartColors.length],
@@ -130,19 +133,17 @@ export function ChartTopProducts() {
   // Calculate the total orders for the displayed top 5 products
   const totalOrders = processedData.reduce(
     (sum, item) => sum + item.totalOrdered,
-    0
+    0,
   );
 
   return (
-    <Card className="@container/card max-h-[27rem]">
+    <Card className="@container/card overflow-hidden max-h-[27rem]">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <CardTitle className="text-lg">
-              {t('title')}
-            </CardTitle>
+            <CardTitle className="text-lg">{t.title || "Top Products"}</CardTitle>
             <CardDescription className="text-sm">
-              {t('description')}
+              {t.description || "View the most popular products by order count"}
             </CardDescription>
           </div>
           {/* Time Range Selector */}
@@ -156,13 +157,13 @@ export function ChartTopProducts() {
               className="hidden @[500px]/card:flex"
             >
               <ToggleGroupItem value="90d" className="px-3 py-1 text-xs">
-                {t('periods.90d')}
+                {t.periods?.['90d'] || "90 Days"}
               </ToggleGroupItem>
               <ToggleGroupItem value="30d" className="px-3 py-1 text-xs">
-                {t('periods.30d')}
+                {t.periods?.['30d'] || "30 Days"}
               </ToggleGroupItem>
               <ToggleGroupItem value="7d" className="px-3 py-1 text-xs">
-                {t('periods.7d')}
+                {t.periods?.['7d'] || "7 Days"}
               </ToggleGroupItem>
             </ToggleGroup>
 
@@ -171,20 +172,12 @@ export function ChartTopProducts() {
                 className="w-32 h-8 @[500px]/card:hidden"
                 size="sm"
               >
-                <SelectValue
-                  placeholder={t('selectPeriodPlaceholder')}
-                />
+                <SelectValue placeholder={t.selectPeriodPlaceholder || "Select period"} />
               </SelectTrigger>
               <SelectContent className="rounded-xl">
-                <SelectItem value="90d">
-                  {t('periods.90d')}
-                </SelectItem>
-                <SelectItem value="30d">
-                  {t('periods.30d')}
-                </SelectItem>
-                <SelectItem value="7d">
-                  {t('periods.7d')}
-                </SelectItem>
+                <SelectItem value="90d">{t.periods?.['90d'] || "90 Days"}</SelectItem>
+                <SelectItem value="30d">{t.periods?.['30d'] || "30 Days"}</SelectItem>
+                <SelectItem value="7d">{t.periods?.['7d'] || "7 Days"}</SelectItem>
               </SelectContent>
             </Select>
           </CardAction>
@@ -198,7 +191,7 @@ export function ChartTopProducts() {
             {totalOrders.toLocaleString()}
           </div>
           <div className="text-sm text-muted-foreground">
-            {t('labels.totalOrdered')} (Top 5)
+            {t.labels?.totalOrdered || "Total Ordered"} (Top 5)
           </div>
         </div>
 
@@ -227,8 +220,7 @@ export function ChartTopProducts() {
               </div>
               {/* Order count for the product */}
               <span className="font-medium shrink-0 ml-4">
-                {item.totalOrdered.toLocaleString()}{" "}
-                {t('labels.orders')}
+                {item.totalOrdered.toLocaleString()} {t.labels?.orders || "orders"}
               </span>
             </div>
           ))}

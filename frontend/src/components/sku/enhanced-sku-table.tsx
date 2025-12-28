@@ -158,9 +158,9 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
   };
 
   const formatPrice = (price: number) =>
-    new Intl.NumberFormat(locale === "ja" ? "ja-JP" : "en-US", {
+    new Intl.NumberFormat(locale, {
       style: "currency",
-      currency: "USD",
+      currency: "MAD",
     }).format(price);
 
   const getStockStatus = (stock: number, lowStockAlert: number) => {

@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import type React from "react";
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import type React from 'react';
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -14,24 +14,26 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Plus } from "lucide-react";
-import { useOrdersStore } from "@/stores/orders-store";
-import { useProductsStore } from "@/stores/products-store";
-import { useUsersStore } from "@/stores/users-store";
-import { toast } from "sonner";
-import { Loader } from "../loader";
-import { useUserLocation } from "@/hooks/use-user-location";
-import DeliveryMapPicker from "../delivery-map-picker";
-import { useLocale } from "@/components/local-lang-swither";
-import { getMessages } from "@/lib/locale";
+} from '@/components/ui/select';
+import { Plus } from 'lucide-react';
+import { useOrdersStore } from '@/stores/orders-store';
+import { useProductsStore } from '@/stores/products-store';
+import { useUsersStore } from '@/stores/users-store';
+import { toast } from 'sonner';
+import { Loader } from '../loader';
+import { useUserLocation } from '@/hooks/use-user-location';
+import DeliveryMapPicker from '../delivery-map-picker';
+import { useLocale } from '@/components/local-lang-swither';
+import { getMessages } from '@/lib/locale';
+import { BarcodeInput } from '@/components/barcode-input';
+import { useBarcodeScanner } from '@/hooks/use-barcode-scanner';
 interface CreateOrderDialogProps {
   trigger?: React.ReactNode;
   isOpen?: boolean;
@@ -47,7 +49,6 @@ export function CreateOrderDialog({
   const lang = getMessages(locale);
   const t = lang.pages?.orders?.dialogs?.createOrder || {};
 
- 
   const { createOrder, loading } = useOrdersStore();
   const { products, fetchProducts } = useProductsStore();
   const { users, fetchUsers } = useUsersStore();
@@ -72,25 +73,25 @@ export function CreateOrderDialog({
 
   // Form state
   const [formData, setFormData] = useState({
-    userId: "",
-    items: [{ skuId: "", quantity: 1 }],
+    userId: '',
+    items: [{ skuId: '', quantity: 1 }],
     deliveryLat: lat ?? undefined,
     deliveryLng: lng ?? undefined,
-    deliveryPlace: place || "",
-    shippingName: "",
-    shippingEmail: "",
-    shippingPhone: "",
+    deliveryPlace: place || '',
+    shippingName: '',
+    shippingEmail: '',
+    shippingPhone: '',
     shippingAddress: {},
-    billingName: "",
-    billingEmail: "",
+    billingName: '',
+    billingEmail: '',
     billingAddress: {},
-    notes: "",
-    trackingNumber: "",
+    notes: '',
+    trackingNumber: '',
   });
 
   const [errors, setErrors] = useState({
-    userId: "",
-    items: [{ skuId: "", quantity: "" }],
+    userId: '',
+    items: [{ skuId: '', quantity: '' }],
   });
 
   useEffect(() => {
@@ -106,16 +107,91 @@ export function CreateOrderDialog({
         ...prev,
         deliveryLat: prev.deliveryLat ?? lat,
         deliveryLng: prev.deliveryLng ?? lng,
-        deliveryPlace: prev.deliveryPlace || place || "",
+        deliveryPlace: prev.deliveryPlace || place || '',
       }));
     }
   }, [lat, lng, place]);
+
+  // Barcode scanning functionality
+  const handleBarcodeScanned = async (barcode: string) => {
+    // Search for SKU by barcode
+    let foundSku = null;
+    let foundProduct = null;
+
+    for (const product of products) {
+      for (const variant of product.variants || []) {
+        for (const sku of variant.skus || []) {
+          // Check both barcode and SKU code for matches
+          if (sku.barcode === barcode || sku.sku === barcode) {
+            foundSku = sku;
+            foundProduct = product;
+            break;
+          }
+        }
+        if (foundSku) break;
+      }
+      if (foundSku) break;
+    }
+
+    if (foundSku && foundProduct) {
+      // Check if SKU is already in items
+      const existingItemIndex = formData.items.findIndex(
+        (item) => item.skuId === foundSku.id,
+      );
+
+      if (existingItemIndex !== -1) {
+        // Increment quantity if already exists
+        setFormData((prev) => ({
+          ...prev,
+          items: prev.items.map((item, idx) =>
+            idx === existingItemIndex
+              ? { ...item, quantity: item.quantity + 1 }
+              : item,
+          ),
+        }));
+        toast.success(
+          `${foundProduct.name} - ${foundSku.sku} quantity increased`,
+        );
+      } else {
+        // Add new item or update first empty slot
+        const emptyIndex = formData.items.findIndex((item) => !item.skuId);
+        if (emptyIndex !== -1) {
+          // Fill empty slot
+          setFormData((prev) => ({
+            ...prev,
+            items: prev.items.map((item, idx) =>
+              idx === emptyIndex ? { skuId: foundSku.id, quantity: 1 } : item,
+            ),
+          }));
+        } else {
+          // Add new item
+          setFormData((prev) => ({
+            ...prev,
+            items: [...prev.items, { skuId: foundSku.id, quantity: 1 }],
+          }));
+          setErrors((prev) => ({
+            ...prev,
+            items: [...prev.items, { skuId: '', quantity: '' }],
+          }));
+        }
+        toast.success(`${foundProduct.name} - ${foundSku.sku} added to order`);
+      }
+    } else {
+      toast.error(`Product with barcode "${barcode}" not found`);
+    }
+  };
+
+  // Enable global barcode scanner when dialog is open
+  useBarcodeScanner({
+    onScan: handleBarcodeScanned,
+    minLength: 3,
+  });
 
   const handleItemChange = (idx: number, field: string, value: any) => {
     setFormData((prev) => ({
       ...prev,
       items: prev.items.map((item, i) =>
-        i === idx ? { ...item, [field]: value } : item
+        i === idx ? { ...item, [field]: value } : item,
       ),
     }));
   };
@@ -123,11 +199,11 @@ export function CreateOrderDialog({
   const addOrderItem = () => {
     setFormData((prev) => ({
       ...prev,
-      items: [...prev.items, { skuId: "", quantity: 1 }],
+      items: [...prev.items, { skuId: '', quantity: 1 }],
     }));
     setErrors((prev) => ({
       ...prev,
-      items: [...prev.items, { skuId: "", quantity: "" }],
+      items: [...prev.items, { skuId: '', quantity: '' }],
     }));
   };
 
@@ -146,8 +222,8 @@ export function CreateOrderDialog({
     e.preventDefault();
 
     const newErrors = {
-      userId: "",
-      items: formData.items.map(() => ({ skuId: "", quantity: "" })),
+      userId: '',
+      items: formData.items.map(() => ({ skuId: '', quantity: '' })),
     };
 
     if (!formData.userId) newErrors.userId = t.errors?.userRequired;
@@ -190,22 +266,22 @@ export function CreateOrderDialog({
       const id = await createOrder(payload);
       toast.success(t.toast?.success);
       setFormData({
-        userId: "",
-        items: [{ skuId: "", quantity: 1 }],
+        userId: '',
+        items: [{ skuId: '', quantity: 1 }],
         deliveryLat: lat ?? undefined,
         deliveryLng: lng ?? undefined,
-        deliveryPlace: place || "",
-        shippingName: "",
-        shippingEmail: "",
-        shippingPhone: "",
+        deliveryPlace: place || '',
+        shippingName: '',
+        shippingEmail: '',
+        shippingPhone: '',
         shippingAddress: {},
-        billingName: "",
-        billingEmail: "",
+        billingName: '',
+        billingEmail: '',
         billingAddress: {},
-        notes: "",
-        trackingNumber: "",
+        notes: '',
+        trackingNumber: '',
       });
-      setErrors({ userId: "", items: [{ skuId: "", quantity: "" }] });
+      setErrors({ userId: '', items: [{ skuId: '', quantity: '' }] });
       setIsDialogOpen(false);
     } catch (error) {
       toast.error(t.toast?.failed);
@@ -218,23 +294,23 @@ export function CreateOrderDialog({
         {trigger || (
           <Button className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
-            {t.trigger || "Add Order"}
+            {t.trigger || 'Add Order'}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[750px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t.title || "Create New Order"}</DialogTitle>
+          <DialogTitle>{t.title || 'Create New Order'}</DialogTitle>
           <DialogDescription>
             {t.description ||
-              "Add a new order. You can add multiple items and delivery details."}
+              'Add a new order. You can add multiple items and delivery details.'}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* User */}
           <div className="space-y-2">
-            <Label htmlFor="userId">{t.sections?.user || "User"}</Label>
+            <Label htmlFor="userId">{t.sections?.user || 'User'}</Label>
             <Select
               value={formData.userId}
               onValueChange={(val) =>
@@ -243,7 +319,7 @@ export function CreateOrderDialog({
             >
               <SelectTrigger id="userId">
                 <SelectValue
-                  placeholder={t.placeholders?.selectUser || "Select user"}
+                  placeholder={t.placeholders?.selectUser || 'Select user'}
                 />
               </SelectTrigger>
               <SelectContent>
@@ -259,24 +335,40 @@ export function CreateOrderDialog({
             )}
           </div>
 
+          {/* Barcode Scanner */}
+          <div className="space-y-2">
+            <BarcodeInput
+              onScan={handleBarcodeScanned}
+              placeholder={
+                t.placeholders?.scanBarcode || 'Scan or type barcode...'
+              }
+              label={t.fields?.barcode || 'Barcode Scanner'}
+              autoFocus
+            />
+            <p className="text-sm text-muted-foreground">
+              {t.hints?.barcodeScanner ||
+                'Scan a product barcode to quickly add it to the order'}
+            </p>
+          </div>
+
           {/* Order Items */}
           <div className="space-y-2">
-            <Label>{t.sections?.orderItems || "Order Items"}</Label>
+            <Label>{t.sections?.orderItems || 'Order Items'}</Label>
             {formData.items.map((item, idx) => (
               <div key={idx} className="border rounded-md p-3 mb-2 space-y-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label>{t.fields?.sku || "SKU"}</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className=" col-span-2 w-full">
+                    <Label>{t.fields?.sku || 'SKU'}</Label>
                     <Select
                       value={item.skuId}
                       onValueChange={(val) =>
-                        handleItemChange(idx, "skuId", val)
+                        handleItemChange(idx, 'skuId', val)
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className=" w-full">
                         <SelectValue
                           placeholder={
-                            t.placeholders?.selectSKU || "Select SKU"
+                            t.placeholders?.selectSKU || 'Select SKU'
                           }
                         />
                       </SelectTrigger>
@@ -290,8 +382,8 @@ export function CreateOrderDialog({
                                     <SelectItem key={sku.id} value={sku.id}>
                                       {prod.name} - {sku.sku}
                                     </SelectItem>
-                                  )) || []
-                              ) || []
+                                  )) || [],
+                              ) || [],
                           )
                           .flat()}
                       </SelectContent>
@@ -303,7 +395,7 @@ export function CreateOrderDialog({
                     )}
                   </div>
                   <div>
-                    <Label>{t.fields?.quantity || "Quantity"}</Label>
+                    <Label>{t.fields?.quantity || 'Quantity'}</Label>
                     <Input
                       type="number"
                       min={1}
@@ -311,8 +403,8 @@ export function CreateOrderDialog({
                       onChange={(e) =>
                         handleItemChange(
                           idx,
-                          "quantity",
-                          parseInt(e.target.value) || 1
+                          'quantity',
+                          parseInt(e.target.value) || 1,
                         )
                       }
                     />
@@ -330,7 +422,7 @@ export function CreateOrderDialog({
                       variant="destructive"
                       onClick={() => removeOrderItem(idx)}
                     >
-                      {t.actions?.removeItem || "Remove"}
+                      {t.actions?.removeItem || 'Remove'}
                     </Button>
                   )}
                   {idx === formData.items.length - 1 && (
@@ -339,7 +431,7 @@ export function CreateOrderDialog({
                       variant="outline"
                       onClick={addOrderItem}
                     >
-                      {t.actions?.addItem || "Add Item"}
+                      {t.actions?.addItem || 'Add Item'}
                     </Button>
                   )}
                 </div>
@@ -349,10 +441,10 @@ export function CreateOrderDialog({
 
           {/* Delivery */}
           <div className="space-y-2">
-            <Label>{t.sections?.delivery || "Delivery Location"}</Label>
+            <Label>{t.sections?.delivery || 'Delivery Location'}</Label>
             {locationLoading ? (
               <p className="text-sm text-muted-foreground">
-                {t.status?.detectingLocation || "Detecting location..."}
+                {t.status?.detectingLocation || 'Detecting location...'}
               </p>
             ) : (
               <DeliveryMapPicker
@@ -375,7 +467,7 @@ export function CreateOrderDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="shippingName">
-                {t.fields?.shippingName || "Shipping Name"}
+                {t.fields?.shippingName || 'Shipping Name'}
               </Label>
               <Input
                 id="shippingName"
@@ -390,7 +482,7 @@ export function CreateOrderDialog({
             </div>
             <div className="space-y-2">
               <Label htmlFor="shippingEmail">
-                {t.fields?.shippingEmail || "Shipping Email"}
+                {t.fields?.shippingEmail || 'Shipping Email'}
               </Label>
               <Input
                 id="shippingEmail"
@@ -405,7 +497,7 @@ export function CreateOrderDialog({
             </div>
             <div className="space-y-2">
               <Label htmlFor="shippingPhone">
-                {t.fields?.shippingPhone || "Shipping Phone"}
+                {t.fields?.shippingPhone || 'Shipping Phone'}
               </Label>
               <Input
                 id="shippingPhone"
@@ -420,7 +512,7 @@ export function CreateOrderDialog({
             </div>
             <div className="space-y-2 col-span-2">
               <Label htmlFor="shippingAddress">
-                {t.fields?.shippingAddress || "Shipping Address (JSON)"}
+                {t.fields?.shippingAddress || 'Shipping Address (JSON)'}
               </Label>
               <Textarea
                 id="shippingAddress"
@@ -445,7 +537,7 @@ export function CreateOrderDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="billingName">
-                {t.fields?.billingName || "Billing Name"}
+                {t.fields?.billingName || 'Billing Name'}
               </Label>
               <Input
                 id="billingName"
@@ -460,7 +552,7 @@ export function CreateOrderDialog({
             </div>
             <div className="space-y-2">
               <Label htmlFor="billingEmail">
-                {t.fields?.billingEmail || "Billing Email"}
+                {t.fields?.billingEmail || 'Billing Email'}
               </Label>
               <Input
                 id="billingEmail"
@@ -475,7 +567,7 @@ export function CreateOrderDialog({
             </div>
             <div className="space-y-2 col-span-2">
               <Label htmlFor="billingAddress">
-                {t.fields?.billingAddress || "Billing Address (JSON)"}
+                {t.fields?.billingAddress || 'Billing Address (JSON)'}
               </Label>
               <Textarea
                 id="billingAddress"
@@ -499,7 +591,7 @@ export function CreateOrderDialog({
 
           {/* Notes */}
           <div className="space-y-2">
-            <Label htmlFor="notes">{t.sections?.notes || "Notes"}</Label>
+            <Label htmlFor="notes">{t.sections?.notes || 'Notes'}</Label>
             <Textarea
               id="notes"
               value={formData.notes}
@@ -513,7 +605,7 @@ export function CreateOrderDialog({
           {/* Tracking */}
           <div className="space-y-2">
             <Label htmlFor="trackingNumber">
-              {t.sections?.trackingNumber || "Tracking Number"}
+              {t.sections?.trackingNumber || 'Tracking Number'}
             </Label>
             <Input
               id="trackingNumber"
@@ -533,16 +625,16 @@ export function CreateOrderDialog({
               variant="outline"
               onClick={() => setIsDialogOpen(false)}
             >
-              {t.actions?.cancel || "Cancel"}
+              {t.actions?.cancel || 'Cancel'}
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <>
-                  <Loader className="mr-2 h-4 w-4" />{" "}
-                  {t.actions?.creating || "Creating..."}
+                  <Loader className="mr-2 h-4 w-4" />{' '}
+                  {t.actions?.creating || 'Creating...'}
                 </>
               ) : (
-                t.actions?.create || "Create Order"
+                t.actions?.create || 'Create Order'
               )}
             </Button>
           </DialogFooter>

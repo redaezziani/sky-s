@@ -6,7 +6,6 @@ import {
   IsNumber,
   ValidateNested,
   IsEnum,
-  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -99,12 +98,9 @@ export class CreateOrderDto {
   trackingNumber?: string;
 
   @ApiProperty({
-    description: 'Payment method: STRIPE or CASH',
-    default: PaymentMethod.STRIPE,
+    description: 'Payment method: CASH',
+    default: PaymentMethod.CASH,
   })
-  @IsEnum(PaymentMethod, { message: 'method must be STRIPE or CASH' })
-  method: PaymentMethod = PaymentMethod.STRIPE;
-  @IsOptional()
-  @IsBoolean()
-  redirectToCheckout?: boolean = true;
+  @IsEnum(PaymentMethod, { message: 'method must be CASH' })
+  method: PaymentMethod = PaymentMethod.CASH;
 }

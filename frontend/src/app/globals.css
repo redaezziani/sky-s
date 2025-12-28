@@ -1,6 +1,6 @@
-@import url("https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap");
-@import "tailwindcss";
-@import "tw-animate-css";
+@import url('https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap');
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -137,42 +137,43 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: "Onest", sans-serif;
+    font-family: 'Onest', sans-serif;
   }
 
   /* Apply Arabic font when lang is ar */
-  :root:has(html[lang="ar"]) body,
-  html[lang="ar"] body {
-    font-family: "Arabic Font", "Onest", sans-serif;
+  :root:has(html[lang='ar']) body,
+  html[lang='ar'] body {
+    font-family: 'Arabic Font', 'Onest', sans-serif;
     direction: rtl;
+    letter-spacing: normal !important;
   }
 
   /* RTL support for Arabic language */
-  html[lang="ar"] {
+  html[lang='ar'] {
     direction: rtl;
   }
 
   /* Fix sidebar for RTL */
-  html[lang="ar"] [data-sidebar] {
+  html[lang='ar'] [data-sidebar] {
     left: auto;
     right: 0;
   }
 
-  html[lang="ar"] [data-sidebar-inset] {
+  html[lang='ar'] [data-sidebar-inset] {
     margin-left: 0;
     margin-right: var(--sidebar-width);
   }
 
   /* Fix icons and layout elements for RTL */
-  html[lang="ar"] .rotate-180 {
+  html[lang='ar'] .rotate-180 {
     transform: rotate(0deg);
   }
 
-  html[lang="ar"] svg {
+  /* html[lang='ar'] svg {
     transform: scaleX(-1);
-  }
+  } */
 
-  html[lang="ar"] [role="separator"] {
+  html[lang='ar'] [role='separator'] {
     transform: scaleX(-1);
   }
 }
