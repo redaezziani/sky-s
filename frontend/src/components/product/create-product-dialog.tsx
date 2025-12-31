@@ -24,7 +24,9 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus } from "lucide-react";
+import { Plus, Upload, X } from "lucide-react";
+import Image from "next/image";
+import { MultiImageUploader } from "@/components/multy-image-file";
 import { useProductsStore, type CreateProductPayload } from "@/stores/products-store";
 import { useCategoriesStore } from "@/stores/categories-store";
 import { toast } from "sonner";
@@ -74,6 +76,8 @@ export function CreateProductDialog({
     sortOrder: 0,
     categoryIds: [] as string[],
   });
+
+  const [coverImageFiles, setCoverImageFiles] = useState<File[]>([]);
 
   const [errors, setErrors] = useState({
     name: "",
@@ -170,7 +174,7 @@ export function CreateProductDialog({
         categoryIds: formData.categoryIds.length > 0 ? formData.categoryIds : undefined,
       };
 
-      await createProduct(payload);
+      await createProduct(payload, coverImageFiles[0] || undefined);
       toast.success(t.toast?.success || "Product created successfully");
 
       // Reset form
@@ -197,6 +201,7 @@ export function CreateProductDialog({
         metaDesc: "",
         sortOrder: "",
       });
+      setCoverImageFiles([]);
 
       setIsDialogOpen(false);
     } catch (error) {
@@ -278,12 +283,12 @@ export function CreateProductDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="coverImage">{t.fields?.coverImage || "Cover Image URL"}</Label>
-            <Input
-              id="coverImage"
-              placeholder={t.placeholders?.coverImage || "https://example.com/images/headphones.jpg"}
-              value={formData.coverImage}
-              onChange={(e) => setFormData(prev => ({ ...prev, coverImage: e.target.value }))}
+            <Label>{t.fields?.coverImage || "Cover Image"}</Label>
+            <MultiImageUploader
+              value={coverImageFiles}
+              onChange={setCoverImageFiles}
+              maxFiles={1}
+              maxSizeMB={5}
             />
           </div>
 

@@ -28,8 +28,14 @@ export class OrderResponseDto {
   @ApiProperty({ description: 'Unique order number' })
   orderNumber: string;
 
-  @ApiProperty({ description: 'User ID who placed the order' })
-  userId: string;
+  @ApiPropertyOptional({ description: 'Admin user ID who created the order' })
+  createdById?: string;
+
+  @ApiPropertyOptional({ description: 'Admin user ID who confirmed the order' })
+  confirmedById?: string;
+
+  @ApiPropertyOptional({ description: 'Admin user who confirmed the order' })
+  confirmedBy?: { id: string; name: string; email: string };
 
   @ApiProperty({ description: 'Order status', enum: OrderStatus })
   status: OrderStatus;
@@ -55,44 +61,20 @@ export class OrderResponseDto {
   @ApiProperty({ description: 'Currency code', example: 'USD' })
   currency: string;
 
-  @ApiPropertyOptional({ description: 'Shipping recipient name' })
-  shippingName?: string;
+  @ApiPropertyOptional({ description: 'Invoice URL if available' })
+  invoiceUrl?: string;
 
-  @ApiPropertyOptional({ description: 'Shipping recipient email' })
-  shippingEmail?: string;
+  @ApiProperty({ description: 'Customer name' })
+  customerName: string;
 
-  @ApiPropertyOptional({ description: 'Shipping phone number' })
-  shippingPhone?: string;
+  @ApiProperty({ description: 'Customer phone number' })
+  customerPhone: string;
 
-  @ApiPropertyOptional({ description: 'Shipping address object', type: Object })
-  shippingAddress?: Record<string, any>;
+  @ApiPropertyOptional({ description: 'Customer email address' })
+  customerEmail?: string;
 
-  @ApiPropertyOptional({ description: 'Billing recipient name' })
-  billingName?: string;
-
-  @ApiPropertyOptional({ description: 'Billing recipient email' })
-  billingEmail?: string;
-
-  @ApiPropertyOptional({ description: 'Billing address object', type: Object })
-  billingAddress?: Record<string, any>;
-
-  @ApiPropertyOptional({ description: 'Additional notes for the order' })
-  notes?: string;
-
-  @ApiPropertyOptional({ description: 'Tracking number for the shipment' })
-  trackingNumber?: string;
-
-  @ApiProperty({ description: 'Creation timestamp' })
-  createdAt: Date;
-
-  @ApiProperty({ description: 'Last update timestamp' })
-  updatedAt: Date;
-
-  @ApiProperty({
-    description: 'List of items in the order',
-    type: [OrderItemResponseDto],
-  })
-  items: OrderItemResponseDto[];
+  @ApiPropertyOptional({ description: 'Customer address object', type: Object })
+  customerAddress?: Record<string, any>;
 
   @ApiPropertyOptional({
     description: 'Delivery latitude coordinate',
@@ -109,6 +91,36 @@ export class OrderResponseDto {
   @ApiPropertyOptional({ description: 'Delivery place description' })
   deliveryPlace?: string;
 
-  @ApiPropertyOptional({ description: 'Invoice URL if available' })
-  invoiceUrl?: string;
+  @ApiPropertyOptional({ description: 'Tracking number for the shipment' })
+  trackingNumber?: string;
+
+  @ApiPropertyOptional({ description: 'Shipped at timestamp' })
+  shippedAt?: Date;
+
+  @ApiPropertyOptional({ description: 'Delivered at timestamp' })
+  deliveredAt?: Date;
+
+  @ApiPropertyOptional({ description: 'Confirmed at timestamp' })
+  confirmedAt?: Date;
+
+  @ApiPropertyOptional({ description: 'Additional notes for the order' })
+  notes?: string;
+
+  @ApiPropertyOptional({
+    description: 'Language for PDF invoice (en, ar, es, fr)',
+    example: 'en',
+  })
+  language?: string;
+
+  @ApiProperty({ description: 'Creation timestamp' })
+  createdAt: Date;
+
+  @ApiProperty({ description: 'Last update timestamp' })
+  updatedAt: Date;
+
+  @ApiProperty({
+    description: 'List of items in the order',
+    type: [OrderItemResponseDto],
+  })
+  items: OrderItemResponseDto[];
 }

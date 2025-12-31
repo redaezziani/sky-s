@@ -14,6 +14,7 @@ interface BarcodeInputProps {
   className?: string;
   autoFocus?: boolean;
   disabled?: boolean;
+  readOnly?: boolean;
 }
 
 export function BarcodeInput({
@@ -23,13 +24,16 @@ export function BarcodeInput({
   className,
   autoFocus = false,
   disabled = false,
+  readOnly = false,
 }: BarcodeInputProps) {
   const [value, setValue] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.value);
+    if (!readOnly) {
+      setValue(e.target.value);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -75,6 +79,7 @@ export function BarcodeInput({
           placeholder={placeholder}
           autoFocus={autoFocus}
           disabled={disabled || isProcessing}
+          readOnly={readOnly}
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2">
           {isProcessing && (

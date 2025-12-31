@@ -46,7 +46,13 @@ export interface OrderItem {
 export interface Order {
   id: string;
   orderNumber: string;
-  userId: string;
+  createdById?: string;
+  confirmedById?: string;
+  confirmedBy?: {
+    id: string;
+    name: string;
+    email: string;
+  };
   status: string;
   paymentStatus: string;
   subtotal: number;
@@ -55,32 +61,30 @@ export interface Order {
   discountAmount: number;
   totalAmount: number;
   currency: string;
-  shippingName?: string;
-  shippingEmail?: string;
-  shippingPhone?: string;
-  shippingAddress?: Record<string, any>;
-  billingName?: string;
-  billingEmail?: string;
-  billingAddress?: Record<string, any>;
-  notes?: string;
-  trackingNumber?: string;
-  createdAt: string;
-  updatedAt: string;
-  items: OrderItem[];
+  language?: string;
+  invoiceUrl?: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  customerAddress?: Record<string, any>;
   deliveryLat?: number | null;
   deliveryLng?: number | null;
   deliveryPlace?: string | null;
-  invoiceUrl?: string;
+  trackingNumber?: string;
+  shippedAt?: string;
+  deliveredAt?: string;
+  confirmedAt?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  items: OrderItem[];
 }
 
 interface UpdateOrderPayload {
-  shippingName?: string;
-  shippingEmail?: string;
-  shippingPhone?: string;
-  shippingAddress?: Record<string, any>;
-  billingName?: string;
-  billingEmail?: string;
-  billingAddress?: Record<string, any>;
+  customerName?: string;
+  customerPhone?: string;
+  customerEmail?: string;
+  customerAddress?: Record<string, any>;
   deliveryLat?: number;
   deliveryLng?: number;
   deliveryPlace?: string;
@@ -88,6 +92,7 @@ interface UpdateOrderPayload {
   trackingNumber?: string;
   status?: string;
   paymentStatus?: string;
+  language?: string;
   items?: { skuId: string; quantity: number }[];
 }
 
@@ -127,7 +132,7 @@ interface OrdersStore {
     updateData: Partial<UpdateOrderPayload>
   ) => Promise<void>;
 
-  cancelOrder: (orderId: string, userId: string) => Promise<void>;
+  cancelOrder: (orderId: string, reason?: string) => Promise<void>;
 
   setPage: (page: number) => void;
   setPageSize: (size: number) => void;
@@ -246,15 +251,15 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
     }
   },
 
-  cancelOrder: async (orderId: string, userId: string) => {
+  cancelOrder: async (orderId: string, reason?: string) => {
     try {
       set({ loading: true, error: null });
-      await axiosInstance.post(`/orders/cancel`, { orderId, userId });
+      await axiosInstance.post(`/orders/cancel`, { orderId, reason });
       // Update the order status locally in the store
       set({
         orders: get().orders.map((order) =>
           order.id === orderId
-            ? { ...order, status: OrderStatus.CANCELLED.toString() }
+            ? { ...order, status: "CANCELLED" }
             : order
         ),
         loading: false,

@@ -58,7 +58,7 @@ export class UsersService {
         updatedAt: true,
         _count: {
           select: {
-            orders: true,
+            createdOrders: true,
             reviews: true,
           },
         },
@@ -96,7 +96,7 @@ export class UsersService {
         updatedAt: true,
         _count: {
           select: {
-            orders: true,
+            createdOrders: true,
             reviews: true,
             cartItems: true,
           },

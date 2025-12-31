@@ -1,21 +1,22 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { 
-  CreateProductDto, 
-  CreateProductWithVariantsDto, 
-  CreateProductVariantDto, 
+import {
+  CreateProductDto,
+  CreateProductWithVariantsDto,
+  CreateProductVariantDto,
   CreateProductSKUDto,
-  UpdateProductDto, 
+  UpdateProductDto,
   UpdateProductSKUDto
 } from './dto/create-product.dto';
 import { ProductQueryDto } from './dto/query.dto';
-import { 
-  ProductResponseDto, 
+import {
+  ProductResponseDto,
   PaginatedProductsResponseDto,
   ProductVariantResponseDto,
-  ProductSKUResponseDto 
+  ProductSKUResponseDto
 } from './dto/response.dto';
 import { ImageKitService } from '../common/services/imagekit.service';
+import { LocalStorageService } from '../common/services/local-storage.service';
 import { customAlphabet } from 'nanoid';
 import { createCanvas } from 'canvas';
 import * as JsBarcode from 'jsbarcode';
@@ -28,6 +29,7 @@ export class ProductsService {
   constructor(
     private prisma: PrismaService,
     private imageKitService: ImageKitService,
+    private localStorageService: LocalStorageService,
   ) {}
   private generateSlug(name: string): string {
     return name
@@ -105,12 +107,11 @@ export class ProductsService {
     // Upload cover image if provided
     if (coverImageFile) {
       try {
-        const uploadResult = await this.imageKitService.uploadImage(
+        const uploadResult = await this.localStorageService.uploadImage(
           coverImageFile,
           {
             folder: createProductDto.imageFolder || 'products',
-            tags: createProductDto.imageTags || ['product'],
-            fileName: `${uniqueSlug}-cover`,
+            fileName: `${uniqueSlug}-cover-${Date.now()}${coverImageFile.originalname.substring(coverImageFile.originalname.lastIndexOf('.'))}`,
           },
         );
         coverImageUrl = uploadResult.url;
@@ -155,9 +156,9 @@ export class ProductsService {
     // Upload additional images if provided
     if (additionalImageFiles && additionalImageFiles.length > 0) {
       try {
-        await this.imageKitService.uploadMultipleImages(additionalImageFiles, {
+        await this.localStorageService.uploadMultipleImages(additionalImageFiles, {
           folder: createProductDto.imageFolder || 'products',
-          tags: [...(createProductDto.imageTags || ['product']), product.slug],
+          fileName: `${uniqueSlug}`,
         });
       } catch (error) {
         // Don't fail the product creation if additional images fail
@@ -497,6 +498,8 @@ export class ProductsService {
   async update(
     id: string,
     updateProductDto: UpdateProductDto,
+    coverImageFile?: Express.Multer.File,
+    additionalImageFiles?: Express.Multer.File[],
   ): Promise<ProductResponseDto> {
     const product = await this.prisma.product.findFirst({
       where: { id, deletedAt: null },
@@ -526,6 +529,25 @@ export class ProductsService {
       }
     }
 
+    let coverImageUrl = updateProductDto.coverImage;
+
+    // Upload cover image if provided
+    if (coverImageFile) {
+      try {
+        const slug = uniqueSlug || product.slug;
+        const uploadResult = await this.localStorageService.uploadImage(
+          coverImageFile,
+          {
+            folder: updateProductDto.imageFolder || 'products',
+            fileName: `${slug}-cover-${Date.now()}${coverImageFile.originalname.substring(coverImageFile.originalname.lastIndexOf('.'))}`,
+          },
+        );
+        coverImageUrl = uploadResult.url;
+      } catch (error) {
+        throw new BadRequestException('Failed to upload cover image');
+      }
+    }
+
     const updatedProduct = await this.prisma.product.update({
       where: { id },
       data: {
@@ -533,7 +555,7 @@ export class ProductsService {
         slug: uniqueSlug,
         description: updateProductDto.description,
         shortDesc: updateProductDto.shortDesc,
-        coverImage: updateProductDto.coverImage,
+        coverImage: coverImageUrl,
         isActive: updateProductDto.isActive,
         isFeatured: updateProductDto.isFeatured,
         metaTitle: updateProductDto.metaTitle,
@@ -570,6 +592,19 @@ export class ProductsService {
         },
       },
     });
+
+    // Upload additional images if provided
+    if (additionalImageFiles && additionalImageFiles.length > 0) {
+      try {
+        await this.localStorageService.uploadMultipleImages(additionalImageFiles, {
+          folder: updateProductDto.imageFolder || 'products',
+          fileName: `${updatedProduct.slug}`,
+        });
+      } catch (error) {
+        // Don't fail the product update if additional images fail
+        console.error('Failed to upload additional product images:', error);
+      }
+    }
 
     return this.formatProductResponse(updatedProduct);
   }
@@ -717,11 +752,11 @@ export class ProductsService {
     // Upload SKU images if provided
     if (imageFiles?.length) {
       try {
-        const uploadResults = await this.imageKitService.uploadMultipleImages(
+        const uploadResults = await this.localStorageService.uploadMultipleImages(
           imageFiles,
           {
             folder: 'products/skus',
-            tags: ['sku', sku.sku],
+            fileName: `${sku.sku}`,
           },
         );
         const imagePromises = uploadResults.map((res, index) =>
@@ -803,11 +838,11 @@ export class ProductsService {
 
     // --- Handle new image uploads ---
     if (imageFiles?.length) {
-      const uploadResults = await this.imageKitService.uploadMultipleImages(
+      const uploadResults = await this.localStorageService.uploadMultipleImages(
         imageFiles,
         {
           folder: 'products/skus',
-          tags: ['sku', updatedSKU.sku],
+          fileName: `${updatedSKU.sku}`,
         },
       );
 
@@ -870,11 +905,11 @@ export class ProductsService {
     }
 
     try {
-      const uploadResults = await this.imageKitService.uploadMultipleImages(
+      const uploadResults = await this.localStorageService.uploadMultipleImages(
         files,
         {
           folder: 'products',
-          tags: ['product', product.slug],
+          fileName: product.slug,
         },
       );
 
@@ -916,11 +951,11 @@ export class ProductsService {
     }
 
     try {
-      const uploadResults = await this.imageKitService.uploadMultipleImages(
+      const uploadResults = await this.localStorageService.uploadMultipleImages(
         files,
         {
           folder: 'products/skus',
-          tags: ['sku', sku.sku, sku.variant.product.slug],
+          fileName: sku.sku,
         },
       );
 
@@ -932,7 +967,6 @@ export class ProductsService {
             url: result.url,
             altText: `${sku.variant.product.name} - ${sku.sku}`,
             position: index,
-            fileId: result.fileId,
           },
         }),
       );

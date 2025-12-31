@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
+import { MultiImageUploader } from "@/components/multy-image-file";
 import { useProductsStore, type Product, type UpdateProductPayload } from "@/stores/products-store";
 import { useCategoriesStore } from "@/stores/categories-store";
 import { toast } from "sonner";
@@ -49,6 +50,8 @@ export function EditProductDialog({ product, open, onClose }: EditProductDialogP
     sortOrder: 0,
     categoryIds: [] as string[],
   });
+
+  const [coverImageFiles, setCoverImageFiles] = useState<File[]>([]);
 
   const [errors, setErrors] = useState({
     name: "",
@@ -153,7 +156,7 @@ export function EditProductDialog({ product, open, onClose }: EditProductDialogP
         categoryIds: formData.categoryIds.length > 0 ? formData.categoryIds : undefined,
       };
 
-      await updateProduct(product.id, payload);
+      await updateProduct(product.id, payload, coverImageFiles[0] || undefined);
       toast.success(t.toast?.success || "Product updated successfully");
       onClose();
     } catch (error) {
@@ -213,12 +216,12 @@ export function EditProductDialog({ product, open, onClose }: EditProductDialogP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="coverImage">{t.fields?.coverImage || "Cover Image URL"}</Label>
-            <Input
-              id="coverImage"
-              placeholder={t.placeholders?.coverImage || "https://example.com/images/headphones.jpg"}
-              value={formData.coverImage}
-              onChange={(e) => setFormData(prev => ({ ...prev, coverImage: e.target.value }))}
+            <Label>{t.fields?.coverImage || "Cover Image"}</Label>
+            <MultiImageUploader
+              value={coverImageFiles}
+              onChange={setCoverImageFiles}
+              maxFiles={1}
+              maxSizeMB={5}
             />
           </div>
 

@@ -53,11 +53,8 @@ export class PaymentEvent {
       });
     }
 
-    // Fetch user
-    const user = await this.prisma.user.findUnique({
-      where: { id: order.userId },
-    });
-    if (!user) return;
+    // Check if customer email is provided
+    if (!order.customerEmail) return; // Skip email if no customer email
 
     // Build order items HTML with modern styling
     const itemsHtml = order.items
@@ -124,7 +121,7 @@ export class PaymentEvent {
         <!-- Content -->
         <div class="content-padding" style="padding:32px 40px;">
           <p style="margin:0 0 24px; color:#202124; font-size:16px; line-height:1.5;">
-            Hi <strong>${user.name || 'Customer'}</strong>,
+            Hi <strong>${order.customerName}</strong>,
           </p>
           
           <p style="margin:0 0 32px; color:#5f6368; font-size:16px; line-height:1.6;">
@@ -194,7 +191,7 @@ export class PaymentEvent {
     </html>
     `;
 
-    // Send email
-    await this.emailService.sendEmail(user.email, subject, html);
+    // Send email to customer
+    await this.emailService.sendEmail(order.customerEmail, subject, html);
   }
 }

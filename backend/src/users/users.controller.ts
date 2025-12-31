@@ -31,11 +31,14 @@ import {
 } from './dto/users.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
+import { Permissions } from '../auth/decorators/permissions.decorator';
+import { Permission } from '../auth/permissions/permissions.enum';
 import { RequestUser } from '../auth/types/auth.types';
 
 @ApiTags('users')
 @Controller('users')
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -126,14 +129,16 @@ export class UsersController {
   }
 
   @Patch(':id/toggle-status')
-  @ApiOperation({ summary: 'Toggle user active status (Admin only)' })
+  @UseGuards(PermissionsGuard)
+  @Permissions(Permission.USER_TOGGLE_STATUS)
+  @ApiOperation({ summary: 'Toggle user active status (Moderator and Admin only)' })
   @ApiResponse({
     status: 200,
     description: 'User status updated successfully',
     type: UserResponseDto,
   })
   @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Cannot change own status' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Moderator/Admin permission required or cannot change own status' })
   @ApiParam({ name: 'id', description: 'User ID' })
   async toggleStatus(
     @Param('id') id: string,

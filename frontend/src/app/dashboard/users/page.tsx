@@ -1,11 +1,17 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useUsersStore, type User } from "@/stores/users-store";
-import { EnhancedUserTable } from "@/components/user/enhanced-user-table";
+import { useEffect } from 'react';
+import { useUsersStore, type User } from '@/stores/users-store';
+import { EnhancedUserTable } from '@/components/user/enhanced-user-table';
+import { useLocale } from '@/components/local-lang-swither';
+import { getMessages } from '@/lib/locale';
 
 export default function UsersPage() {
   const { fetchUsers } = useUsersStore();
+  const { locale } = useLocale();
+  const lang = getMessages(locale);
+  const t = lang.pages?.users || {};
+
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
@@ -14,9 +20,11 @@ export default function UsersPage() {
     <section className="flex flex-col gap-4 w-full px-6 py-4">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold">Users Management</h1>
+          <h1 className="text-2xl font-semibold">
+            {t.title || 'User Management'}
+          </h1>
           <p className="text-muted-foreground">
-            Manage your application users and their roles
+            {t.description || 'Manage user accounts, roles, and permissions'}
           </p>
         </div>
       </div>

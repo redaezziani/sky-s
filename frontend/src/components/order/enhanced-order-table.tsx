@@ -83,9 +83,9 @@ export function EnhancedOrderTable() {
     }
   };
 
-  const handelOrderCancel = async (orderId: string, userId: string) => {
+  const handelOrderCancel = async (orderId: string) => {
     try {
-      await cancelOrder(orderId, userId);
+      await cancelOrder(orderId);
       toast.success(t.toast?.cancelled ?? "Order cancelled successfully");
     } catch {
       toast.error(t.toast?.cancelFailed ?? "Failed to cancel order");
@@ -154,8 +154,8 @@ export function EnhancedOrderTable() {
           <div className="flex flex-col">
             <span className="font-medium">#{order.orderNumber}</span>
             <span className="text-xs text-muted-foreground">
-              {t.updateOrder?.fields?.shippingName ?? "User"}:{" "}
-              {order.shippingName} - {order.shippingEmail}
+              {t.updateOrder?.fields?.customerName ?? "Customer"}:{" "}
+              {order.customerName} - {order.customerPhone}
             </span>
           </div>
         </div>
@@ -244,7 +244,7 @@ export function EnhancedOrderTable() {
               {t.components?.ordersTable?.table?.viewInvoice ?? "View Invoice"}
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => handelOrderCancel(order.id, order.userId)}
+              onClick={() => handelOrderCancel(order.id)}
               disabled={order.status === "CANCELLED"}
             >
               <Package className="mr-2 h-4 w-4" />

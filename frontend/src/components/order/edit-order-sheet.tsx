@@ -37,13 +37,10 @@ interface UpdateOrderSheetProps {
 }
 
 interface UpdateOrderPayload {
-  shippingName?: string;
-  shippingEmail?: string;
-  shippingPhone?: string;
-  shippingAddress?: Record<string, any>;
-  billingName?: string;
-  billingEmail?: string;
-  billingAddress?: Record<string, any>;
+  customerName?: string;
+  customerPhone?: string;
+  customerEmail?: string;
+  customerAddress?: Record<string, any>;
   deliveryLat?: number;
   deliveryLng?: number;
   deliveryPlace?: string;
@@ -51,6 +48,7 @@ interface UpdateOrderPayload {
   trackingNumber?: string;
   status?: string;
   paymentStatus?: string;
+  language?: string;
   items?: { skuId: string; quantity: number }[];
 }
 
@@ -61,13 +59,10 @@ export default function UpdateOrderSheet({ order }: UpdateOrderSheetProps) {
   const t = getMessages(locale).pages?.orders?.dialogs?.updateOrder || {};
 
   const [form, setForm] = useState<UpdateOrderPayload>({
-    shippingName: order.shippingName,
-    shippingEmail: order.shippingEmail,
-    shippingPhone: order.shippingPhone,
-    shippingAddress: order.shippingAddress,
-    billingName: order.billingName,
-    billingEmail: order.billingEmail,
-    billingAddress: order.billingAddress,
+    customerName: order.customerName,
+    customerPhone: order.customerPhone,
+    customerEmail: order.customerEmail,
+    customerAddress: order.customerAddress,
     deliveryLat: order.deliveryLat ?? undefined,
     deliveryLng: order.deliveryLng ?? undefined,
     deliveryPlace: order.deliveryPlace ?? "",
@@ -115,13 +110,14 @@ export default function UpdateOrderSheet({ order }: UpdateOrderSheetProps) {
       newErrors.status = t.errors?.statusRequired || "Order status is required";
     if (!form.paymentStatus)
       newErrors.paymentStatus =
-        t.errors?.paymentRequired || "Payment status is required";
+        t.errors?.paymentStatusRequired || "Payment status is required";
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length) return;
 
     try {
-      await updateOrder(order.id, form);
+      // Include user's current locale for PDF regeneration
+      await updateOrder(order.id, { ...form, language: locale });
       toast.success(t.toast?.success || "Order updated successfully");
     } catch (err) {
       toast.error(t.toast?.failed || "Failed to update order");
@@ -145,103 +141,53 @@ export default function UpdateOrderSheet({ order }: UpdateOrderSheetProps) {
         </SheetHeader>
 
         <div className="space-y-6 py-4">
-          {/* Shipping Info */}
+          {/* Customer Info */}
           <section className="grid grid-cols-2 gap-4">
             <h3 className="text-lg font-semibold col-span-2">
-              {t.sections?.shipping || "Shipping Info"}
+              {t.sections?.shippingInfo || "Customer Information"}
             </h3>
             <div className="space-y-2">
-              <Label htmlFor="shippingName">
-                {t.fields?.shippingName || "Name"}
+              <Label htmlFor="customerName">
+                {t.fields?.shippingName || "Customer Name"}
               </Label>
               <Input
-                id="shippingName"
-                value={form.shippingName || ""}
-                onChange={(e) => handleChange("shippingName", e.target.value)}
+                id="customerName"
+                value={form.customerName || ""}
+                onChange={(e) => handleChange("customerName", e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="shippingEmail">
-                {t.fields?.shippingEmail || "Email"}
-              </Label>
-              <Input
-                id="shippingEmail"
-                value={form.shippingEmail || ""}
-                onChange={(e) => handleChange("shippingEmail", e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="shippingPhone">
+              <Label htmlFor="customerPhone">
                 {t.fields?.shippingPhone || "Phone"}
               </Label>
               <Input
-                id="shippingPhone"
-                value={form.shippingPhone || ""}
-                onChange={(e) => handleChange("shippingPhone", e.target.value)}
+                id="customerPhone"
+                value={form.customerPhone || ""}
+                onChange={(e) => handleChange("customerPhone", e.target.value)}
               />
             </div>
             <div className="space-y-2 col-span-2">
-              <Label htmlFor="shippingAddress">
+              <Label htmlFor="customerEmail">
+                {t.fields?.shippingEmail || "Email"}
+              </Label>
+              <Input
+                id="customerEmail"
+                type="email"
+                value={form.customerEmail || ""}
+                onChange={(e) => handleChange("customerEmail", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2 col-span-2">
+              <Label htmlFor="customerAddress">
                 {t.fields?.shippingAddress || "Address (JSON)"}
               </Label>
               <Textarea
-                id="shippingAddress"
+                id="customerAddress"
                 rows={2}
-                value={JSON.stringify(form.shippingAddress || {}, null, 2)}
+                value={JSON.stringify(form.customerAddress || {}, null, 2)}
                 onChange={(e) =>
                   handleChange(
-                    "shippingAddress",
-                    (() => {
-                      try {
-                        return JSON.parse(e.target.value);
-                      } catch {
-                        return {};
-                      }
-                    })()
-                  )
-                }
-              />
-            </div>
-          </section>
-
-          <Separator />
-
-          {/* Billing Info */}
-          <section className="grid grid-cols-2 gap-4">
-            <h3 className="text-lg font-semibold col-span-2">
-              {t.sections?.billing || "Billing Info"}
-            </h3>
-            <div className="space-y-2">
-              <Label htmlFor="billingName">
-                {t.fields?.billingName || "Name"}
-              </Label>
-              <Input
-                id="billingName"
-                value={form.billingName || ""}
-                onChange={(e) => handleChange("billingName", e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="billingEmail">
-                {t.fields?.billingEmail || "Email"}
-              </Label>
-              <Input
-                id="billingEmail"
-                value={form.billingEmail || ""}
-                onChange={(e) => handleChange("billingEmail", e.target.value)}
-              />
-            </div>
-            <div className="space-y-2 col-span-2">
-              <Label htmlFor="billingAddress">
-                {t.fields?.billingAddress || "Address (JSON)"}
-              </Label>
-              <Textarea
-                id="billingAddress"
-                rows={2}
-                value={JSON.stringify(form.billingAddress || {}, null, 2)}
-                onChange={(e) =>
-                  handleChange(
-                    "billingAddress",
+                    "customerAddress",
                     (() => {
                       try {
                         return JSON.parse(e.target.value);
@@ -308,11 +254,11 @@ export default function UpdateOrderSheet({ order }: UpdateOrderSheetProps) {
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.values(OrderStatus)
-                    .filter((v) => typeof v === "string")
+                  {Object.keys(OrderStatus)
+                    .filter((key) => isNaN(Number(key)))
                     .map((s) => (
                       <SelectItem key={s} value={s}>
-                        {t.statuses?.[s] || s}
+                        {t.orderStatus?.[s as keyof typeof OrderStatus] || s}
                       </SelectItem>
                     ))}
                 </SelectContent>
@@ -333,16 +279,16 @@ export default function UpdateOrderSheet({ order }: UpdateOrderSheetProps) {
                 <SelectTrigger id="paymentStatus">
                   <SelectValue
                     placeholder={
-                      t.placeholders?.selectPayment || "Select payment status"
+                      t.placeholders?.selectPaymentStatus || "Select payment status"
                     }
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.values(PaymentStatus)
-                    .filter((v) => typeof v === "string")
+                  {Object.keys(PaymentStatus)
+                    .filter((key) => isNaN(Number(key)))
                     .map((s) => (
                       <SelectItem key={s} value={s}>
-                        {t.paymentStatuses?.[s] || s}
+                        {t.paymentStatus?.[s as keyof typeof PaymentStatus] || s}
                       </SelectItem>
                     ))}
                 </SelectContent>
@@ -381,7 +327,7 @@ export default function UpdateOrderSheet({ order }: UpdateOrderSheetProps) {
           </section>
 
           <Button onClick={handleSubmit} className="mt-4 w-full">
-            {t.actions?.save || "Save Changes"}
+            {t.actions?.saveChanges || "Save Changes"}
           </Button>
         </div>
       </SheetContent>

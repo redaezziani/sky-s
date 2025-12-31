@@ -120,8 +120,8 @@ interface ProductsStore {
 
   // Actions
   fetchProducts: (params?: FilterParams) => Promise<void>;
-  createProduct: (productData: CreateProductPayload) => Promise<void>;
-  updateProduct: (id: string, productData: UpdateProductPayload) => Promise<void>;
+  createProduct: (productData: CreateProductPayload, coverImage?: File) => Promise<void>;
+  updateProduct: (id: string, productData: UpdateProductPayload, coverImage?: File) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   bulkDeleteProducts: (productIds: string[]) => Promise<void>;
   getProductById: (id: string) => Promise<Product | null>;
@@ -222,11 +222,38 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
   },
 
   // Create a new product
-  createProduct: async (productData: CreateProductPayload) => {
+  createProduct: async (productData: CreateProductPayload, coverImage?: File) => {
     try {
       set({ loading: true, error: null });
 
-      await axiosInstance.post("/products", productData);
+      // Create FormData if we have a file to upload
+      if (coverImage) {
+        const formData = new FormData();
+
+        // Append all product data fields
+        Object.entries(productData).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            if (Array.isArray(value)) {
+              // Handle arrays (like categoryIds)
+              value.forEach((item) => formData.append(`${key}[]`, item));
+            } else {
+              formData.append(key, value.toString());
+            }
+          }
+        });
+
+        // Append the cover image file
+        formData.append('coverImage', coverImage);
+
+        await axiosInstance.post("/products", formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      } else {
+        // No file, use JSON
+        await axiosInstance.post("/products", productData);
+      }
 
       // Refresh the products list
       await get().fetchProducts();
@@ -242,11 +269,38 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
   },
 
   // Update product
-  updateProduct: async (id: string, productData: UpdateProductPayload) => {
+  updateProduct: async (id: string, productData: UpdateProductPayload, coverImage?: File) => {
     try {
       set({ loading: true, error: null });
 
-      await axiosInstance.patch(`/products/${id}`, productData);
+      // Create FormData if we have a file to upload
+      if (coverImage) {
+        const formData = new FormData();
+
+        // Append all product data fields
+        Object.entries(productData).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            if (Array.isArray(value)) {
+              // Handle arrays (like categoryIds)
+              value.forEach((item) => formData.append(`${key}[]`, item));
+            } else {
+              formData.append(key, value.toString());
+            }
+          }
+        });
+
+        // Append the cover image file
+        formData.append('coverImage', coverImage);
+
+        await axiosInstance.patch(`/products/${id}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      } else {
+        // No file, use JSON
+        await axiosInstance.patch(`/products/${id}`, productData);
+      }
 
       // Refresh the products list
       await get().fetchProducts();

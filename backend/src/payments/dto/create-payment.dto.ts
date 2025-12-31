@@ -6,8 +6,8 @@ export class CreatePaymentDto {
   @IsNotEmpty()
   orderId: string;
 
-  @IsNotEmpty()
-  userId: string;
+  @IsOptional()
+  processedById?: string;
 
   @IsEnum(PaymentMethod, { message: 'method must be CASH' })
   method: PaymentMethod;

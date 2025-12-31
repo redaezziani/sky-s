@@ -1,4 +1,7 @@
 {
+  "errors": {
+    "permissionDenied": "Vous n'avez pas la permission d'accéder à cette ressource"
+  },
   "sidebar": {
     "storeManager": "Gestionnaire de magasin",
     "user": "Utilisateur",
@@ -248,6 +251,7 @@
           "viewDetails": "Voir les détails",
           "sections": {
             "generalInfo": "Informations générales",
+            "customerInfo": "Informations client",
             "shippingInfo": "Informations de livraison",
             "billingInfo": "Informations de facturation",
             "items": "Articles de la commande",
@@ -259,6 +263,13 @@
             "payment": "Paiement",
             "user": "Utilisateur",
             "createdAt": "Créé le",
+            "updatedAt": "Mis à jour le",
+            "confirmedBy": "Confirmé par",
+            "confirmedAt": "Confirmé le",
+            "customerName": "Nom du client",
+            "customerPhone": "Téléphone",
+            "customerEmail": "Email",
+            "customerAddress": "Adresse",
             "name": "Nom",
             "email": "Email",
             "phone": "Téléphone",
@@ -278,15 +289,20 @@
           "title": "Créer une nouvelle commande",
           "description": "Ajoutez une nouvelle commande. Vous pouvez définir plusieurs produits et informations de livraison.",
           "sections": {
+            "customer": "Informations client",
             "user": "Utilisateur",
             "orderItems": "Articles de la commande",
-            "delivery": "Livraison",
+            "delivery": "Lieu de livraison (Optionnel)",
             "shipping": "Informations de livraison",
             "billing": "Informations de facturation",
             "notes": "Notes",
             "trackingNumber": "Numéro de suivi"
           },
           "fields": {
+            "barcode": "Scanner de codes-barres",
+            "customerName": "Nom du client",
+            "customerPhone": "Téléphone du client",
+            "customerEmail": "Email du client",
             "sku": "SKU",
             "quantity": "Quantité",
             "deliveryLat": "Latitude",
@@ -300,6 +316,7 @@
             "billingEmail": "Email de facturation",
             "billingAddress": "Adresse de facturation (JSON)"
           },
+          "optional": "Optionnel",
           "actions": {
             "addItem": "Ajouter un article",
             "removeItem": "Supprimer",
@@ -308,10 +325,19 @@
             "creating": "Création..."
           },
           "placeholders": {
+            "customerName": "Entrez le nom du client",
+            "customerPhone": "Entrez le numéro de téléphone",
+            "customerEmail": "Entrez l'adresse email",
             "selectUser": "Sélectionner un utilisateur",
-            "selectSKU": "Sélectionner un SKU"
+            "selectSKU": "Sélectionner un SKU",
+            "scanBarcode": "Prêt à scanner le code-barres..."
+          },
+          "hints": {
+            "barcodeScanner": "Scannez un code-barres de produit pour l'ajouter rapidement à la commande"
           },
           "errors": {
+            "customerNameRequired": "Le nom du client est requis",
+            "customerPhoneRequired": "Le téléphone du client est requis",
             "userRequired": "Veuillez sélectionner un utilisateur",
             "skuRequired": "Veuillez sélectionner un SKU",
             "quantityMin": "La quantité doit être au moins de 1"
@@ -322,7 +348,10 @@
           },
           "toast": {
             "success": "Commande créée",
-            "failed": "Échec de la création de la commande"
+            "failed": "Échec de la création de la commande",
+            "barcodeAdded": "{productName} - {sku} ajouté à la commande",
+            "barcodeQuantityIncreased": "{productName} - {sku} quantité augmentée",
+            "barcodeNotFound": "Produit avec le code-barres \"{barcode}\" non trouvé"
           }
         },
         "updateOrder": {
@@ -375,6 +404,21 @@
           "toast": {
             "success": "Commande mise à jour avec succès",
             "failed": "Échec de la mise à jour de la commande"
+          },
+          "orderStatus": {
+            "PENDING": "En attente",
+            "CONFIRMED": "Confirmé",
+            "PROCESSING": "En traitement",
+            "SHIPPED": "Expédié",
+            "DELIVERED": "Livré",
+            "CANCELLED": "Annulé",
+            "REFUNDED": "Remboursé"
+          },
+          "paymentStatus": {
+            "PENDING": "En attente",
+            "COMPLETED": "Terminé",
+            "FAILED": "Échoué",
+            "REFUNDED": "Remboursé"
           }
         }
       }
@@ -603,6 +647,10 @@
         }
       }
     },
+    "categories": {
+      "title": "Gestion des Catégories",
+      "description": "Gérez vos catégories de produits et hiérarchies"
+    },
     "common": {
       "unknownProduct": "Produit inconnu",
       "noAttributes": "Aucun attribut"
@@ -611,5 +659,82 @@
   "app": {
     "title": "Sky's Store - Plateforme e-commerce open source",
     "description": "Sky's Store est une plateforme e-commerce moderne et extensible, open source, construite avec Next.js et Prisma. Elle offre des fonctionnalités telles que la gestion des produits, le traitement des commandes et l'authentification des utilisateurs."
+  },
+  "permissions": {
+    "page": {
+      "title": "Rôles et Permissions",
+      "description": "Gérer les rôles utilisateurs et configurer le contrôle d'accès",
+      "tabPermissions": "Matrice des Permissions",
+      "tabUsers": "Rôles des Utilisateurs",
+      "comingSoon": "Attribution des rôles utilisateurs bientôt disponible...",
+      "manageFromUsers": "Vous pouvez gérer les rôles depuis la page Utilisateurs"
+    },
+    "actions": {
+      "refreshCache": "Actualiser le Cache",
+      "saveChanges": "Enregistrer les Modifications",
+      "reset": "Réinitialiser",
+      "unsavedChanges": "Modifications non enregistrées"
+    },
+    "toast": {
+      "permissionsUpdated": "Permissions mises à jour avec succès pour {role}",
+      "permissionAdded": "{permission} ajouté à {role}",
+      "permissionRemoved": "{permission} supprimé de {role}",
+      "cacheRefreshed": "Cache des permissions actualisé"
+    },
+    "roles": {
+      "ADMIN": "Administrateur",
+      "MODERATOR": "Modérateur",
+      "USER": "Utilisateur"
+    },
+    "categories": {
+      "Products": "Produits",
+      "Categories": "Catégories",
+      "Orders": "Commandes",
+      "Users": "Utilisateurs",
+      "Payments": "Paiements",
+      "Inventory": "Inventaire",
+      "Analytics": "Analytiques",
+      "Settings": "Paramètres",
+      "Reviews": "Avis"
+    },
+    "labels": {
+      "product:create": "Créer des Produits",
+      "product:read": "Voir les Produits",
+      "product:update": "Modifier les Produits",
+      "product:delete": "Supprimer les Produits",
+      "category:create": "Créer des Catégories",
+      "category:read": "Voir les Catégories",
+      "category:update": "Modifier les Catégories",
+      "category:delete": "Supprimer les Catégories",
+      "order:create": "Créer des Commandes",
+      "order:read": "Voir les Commandes",
+      "order:read_all": "Voir Toutes les Commandes",
+      "order:update": "Modifier les Commandes",
+      "order:delete": "Supprimer les Commandes",
+      "order:cancel": "Annuler les Commandes",
+      "order:confirm": "Confirmer les Commandes",
+      "user:create": "Créer des Utilisateurs",
+      "user:read": "Voir les Utilisateurs",
+      "user:read_all": "Voir Tous les Utilisateurs",
+      "user:update": "Modifier les Utilisateurs",
+      "user:update_role": "Changer les Rôles",
+      "user:delete": "Supprimer les Utilisateurs",
+      "user:toggle_status": "Basculer le Statut",
+      "user:manage_from_users": "Gérer les Utilisateurs depuis la Page Utilisateurs",
+      "payment:create": "Créer des Paiements",
+      "payment:read": "Voir les Paiements",
+      "payment:process": "Traiter les Paiements",
+      "inventory:read": "Voir l'Inventaire",
+      "inventory:update": "Mettre à jour l'Inventaire",
+      "inventory:adjust": "Ajuster l'Inventaire",
+      "analytics:read": "Voir les Analytiques",
+      "analytics:export": "Exporter les Analytiques",
+      "settings:read": "Voir les Paramètres",
+      "settings:update": "Mettre à jour les Paramètres",
+      "review:create": "Créer des Avis",
+      "review:read": "Voir les Avis",
+      "review:approve": "Approuver les Avis",
+      "review:delete": "Supprimer les Avis"
+    }
   }
 }

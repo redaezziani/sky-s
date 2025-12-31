@@ -13,8 +13,11 @@
   font-display: swap;
 }
 
+.color {
+  color: oklch(64.263% 0.23663 32.347);
+}
 :root {
-  --color-1: oklch(75.26% 0.1653 29.644);
+  --color-1: oklch(64.263% 0.23663 32.347);
   --color-2: oklab(32.915% -0.0409 -0.04214);
   --color-3: oklch(77.751% 0.15953 166.602);
   --color-4: oklch(88.03% 0.1347 86.064);
@@ -69,7 +72,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(75.26% 0.1653 29.644);
+  --primary: oklch(64.263% 0.23663 32.347);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -81,7 +84,7 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --chart-1: oklch(75.26% 0.1653 29.644);
+  --chart-1: oklch(64.263% 0.23663 32.347);
   --chart-2: oklch(32.915% -0.0409 -0.04214);
   --chart-3: oklch(77.751% 0.15953 166.602);
   --chart-4: oklch(88.03% 0.1347 86.064);
@@ -103,7 +106,7 @@
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
 
-  --primary: oklch(75.26% 0.1653 29.644);
+  --primary: oklch(64.263% 0.23663 32.347);
   --primary-foreground: oklch(0.985 0 0);
 
   --secondary: oklch(0.269 0 0);
@@ -116,7 +119,7 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --chart-1: oklch(75.26% 0.1653 29.644);
+  --chart-1: oklch(64.263% 0.23663 32.347);
   --chart-2: oklch(32.915% -0.0409 -0.04214);
   --chart-3: oklch(77.751% 0.15953 166.602);
   --chart-4: oklch(88.03% 0.1347 86.064);
@@ -142,10 +145,14 @@
 
   /* Apply Arabic font when lang is ar */
   :root:has(html[lang='ar']) body,
-  html[lang='ar'] body {
+  html[lang='ar'] body,
+  html[lang='ar'] * {
     font-family: 'Arabic Font', 'Onest', sans-serif;
-    direction: rtl;
     letter-spacing: normal !important;
+  }
+
+  html[lang='ar'] body {
+    direction: rtl;
   }
 
   /* RTL support for Arabic language */

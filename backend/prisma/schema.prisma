@@ -49,12 +49,13 @@ model User {
   deletedAt                DateTime?
 
   // Relations
-  refreshTokens RefreshToken[]
-  orders        Order[]
-  reviews       ProductReview[]
-  cartItems     CartItem[]
-  payments      Payment[]
-  devices       UserDevice[]
+  refreshTokens    RefreshToken[]
+  createdOrders    Order[]          @relation("OrderCreator") // Orders created by this admin user
+  confirmedOrders  Order[]          @relation("OrderConfirmer") // Orders confirmed by this admin user
+  reviews          ProductReview[]
+  cartItems        CartItem[]
+  payments         Payment[]
+  devices          UserDevice[]
 
   @@index([email])
   @@index([isActive])
@@ -240,7 +241,8 @@ model CartItem {
 model Order {
   id             String        @id @default(uuid())
   orderNumber    String        @unique @db.VarChar(50)
-  userId         String
+  createdById    String? // Admin user who created the order
+  confirmedById  String? // Admin user who confirmed the order
   status         OrderStatus   @default(PENDING)
   paymentStatus  PaymentStatus @default(PENDING)
   subtotal       Decimal       @db.Decimal(10, 2)
@@ -249,42 +251,43 @@ model Order {
   discountAmount Decimal       @default(0) @db.Decimal(10, 2)
   totalAmount    Decimal       @db.Decimal(10, 2)
   currency       String        @default("USD") @db.VarChar(3)
+  language       String        @default("en") @db.VarChar(5) // PDF language: en, ar, es, fr
 
-  // pdf invoice url
-  invoiceUrl      String? @default("") @db.VarChar(500)
-  invoiceFileId   String? @default("") @db.VarChar(200)
-  // Shipping Information
-  shippingName    String  @db.VarChar(100)
-  shippingEmail   String  @db.VarChar(255)
-  shippingPhone   String? @db.VarChar(20)
-  shippingAddress Json // Full address object
+  // Invoice
+  invoiceUrl    String? @default("") @db.VarChar(500)
+  invoiceFileId String? @default("") @db.VarChar(200)
 
-  // Delivery Coordinates
+  // Customer Information
+  customerName  String  @db.VarChar(100)
+  customerEmail String? @db.VarChar(255)
+  customerPhone String  @db.VarChar(20)
+  customerAddress Json? // Full address object
+
+  // Delivery Information (optional for delivery orders)
   deliveryLat   Float?
   deliveryLng   Float?
   deliveryPlace String?
-
-  // Billing Information
-  billingName    String? @db.VarChar(100)
-  billingEmail   String? @db.VarChar(255)
-  billingAddress Json? // Full address object
-
-  notes          String?   @db.Text
   trackingNumber String?   @db.VarChar(100)
   shippedAt      DateTime?
   deliveredAt    DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  confirmedAt    DateTime? // When the order was confirmed
 
-  user     User        @relation(fields: [userId], references: [id])
-  items    OrderItem[]
-  payments Payment[]
+  notes     String?   @db.Text
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  createdBy   User?       @relation("OrderCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  confirmedBy User?       @relation("OrderConfirmer", fields: [confirmedById], references: [id], onDelete: SetNull)
+  items       OrderItem[]
+  payments    Payment[]
 
   @@index([orderNumber])
-  @@index([userId])
+  @@index([createdById])
+  @@index([confirmedById])
   @@index([status])
   @@index([paymentStatus])
   @@index([createdAt])
+  @@index([customerPhone])
 }
 
 model OrderItem {
@@ -345,7 +348,7 @@ enum PaymentMethod {
 model Payment {
   id            String        @id @default(uuid())
   orderId       String
-  userId        String
+  processedById String? // Admin user who processed the payment
   method        PaymentMethod
   status        PaymentStatus @default(PENDING)
   amount        Decimal       @db.Decimal(10, 2)
@@ -357,11 +360,11 @@ model Payment {
   updatedAt     DateTime      @updatedAt
 
   // Relations
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id])
+  order       Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  processedBy User? @relation(fields: [processedById], references: [id], onDelete: SetNull)
 
   @@index([orderId])
-  @@index([userId])
+  @@index([processedById])
   @@index([status])
   @@index([method])
 }
@@ -407,4 +410,18 @@ model UserDevice {
   @@unique([userId, ip]) // Composite unique
   @@index([userId])
   @@index([ip])
+}
+
+model RolePermission {
+  id         String   @id @default(uuid())
+  role       UserRole
+  permission String   @db.VarChar(100) // e.g., "product:create", "user:delete"
+  isActive   Boolean  @default(true) // Allow enabling/disabling specific permissions
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([role, permission]) // Each role can have a permission only once
+  @@index([role])
+  @@index([permission])
+  @@index([isActive])
 }

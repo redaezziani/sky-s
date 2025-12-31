@@ -1,4 +1,7 @@
 {
+  "errors": {
+    "permissionDenied": "You don't have permission to access this resource"
+  },
   "sidebar": {
     "storeManager": "Store Manager",
     "user": "User",
@@ -252,6 +255,7 @@
           "viewDetails": "View Details",
           "sections": {
             "generalInfo": "General Info",
+            "customerInfo": "Customer Information",
             "shippingInfo": "Shipping Info",
             "billingInfo": "Billing Info",
             "items": "Order Items",
@@ -263,6 +267,13 @@
             "payment": "Payment",
             "user": "User",
             "createdAt": "Created At",
+            "updatedAt": "Updated At",
+            "confirmedBy": "Confirmed By",
+            "confirmedAt": "Confirmed At",
+            "customerName": "Customer Name",
+            "customerPhone": "Phone",
+            "customerEmail": "Email",
+            "customerAddress": "Address",
             "name": "Name",
             "email": "Email",
             "phone": "Phone",
@@ -282,9 +293,10 @@
           "title": "Create New Order",
           "description": "Add a new order. You can set multiple products and shipping info.",
           "sections": {
+            "customer": "Customer Information",
             "user": "User",
             "orderItems": "Order Items",
-            "delivery": "Delivery",
+            "delivery": "Delivery Location (Optional)",
             "shipping": "Shipping Info",
             "billing": "Billing Info",
             "notes": "Notes",
@@ -292,6 +304,9 @@
           },
           "fields": {
             "barcode": "Barcode Scanner",
+            "customerName": "Customer Name",
+            "customerPhone": "Customer Phone",
+            "customerEmail": "Customer Email",
             "sku": "SKU",
             "quantity": "Quantity",
             "deliveryLat": "Latitude",
@@ -305,6 +320,7 @@
             "billingEmail": "Billing Email",
             "billingAddress": "Billing Address (JSON)"
           },
+          "optional": "Optional",
           "actions": {
             "addItem": "Add Item",
             "removeItem": "Remove",
@@ -313,6 +329,9 @@
             "creating": "Creating..."
           },
           "placeholders": {
+            "customerName": "Enter customer name",
+            "customerPhone": "Enter phone number",
+            "customerEmail": "Enter email address",
             "selectUser": "Select User",
             "selectSKU": "Select SKU",
             "scanBarcode": "Scan or type barcode..."
@@ -321,6 +340,8 @@
             "barcodeScanner": "Scan a product barcode to quickly add it to the order"
           },
           "errors": {
+            "customerNameRequired": "Customer name is required",
+            "customerPhoneRequired": "Customer phone is required",
             "userRequired": "Please select a user",
             "skuRequired": "Please select a SKU",
             "quantityMin": "Quantity must be at least 1"
@@ -331,7 +352,10 @@
           },
           "toast": {
             "success": "Order created",
-            "failed": "Failed to create order"
+            "failed": "Failed to create order",
+            "barcodeAdded": "{productName} - {sku} added to order",
+            "barcodeQuantityIncreased": "{productName} - {sku} quantity increased",
+            "barcodeNotFound": "Product with barcode \"{barcode}\" not found"
           }
         },
         "updateOrder": {
@@ -384,6 +408,21 @@
           "toast": {
             "success": "Order updated successfully",
             "failed": "Failed to update order"
+          },
+          "orderStatus": {
+            "PENDING": "Pending",
+            "CONFIRMED": "Confirmed",
+            "PROCESSING": "Processing",
+            "SHIPPED": "Shipped",
+            "DELIVERED": "Delivered",
+            "CANCELLED": "Cancelled",
+            "REFUNDED": "Refunded"
+          },
+          "paymentStatus": {
+            "PENDING": "Pending",
+            "COMPLETED": "Completed",
+            "FAILED": "Failed",
+            "REFUNDED": "Refunded"
           }
         }
       }
@@ -647,6 +686,10 @@
           }
         }
       }
+    },
+    "categories": {
+      "title": "Categories Management",
+      "description": "Manage your product categories and hierarchies"
     },
     "products": {
       "title": "Products Management",
@@ -970,5 +1013,82 @@
   "app": {
     "title": "Sky's Store - Open Source E-commerce Platform",
     "description": "Sky's Store is a modern, extensible open source e-commerce platform built with Next.js and Prisma. It offers features like product management, order processing, and user authentication."
+  },
+  "permissions": {
+    "page": {
+      "title": "Roles & Permissions",
+      "description": "Manage user roles and configure permission-based access control",
+      "tabPermissions": "Permissions Matrix",
+      "tabUsers": "User Roles",
+      "comingSoon": "User role assignment coming soon...",
+      "manageFromUsers": "You can manage user roles from the Users page"
+    },
+    "actions": {
+      "refreshCache": "Refresh Cache",
+      "saveChanges": "Save Changes",
+      "reset": "Reset",
+      "unsavedChanges": "Unsaved changes"
+    },
+    "toast": {
+      "permissionsUpdated": "Successfully updated permissions for {role}",
+      "permissionAdded": "Added {permission} to {role}",
+      "permissionRemoved": "Removed {permission} from {role}",
+      "cacheRefreshed": "Permissions cache refreshed"
+    },
+    "roles": {
+      "ADMIN": "Admin",
+      "MODERATOR": "Moderator",
+      "USER": "User"
+    },
+    "categories": {
+      "Products": "Products",
+      "Categories": "Categories",
+      "Orders": "Orders",
+      "Users": "Users",
+      "Payments": "Payments",
+      "Inventory": "Inventory",
+      "Analytics": "Analytics",
+      "Settings": "Settings",
+      "Reviews": "Reviews"
+    },
+    "labels": {
+      "product:create": "Create Products",
+      "product:read": "View Products",
+      "product:update": "Edit Products",
+      "product:delete": "Delete Products",
+      "category:create": "Create Categories",
+      "category:read": "View Categories",
+      "category:update": "Edit Categories",
+      "category:delete": "Delete Categories",
+      "order:create": "Create Orders",
+      "order:read": "View Orders",
+      "order:read_all": "View All Orders",
+      "order:update": "Edit Orders",
+      "order:delete": "Delete Orders",
+      "order:cancel": "Cancel Orders",
+      "order:confirm": "Confirm Orders",
+      "user:create": "Create Users",
+      "user:read": "View Users",
+      "user:read_all": "View All Users",
+      "user:update": "Edit Users",
+      "user:update_role": "Change User Roles",
+      "user:delete": "Delete Users",
+      "user:toggle_status": "Toggle User Status",
+      "user:manage_from_users": "Manage Users from Users Page",
+      "payment:create": "Create Payments",
+      "payment:read": "View Payments",
+      "payment:process": "Process Payments",
+      "inventory:read": "View Inventory",
+      "inventory:update": "Update Inventory",
+      "inventory:adjust": "Adjust Inventory",
+      "analytics:read": "View Analytics",
+      "analytics:export": "Export Analytics",
+      "settings:read": "View Settings",
+      "settings:update": "Update Settings",
+      "review:create": "Create Reviews",
+      "review:read": "View Reviews",
+      "review:approve": "Approve Reviews",
+      "review:delete": "Delete Reviews"
+    }
   }
 }

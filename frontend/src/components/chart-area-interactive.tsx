@@ -137,7 +137,7 @@ export function ChartAreaInteractive() {
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[290px] w-full"
+          className="aspect-auto h-[250px] w-full"
         >
           {/* We keep the container LTR because Recharts handles coordinates in LTR, 
               but we use the 'reversed' prop on XAxis to flip the data flow visually */}

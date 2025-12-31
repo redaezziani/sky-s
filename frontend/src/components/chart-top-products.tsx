@@ -137,13 +137,15 @@ export function ChartTopProducts() {
   );
 
   return (
-    <Card className="@container/card overflow-hidden max-h-[27rem]">
+    <Card className="@container/card overflow-hidden  h-84">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <CardTitle className="text-lg">{t.title || "Top Products"}</CardTitle>
+            <CardTitle className="text-lg">
+              {t.title || 'Top Products'}
+            </CardTitle>
             <CardDescription className="text-sm">
-              {t.description || "View the most popular products by order count"}
+              {t.description || 'View the most popular products by order count'}
             </CardDescription>
           </div>
           {/* Time Range Selector */}
@@ -157,13 +159,13 @@ export function ChartTopProducts() {
               className="hidden @[500px]/card:flex"
             >
               <ToggleGroupItem value="90d" className="px-3 py-1 text-xs">
-                {t.periods?.['90d'] || "90 Days"}
+                {t.periods?.['90d'] || '90 Days'}
               </ToggleGroupItem>
               <ToggleGroupItem value="30d" className="px-3 py-1 text-xs">
-                {t.periods?.['30d'] || "30 Days"}
+                {t.periods?.['30d'] || '30 Days'}
               </ToggleGroupItem>
               <ToggleGroupItem value="7d" className="px-3 py-1 text-xs">
-                {t.periods?.['7d'] || "7 Days"}
+                {t.periods?.['7d'] || '7 Days'}
               </ToggleGroupItem>
             </ToggleGroup>
 
@@ -172,12 +174,20 @@ export function ChartTopProducts() {
                 className="w-32 h-8 @[500px]/card:hidden"
                 size="sm"
               >
-                <SelectValue placeholder={t.selectPeriodPlaceholder || "Select period"} />
+                <SelectValue
+                  placeholder={t.selectPeriodPlaceholder || 'Select period'}
+                />
               </SelectTrigger>
               <SelectContent className="rounded-xl">
-                <SelectItem value="90d">{t.periods?.['90d'] || "90 Days"}</SelectItem>
-                <SelectItem value="30d">{t.periods?.['30d'] || "30 Days"}</SelectItem>
-                <SelectItem value="7d">{t.periods?.['7d'] || "7 Days"}</SelectItem>
+                <SelectItem value="90d">
+                  {t.periods?.['90d'] || '90 Days'}
+                </SelectItem>
+                <SelectItem value="30d">
+                  {t.periods?.['30d'] || '30 Days'}
+                </SelectItem>
+                <SelectItem value="7d">
+                  {t.periods?.['7d'] || '7 Days'}
+                </SelectItem>
               </SelectContent>
             </Select>
           </CardAction>
@@ -191,7 +201,7 @@ export function ChartTopProducts() {
             {totalOrders.toLocaleString()}
           </div>
           <div className="text-sm text-muted-foreground">
-            {t.labels?.totalOrdered || "Total Ordered"} (Top 5)
+            {t.labels?.totalOrdered || 'Total Ordered'} (Top 5)
           </div>
         </div>
 
@@ -220,7 +230,8 @@ export function ChartTopProducts() {
               </div>
               {/* Order count for the product */}
               <span className="font-medium shrink-0 ml-4">
-                {item.totalOrdered.toLocaleString()} {t.labels?.orders || "orders"}
+                {item.totalOrdered.toLocaleString()}{' '}
+                {t.labels?.orders || 'orders'}
               </span>
             </div>
           ))}

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Sheet,
@@ -6,15 +6,15 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Eye } from "lucide-react";
-import { Order } from "@/stores/orders-store";
-import DeliveryMapPicker from "../delivery-map-picker";
-import { useLocale } from "@/components/local-lang-swither";
-import { getMessages } from "@/lib/locale";
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Eye } from 'lucide-react';
+import { Order } from '@/stores/orders-store';
+import DeliveryMapPicker from '../delivery-map-picker';
+import { useLocale } from '@/components/local-lang-swither';
+import { getMessages } from '@/lib/locale';
 
 interface OrderDetailsProps {
   order: Order;
@@ -26,8 +26,8 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
 
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency: "MAD",
+      style: 'currency',
+      currency: 'MAD',
     }).format(amount);
 
   return (
@@ -38,10 +38,10 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
           {t.viewDetails}
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full px-4 sm:min-w-[670px] lg:w-[700px] xl:w-[900px] overflow-y-auto">
+      <SheetContent className="w-full px-4 sm:min-w-167.5 lg:w-175 xl:w-225 overflow-y-auto">
         <SheetHeader>
           <SheetTitle>
-            {t.title.replace("{orderNumber}", order.orderNumber)}
+            {t.title.replace('{orderNumber}', order.orderNumber)}
           </SheetTitle>
         </SheetHeader>
 
@@ -63,65 +63,68 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                 </Badge>
               </div>
               <div>
-                <p className="text-muted-foreground">{t.fields.user}</p>
-                <p>{order.userId}</p>
-              </div>
-              <div>
                 <p className="text-muted-foreground">{t.fields.createdAt}</p>
                 <p>{new Date(order.createdAt).toLocaleString(locale)}</p>
               </div>
+              <div>
+                <p className="text-muted-foreground">
+                  {t.fields.updatedAt || 'Updated At'}
+                </p>
+                <p>{new Date(order.updatedAt).toLocaleString(locale)}</p>
+              </div>
+              {order.confirmedBy && (
+                <div>
+                  <p className="text-muted-foreground">
+                    {t.fields.confirmedBy || 'Confirmed By'}
+                  </p>
+                  <p>{order.confirmedBy.name || order.confirmedBy.email}</p>
+                </div>
+              )}
+              {order.confirmedAt && (
+                <div>
+                  <p className="text-muted-foreground">
+                    {t.fields.confirmedAt || 'Confirmed At'}
+                  </p>
+                  <p>{new Date(order.confirmedAt).toLocaleString(locale)}</p>
+                </div>
+              )}
             </div>
           </section>
 
           <Separator />
 
-          {/* Shipping Info */}
+          {/* Customer Info */}
           <section>
-            <h3 className="text-lg font-semibold">{t.sections.shippingInfo}</h3>
+            <h3 className="text-lg font-semibold">
+              {t.sections.customerInfo || 'Customer Information'}
+            </h3>
             <div className="grid grid-cols-2 gap-4 mt-2 text-sm">
               <div>
-                <p className="text-muted-foreground">{t.fields.name}</p>
-                <p>{order.shippingName || "-"}</p>
+                <p className="text-muted-foreground">
+                  {t.fields.customerName || 'Customer Name'}
+                </p>
+                <p>{order.customerName}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">{t.fields.email}</p>
-                <p>{order.shippingEmail || "-"}</p>
+                <p className="text-muted-foreground">
+                  {t.fields.customerPhone || 'Phone'}
+                </p>
+                <p>{order.customerPhone}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">{t.fields.phone}</p>
-                <p>{order.shippingPhone || "-"}</p>
+                <p className="text-muted-foreground">
+                  {t.fields.customerEmail || 'Email'}
+                </p>
+                <p>{order.customerEmail || '-'}</p>
               </div>
               <div className="col-span-2">
-                <p className="text-muted-foreground">{t.fields.address}</p>
+                <p className="text-muted-foreground">
+                  {t.fields.customerAddress || 'Address'}
+                </p>
                 <pre className="bg-muted p-2 rounded text-xs overflow-x-auto">
-                  {order.shippingAddress
-                    ? JSON.stringify(order.shippingAddress, null, 2)
-                    : "-"}
-                </pre>
-              </div>
-            </div>
-          </section>
-
-          <Separator />
-
-          {/* Billing Info */}
-          <section>
-            <h3 className="text-lg font-semibold">{t.sections.billingInfo}</h3>
-            <div className="grid grid-cols-2 gap-4 mt-2 text-sm">
-              <div>
-                <p className="text-muted-foreground">{t.fields.name}</p>
-                <p>{order.billingName || "-"}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">{t.fields.email}</p>
-                <p>{order.billingEmail || "-"}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="text-muted-foreground">{t.fields.address}</p>
-                <pre className="bg-muted p-2 rounded text-xs overflow-x-auto">
-                  {order.billingAddress
-                    ? JSON.stringify(order.billingAddress, null, 2)
-                    : "-"}
+                  {order.customerAddress
+                    ? JSON.stringify(order.customerAddress, null, 2)
+                    : '-'}
                 </pre>
               </div>
             </div>
@@ -138,9 +141,9 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                   key={item.skuId}
                   className="flex justify-between items-center p-3 text-sm gap-4"
                 >
-                  <div className="w-16 h-16 flex-shrink-0">
+                  <div className="w-16 h-16 shrink-0">
                     <img
-                      src={item.sku?.coverImage || "/placeholder.png"}
+                      src={item.sku?.coverImage || '/placeholder.png'}
                       alt={item.productName}
                       className="w-full h-full object-cover rounded"
                     />
@@ -151,7 +154,7 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                       {item.skuCode}
                     </p>
                     <p className="text-xs">
-                      {t.labels.qty.replace("{qty}", String(item.quantity))} ×{" "}
+                      {t.labels.qty.replace('{qty}', String(item.quantity))} ×{' '}
                       {formatCurrency(item.unitPrice)}
                     </p>
                   </div>

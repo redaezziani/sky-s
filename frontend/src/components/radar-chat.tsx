@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import useSWR from "swr";
-import { TrendingUp } from "lucide-react";
-import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts";
+import * as React from 'react';
+import useSWR from 'swr';
+import { TrendingUp } from 'lucide-react';
+import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from 'recharts';
 
 import {
   Card,
@@ -12,41 +12,41 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   ChartContainer,
   ChartConfig,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart";
-import { useTranslations } from "next-intl";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+} from '@/components/ui/chart';
+import { useTranslations } from 'next-intl';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import {
   Select,
   SelectTrigger,
   SelectContent,
   SelectItem,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
-import { fetcher } from "@/lib/utils";
+import { fetcher } from '@/lib/utils';
 
 export function ChartTopProductsRadar() {
   const t = useTranslations('pages.analytics.components.chartTopProductsRadar');
 
-  const [timeRange, setTimeRange] = React.useState("30d");
+  const [timeRange, setTimeRange] = React.useState('30d');
   const [period, setPeriod] = React.useState(30);
 
   React.useEffect(() => {
-    if (timeRange === "90d") setPeriod(90);
-    else if (timeRange === "30d") setPeriod(30);
+    if (timeRange === '90d') setPeriod(90);
+    else if (timeRange === '30d') setPeriod(30);
     else setPeriod(7);
   }, [timeRange]);
 
   const { data: topProductsMetrics } = useSWR(
     `/analytics/top-products-metrics?period=${period}`,
     fetcher,
-    { refreshInterval: 60000 }
+    { refreshInterval: 60000 },
   );
 
   const processedData = React.useMemo(() => {
@@ -60,11 +60,11 @@ export function ChartTopProductsRadar() {
         product3: topFive[2]?.totalOrdered || 0,
         product4: topFive[3]?.totalOrdered || 0,
         product5: topFive[4]?.totalOrdered || 0,
-        product1Name: topFive[0]?.label || "Product 1",
-        product2Name: topFive[1]?.label || "Product 2",
-        product3Name: topFive[2]?.label || "Product 3",
-        product4Name: topFive[3]?.label || "Product 4",
-        product5Name: topFive[4]?.label || "Product 5",
+        product1Name: topFive[0]?.label || 'Product 1',
+        product2Name: topFive[1]?.label || 'Product 2',
+        product3Name: topFive[2]?.label || 'Product 3',
+        product4Name: topFive[3]?.label || 'Product 4',
+        product5Name: topFive[4]?.label || 'Product 5',
       },
     ];
   }, [topProductsMetrics]);
@@ -82,33 +82,35 @@ export function ChartTopProductsRadar() {
 
   const chartConfig = {
     product1: {
-      label: processedData[0]?.product1Name || "Product 1",
-      color: "var(--chart-1)",
+      label: processedData[0]?.product1Name || 'Product 1',
+      color: 'var(--chart-1)',
     },
     product2: {
-      label: processedData[0]?.product2Name || "Product 2",
-      color: "var(--chart-2)",
+      label: processedData[0]?.product2Name || 'Product 2',
+      color: 'var(--chart-2)',
     },
     product3: {
-      label: processedData[0]?.product3Name || "Product 3",
-      color: "var(--chart-3)",
+      label: processedData[0]?.product3Name || 'Product 3',
+      color: 'var(--chart-3)',
     },
     product4: {
-      label: processedData[0]?.product4Name || "Product 4",
-      color: "var(--chart-4)",
+      label: processedData[0]?.product4Name || 'Product 4',
+      color: 'var(--chart-4)',
     },
     product5: {
-      label: processedData[0]?.product5Name || "Product 5",
-      color: "var(--chart-5)",
+      label: processedData[0]?.product5Name || 'Product 5',
+      color: 'var(--chart-5)',
     },
   } satisfies ChartConfig;
 
   return (
-    <Card className="@container/card flex flex-col max-h-[27rem]">
+    <Card className="@container/card flex overflow-hidden flex-col h-84">
       <CardHeader className="flex items-center justify-between">
         <div className="space-y-1">
           <CardTitle className="text-lg">{t('title')}</CardTitle>
-          <CardDescription className="text-sm">{t('description')}</CardDescription>
+          <CardDescription className="text-sm">
+            {t('description')}
+          </CardDescription>
         </div>
 
         <div className="flex items-center gap-2">
@@ -156,7 +158,7 @@ export function ChartTopProductsRadar() {
             <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
               <Label
                 content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                  if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
                     return (
                       <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle">
                         <tspan
@@ -217,15 +219,6 @@ export function ChartTopProductsRadar() {
           </RadialBarChart>
         </ChartContainer>
       </CardContent>
-
-      <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 leading-none font-medium">
-          Trending up by 5.2% <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="text-muted-foreground flex items-center gap-2 leading-none">
-          {t(`periods.${timeRange}`)} {t('labelSuffix')}
-        </div>
-      </CardFooter>
     </Card>
   );
 }

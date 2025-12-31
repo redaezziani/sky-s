@@ -1,4 +1,7 @@
 {
+  "errors": {
+    "permissionDenied": "ليس لديك الصلاحية للوصول إلى هذا المورد"
+  },
   "sidebar": {
     "storeManager": "مدير المتجر",
     "user": "المستخدم",
@@ -251,6 +254,7 @@
           "viewDetails": "عرض التفاصيل",
           "sections": {
             "generalInfo": "المعلومات العامة",
+            "customerInfo": "معلومات العميل",
             "shippingInfo": "معلومات الشحن",
             "billingInfo": "معلومات الفوترة",
             "items": "عناصر الطلب",
@@ -262,6 +266,13 @@
             "payment": "الدفع",
             "user": "المستخدم",
             "createdAt": "تاريخ الإنشاء",
+            "updatedAt": "تاريخ التحديث",
+            "confirmedBy": "تم التأكيد بواسطة",
+            "confirmedAt": "تاريخ التأكيد",
+            "customerName": "اسم العميل",
+            "customerPhone": "الهاتف",
+            "customerEmail": "البريد الإلكتروني",
+            "customerAddress": "العنوان",
             "name": "الاسم",
             "email": "البريد الإلكتروني",
             "phone": "الهاتف",
@@ -281,9 +292,10 @@
           "title": "إنشاء طلب جديد",
           "description": "إضافة طلب جديد. يمكنك تحديد منتجات متعددة ومعلومات الشحن.",
           "sections": {
+            "customer": "معلومات العميل",
             "user": "المستخدم",
             "orderItems": "عناصر الطلب",
-            "delivery": "التوصيل",
+            "delivery": "موقع التسليم (اختياري)",
             "shipping": "معلومات الشحن",
             "billing": "معلومات الفوترة",
             "notes": "الملاحظات",
@@ -291,6 +303,9 @@
           },
           "fields": {
             "barcode": "ماسح الباركود",
+            "customerName": "اسم العميل",
+            "customerPhone": "هاتف العميل",
+            "customerEmail": "بريد العميل الإلكتروني",
             "sku": "الكود",
             "quantity": "الكمية",
             "deliveryLat": "خط العرض",
@@ -304,6 +319,7 @@
             "billingEmail": "بريد الفوترة الإلكتروني",
             "billingAddress": "عنوان الفوترة (JSON)"
           },
+          "optional": "اختياري",
           "actions": {
             "addItem": "إضافة عنصر",
             "removeItem": "إزالة",
@@ -312,14 +328,19 @@
             "creating": "جاري الإنشاء..."
           },
           "placeholders": {
+            "customerName": "أدخل اسم العميل",
+            "customerPhone": "أدخل رقم الهاتف",
+            "customerEmail": "أدخل البريد الإلكتروني",
             "selectUser": "اختر مستخدم",
             "selectSKU": "اختر كود",
-            "scanBarcode": "امسح أو اكتب الباركود..."
+            "scanBarcode": "جاهز لمسح الباركود..."
           },
           "hints": {
             "barcodeScanner": "امسح باركود المنتج لإضافته بسرعة إلى الطلب"
           },
           "errors": {
+            "customerNameRequired": "اسم العميل مطلوب",
+            "customerPhoneRequired": "هاتف العميل مطلوب",
             "userRequired": "الرجاء اختيار مستخدم",
             "skuRequired": "الرجاء اختيار كود",
             "quantityMin": "يجب أن تكون الكمية 1 على الأقل"
@@ -330,7 +351,10 @@
           },
           "toast": {
             "success": "تم إنشاء الطلب",
-            "failed": "فشل إنشاء الطلب"
+            "failed": "فشل إنشاء الطلب",
+            "barcodeAdded": "{productName} - {sku} تمت الإضافة إلى الطلب",
+            "barcodeQuantityIncreased": "{productName} - {sku} تم زيادة الكمية",
+            "barcodeNotFound": "المنتج بالباركود \"{barcode}\" غير موجود"
           }
         },
         "updateOrder": {
@@ -383,6 +407,21 @@
           "toast": {
             "success": "تم تحديث الطلب بنجاح",
             "failed": "فشل تحديث الطلب"
+          },
+          "orderStatus": {
+            "PENDING": "قيد الانتظار",
+            "CONFIRMED": "مؤكد",
+            "PROCESSING": "قيد المعالجة",
+            "SHIPPED": "تم الشحن",
+            "DELIVERED": "تم التسليم",
+            "CANCELLED": "ملغي",
+            "REFUNDED": "مسترد"
+          },
+          "paymentStatus": {
+            "PENDING": "قيد الانتظار",
+            "COMPLETED": "مكتمل",
+            "FAILED": "فشل",
+            "REFUNDED": "مسترد"
           }
         }
       }
@@ -646,6 +685,10 @@
           }
         }
       }
+    },
+    "categories": {
+      "title": "إدارة الفئات",
+      "description": "إدارة فئات المنتجات والهياكل التنظيمية"
     },
     "products": {
       "title": "إدارة المنتجات",
@@ -969,5 +1012,82 @@
   "app": {
     "title": "متجر سكاي - منصة تجارة إلكترونية مفتوحة المصدر",
     "description": "متجر سكاي هو منصة تجارة إلكترونية حديثة وقابلة للتوسع ومفتوحة المصدر مبنية باستخدام Next.js و Prisma. توفر ميزات مثل إدارة المنتجات ومعالجة الطلبات ومصادقة المستخدم."
+  },
+  "permissions": {
+    "page": {
+      "title": "الأدوار والصلاحيات",
+      "description": "إدارة أدوار المستخدمين وتكوين التحكم في الوصول",
+      "tabPermissions": "مصفوفة الصلاحيات",
+      "tabUsers": "أدوار المستخدمين",
+      "comingSoon": "تعيين أدوار المستخدمين قريباً...",
+      "manageFromUsers": "يمكنك إدارة أدوار المستخدمين من صفحة المستخدمين"
+    },
+    "actions": {
+      "refreshCache": "تحديث ذاكرة التخزين المؤقت",
+      "saveChanges": "حفظ التغييرات",
+      "reset": "إعادة تعيين",
+      "unsavedChanges": "تغييرات غير محفوظة"
+    },
+    "toast": {
+      "permissionsUpdated": "تم تحديث الصلاحيات بنجاح لـ {role}",
+      "permissionAdded": "تمت إضافة {permission} إلى {role}",
+      "permissionRemoved": "تمت إزالة {permission} من {role}",
+      "cacheRefreshed": "تم تحديث ذاكرة التخزين المؤقت للصلاحيات"
+    },
+    "roles": {
+      "ADMIN": "مسؤول",
+      "MODERATOR": "مشرف",
+      "USER": "مستخدم"
+    },
+    "categories": {
+      "Products": "المنتجات",
+      "Categories": "الفئات",
+      "Orders": "الطلبات",
+      "Users": "المستخدمين",
+      "Payments": "المدفوعات",
+      "Inventory": "المخزون",
+      "Analytics": "التحليلات",
+      "Settings": "الإعدادات",
+      "Reviews": "التقييمات"
+    },
+    "labels": {
+      "product:create": "إنشاء المنتجات",
+      "product:read": "عرض المنتجات",
+      "product:update": "تعديل المنتجات",
+      "product:delete": "حذف المنتجات",
+      "category:create": "إنشاء الفئات",
+      "category:read": "عرض الفئات",
+      "category:update": "تعديل الفئات",
+      "category:delete": "حذف الفئات",
+      "order:create": "إنشاء الطلبات",
+      "order:read": "عرض الطلبات",
+      "order:read_all": "عرض جميع الطلبات",
+      "order:update": "تعديل الطلبات",
+      "order:delete": "حذف الطلبات",
+      "order:cancel": "إلغاء الطلبات",
+      "order:confirm": "تأكيد الطلبات",
+      "user:create": "إنشاء المستخدمين",
+      "user:read": "عرض المستخدمين",
+      "user:read_all": "عرض جميع المستخدمين",
+      "user:update": "تعديل المستخدمين",
+      "user:update_role": "تغيير أدوار المستخدمين",
+      "user:delete": "حذف المستخدمين",
+      "user:toggle_status": "تبديل حالة المستخدم",
+      "user:manage_from_users": "إدارة المستخدمين من صفحة المستخدمين",
+      "payment:create": "إنشاء المدفوعات",
+      "payment:read": "عرض المدفوعات",
+      "payment:process": "معالجة المدفوعات",
+      "inventory:read": "عرض المخزون",
+      "inventory:update": "تحديث المخزون",
+      "inventory:adjust": "تعديل المخزون",
+      "analytics:read": "عرض التحليلات",
+      "analytics:export": "تصدير التحليلات",
+      "settings:read": "عرض الإعدادات",
+      "settings:update": "تحديث الإعدادات",
+      "review:create": "إنشاء التقييمات",
+      "review:read": "عرض التقييمات",
+      "review:approve": "الموافقة على التقييمات",
+      "review:delete": "حذف التقييمات"
+    }
   }
 }

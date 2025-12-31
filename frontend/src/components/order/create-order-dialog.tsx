@@ -25,15 +25,14 @@ import {
 import { Plus } from 'lucide-react';
 import { useOrdersStore } from '@/stores/orders-store';
 import { useProductsStore } from '@/stores/products-store';
-import { useUsersStore } from '@/stores/users-store';
 import { toast } from 'sonner';
 import { Loader } from '../loader';
 import { useUserLocation } from '@/hooks/use-user-location';
 import DeliveryMapPicker from '../delivery-map-picker';
 import { useLocale } from '@/components/local-lang-swither';
 import { getMessages } from '@/lib/locale';
-import { BarcodeInput } from '@/components/barcode-input';
 import { useBarcodeScanner } from '@/hooks/use-barcode-scanner';
+
 interface CreateOrderDialogProps {
   trigger?: React.ReactNode;
   isOpen?: boolean;
@@ -51,7 +50,6 @@ export function CreateOrderDialog({
 
   const { createOrder, loading } = useOrdersStore();
   const { products, fetchProducts } = useProductsStore();
-  const { users, fetchUsers } = useUsersStore();
   const [internalIsOpen, setInternalIsOpen] = useState(false);
 
   const {
@@ -73,33 +71,29 @@ export function CreateOrderDialog({
 
   // Form state
   const [formData, setFormData] = useState({
-    userId: '',
+    customerName: '',
+    customerPhone: '',
+    customerEmail: '',
+    customerAddress: {},
     items: [{ skuId: '', quantity: 1 }],
     deliveryLat: lat ?? undefined,
     deliveryLng: lng ?? undefined,
     deliveryPlace: place || '',
-    shippingName: '',
-    shippingEmail: '',
-    shippingPhone: '',
-    shippingAddress: {},
-    billingName: '',
-    billingEmail: '',
-    billingAddress: {},
     notes: '',
     trackingNumber: '',
   });
 
   const [errors, setErrors] = useState({
-    userId: '',
+    customerName: '',
+    customerPhone: '',
     items: [{ skuId: '', quantity: '' }],
   });
 
   useEffect(() => {
     if (isDialogOpen) {
       fetchProducts();
-      fetchUsers();
     }
-  }, [isDialogOpen, fetchProducts, fetchUsers]);
+  }, [isDialogOpen, fetchProducts]);
 
   useEffect(() => {
     if (lat && lng) {
@@ -114,6 +108,9 @@ export function CreateOrderDialog({
 
   // Barcode scanning functionality
   const handleBarcodeScanned = async (barcode: string) => {
+    console.log('🔍 Barcode scanned:', barcode);
+    console.log('📅 Scan timestamp:', new Date().toISOString());
+
     // Search for SKU by barcode
     let foundSku = null;
     let foundProduct = null;
@@ -134,12 +131,20 @@ export function CreateOrderDialog({
     }
 
     if (foundSku && foundProduct) {
+      console.log(
+        '✅ Product found:',
+        foundProduct.name,
+        '- SKU:',
+        foundSku.sku,
+      );
+
       // Check if SKU is already in items
       const existingItemIndex = formData.items.findIndex(
         (item) => item.skuId === foundSku.id,
       );
 
       if (existingItemIndex !== -1) {
+        console.log('📈 Incrementing quantity for existing item');
         // Increment quantity if already exists
         setFormData((prev) => ({
           ...prev,
@@ -150,9 +155,15 @@ export function CreateOrderDialog({
           ),
         }));
         toast.success(
-          `${foundProduct.name} - ${foundSku.sku} quantity increased`,
+          (
+            t.toast?.barcodeQuantityIncreased ||
+            '{productName} - {sku} quantity increased'
+          )
+            .replace('{productName}', foundProduct.name)
+            .replace('{sku}', foundSku.sku),
         );
       } else {
+        console.log('➕ Adding new item to order');
         // Add new item or update first empty slot
         const emptyIndex = formData.items.findIndex((item) => !item.skuId);
         if (emptyIndex !== -1) {
@@ -174,10 +185,20 @@ export function CreateOrderDialog({
             items: [...prev.items, { skuId: '', quantity: '' }],
           }));
         }
-        toast.success(`${foundProduct.name} - ${foundSku.sku} added to order`);
+        toast.success(
+          (t.toast?.barcodeAdded || '{productName} - {sku} added to order')
+            .replace('{productName}', foundProduct.name)
+            .replace('{sku}', foundSku.sku),
+        );
       }
     } else {
-      toast.error(`Product with barcode "${barcode}" not found`);
+      console.log('❌ Product not found for barcode:', barcode);
+      toast.error(
+        (
+          t.toast?.barcodeNotFound ||
+          'Product with barcode "{barcode}" not found'
+        ).replace('{barcode}', barcode),
+      );
     }
   };
 
@@ -222,11 +243,17 @@ export function CreateOrderDialog({
     e.preventDefault();
 
     const newErrors = {
-      userId: '',
+      customerName: '',
+      customerPhone: '',
       items: formData.items.map(() => ({ skuId: '', quantity: '' })),
     };
 
-    if (!formData.userId) newErrors.userId = t.errors?.userRequired;
+    if (!formData.customerName)
+      newErrors.customerName =
+        t.errors?.customerNameRequired || 'Customer name is required';
+    if (!formData.customerPhone)
+      newErrors.customerPhone =
+        t.errors?.customerPhoneRequired || 'Customer phone is required';
 
     formData.items.forEach((item, idx) => {
       if (!item.skuId) newErrors.items[idx].skuId = t.errors?.skuRequired;
@@ -237,14 +264,21 @@ export function CreateOrderDialog({
     setErrors(newErrors);
 
     if (
-      newErrors.userId ||
+      newErrors.customerName ||
+      newErrors.customerPhone ||
       newErrors.items.some((itemErr) => itemErr.skuId || itemErr.quantity)
     )
       return;
 
     try {
       const payload = {
-        userId: formData.userId,
+        customerName: formData.customerName,
+        customerPhone: formData.customerPhone,
+        customerEmail: formData.customerEmail || undefined,
+        customerAddress:
+          Object.keys(formData.customerAddress).length > 0
+            ? formData.customerAddress
+            : undefined,
         items: formData.items.map((item) => ({
           skuId: item.skuId,
           quantity: item.quantity,
@@ -252,36 +286,30 @@ export function CreateOrderDialog({
         deliveryLat: formData.deliveryLat,
         deliveryLng: formData.deliveryLng,
         deliveryPlace: formData.deliveryPlace,
-        shippingName: formData.shippingName,
-        shippingEmail: formData.shippingEmail,
-        shippingPhone: formData.shippingPhone,
-        shippingAddress: formData.shippingAddress,
-        billingName: formData.billingName,
-        billingEmail: formData.billingEmail,
-        billingAddress: formData.billingAddress,
         notes: formData.notes,
         trackingNumber: formData.trackingNumber,
+        language: locale, // Add user's current locale for PDF generation
       };
 
       const id = await createOrder(payload);
       toast.success(t.toast?.success);
       setFormData({
-        userId: '',
+        customerName: '',
+        customerPhone: '',
+        customerEmail: '',
+        customerAddress: {},
         items: [{ skuId: '', quantity: 1 }],
         deliveryLat: lat ?? undefined,
         deliveryLng: lng ?? undefined,
         deliveryPlace: place || '',
-        shippingName: '',
-        shippingEmail: '',
-        shippingPhone: '',
-        shippingAddress: {},
-        billingName: '',
-        billingEmail: '',
-        billingAddress: {},
         notes: '',
         trackingNumber: '',
       });
-      setErrors({ userId: '', items: [{ skuId: '', quantity: '' }] });
+      setErrors({
+        customerName: '',
+        customerPhone: '',
+        items: [{ skuId: '', quantity: '' }],
+      });
       setIsDialogOpen(false);
     } catch (error) {
       toast.error(t.toast?.failed);
@@ -308,43 +336,92 @@ export function CreateOrderDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* User */}
-          <div className="space-y-2">
-            <Label htmlFor="userId">{t.sections?.user || 'User'}</Label>
-            <Select
-              value={formData.userId}
-              onValueChange={(val) =>
-                setFormData((prev) => ({ ...prev, userId: val }))
-              }
-            >
-              <SelectTrigger id="userId">
-                <SelectValue
-                  placeholder={t.placeholders?.selectUser || 'Select user'}
+          {/* Customer Information */}
+          <div className="space-y-4 border rounded-md p-4 ">
+            <h3 className="font-medium">
+              {t.sections?.customer || 'Customer Information'}
+            </h3>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="customerName">
+                  {t.fields?.customerName || 'Customer Name'} *
+                </Label>
+                <Input
+                  id="customerName"
+                  value={formData.customerName}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      customerName: e.target.value,
+                    }))
+                  }
+                  placeholder={
+                    t.placeholders?.customerName || 'Enter customer name'
+                  }
                 />
-              </SelectTrigger>
-              <SelectContent>
-                {users.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.name || user.email}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.userId && (
-              <p className="text-sm text-destructive">{errors.userId}</p>
-            )}
+                {errors.customerName && (
+                  <p className="text-sm text-destructive">
+                    {errors.customerName}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="customerPhone">
+                  {t.fields?.customerPhone || 'Customer Phone'} *
+                </Label>
+                <Input
+                  id="customerPhone"
+                  value={formData.customerPhone}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      customerPhone: e.target.value,
+                    }))
+                  }
+                  placeholder={
+                    t.placeholders?.customerPhone || 'Enter phone number'
+                  }
+                />
+                {errors.customerPhone && (
+                  <p className="text-sm text-destructive">
+                    {errors.customerPhone}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="customerEmail">
+                {t.fields?.customerEmail || 'Customer Email'} (
+                {t.optional || 'Optional'})
+              </Label>
+              <Input
+                id="customerEmail"
+                type="email"
+                value={formData.customerEmail}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    customerEmail: e.target.value,
+                  }))
+                }
+                placeholder={
+                  t.placeholders?.customerEmail || 'Enter email address'
+                }
+              />
+            </div>
           </div>
 
-          {/* Barcode Scanner */}
-          <div className="space-y-2">
-            <BarcodeInput
-              onScan={handleBarcodeScanned}
-              placeholder={
-                t.placeholders?.scanBarcode || 'Scan or type barcode...'
-              }
-              label={t.fields?.barcode || 'Barcode Scanner'}
-              autoFocus
-            />
+          {/* Barcode Scanner Status */}
+          <div className="space-y-2 border rounded-md p-3 bg-muted/30">
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+              <Label className="text-sm font-medium">
+                {t.fields?.barcode || 'Barcode Scanner Active'}
+              </Label>
+            </div>
             <p className="text-sm text-muted-foreground">
               {t.hints?.barcodeScanner ||
                 'Scan a product barcode to quickly add it to the order'}
@@ -441,7 +518,9 @@ export function CreateOrderDialog({
 
           {/* Delivery */}
           <div className="space-y-2">
-            <Label>{t.sections?.delivery || 'Delivery Location'}</Label>
+            <Label>
+              {t.sections?.delivery || 'Delivery Location (Optional)'}
+            </Label>
             {locationLoading ? (
               <p className="text-sm text-muted-foreground">
                 {t.status?.detectingLocation || 'Detecting location...'}
@@ -461,132 +540,6 @@ export function CreateOrderDialog({
                 }
               />
             )}
-          </div>
-
-          {/* Shipping & Billing */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="shippingName">
-                {t.fields?.shippingName || 'Shipping Name'}
-              </Label>
-              <Input
-                id="shippingName"
-                value={formData.shippingName}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    shippingName: e.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="shippingEmail">
-                {t.fields?.shippingEmail || 'Shipping Email'}
-              </Label>
-              <Input
-                id="shippingEmail"
-                value={formData.shippingEmail}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    shippingEmail: e.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="shippingPhone">
-                {t.fields?.shippingPhone || 'Shipping Phone'}
-              </Label>
-              <Input
-                id="shippingPhone"
-                value={formData.shippingPhone}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    shippingPhone: e.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="space-y-2 col-span-2">
-              <Label htmlFor="shippingAddress">
-                {t.fields?.shippingAddress || 'Shipping Address (JSON)'}
-              </Label>
-              <Textarea
-                id="shippingAddress"
-                value={JSON.stringify(formData.shippingAddress)}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    shippingAddress: (() => {
-                      try {
-                        return JSON.parse(e.target.value);
-                      } catch {
-                        return {};
-                      }
-                    })(),
-                  }))
-                }
-                rows={2}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="billingName">
-                {t.fields?.billingName || 'Billing Name'}
-              </Label>
-              <Input
-                id="billingName"
-                value={formData.billingName}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    billingName: e.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="billingEmail">
-                {t.fields?.billingEmail || 'Billing Email'}
-              </Label>
-              <Input
-                id="billingEmail"
-                value={formData.billingEmail}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    billingEmail: e.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="space-y-2 col-span-2">
-              <Label htmlFor="billingAddress">
-                {t.fields?.billingAddress || 'Billing Address (JSON)'}
-              </Label>
-              <Textarea
-                id="billingAddress"
-                value={JSON.stringify(formData.billingAddress)}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    billingAddress: (() => {
-                      try {
-                        return JSON.parse(e.target.value);
-                      } catch {
-                        return {};
-                      }
-                    })(),
-                  }))
-                }
-                rows={2}
-              />
-            </div>
           </div>
 
           {/* Notes */}

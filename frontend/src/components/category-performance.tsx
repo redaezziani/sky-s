@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { BarChart, Bar, CartesianGrid, XAxis, YAxis } from "recharts";
-import useSWR from "swr";
+import * as React from 'react';
+import { BarChart, Bar, CartesianGrid, XAxis, YAxis } from 'recharts';
+import useSWR from 'swr';
 
 import {
   Card,
@@ -11,44 +11,46 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   ChartContainer,
   ChartConfig,
   ChartTooltip,
-} from "@/components/ui/chart";
+} from '@/components/ui/chart';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { useTranslations } from "next-intl";
-import { fetcher } from "@/lib/utils";
+} from '@/components/ui/select';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { useTranslations } from 'next-intl';
+import { fetcher } from '@/lib/utils';
 
 const truncateText = (text: string, maxLength: number): string => {
   if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + "...";
+  return text.slice(0, maxLength) + '...';
 };
 
 export function ChartCategoryPerformance() {
-  const t = useTranslations('pages.analytics.components.chartCategoryPerformance');
+  const t = useTranslations(
+    'pages.analytics.components.chartCategoryPerformance',
+  );
 
-  const [timeRange, setTimeRange] = React.useState("30d");
+  const [timeRange, setTimeRange] = React.useState('30d');
   const [period, setPeriod] = React.useState(30);
 
   React.useEffect(() => {
-    if (timeRange === "90d") setPeriod(90);
-    else if (timeRange === "30d") setPeriod(30);
+    if (timeRange === '90d') setPeriod(90);
+    else if (timeRange === '30d') setPeriod(30);
     else setPeriod(7);
   }, [timeRange]);
 
   const { data: rawData } = useSWR(
     `/analytics/category-performance?period=${period}`,
     fetcher,
-    { refreshInterval: 60000 }
+    { refreshInterval: 60000 },
   );
 
   const processedData = React.useMemo(() => {
@@ -64,7 +66,7 @@ export function ChartCategoryPerformance() {
 
     const aggregatedData: { [category: string]: AggregatedCategory } = {};
     rawData.forEach((day: Record<string, any>) => {
-      const categories = Object.keys(day).filter((key) => key !== "date");
+      const categories = Object.keys(day).filter((key) => key !== 'date');
       categories.forEach((category) => {
         if (!aggregatedData[category]) {
           aggregatedData[category] = {
@@ -92,21 +94,21 @@ export function ChartCategoryPerformance() {
   const chartConfig = {
     totalOrders: {
       label: t('labels.totalOrders'),
-      color: "var(--chart-1)",
+      color: 'var(--chart-1)',
     },
     totalRevenue: {
       label: t('labels.totalRevenue'),
-      color: "var(--chart-2)",
+      color: 'var(--chart-2)',
     },
     totalProducts: {
       label: t('labels.totalProducts'),
-      color: "var(--chart-3)",
+      color: 'var(--chart-3)',
     },
-    label: { color: "var(--foreground)" },
+    label: { color: 'var(--foreground)' },
   };
 
   return (
-    <Card className="@container/card max-h-[27rem]">
+    <Card className="@container/card overflow-hidden h-84">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
@@ -171,14 +173,14 @@ export function ChartCategoryPerformance() {
               angle={-45}
               textAnchor="end"
               height={60}
-              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+              tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
             />
             {/* Hidden Y-axis for Orders and Products */}
             <YAxis yAxisId="ordersAndProducts" hide />
             {/* Hidden Y-axis for Revenue */}
             <YAxis yAxisId="revenue" hide />
             <ChartTooltip
-              cursor={{ fill: "var(--muted)", opacity: 0.1 }}
+              cursor={{ fill: 'var(--muted)', opacity: 0.1 }}
               content={({ active, payload, label }) => {
                 if (active && payload && payload.length) {
                   const data = payload[0].payload;
@@ -213,7 +215,7 @@ export function ChartCategoryPerformance() {
                             {t('labels.totalRevenue')}:
                           </span>
                           <span className="font-medium">
-                            ${data.totalRevenue?.toFixed(2) || "0.00"}
+                            ${data.totalRevenue?.toFixed(2) || '0.00'}
                           </span>
                         </div>
                         <div className="flex items-center justify-between text-xs">

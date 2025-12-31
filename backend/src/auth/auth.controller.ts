@@ -11,16 +11,10 @@ import {
   Param,
   Res,
 } from '@nestjs/common';
-import {
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import {
-  LoginDto,
-} from './dto/auth.dto';
-import {
-  UserDeviceDto,
-} from './dto/response.dto';
+import { LoginDto } from './dto/auth.dto';
+import { UserDeviceDto } from './dto/response.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -40,6 +34,8 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthResponse> {
+    console.log('AuthController: login called');
+    console.log('Login DTO:', loginDto);
     const ip =
       req.ip || req.headers['x-forwarded-for']?.toString() || 'unknown';
     const userAgent = req.headers['user-agent'] || 'unknown';
@@ -142,6 +138,4 @@ export class AuthController {
     await this.authService.logoutDevice(user.id, deviceId);
     return { message: 'Logged out from device successfully' };
   }
-
-  
 }

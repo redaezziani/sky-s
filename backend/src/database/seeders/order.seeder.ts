@@ -48,7 +48,7 @@ export async function seedOrders() {
     const order = await prisma.order.create({
       data: {
         orderNumber: `ORD-${Date.now()}-${i}`,
-        userId: user.id,
+        createdById: user.id,
         status: 'DELIVERED',
         paymentStatus: 'COMPLETED',
         subtotal: sku.price,
@@ -57,17 +57,10 @@ export async function seedOrders() {
         discountAmount: 0,
         totalAmount: sku.price.plus(5),
         currency: 'USD',
-        shippingName: user.name || 'Test User',
-        shippingEmail: user.email,
-        shippingPhone: null,
-        shippingAddress: {
-          address: '123 Test St',
-          city: 'Testville',
-          country: 'Testland',
-        },
-        billingName: user.name || 'Test User',
-        billingEmail: user.email,
-        billingAddress: {
+        customerName: user.name || 'Test Customer',
+        customerEmail: user.email,
+        customerPhone: '+1234567890',
+        customerAddress: {
           address: '123 Test St',
           city: 'Testville',
           country: 'Testland',

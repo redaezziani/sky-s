@@ -44,7 +44,10 @@ import {
 } from './dto/response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { Permissions } from '../auth/decorators/permissions.decorator';
+import { Permission } from '../auth/permissions/permissions.enum';
 import { UserRole } from '@prisma/client';
 import { ImageKitService } from '../common/services/imagekit.service';
 import { PaginatedPublicProductsResponseDto, PublicProductDetailDto, PublicProductQueryDto } from './dto/public-products.dto';
@@ -58,8 +61,9 @@ export class ProductsController {
   ) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Permissions(Permission.PRODUCT_CREATE)
   @ApiBearerAuth()
   @UseInterceptors(
     FileInterceptor('coverImage'),
@@ -179,8 +183,9 @@ export class ProductsController {
   }
 
   @Post('with-variants')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Permissions(Permission.PRODUCT_CREATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a product with variants' })
   @ApiResponse({
@@ -207,6 +212,9 @@ export class ProductsController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(Permission.PRODUCT_READ)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all products with pagination and filtering' })
   @ApiResponse({
     status: 200,
@@ -313,6 +321,9 @@ export class ProductsController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(Permission.PRODUCT_READ)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a product by ID' })
   @ApiParam({
     name: 'id',
@@ -335,6 +346,9 @@ export class ProductsController {
   }
 
   @Get('slug/:slug')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(Permission.PRODUCT_READ)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a product by slug' })
   @ApiParam({
     name: 'slug',
@@ -355,14 +369,63 @@ export class ProductsController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Permissions(Permission.PRODUCT_UPDATE)
   @ApiBearerAuth()
+  @UseInterceptors(
+    FileInterceptor('coverImage'),
+    FilesInterceptor('additionalImages', 10),
+  )
   @ApiOperation({ summary: 'Update a product' })
+  @ApiConsumes('multipart/form-data')
   @ApiParam({
     name: 'id',
     description: 'Product UUID',
     example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @ApiBody({
+    description: 'Product update data with optional image files',
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', description: 'Product name' },
+        slug: { type: 'string', description: 'Product URL slug' },
+        description: { type: 'string', description: 'Product description' },
+        shortDesc: { type: 'string', description: 'Short description' },
+        isActive: { type: 'boolean', description: 'Whether product is active' },
+        isFeatured: { type: 'boolean', description: 'Whether product is featured' },
+        metaTitle: { type: 'string', description: 'SEO meta title' },
+        metaDesc: { type: 'string', description: 'SEO meta description' },
+        sortOrder: { type: 'number', description: 'Sort order' },
+        categoryIds: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Category IDs',
+        },
+        coverImage: {
+          type: 'string',
+          format: 'binary',
+          description: 'Cover image file (optional)',
+        },
+        additionalImages: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+          description: 'Additional image files (optional)',
+        },
+        imageFolder: {
+          type: 'string',
+          description: 'Image upload folder',
+          example: 'products',
+          default: 'products',
+        },
+        imageTags: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Image tags',
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 200,
@@ -388,13 +451,21 @@ export class ProductsController {
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateProductDto: UpdateProductDto,
+    @UploadedFile() coverImage?: Express.Multer.File,
+    @UploadedFiles() additionalImages?: Express.Multer.File[],
   ): Promise<ProductResponseDto> {
-    return this.productsService.update(id, updateProductDto);
+    return this.productsService.update(
+      id,
+      updateProductDto,
+      coverImage,
+      additionalImages,
+    );
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Permissions(Permission.PRODUCT_DELETE)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a product (soft delete)' })

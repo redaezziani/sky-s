@@ -260,6 +260,20 @@ export class UpdateProductDto {
   @IsArray()
   @IsUUID('4', { each: true })
   categoryIds?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Image upload folder',
+    example: 'products',
+  })
+  @IsOptional()
+  @IsString()
+  imageFolder?: string;
+
+  @ApiPropertyOptional({ description: 'Image tags', type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  imageTags?: string[];
 }
 
 

@@ -38,6 +38,7 @@ export class OrdersService {
   }
   async create(
     createOrderDto: CreateOrderDto,
+    createdById?: string,
   ): Promise<OrderResponseDto & { payment?: any }> {
     const orderNumber = await this.generateOrderNumber();
 
@@ -91,20 +92,20 @@ export class OrdersService {
     const order = await this.prisma.order.create({
       data: {
         orderNumber,
-        userId: createOrderDto.userId,
+        createdById: createdById ?? null,
+        confirmedById: createdById ?? null, // Initially confirmed by the creator
+        confirmedAt: new Date(), // Set confirmation time
         subtotal,
         taxAmount,
         shippingAmount,
         discountAmount,
         totalAmount,
         currency: 'USD',
-        shippingName: createOrderDto.shippingName ?? 'n/a',
-        shippingEmail: createOrderDto.shippingEmail ?? 'n/a',
-        shippingPhone: createOrderDto.shippingPhone ?? 'n/a',
-        shippingAddress: createOrderDto.shippingAddress ?? 'n/a',
-        billingName: createOrderDto.billingName ?? null,
-        billingEmail: createOrderDto.billingEmail ?? null,
-        billingAddress: createOrderDto.billingAddress ?? undefined,
+        language: createOrderDto.language || 'en', // Store the language
+        customerName: createOrderDto.customerName,
+        customerPhone: createOrderDto.customerPhone,
+        customerEmail: createOrderDto.customerEmail ?? null,
+        customerAddress: createOrderDto.customerAddress ?? undefined,
         notes: createOrderDto.notes ?? null,
         trackingNumber: createOrderDto.trackingNumber ?? null,
         deliveryLat: createOrderDto.deliveryLat ?? null,
@@ -114,42 +115,64 @@ export class OrdersService {
         invoiceFileId: '',
         items: { create: itemsData },
       },
-      include: { items: true },
+      include: {
+        items: true,
+        confirmedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
 
-    // Generate PDF
-    const { url, fileId } = await this.pdfService.generateOrderPdf({
-      ...order,
-      items: order.items.map((i) => ({
-        ...i,
-        name: i.productName,
-        quantity: i.quantity,
-        totalPrice: i.totalPrice.toNumber(),
-      })),
-    });
+    // Generate PDF with language support
+    const { url, fileId } = await this.pdfService.generateOrderPdf(
+      {
+        ...order,
+        items: order.items.map((i) => ({
+          ...i,
+          name: i.productName,
+          quantity: i.quantity,
+          totalPrice: i.totalPrice.toNumber(),
+        })),
+      },
+      (createOrderDto.language as any) || 'en',
+    );
 
-    await this.prisma.order.update({
+    const updatedOrder = await this.prisma.order.update({
       where: { id: order.id },
       data: { invoiceUrl: url, invoiceFileId: fileId },
+      include: {
+        items: true,
+        confirmedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
 
     // Create cash payment
     if (createOrderDto.method) {
       const paymentDto: CreatePaymentDto = {
         method: createOrderDto.method,
-        orderId: order.id,
+        orderId: updatedOrder.id,
         amount: totalAmount.toNumber(),
         currency: 'USD',
-        userId: createOrderDto.userId,
+        processedById: createdById,
       };
 
       const payment = await this.paymentService.createPayment(paymentDto);
 
-      return { ...this.formatOrderResponse(order), payment };
+      return { ...this.formatOrderResponse(updatedOrder), payment };
     }
 
     return {
-      ...this.formatOrderResponse(order),
+      ...this.formatOrderResponse(updatedOrder),
     };
   }
 
@@ -176,7 +199,8 @@ export class OrdersService {
     if (search) {
       where.OR = [
         { orderNumber: { contains: search, mode: 'insensitive' } },
-        { userId: { contains: search, mode: 'insensitive' } },
+        { customerName: { contains: search, mode: 'insensitive' } },
+        { customerPhone: { contains: search, mode: 'insensitive' } },
       ];
     }
     if (status) where.status = status;
@@ -197,7 +221,14 @@ export class OrdersService {
               },
             },
           },
-          user: true,
+          createdBy: true,
+          confirmedBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
         },
         orderBy,
         skip,
@@ -222,7 +253,16 @@ export class OrdersService {
   async findOne(id: string): Promise<OrderResponseDto> {
     const order = await this.prisma.order.findUnique({
       where: { id },
-      include: { items: true },
+      include: {
+        items: true,
+        confirmedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
 
     if (!order) throw new NotFoundException('Order not found');
@@ -316,15 +356,18 @@ export class OrdersService {
         console.error('Error deleting old PDF:', error);
       }
     }
-    const { url, fileId } = await this.pdfService.generateOrderPdf({
-      ...updatedOrder,
-      items: updatedOrder.items.map((i) => ({
-        ...i,
-        name: i.productName,
-        quantity: i.quantity,
-        totalPrice: i.totalPrice.toNumber(),
-      })),
-    });
+    const { url, fileId } = await this.pdfService.generateOrderPdf(
+      {
+        ...updatedOrder,
+        items: updatedOrder.items.map((i) => ({
+          ...i,
+          name: i.productName,
+          quantity: i.quantity,
+          totalPrice: i.totalPrice.toNumber(),
+        })),
+      },
+      (updateOrderDto.language as any) || updatedOrder.language || 'en',
+    );
     await this.prisma.order.update({
       where: { id: updatedOrder.id },
       data: { invoiceUrl: url, invoiceFileId: fileId },
@@ -352,9 +395,6 @@ export class OrdersService {
     if (!order) {
       throw new NotFoundException('Order not found');
     }
-    if (order.userId !== dto.userId) {
-      throw new BadRequestException('Not your order');
-    }
 
     // Cancel related payments (if any)
     for (const payment of order.payments) {
@@ -368,7 +408,7 @@ export class OrdersService {
       where: { id: dto.orderId },
       data: {
         status: 'CANCELLED',
-        // cancelReason: dto.reason, // only if you add a field
+        notes: dto.reason ? `${order.notes ?? ''}\nCancellation reason: ${dto.reason}`.trim() : order.notes,
       },
     });
   }
@@ -377,7 +417,9 @@ export class OrdersService {
     return {
       id: order.id,
       orderNumber: order.orderNumber,
-      userId: order.userId,
+      createdById: order.createdById,
+      confirmedById: order.confirmedById,
+      confirmedBy: order.confirmedBy || undefined,
       status: order.status,
       paymentStatus: order.paymentStatus,
       subtotal: order.subtotal.toNumber(),
@@ -386,47 +428,30 @@ export class OrdersService {
       discountAmount: order.discountAmount.toNumber(),
       totalAmount: order.totalAmount.toNumber(),
       currency: order.currency,
-      shippingName: order.shippingName,
-      shippingEmail: order.shippingEmail,
-      shippingPhone: order.shippingPhone,
-      shippingAddress: order.shippingAddress,
-      billingName: order.billingName,
-      billingEmail: order.billingEmail,
-      billingAddress: order.billingAddress,
-      notes: order.notes,
-      trackingNumber: order.trackingNumber,
-      createdAt: order.createdAt,
-      updatedAt: order.updatedAt,
+      language: order.language,
       invoiceUrl: order.invoiceUrl,
-      // delivery info at order level
+      customerName: order.customerName,
+      customerPhone: order.customerPhone,
+      customerEmail: order.customerEmail,
+      customerAddress: order.customerAddress,
       deliveryLat: order.deliveryLat ?? null,
       deliveryLng: order.deliveryLng ?? null,
       deliveryPlace: order.deliveryPlace ?? null,
+      trackingNumber: order.trackingNumber,
+      shippedAt: order.shippedAt,
+      deliveredAt: order.deliveredAt,
+      confirmedAt: order.confirmedAt,
+      notes: order.notes,
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
 
       items: order.items.map((item) => ({
-        id: item.id,
         skuId: item.skuId,
         productName: item.productName,
         skuCode: item.skuCode,
         quantity: item.quantity,
         unitPrice: item.unitPrice.toNumber(),
         totalPrice: item.totalPrice.toNumber(),
-
-        // include SKU details and images
-        sku: item.sku
-          ? {
-              id: item.sku.id,
-              sku: item.sku.sku,
-              price: item.sku.price.toNumber(),
-              coverImage: item.sku.coverImage,
-              images:
-                item.sku.images?.map((img) => ({
-                  id: img.id,
-                  url: img.url,
-                  altText: img.altText,
-                })) || [],
-            }
-          : undefined,
       })),
     };
   }

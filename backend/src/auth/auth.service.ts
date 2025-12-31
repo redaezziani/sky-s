@@ -35,11 +35,6 @@ export class AuthService {
     if (!user || !user.isActive)
       throw new UnauthorizedException('Invalid credentials');
 
-    // Admin-only check
-    if (user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Access denied. Admin privileges required.');
-    }
-
     // Check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid)

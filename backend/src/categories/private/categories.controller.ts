@@ -29,7 +29,10 @@ import {
 import { CategoryResponseDto } from '../dto/response.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
+import { PermissionsGuard } from '../../auth/guards/permissions.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
+import { Permissions } from '../../auth/decorators/permissions.decorator';
+import { Permission } from '../../auth/permissions/permissions.enum';
 import { UserRole } from '@prisma/client';
 
 @ApiTags('Categories')
@@ -38,8 +41,9 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Permissions(Permission.CATEGORY_CREATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new category' })
   @ApiResponse({
@@ -66,6 +70,9 @@ export class CategoriesController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(Permission.CATEGORY_READ)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all categories' })
   @ApiResponse({
     status: 200,
@@ -94,6 +101,9 @@ export class CategoriesController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(Permission.CATEGORY_READ)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a category by ID' })
   @ApiParam({
     name: 'id',
@@ -116,6 +126,9 @@ export class CategoriesController {
   }
 
   @Get('slug/:slug')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(Permission.CATEGORY_READ)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a category by slug' })
   @ApiParam({
     name: 'slug',
@@ -136,8 +149,9 @@ export class CategoriesController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Permissions(Permission.CATEGORY_UPDATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a category' })
   @ApiParam({
@@ -174,8 +188,9 @@ export class CategoriesController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Permissions(Permission.CATEGORY_DELETE)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a category (soft delete)' })

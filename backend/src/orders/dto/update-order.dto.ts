@@ -1,21 +1,37 @@
 import {
   IsString,
-  IsUUID,
   IsArray,
   IsOptional,
   IsNumber,
   ValidateNested,
+  IsEmail,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { OrderItemDto } from './create-order.dto';
 
 export class UpdateOrderDto {
-  @ApiPropertyOptional({ description: 'User ID placing the order' })
+  // Customer Information
+  @ApiPropertyOptional({ description: 'Customer name' })
   @IsOptional()
-  @IsUUID()
-  userId?: string;
+  @IsString()
+  customerName?: string;
 
+  @ApiPropertyOptional({ description: 'Customer phone number' })
+  @IsOptional()
+  @IsString()
+  customerPhone?: string;
+
+  @ApiPropertyOptional({ description: 'Customer email address' })
+  @IsOptional()
+  @IsEmail()
+  customerEmail?: string;
+
+  @ApiPropertyOptional({ description: 'Customer address object', type: Object })
+  @IsOptional()
+  customerAddress?: Record<string, any>;
+
+  // Order Items
   @ApiPropertyOptional({
     description:
       'List of items in the order (will replace existing items if provided)',
@@ -27,7 +43,7 @@ export class UpdateOrderDto {
   @Type(() => OrderItemDto)
   items?: OrderItemDto[];
 
-  // Delivery info
+  // Delivery Information
   @ApiPropertyOptional({ description: 'Delivery latitude', example: 40.7128 })
   @IsOptional()
   @IsNumber()
@@ -46,51 +62,18 @@ export class UpdateOrderDto {
   @IsString()
   deliveryPlace?: string;
 
-  // Shipping info
-  @ApiPropertyOptional({ description: 'Shipping name' })
-  @IsOptional()
-  @IsString()
-  shippingName?: string;
-
-  @ApiPropertyOptional({ description: 'Shipping email' })
-  @IsOptional()
-  @IsString()
-  shippingEmail?: string;
-
-  @ApiPropertyOptional({ description: 'Shipping phone number' })
-  @IsOptional()
-  @IsString()
-  shippingPhone?: string;
-
-  @ApiPropertyOptional({ description: 'Shipping address object', type: Object })
-  @IsOptional()
-  shippingAddress?: Record<string, any>;
-
-  // Billing info
-  @ApiPropertyOptional({ description: 'Billing name' })
-  @IsOptional()
-  @IsString()
-  billingName?: string;
-
-  @ApiPropertyOptional({ description: 'Billing email' })
-  @IsOptional()
-  @IsString()
-  billingEmail?: string;
-
-  @ApiPropertyOptional({ description: 'Billing address object', type: Object })
-  @IsOptional()
-  billingAddress?: Record<string, any>;
-
-  @ApiPropertyOptional({ description: 'Additional notes for the order' })
-  @IsOptional()
-  @IsString()
-  notes?: string;
-
   @ApiPropertyOptional({ description: 'Tracking number for the order' })
   @IsOptional()
   @IsString()
   trackingNumber?: string;
 
+  // Additional Information
+  @ApiPropertyOptional({ description: 'Additional notes for the order' })
+  @IsOptional()
+  @IsString()
+  notes?: string;
+
+  // Order Status
   @ApiPropertyOptional({
     description: 'Order status',
     enum: [
@@ -109,9 +92,17 @@ export class UpdateOrderDto {
 
   @ApiPropertyOptional({
     description: 'Payment status',
-    enum: ['PENDING', 'COMPLETED', 'FAILED', 'REFUNDED'],
+    enum: ['PENDING', 'COMPLETED', 'FAILED', 'REFUNDED', 'CANCELLED'],
   })
   @IsOptional()
   @IsString()
   paymentStatus?: string;
+
+  @ApiPropertyOptional({
+    description: 'Language for PDF invoice generation (en, ar, es, fr)',
+    example: 'en',
+  })
+  @IsOptional()
+  @IsString()
+  language?: string;
 }

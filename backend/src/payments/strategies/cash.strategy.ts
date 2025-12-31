@@ -14,7 +14,7 @@ export class CashPaymentStrategy implements PaymentStrategy {
     return this.prisma.payment.create({
       data: {
         orderId: dto.orderId,
-        userId: dto.userId,
+        processedById: dto.processedById ?? null,
         method: 'CASH',
         amount: dto.amount,
         currency: dto.currency,

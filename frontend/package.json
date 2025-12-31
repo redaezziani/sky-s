@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev -H 0.0.0.0",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint"
@@ -55,6 +55,7 @@
     "nuqs": "^2.6.0",
     "radix-ui": "^1.4.3",
     "react": "^19.0.0",
+    "react-barcode": "^1.6.1",
     "react-day-picker": "^9.9.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.62.0",

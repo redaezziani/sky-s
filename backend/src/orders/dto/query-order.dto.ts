@@ -48,7 +48,9 @@ export class QueryOrderDto {
   @Max(100)
   limit?: number = 10;
 
-  @ApiPropertyOptional({ description: 'Search by order number or user ID' })
+  @ApiPropertyOptional({
+    description: 'Search by order number, customer name, or customer phone',
+  })
   @IsOptional()
   @IsString()
   search?: string;

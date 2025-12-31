@@ -5,7 +5,7 @@ import * as JsBarcode from 'jsbarcode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { secrets } from '../../config/secrets';
-import * as arabicReshaper from 'arabic-persian-reshaper';
+import { ArabicShaper } from 'arabic-persian-reshaper';
 import * as bidi from 'bidi-js';
 
 type SupportedLanguage = 'en' | 'ar' | 'fr' | 'es';
@@ -20,6 +20,7 @@ interface InvoiceTranslations {
   status: string;
   paymentStatus: string;
   tracking: string;
+  confirmedBy: string;
   customerInfo: string;
   shippingAddress: string;
   billingAddress: string;
@@ -53,6 +54,7 @@ export class PdfService {
       status: 'Status',
       paymentStatus: 'Payment Status',
       tracking: 'Tracking',
+      confirmedBy: 'Confirmed By',
       customerInfo: 'CUSTOMER INFORMATION',
       shippingAddress: 'SHIPPING ADDRESS',
       billingAddress: 'BILLING ADDRESS',
@@ -80,6 +82,7 @@ export class PdfService {
       status: 'الحالة',
       paymentStatus: 'حالة الدفع',
       tracking: 'التتبع',
+      confirmedBy: 'تم التأكيد بواسطة',
       customerInfo: 'معلومات العميل',
       shippingAddress: 'عنوان الشحن',
       billingAddress: 'عنوان الفوترة',
@@ -107,6 +110,7 @@ export class PdfService {
       status: 'Statut',
       paymentStatus: 'Statut de paiement',
       tracking: 'Suivi',
+      confirmedBy: 'Confirmé par',
       customerInfo: 'INFORMATIONS CLIENT',
       shippingAddress: 'ADRESSE DE LIVRAISON',
       billingAddress: 'ADRESSE DE FACTURATION',
@@ -134,6 +138,7 @@ export class PdfService {
       status: 'Estado',
       paymentStatus: 'Estado de pago',
       tracking: 'Seguimiento',
+      confirmedBy: 'Confirmado por',
       customerInfo: 'INFORMACIÓN DEL CLIENTE',
       shippingAddress: 'DIRECCIÓN DE ENVÍO',
       billingAddress: 'DIRECCIÓN DE FACTURACIÓN',
@@ -174,7 +179,7 @@ export class PdfService {
 
     try {
       // Step 1: Reshape Arabic characters to their proper forms
-      const reshaped = arabicReshaper(text);
+      const reshaped = ArabicShaper(text);
 
       // Step 2: Apply bidirectional algorithm for proper RTL rendering
       const bidiText = bidi(reshaped);
@@ -354,7 +359,19 @@ export class PdfService {
         },
       );
     }
-    currentY += 30;
+    currentY += 15;
+
+    // Display confirmed by admin if available
+    if (order.confirmedBy?.name || order.confirmedBy?.email) {
+      const confirmedName = order.confirmedBy.name || order.confirmedBy.email || 'Admin';
+      const confirmedByText = `${t.confirmedBy}: ${this.safe(confirmedName)}`;
+      doc.text(this.formatRTL(confirmedByText, isRTL), 50, currentY, {
+        align: isRTL ? 'right' : 'left',
+      });
+      currentY += 15;
+    }
+
+    currentY += 15;
 
     // Customer Information Section
     doc.fontSize(12).font(fontBold).fillColor('#333333');
