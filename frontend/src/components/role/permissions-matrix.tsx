@@ -69,9 +69,9 @@ function SortableRoleCard({
   editedPermissions: Record<UserRole, Set<string>>;
   togglePermission: (role: UserRole, permission: string) => void;
   loading: boolean;
-  tRoles: any;
-  tCategories: any;
-  tLabels: any;
+  tRoles: unknown;
+  tCategories: unknown;
+  tLabels: unknown;
   collapsedState: Record<UserRole, boolean>;
   onToggleCollapse: (role: UserRole) => void;
 }) {
@@ -113,7 +113,7 @@ function SortableRoleCard({
               <div className="p-2 rounded-lg bg-primary/10 shrink-0">
                 <Icon className="h-5 w-5 text-primary" />
               </div>
-              <CardTitle className="text-lg truncate">{tRoles(role)}</CardTitle>
+              <CardTitle className="text-lg truncate">{(tRoles as { [key: string]: string })[role]}</CardTitle>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
@@ -151,7 +151,7 @@ function SortableRoleCard({
                     <div key={category} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <h4 className="text-sm font-medium text-muted-foreground">
-                          {tCategories(category)}
+                          {(tCategories as { [key: string]: string })[category]}
                         </h4>
                         <Badge variant="secondary" className="text-xs">
                           {
@@ -172,7 +172,7 @@ function SortableRoleCard({
                               htmlFor={`${role}-${permission}`}
                               className="text-sm cursor-pointer flex-1"
                             >
-                              {tLabels(permission)}
+                              {(tLabels as { [key: string]: string })[permission]}
                             </label>
                             <Switch
                               id={`${role}-${permission}`}

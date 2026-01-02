@@ -66,7 +66,7 @@ export interface Order {
   customerName: string;
   customerPhone: string;
   customerEmail?: string;
-  customerAddress?: Record<string, any>;
+  customerAddress?: Record<string, string | number>;
   deliveryLat?: number | null;
   deliveryLng?: number | null;
   deliveryPlace?: string | null;
@@ -84,7 +84,7 @@ interface UpdateOrderPayload {
   customerName?: string;
   customerPhone?: string;
   customerEmail?: string;
-  customerAddress?: Record<string, any>;
+  customerAddress?: Record<string, string | number>;
   deliveryLat?: number;
   deliveryLng?: number;
   deliveryPlace?: string;
@@ -123,10 +123,10 @@ interface OrdersStore {
   pageSize: number;
   totalPages: number;
 
-  fetchOrders: (params?: Record<string, any>) => Promise<void>;
+  fetchOrders: (params?: Record<string, string | number | boolean>) => Promise<void>;
   deleteOrder: (id: string) => Promise<void>;
   bulkDeleteOrders: (orderIds: string[]) => Promise<void>;
-  createOrder: (orderData: any) => Promise<string>;
+  createOrder: (orderData: Omit<Order, 'id' | 'createdAt' | 'updatedAt' | 'orderNumber'>) => Promise<string>;
   updateOrder: (
     id: string,
     updateData: Partial<UpdateOrderPayload>
@@ -156,7 +156,7 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
   pageSize: 10,
   totalPages: 0,
 
-  fetchOrders: async (params: Record<string, any> = {}) => {
+  fetchOrders: async (params: Record<string, string | number | boolean> = {}) => {
     try {
       set({ loading: true, error: null });
       const { currentPage, pageSize } = get();
@@ -170,9 +170,12 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
         totalPages: Math.ceil(res.data.total / pageSize),
         loading: false,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to fetch orders"
+        : "Failed to fetch orders";
       set({
-        error: err.response?.data?.message || "Failed to fetch orders",
+        error: errorMessage,
         loading: false,
       });
     }
@@ -186,9 +189,12 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
         orders: get().orders.filter((o) => o.id !== id),
         loading: false,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to delete order"
+        : "Failed to delete order";
       set({
-        error: err.response?.data?.message || "Failed to delete order",
+        error: errorMessage,
         loading: false,
       });
     }
@@ -203,25 +209,30 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
         selectedOrders: [],
         loading: false,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to delete orders"
+        : "Failed to delete orders";
       set({
-        error: err.response?.data?.message || "Failed to delete orders",
+        error: errorMessage,
         loading: false,
       });
     }
   },
 
-  createOrder: async (orderData: any) => {
+  createOrder: async (orderData: Omit<Order, 'id' | 'createdAt' | 'updatedAt' | 'orderNumber'>) => {
     try {
       set({ loading: true, error: null });
       const res = await axiosInstance.post<OrderWithPdf>("/orders", orderData);
       set({ orders: [res.data, ...get().orders], loading: false });
-      console.log("Create Order Response:", res.data);
 
       return res.data.id;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to create order"
+        : "Failed to create order";
       set({
-        error: err.response?.data?.message || "Failed to create order",
+        error: errorMessage,
         loading: false,
       });
       throw err;
@@ -242,9 +253,12 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
         ),
         loading: false,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to update order"
+        : "Failed to update order";
       set({
-        error: err.response?.data?.message || "Failed to update order",
+        error: errorMessage,
         loading: false,
       });
       throw err;
@@ -264,9 +278,12 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
         ),
         loading: false,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to cancel order"
+        : "Failed to cancel order";
       set({
-        error: err.response?.data?.message || "Failed to cancel order",
+        error: errorMessage,
         loading: false,
       });
       throw err;

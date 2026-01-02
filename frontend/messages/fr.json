@@ -3,7 +3,7 @@
     "permissionDenied": "Vous n'avez pas la permission d'accéder à cette ressource"
   },
   "sidebar": {
-    "storeManager": "Gestionnaire de magasin",
+    "storeManager": "  la boutique Comodo",
     "user": "Utilisateur",
     "links": {
       "dashboard": "Tableau de bord",
@@ -44,46 +44,46 @@
   },
   "pages": {
     "forgotPassword": {
-    "title": "Réinitialiser le mot de passe",
-    "description": {
-      "initial": "Entrez votre adresse email et nous vous enverrons un lien de réinitialisation",
-      "success": "Vérifiez votre email pour un lien de réinitialisation de mot de passe"
+      "title": "Réinitialiser le mot de passe",
+      "description": {
+        "initial": "Entrez votre adresse email et nous vous enverrons un lien de réinitialisation",
+        "success": "Vérifiez votre email pour un lien de réinitialisation de mot de passe"
+      },
+      "sending": "Envoi du lien de réinitialisation...",
+      "sent": "Email envoyé !",
+      "sendLink": "Envoyer le lien de réinitialisation",
+      "email": "Email",
+      "toast": {
+        "successTitle": "Lien de réinitialisation envoyé !",
+        "successDescription": "Si un compte avec cet email existe, nous avons envoyé un lien de réinitialisation de mot de passe.",
+        "failedTitle": "Échec de l'envoi du lien de réinitialisation",
+        "failedDescription": "Une erreur est survenue. Veuillez réessayer."
+      },
+      "messages": {
+        "sentTitle": "Lien de réinitialisation envoyé",
+        "sentDescription": "Nous avons envoyé un lien de réinitialisation de mot de passe à {email}. Veuillez vérifier votre email et suivre les instructions."
+      },
+      "actions": {
+        "sendAnotherLink": "Envoyer un autre lien",
+        "rememberPassword": "Vous vous souvenez de votre mot de passe ?",
+        "signIn": "Se connecter"
+      }
     },
-    "sending": "Envoi du lien de réinitialisation...",
-    "sent": "Email envoyé !",
-    "sendLink": "Envoyer le lien de réinitialisation",
-    "email": "Email",
-    "toast": {
-      "successTitle": "Lien de réinitialisation envoyé !",
-      "successDescription": "Si un compte avec cet email existe, nous avons envoyé un lien de réinitialisation de mot de passe.",
-      "failedTitle": "Échec de l'envoi du lien de réinitialisation",
-      "failedDescription": "Une erreur est survenue. Veuillez réessayer."
-    },
-    "messages": {
-      "sentTitle": "Lien de réinitialisation envoyé",
-      "sentDescription": "Nous avons envoyé un lien de réinitialisation de mot de passe à {email}. Veuillez vérifier votre email et suivre les instructions."
-    },
-    "actions": {
-      "sendAnotherLink": "Envoyer un autre lien",
-      "rememberPassword": "Vous vous souvenez de votre mot de passe ?",
-      "signIn": "Se connecter"
-    }
-  },
     "login": {
-    "title": "Connexion",
-    "description": "Entrez votre email et mot de passe pour accéder à votre compte",
-    "loggingIn": "Connexion en cours...",
-    "login": "Se connecter",
-    "email": "Email",
-    "password": "Mot de passe",
-    "forgotPassword": "Mot de passe oublié ?",
-    "noAccount": "Vous n'avez pas de compte ?",
-    "signUp": "S'inscrire",
-    "toast": {
-      "failed": "Échec de la connexion",
-      "invalid": "Email ou mot de passe invalide."
-    }
-  },
+      "title": "Connexion",
+      "description": "Entrez votre email et mot de passe pour accéder à votre compte",
+      "loggingIn": "Connexion en cours...",
+      "login": "Se connecter",
+      "email": "Email",
+      "password": "Mot de passe",
+      "forgotPassword": "Mot de passe oublié ?",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "signUp": "S'inscrire",
+      "toast": {
+        "failed": "Échec de la connexion",
+        "invalid": "Email ou mot de passe invalide."
+      }
+    },
     "skus": {
       "title": "Gestion des SKU & Stock",
       "description": "Gérer les SKU, les prix et les niveaux de stock des produits",
@@ -133,6 +133,16 @@
             "inStock": "En stock",
             "lowStock": "Stock faible",
             "outOfStock": "Rupture de stock"
+          },
+          "printLabels": {
+            "menuItem": "Imprimer les étiquettes",
+            "dialogTitle": "Imprimer les étiquettes de codes-barres",
+            "dialogDescription": "Générer des étiquettes de codes-barres imprimables pour {sku}",
+            "quantity": "Quantité",
+            "cancel": "Annuler",
+            "printButton": "Imprimer {count} étiquette(s)",
+            "allowPopupsMessage": "Veuillez autoriser les fenêtres contextuelles pour imprimer les étiquettes",
+            "printingMessage": "Impression de {count} étiquette(s) pour {sku}"
           }
         }
       },
@@ -649,7 +659,128 @@
     },
     "categories": {
       "title": "Gestion des Catégories",
-      "description": "Gérez vos catégories de produits et hiérarchies"
+      "description": "Gérez vos catégories de produits et hiérarchies",
+      "components": {
+        "categoryTable": {
+          "title": "Gestion des Catégories",
+          "table": {
+            "select": "Sélectionner",
+            "selectRow": "Sélectionner la catégorie",
+            "name": "Nom",
+            "slug": "Slug",
+            "parent": "Parent",
+            "status": "Statut",
+            "products": "Produits",
+            "subCategories": "Sous-catégories",
+            "order": "Ordre",
+            "created": "Créé",
+            "actions": "Actions",
+            "openMenu": "Ouvrir le menu",
+            "edit": "Modifier",
+            "activate": "Activer",
+            "deactivate": "Désactiver",
+            "delete": "Supprimer",
+            "active": "Actif",
+            "inactive": "Inactif",
+            "subCategory": "Sous-catégorie",
+            "rootCategory": "Catégorie racine",
+            "productsCount": "{count} produits",
+            "subCategoriesCount": "{count} sous-catégories",
+            "searchPlaceholder": "Rechercher des catégories par nom, slug ou description...",
+            "empty": "Aucune catégorie trouvée",
+            "deleteSelected": "Supprimer la sélection ({0})"
+          },
+          "toast": {
+            "deleted": "Catégorie supprimée avec succès",
+            "deleteFailed": "Échec de la suppression de la catégorie",
+            "statusUpdated": "Statut de la catégorie mis à jour avec succès",
+            "statusUpdateFailed": "Échec de la mise à jour du statut de la catégorie",
+            "bulkDeleted": "{0} catégories supprimées avec succès",
+            "bulkDeleteFailed": "Échec de la suppression des catégories"
+          },
+          "dialogs": {
+            "deleteTitle": "Êtes-vous sûr ?",
+            "deleteDesc": "Cette action est irréversible. Cela supprimera définitivement la catégorie et toutes ses sous-catégories.",
+            "bulkDeleteTitle": "Supprimer {0} catégories ?",
+            "bulkDeleteDesc": "Cette action est irréversible. Cela supprimera définitivement les catégories sélectionnées et toutes leurs sous-catégories.",
+            "cancel": "Annuler",
+            "delete": "Supprimer",
+            "deleteAll": "Tout supprimer"
+          }
+        }
+      },
+      "dialogs": {
+        "createCategory": {
+          "trigger": "Ajouter une Catégorie",
+          "title": "Créer une Nouvelle Catégorie",
+          "description": "Ajoutez une nouvelle catégorie de produit pour organiser vos produits.",
+          "fields": {
+            "name": "Nom de la Catégorie",
+            "slug": "Slug",
+            "slugDescription": "Version conviviale pour les URL du nom. Généré automatiquement si laissé vide.",
+            "description": "Description",
+            "parent": "Catégorie Parente",
+            "sortOrder": "Ordre de Tri",
+            "sortOrderDescription": "Les nombres plus bas apparaissent en premier",
+            "isActive": "Statut Actif",
+            "isActiveDescription": "Les catégories actives sont visibles pour les clients"
+          },
+          "placeholders": {
+            "name": "Électronique",
+            "slug": "electronique",
+            "description": "Appareils électroniques et accessoires",
+            "parent": "Sélectionner une catégorie parente (optionnel)"
+          },
+          "errors": {
+            "nameRequired": "Le nom de la catégorie est requis",
+            "nameTooLong": "Le nom est trop long (max 255 caractères)",
+            "sortOrderNegative": "L'ordre de tri ne peut pas être négatif"
+          },
+          "actions": {
+            "cancel": "Annuler",
+            "create": "Créer la Catégorie",
+            "creating": "Création..."
+          },
+          "toast": {
+            "success": "Catégorie créée avec succès",
+            "failed": "Échec de la création de la catégorie"
+          }
+        },
+        "editCategory": {
+          "title": "Modifier la Catégorie",
+          "description": "Mettez à jour les informations et paramètres de la catégorie.",
+          "fields": {
+            "name": "Nom de la Catégorie",
+            "slug": "Slug",
+            "description": "Description",
+            "parent": "Catégorie Parente",
+            "sortOrder": "Ordre de Tri",
+            "sortOrderDescription": "Les nombres plus bas apparaissent en premier",
+            "isActive": "Statut Actif",
+            "isActiveDescription": "Les catégories actives sont visibles pour les clients"
+          },
+          "placeholders": {
+            "name": "Électronique",
+            "slug": "electronique",
+            "description": "Appareils électroniques et accessoires",
+            "parent": "Sélectionner une catégorie parente (optionnel)"
+          },
+          "errors": {
+            "nameRequired": "Le nom de la catégorie est requis",
+            "nameTooLong": "Le nom est trop long (max 255 caractères)",
+            "sortOrderNegative": "L'ordre de tri ne peut pas être négatif"
+          },
+          "actions": {
+            "cancel": "Annuler",
+            "update": "Mettre à Jour la Catégorie",
+            "updating": "Mise à jour..."
+          },
+          "toast": {
+            "success": "Catégorie mise à jour avec succès",
+            "failed": "Échec de la mise à jour de la catégorie"
+          }
+        }
+      }
     },
     "common": {
       "unknownProduct": "Produit inconnu",

@@ -21,15 +21,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Trash2, Edit, UserPlus, Shield } from "lucide-react";
+import { MoreHorizontal, Trash2, Shield } from "lucide-react";
 import { useRolesStore, type Role } from "@/stores/roles-store";
 import { toast } from "sonner";
 import { EditRoleDialog } from "./edit-role-dialog";
 import { CreateRoleDialog } from "./create-role-dialog";
 
-interface EnhancedRoleTableProps {
-  // Remove the callback props since we'll handle them internally
-}
+type EnhancedRoleTableProps = Record<string, never>;
 
 export function EnhancedRoleTable({}: EnhancedRoleTableProps) {
   const {

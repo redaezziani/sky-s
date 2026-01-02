@@ -35,9 +35,7 @@ import { useSearchQuery } from '@/hooks/use-search-query';
 import { useLocale } from '@/components/local-lang-swither';
 import { getMessages } from '@/lib/locale';
 
-interface EnhancedProductVariantTableProps {
-  // Remove the callback props since we'll handle them internally
-}
+type EnhancedProductVariantTableProps = Record<string, never>;
 
 export function EnhancedProductVariantTable({}: EnhancedProductVariantTableProps) {
   const { products, loading, error, fetchProducts, deleteVariant } =

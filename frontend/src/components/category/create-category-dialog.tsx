@@ -27,6 +27,8 @@ import { Plus } from "lucide-react";
 import { useCategoriesStore, type CreateCategoryPayload } from "@/stores/categories-store";
 import { toast } from "sonner";
 import { Loader } from "../loader";
+import { useLocale } from "@/components/local-lang-swither";
+import { getMessages } from "@/lib/locale";
 
 interface CreateCategoryDialogProps {
   trigger?: React.ReactNode;
@@ -40,6 +42,9 @@ export function CreateCategoryDialog({
   onClose: externalOnClose,
 }: CreateCategoryDialogProps) {
   const { createCategory, categories, loading } = useCategoriesStore();
+  const { locale } = useLocale();
+  const lang = getMessages(locale);
+  const t = lang.pages?.categories?.dialogs?.createCategory || {};
   const [internalIsOpen, setInternalIsOpen] = useState(false);
 
   // Use external state if provided, otherwise use internal state
@@ -102,15 +107,15 @@ export function CreateCategoryDialog({
     };
 
     if (!formData.name.trim()) {
-      newErrors.name = "Category name is required";
+      newErrors.name = t.errors?.nameRequired || "Category name is required";
     }
 
     if (formData.name.length > 100) {
-      newErrors.name = "Name is too long";
+      newErrors.name = t.errors?.nameTooLong || "Name is too long";
     }
 
     if (formData.sortOrder < 0) {
-      newErrors.sortOrder = "Sort order cannot be negative";
+      newErrors.sortOrder = t.errors?.sortOrderNegative || "Sort order cannot be negative";
     }
 
     setErrors(newErrors);
@@ -131,8 +136,8 @@ export function CreateCategoryDialog({
       };
 
       await createCategory(payload);
-      toast.success("Category created successfully");
-      
+      toast.success(t.toast?.success || "Category created successfully");
+
       // Reset form
       setFormData({
         name: "",
@@ -149,10 +154,10 @@ export function CreateCategoryDialog({
         parentId: "",
         sortOrder: "",
       });
-      
+
       setIsDialogOpen(false);
     } catch (error) {
-      toast.error("Failed to create category");
+      toast.error(t.toast?.failed || "Failed to create category");
     }
   };
 
@@ -165,24 +170,24 @@ export function CreateCategoryDialog({
         {trigger || (
           <Button className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
-            Add Category
+            {t.trigger || "Add Category"}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Create New Category</DialogTitle>
+          <DialogTitle>{t.title || "Create New Category"}</DialogTitle>
           <DialogDescription>
-            Add a new category to organize your products. You can create nested categories by selecting a parent.
+            {t.description || "Add a new category to organize your products. You can create nested categories by selecting a parent."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Category Name</Label>
+              <Label htmlFor="name">{t.fields?.name || "Category Name"}</Label>
               <Input
                 id="name"
-                placeholder="Electronics"
+                placeholder={t.placeholders?.name || "Electronics"}
                 value={formData.name}
                 onChange={(e) => handleNameChange(e.target.value)}
                 className={errors.name ? "border-destructive" : ""}
@@ -191,18 +196,18 @@ export function CreateCategoryDialog({
                 <p className="text-sm text-destructive">{errors.name}</p>
               )}
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="slug">Slug</Label>
+              <Label htmlFor="slug">{t.fields?.slug || "Slug"}</Label>
               <Input
                 id="slug"
-                placeholder="electronics"
+                placeholder={t.placeholders?.slug || "electronics"}
                 value={formData.slug}
                 onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
                 className={errors.slug ? "border-destructive" : ""}
               />
               <p className="text-xs text-muted-foreground">
-                URL-friendly version of the name. Auto-generated if left empty.
+                {t.fields?.slugDescription || "URL-friendly version of the name. Auto-generated if left empty."}
               </p>
               {errors.slug && (
                 <p className="text-sm text-destructive">{errors.slug}</p>
@@ -211,10 +216,10 @@ export function CreateCategoryDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t.fields?.description || "Description"}</Label>
             <Textarea
               id="description"
-              placeholder="Electronic devices and accessories"
+              placeholder={t.placeholders?.description || "Electronic devices and accessories"}
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               className="resize-none"
@@ -223,16 +228,16 @@ export function CreateCategoryDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="parentId">Parent Category</Label>
+              <Label htmlFor="parentId">{t.fields?.parent || "Parent Category"}</Label>
               <Select
                 value={formData.parentId || "none"}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, parentId: value === "none" ? "" : value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select parent category" />
+                  <SelectValue placeholder={t.placeholders?.parent || "Select parent category"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">No Parent (Root Category)</SelectItem>
+                  <SelectItem value="none">{t.placeholders?.parent || "Select parent category (optional)"}</SelectItem>
                   {parentCategories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
@@ -240,13 +245,10 @@ export function CreateCategoryDialog({
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                Choose a parent to create a subcategory
-              </p>
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="sortOrder">Sort Order</Label>
+              <Label htmlFor="sortOrder">{t.fields?.sortOrder || "Sort Order"}</Label>
               <Input
                 id="sortOrder"
                 type="number"
@@ -256,7 +258,7 @@ export function CreateCategoryDialog({
                 className={errors.sortOrder ? "border-destructive" : ""}
               />
               <p className="text-xs text-muted-foreground">
-                Lower numbers appear first
+                {t.fields?.sortOrderDescription || "Lower numbers appear first"}
               </p>
               {errors.sortOrder && (
                 <p className="text-sm text-destructive">{errors.sortOrder}</p>
@@ -266,9 +268,9 @@ export function CreateCategoryDialog({
 
           <div className="flex items-center justify-between rounded-lg border p-4">
             <div className="space-y-0.5">
-              <Label className="text-base">Active Status</Label>
+              <Label className="text-base">{t.fields?.isActive || "Active Status"}</Label>
               <p className="text-sm text-muted-foreground">
-                Active categories are visible to customers
+                {t.fields?.isActiveDescription || "Active categories are visible to customers"}
               </p>
             </div>
             <Switch
@@ -283,16 +285,16 @@ export function CreateCategoryDialog({
               variant="outline"
               onClick={() => setIsDialogOpen(false)}
             >
-              Cancel
+              {t.actions?.cancel || "Cancel"}
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <>
                   <Loader className="mr-2 h-4 w-4" />
-                  Creating...
+                  {t.actions?.creating || "Creating..."}
                 </>
               ) : (
-                "Create Category"
+                t.actions?.create || "Create Category"
               )}
             </Button>
           </DialogFooter>

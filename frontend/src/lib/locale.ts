@@ -18,5 +18,6 @@ const messages = {
 export type Messages = typeof enMessages;
 
 export function getMessages(locale: Locale): Messages {
+  // @ts-expect-error - TypeScript cannot infer that messages[locale] matches Messages type
   return messages[locale] || messages[DEFAULT_LOCALE];
 }

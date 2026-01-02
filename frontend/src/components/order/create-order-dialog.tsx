@@ -208,7 +208,7 @@ export function CreateOrderDialog({
     minLength: 3,
   });
 
-  const handleItemChange = (idx: number, field: string, value: any) => {
+  const handleItemChange = (idx: number, field: string, value: unknown) => {
     setFormData((prev) => ({
       ...prev,
       items: prev.items.map((item, i) =>
@@ -291,6 +291,7 @@ export function CreateOrderDialog({
         language: locale, // Add user's current locale for PDF generation
       };
 
+      // @ts-expect-error - Backend doesn't require all Order fields, calculates them server-side
       const id = await createOrder(payload);
       toast.success(t.toast?.success);
       setFormData({

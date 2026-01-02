@@ -7,6 +7,7 @@ import {
 } from "@/types/permissions";
 import { toast } from "sonner";
 import { axiosInstance, getTranslation } from "@/lib/utils";
+import { AxiosError } from "axios";
 
 interface PermissionsState {
   rolePermissions: RolePermissions | null;
@@ -38,12 +39,13 @@ export const usePermissionsStore = create<PermissionsState>((set, get) => ({
     try {
       const response = await axiosInstance.get<RolePermissions>("/permissions/roles");
       set({ rolePermissions: response.data, loading: false });
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to fetch role permissions";
+    } catch (error: unknown) {
+      const errorMessage = error instanceof AxiosError
+        ? error.response?.data?.message || "Failed to fetch role permissions"
+        : "Failed to fetch role permissions";
       set({ error: errorMessage, loading: false });
       // Don't show toast for 403 - handled globally by axios interceptor
-      if (error.response?.status !== 403) {
+      if (error instanceof AxiosError && error.response?.status !== 403) {
         toast.error(errorMessage);
       }
     }
@@ -53,11 +55,12 @@ export const usePermissionsStore = create<PermissionsState>((set, get) => ({
     try {
       const response = await axiosInstance.get<AvailablePermissionsResponse>("/permissions/available");
       set({ availablePermissions: response.data.permissions });
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to fetch available permissions";
+    } catch (error: unknown) {
+      const errorMessage = error instanceof AxiosError
+        ? error.response?.data?.message || "Failed to fetch available permissions"
+        : "Failed to fetch available permissions";
       // Don't show toast for 403 - handled globally by axios interceptor
-      if (error.response?.status !== 403) {
+      if (error instanceof AxiosError && error.response?.status !== 403) {
         toast.error(errorMessage);
       }
     }
@@ -78,12 +81,13 @@ export const usePermissionsStore = create<PermissionsState>((set, get) => ({
       const message = getTranslation('permissions.toast.permissionsUpdated', { role });
       toast.success(message);
       set({ loading: false });
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to update role permissions";
+    } catch (error: unknown) {
+      const errorMessage = error instanceof AxiosError
+        ? error.response?.data?.message || "Failed to update role permissions"
+        : "Failed to update role permissions";
       set({ error: errorMessage, loading: false });
       // Don't show toast for 403 - handled globally by axios interceptor
-      if (error.response?.status !== 403) {
+      if (error instanceof AxiosError && error.response?.status !== 403) {
         toast.error(errorMessage);
       }
     }
@@ -98,11 +102,12 @@ export const usePermissionsStore = create<PermissionsState>((set, get) => ({
 
       const message = getTranslation('permissions.toast.permissionAdded', { permission, role });
       toast.success(message);
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to add permission";
+    } catch (error: unknown) {
+      const errorMessage = error instanceof AxiosError
+        ? error.response?.data?.message || "Failed to add permission"
+        : "Failed to add permission";
       // Don't show toast for 403 - handled globally by axios interceptor
-      if (error.response?.status !== 403) {
+      if (error instanceof AxiosError && error.response?.status !== 403) {
         toast.error(errorMessage);
       }
     }
@@ -119,11 +124,12 @@ export const usePermissionsStore = create<PermissionsState>((set, get) => ({
 
       const message = getTranslation('permissions.toast.permissionRemoved', { permission, role });
       toast.success(message);
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to remove permission";
+    } catch (error: unknown) {
+      const errorMessage = error instanceof AxiosError
+        ? error.response?.data?.message || "Failed to remove permission"
+        : "Failed to remove permission";
       // Don't show toast for 403 - handled globally by axios interceptor
-      if (error.response?.status !== 403) {
+      if (error instanceof AxiosError && error.response?.status !== 403) {
         toast.error(errorMessage);
       }
     }

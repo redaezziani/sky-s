@@ -13,8 +13,8 @@ export const roleProtectedRoutes = {
   '/dashboard/skus': [UserRole.MODERATOR, UserRole.ADMIN],
   '/dashboard/orders': [UserRole.MODERATOR, UserRole.ADMIN],
   '/dashboard/order-items': [UserRole.MODERATOR, UserRole.ADMIN],
-  '/dashboard/analytics': [UserRole.ADMIN],
-  '/dashboard/settings': [UserRole.ADMIN],
+  '/dashboard/analytics': [],
+  '/dashboard/settings': [],
 };
 
 export const authRoutes = publicRoutes;

@@ -49,7 +49,6 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { Permissions } from '../auth/decorators/permissions.decorator';
 import { Permission } from '../auth/permissions/permissions.enum';
 import { UserRole } from '@prisma/client';
-import { ImageKitService } from '../common/services/imagekit.service';
 import { PaginatedPublicProductsResponseDto, PublicProductDetailDto, PublicProductQueryDto } from './dto/public-products.dto';
 
 @ApiTags('Products')
@@ -57,7 +56,6 @@ import { PaginatedPublicProductsResponseDto, PublicProductDetailDto, PublicProdu
 export class ProductsController {
   constructor(
     private readonly productsService: ProductsService,
-    private readonly imageKitService: ImageKitService,
   ) {}
 
   @Post()

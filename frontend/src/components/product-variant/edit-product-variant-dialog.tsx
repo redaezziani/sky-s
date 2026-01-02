@@ -63,7 +63,7 @@ export function EditProductVariantDialog({
 }: EditProductVariantDialogProps) {
   const { updateVariant, loading } = useProductVariantsStore();
   const { products, fetchProducts } = useProductsStore();
-  const [attributes, setAttributes] = useState<Record<string, string>>({});
+  const [attributes, setAttributes] = useState<Record<string, string | number | boolean>>({});
   const { locale } = useLocale();
   const t =
     getMessages(locale).pages.variants.components.dialogs.editProductVariant;
@@ -238,13 +238,13 @@ export function EditProductVariantDialog({
                     placeholder={t.placeholders.attributeName}
                     value={key}
                     onChange={(e) =>
-                      handleUpdateAttribute(key, e.target.value, value)
+                      handleUpdateAttribute(key, e.target.value, String(value))
                     }
                     className="flex-1"
                   />
                   <Input
                     placeholder={t.placeholders.attributeValue}
-                    value={value}
+                    value={String(value)}
                     onChange={(e) =>
                       handleUpdateAttribute(key, key, e.target.value)
                     }

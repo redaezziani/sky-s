@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useCategoriesStore, type Category } from "@/stores/categories-store";
+import { useCategoriesStore } from "@/stores/categories-store";
 import { EnhancedCategoryTable } from "@/components/category/enhanced-category-table";
 import { useLocale } from "@/components/local-lang-swither";
 import { getMessages } from "@/lib/locale";

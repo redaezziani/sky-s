@@ -117,12 +117,12 @@ export function ChartTopProducts() {
 
     // Sort by totalOrdered (highest first) and take top 5
     const sortedData = [...topProductsMetrics].sort(
-      (a: any, b: any) => b.totalOrdered - a.totalOrdered,
+      (a: {totalOrdered: number}, b: {totalOrdered: number}) => b.totalOrdered - a.totalOrdered,
     );
 
-    return sortedData.slice(0, 5).map((item: any, index: number) => ({
-      label: item.label,
-      productName: truncateText(item.label || '', 30),
+    return sortedData.slice(0, 5).map((item: {id: string; name: string; label?: string; totalOrdered: number; totalRevenue: number}, index: number) => ({
+      label: item.label || item.name || '',
+      productName: truncateText(item.label || item.name || '', 30),
       totalOrdered: item.totalOrdered,
       totalRevenue: item.totalRevenue,
       color: chartColors[index % chartColors.length],

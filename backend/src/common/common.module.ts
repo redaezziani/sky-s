@@ -1,7 +1,6 @@
 // src/common/common.module.ts
 import { Module } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { ImageKitService } from './services/imagekit.service';
 import { LocalStorageService } from './services/local-storage.service';
 import { PdfService } from './services/pdf.service';
 import { EmailService } from './services/email.service';
@@ -29,7 +28,7 @@ import { UploadController } from './controllers/upload.controller';
     }),
   ],
   controllers: [UploadController],
-  providers: [ImageKitService, LocalStorageService, PdfService, EmailService],
-  exports: [ImageKitService, LocalStorageService, PdfService, EmailService],
+  providers: [LocalStorageService, PdfService, EmailService],
+  exports: [LocalStorageService, PdfService, EmailService],
 })
 export class CommonModule {}

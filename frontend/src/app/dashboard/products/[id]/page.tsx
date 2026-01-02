@@ -4,12 +4,8 @@ import React from 'react';
 import {
   ArrowLeft,
   Package,
-  DollarSign,
-  Warehouse,
   Star,
   Calendar,
-  Image as ImageIcon,
-  Ruler,
   Edit,
   Trash2,
 } from 'lucide-react';

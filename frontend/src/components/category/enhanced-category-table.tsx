@@ -21,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Trash2, Edit, Plus, Tag } from "lucide-react";
+import { MoreHorizontal, Trash2, Edit } from "lucide-react";
 import { useCategoriesStore, type Category } from "@/stores/categories-store";
 import { toast } from "sonner";
 import { CreateCategoryDialog } from "@/components/category/create-category-dialog";
@@ -29,13 +29,17 @@ import { EditCategoryDialog } from "@/components/category/edit-category-dialog";
 import PaginationTable from "@/components/pagination-table";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
 import { useSearchQuery } from "@/hooks/use-search-query";
+import { useLocale } from "@/components/local-lang-swither";
+import { getMessages } from "@/lib/locale";
 
-interface EnhancedCategoryTableProps {
-  // Remove the callback props since we'll handle them internally
-}
+type EnhancedCategoryTableProps = Record<string, never>;
 
 export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
    const [search, setSearch] = useSearchQuery("q", 400);
+  const { locale } = useLocale();
+  const lang = getMessages(locale);
+  const t = lang.pages?.categories?.components?.categoryTable || {};
+
   const {
     categories,
     loading,
@@ -79,30 +83,31 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
   const handleDeleteCategory = async (id: string) => {
     try {
       await deleteCategory(id);
-      toast.success("Category deleted successfully");
+      toast.success(t.toast?.deleted || "Category deleted successfully");
       setDeleteDialogOpen(false);
       setCategoryToDelete(null);
     } catch (error) {
-      toast.error("Failed to delete category");
+      toast.error(t.toast?.deleteFailed || "Failed to delete category");
     }
   };
 
   const handleToggleStatus = async (id: string) => {
     try {
       await toggleCategoryStatus(id);
-      toast.success("Category status updated successfully");
+      toast.success(t.toast?.statusUpdated || "Category status updated successfully");
     } catch (error) {
-      toast.error("Failed to update category status");
+      toast.error(t.toast?.statusUpdateFailed || "Failed to update category status");
     }
   };
 
   const handleBulkDelete = async () => {
     try {
       await bulkDeleteCategories(selectedCategories);
-      toast.success(`${selectedCategories.length} categories deleted successfully`);
+      const message = t.toast?.bulkDeleted?.replace("{0}", selectedCategories.length.toString()) || `${selectedCategories.length} categories deleted successfully`;
+      toast.success(message);
       setBulkDeleteDialogOpen(false);
     } catch (error) {
-      toast.error("Failed to delete categories");
+      toast.error(t.toast?.bulkDeleteFailed || "Failed to delete categories");
     }
   };
 
@@ -119,24 +124,24 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
   const columns: TableColumn<Category>[] = [
     {
       key: "select",
-      label: "Select",
+      label: t.table?.select || "Select",
       render: (category) => (
         <Checkbox
           checked={selectedCategories.includes(category.id)}
           onCheckedChange={() => selectCategory(category.id)}
-          aria-label="Select category"
+          aria-label={t.table?.selectRow || "Select category"}
         />
       ),
     },
     {
       key: "name",
-      label: "Name",
+      label: t.table?.name || "Name",
       render: (category) => (
         <div className="flex items-center gap-2">
           <div className="font-medium">{category.name}</div>
           {category.parent && (
             <Badge variant="outline" className="text-xs">
-              Sub-category
+              {t.table?.subCategory || "Sub-category"}
             </Badge>
           )}
         </div>
@@ -144,7 +149,7 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
     },
     {
       key: "slug",
-      label: "Slug",
+      label: t.table?.slug || "Slug",
       render: (category) => (
         <div className="text-sm text-muted-foreground font-mono">
           {category.slug}
@@ -153,46 +158,54 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
     },
     {
       key: "parent",
-      label: "Parent",
+      label: t.table?.parent || "Parent",
       render: (category) => (
         <div className="text-sm text-muted-foreground">
-          {category.parent ? category.parent.name : "Root Category"}
+          {category.parent ? category.parent.name : (t.table?.rootCategory || "Root Category")}
         </div>
       ),
     },
     {
       key: "status",
-      label: "Status",
+      label: t.table?.status || "Status",
       render: (category) => (
         <div className="flex items-center gap-2">
           <Badge variant={"secondary"}>
             {category.isActive ? <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" /> : <IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" /> }
-          {category.isActive  ? "Active" : "Inactive"}
+          {category.isActive  ? (t.table?.active || "Active") : (t.table?.inactive || "Inactive")}
           </Badge>
         </div>
       ),
     },
     {
       key: "products",
-      label: "Products",
-      render: (category) => (
-        <div className="text-sm text-muted-foreground">
-          {category.productCount ?? 0} products
-        </div>
-      ),
+      label: t.table?.products || "Products",
+      render: (category) => {
+        const count = category.productCount ?? 0;
+        const text = t.table?.productsCount?.replace("{count}", count.toString()) || `${count} products`;
+        return (
+          <div className="text-sm text-muted-foreground">
+            {text}
+          </div>
+        );
+      },
     },
     {
       key: "children",
-      label: "Sub-categories",
-      render: (category) => (
-        <div className="text-sm text-muted-foreground">
-          {category.children ? category.children.length : 0} sub-categories
-        </div>
-      ),
+      label: t.table?.subCategories || "Sub-categories",
+      render: (category) => {
+        const count = category.children ? category.children.length : 0;
+        const text = t.table?.subCategoriesCount?.replace("{count}", count.toString()) || `${count} sub-categories`;
+        return (
+          <div className="text-sm text-muted-foreground">
+            {text}
+          </div>
+        );
+      },
     },
     {
       key: "sortOrder",
-      label: "Order",
+      label: t.table?.order || "Order",
       render: (category) => (
         <div className="text-sm text-muted-foreground">
           {category.sortOrder}
@@ -201,7 +214,7 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
     },
     {
       key: "createdAt",
-      label: "Created",
+      label: t.table?.created || "Created",
       render: (category) => {
         const date = new Date(category.createdAt);
         return (
@@ -213,22 +226,22 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
     },
     {
       key: "actions",
-      label: "Actions",
+      label: t.table?.actions || "Actions",
       render: (category) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
+              <span className="sr-only">{t.table?.openMenu || "Open menu"}</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => handleEditCategory(category)}>
               <Edit className="mr-2 h-4 w-4" />
-              Edit
+              {t.table?.edit || "Edit"}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleToggleStatus(category.id)}>
-              {category.isActive ? "Deactivate" : "Activate"}
+              {category.isActive ? (t.table?.deactivate || "Deactivate") : (t.table?.activate || "Activate")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
@@ -238,7 +251,7 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
               className="text-destructive"
             >
               <Trash2 className="mr-2 h-4 w-4" />
-              Delete
+              {t.table?.delete || "Delete"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -251,14 +264,14 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
   return (
     <div className="space-y-4">
       <DataTable
-        title="Category Management"
+        title={t.title || "Category Management"}
         data={categories}
         columns={columns}
         searchKeys={["name", "slug", "description"]}
         searchValue={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search categories by name, slug, or description..."
-        emptyMessage="No categories found"
+        searchPlaceholder={t.table?.searchPlaceholder || "Search categories by name, slug, or description..."}
+        emptyMessage={t.table?.empty || "No categories found"}
         showCount={true}
         customHeader={
           <div className="flex items-center gap-2">
@@ -269,7 +282,7 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
                 className="flex items-center gap-2"
               >
                 <Trash2 className="h-4 w-4" />
-                Delete Selected ({selectedCategories.length})
+                {t.table?.deleteSelected?.replace("{0}", selectedCategories.length.toString()) || `Delete Selected (${selectedCategories.length})`}
               </Button>
             )}
             <CreateCategoryDialog />
@@ -288,20 +301,19 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t.dialogs?.deleteTitle || "Are you sure?"}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              category and all its subcategories.
+              {t.dialogs?.deleteDesc || "This action cannot be undone. This will permanently delete the category and all its subcategories."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t.dialogs?.cancel || "Cancel"}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() =>
                 categoryToDelete && handleDeleteCategory(categoryToDelete)
               }
             >
-              Delete
+              {t.dialogs?.delete || "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -315,17 +327,16 @@ export function EnhancedCategoryTable({}: EnhancedCategoryTableProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Delete {selectedCategories.length} categories?
+              {t.dialogs?.bulkDeleteTitle?.replace("{0}", selectedCategories.length.toString()) || `Delete ${selectedCategories.length} categories?`}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              selected categories and all their subcategories.
+              {t.dialogs?.bulkDeleteDesc || "This action cannot be undone. This will permanently delete the selected categories and all their subcategories."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t.dialogs?.cancel || "Cancel"}</AlertDialogCancel>
             <AlertDialogAction onClick={handleBulkDelete}>
-              Delete All
+              {t.dialogs?.deleteAll || "Delete All"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -15,12 +15,12 @@ import {
   ProductVariantResponseDto,
   ProductSKUResponseDto
 } from './dto/response.dto';
-import { ImageKitService } from '../common/services/imagekit.service';
 import { LocalStorageService } from '../common/services/local-storage.service';
 import { customAlphabet } from 'nanoid';
 import { createCanvas } from 'canvas';
 import * as JsBarcode from 'jsbarcode';
 import { Prisma } from '@prisma/client';
+import { secrets } from '../config/secrets';
 import { PaginatedPublicProductsResponseDto, PublicProductDetailDto, PublicProductQueryDto, PublicProductSummaryDto } from './dto/public-products.dto';
 
 
@@ -28,7 +28,6 @@ import { PaginatedPublicProductsResponseDto, PublicProductDetailDto, PublicProdu
 export class ProductsService {
   constructor(
     private prisma: PrismaService,
-    private imageKitService: ImageKitService,
     private localStorageService: LocalStorageService,
   ) {}
   private generateSlug(name: string): string {
@@ -60,8 +59,8 @@ export class ProductsService {
     }
   }
 
-  private generateSKU(length = 8): string {
-    const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  private generateSKU(length = 12): string {
+    const alphabet = '0123456789';
     const nanoid = customAlphabet(alphabet, length);
     return nanoid();
   }
@@ -998,9 +997,11 @@ export class ProductsService {
 
     if (!image) throw new NotFoundException('SKU image not found');
 
-    // Optionally delete from ImageKit / storage
-    if (image.fileId) {
-      await this.imageKitService.deleteImage(image.fileId);
+    // Delete from local storage
+    try {
+      await this.localStorageService.deleteImage(image.url.replace(secrets.BaseUrl, ''));
+    } catch (error) {
+      console.error('Failed to delete image from storage:', error);
     }
 
     // Delete record from DB
@@ -1019,16 +1020,15 @@ export class ProductsService {
     }
 
     try {
-      // Extract file ID from URL or use a stored fileId if available
-      // For now, we'll just delete the database record
-      // In a real implementation, you'd store the ImageKit fileId in the database
+      // Delete from local storage
+      await this.localStorageService.deleteImage(image.url.replace(secrets.BaseUrl, ''));
+
+      // Delete the database record
       await this.prisma.productSKUImage.delete({
         where: { id: imageId },
       });
-
-      // Note: To properly delete from ImageKit, you'd need to store the fileId
-      // and then call: await this.imageKitService.deleteImage(fileId);
     } catch (error) {
+      console.error('Failed to delete image:', error);
       throw new BadRequestException('Failed to delete image');
     }
   }

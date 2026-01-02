@@ -230,7 +230,7 @@ export function DataTable<T extends object>({
                 filteredData.map((item, index) => (
                   <TableRow
                     key={
-                      ('id' in item ? String((item as any).id) : undefined) ||
+                      ('id' in item ? String((item as {id: string | number}).id) : undefined) ||
                       `row-${index}`
                     }
                     className={

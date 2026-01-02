@@ -21,8 +21,8 @@ import {
   ApiBody,
   ApiParam,
 } from '@nestjs/swagger';
-import { ImageKitService } from '../services/imagekit.service';
-import { ImageUploadDto, ImageResponseDto, ResponsiveImageUrlsDto } from '../dto/image.dto';
+import { LocalStorageService } from '../services/local-storage.service';
+import { ImageUploadDto, ImageResponseDto } from '../dto/image.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
@@ -31,7 +31,7 @@ import { UserRole } from '@prisma/client';
 @ApiTags('Upload')
 @Controller('upload')
 export class UploadController {
-  constructor(private readonly imageKitService: ImageKitService) {}
+  constructor(private readonly localStorageService: LocalStorageService) {}
 
   @Post('image')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -93,7 +93,16 @@ export class UploadController {
       throw new BadRequestException('No file provided');
     }
 
-    return this.imageKitService.uploadImage(file, uploadOptions);
+    const result = await this.localStorageService.uploadImage(file, uploadOptions);
+
+    return {
+      url: result.url,
+      thumbnailUrl: result.url,
+      fileId: result.fileName,
+      name: result.fileName,
+      size: file.size,
+      filePath: result.filePath,
+    };
   }
 
   @Post('images')
@@ -155,7 +164,16 @@ export class UploadController {
       throw new BadRequestException('No files provided');
     }
 
-    return this.imageKitService.uploadMultipleImages(files, uploadOptions);
+    const results = await this.localStorageService.uploadMultipleImages(files, uploadOptions);
+
+    return results.map((result, index) => ({
+      url: result.url,
+      thumbnailUrl: result.url,
+      fileId: result.fileName,
+      name: result.fileName,
+      size: files[index].size,
+      filePath: result.filePath,
+    }));
   }
 
   @Delete('image/:fileId')
@@ -165,8 +183,8 @@ export class UploadController {
   @ApiOperation({ summary: 'Delete an image' })
   @ApiParam({
     name: 'fileId',
-    description: 'ImageKit file ID',
-    example: '5e2a0b6d7b45a50012345678',
+    description: 'File ID for deletion',
+    example: 'product-image.jpg',
   })
   @ApiResponse({
     status: 200,
@@ -185,36 +203,8 @@ export class UploadController {
     description: 'Forbidden - insufficient permissions',
   })
   async deleteImage(@Param('fileId') fileId: string): Promise<{ message: string }> {
-    await this.imageKitService.deleteImage(fileId);
+    // fileId is actually the fileName in local storage
+    await this.localStorageService.deleteImage(fileId);
     return { message: 'Image deleted successfully' };
-  }
-
-  @Post('responsive-urls')
-  @ApiOperation({ summary: 'Generate responsive image URLs from file path' })
-  @ApiBody({
-    description: 'File path to generate responsive URLs',
-    schema: {
-      type: 'object',
-      properties: {
-        filePath: {
-          type: 'string',
-          description: 'ImageKit file path',
-          example: '/products/product-image.jpg',
-        },
-      },
-      required: ['filePath'],
-    },
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Responsive URLs generated successfully',
-    type: ResponsiveImageUrlsDto,
-  })
-  async getResponsiveUrls(@Body('filePath') filePath: string): Promise<ResponsiveImageUrlsDto> {
-    if (!filePath) {
-      throw new BadRequestException('File path is required');
-    }
-
-    return this.imageKitService.getResponsiveUrls(filePath);
   }
 }

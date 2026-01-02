@@ -11,10 +11,10 @@ export interface ProductSKU {
   stock: number;
   lowStockAlert: number;
   weight?: number;
-  dimensions?: Record<string, any>;
+  dimensions?: Record<string, number>;
   coverImage?: string;
   isActive: boolean;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, string | number | boolean>;
   createdAt: string;
   updatedAt: string;
 }
@@ -164,7 +164,7 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
       const { currentPage, pageSize } = get();
       
       // Use axios params for better type handling - backend uses page/limit not offset/limit
-      const apiParams: any = {
+      const apiParams: Record<string, string | number | boolean | undefined> = {
         page: currentPage,
         limit: pageSize,
         includeCategories: params.includeCategories ?? true,
@@ -213,9 +213,12 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
         totalPages,
         loading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to fetch products"
+        : "Failed to fetch products";
       set({
-        error: error.response?.data?.message || "Failed to fetch products",
+        error: errorMessage,
         loading: false,
       });
     }
@@ -259,9 +262,12 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
       await get().fetchProducts();
 
       set({ loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to create product"
+        : "Failed to create product";
       set({
-        error: error.response?.data?.message || "Failed to create product",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -306,9 +312,12 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
       await get().fetchProducts();
 
       set({ loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to update product"
+        : "Failed to update product";
       set({
-        error: error.response?.data?.message || "Failed to update product",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -328,9 +337,12 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
         products: products.filter((product) => product.id !== id),
         loading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to delete product"
+        : "Failed to delete product";
       set({
-        error: error.response?.data?.message || "Failed to delete product",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -340,7 +352,6 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
   // Bulk delete products
   bulkDeleteProducts: async (productIds: string[]) => {
     try {
-      console.log("Bulk deleting products:", productIds);
       set({ loading: true, error: null });
 
       // Since the backend might not have bulk delete, we'll delete one by one
@@ -355,9 +366,12 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
         selectedProducts: [],
         loading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to delete products"
+        : "Failed to delete products";
       set({
-        error: error.response?.data?.message || "Failed to delete products",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -369,8 +383,11 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
     try {
       const response = await axiosInstance.get<Product>(`/products/${id}?includeCategories=true&includeVariants=true`);
       return response.data;
-    } catch (error: any) {
-      set({ error: error.response?.data?.message || "Failed to fetch product" });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to fetch product"
+        : "Failed to fetch product";
+      set({ error: errorMessage });
       return null;
     }
   },
@@ -380,8 +397,11 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
     try {
       const response = await axiosInstance.get<Product>(`/products/slug/${slug}?includeCategories=true&includeVariants=true`);
       return response.data;
-    } catch (error: any) {
-      set({ error: error.response?.data?.message || "Failed to fetch product" });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to fetch product"
+        : "Failed to fetch product";
+      set({ error: errorMessage });
       return null;
     }
   },
@@ -404,9 +424,12 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
       await get().fetchProducts();
 
       set({ loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to toggle product status"
+        : "Failed to toggle product status";
       set({
-        error: error.response?.data?.message || "Failed to toggle product status",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -422,8 +445,8 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
       const { products } = get();
       const product = products.find(p => p.id === id);
       if (product) {
-        await axiosInstance.patch(`/products/${id}`, { 
-          isFeatured: !product.isFeatured 
+        await axiosInstance.patch(`/products/${id}`, {
+          isFeatured: !product.isFeatured
         });
       }
 
@@ -431,9 +454,12 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
       await get().fetchProducts();
 
       set({ loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to toggle product featured status"
+        : "Failed to toggle product featured status";
       set({
-        error: error.response?.data?.message || "Failed to toggle product featured status",
+        error: errorMessage,
         loading: false,
       });
       throw error;

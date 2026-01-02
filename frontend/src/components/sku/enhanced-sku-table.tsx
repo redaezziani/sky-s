@@ -26,8 +26,8 @@ import {
   Trash2,
   Edit,
   Plus,
-  Package,
   AlertTriangle,
+  Printer,
 } from "lucide-react";
 import useProductVariantsStore, {
   type ProductSKU,
@@ -41,8 +41,18 @@ import Link from "next/link";
 import { useSearchQuery } from "@/hooks/use-search-query";
 import { useLocale } from "@/components/local-lang-swither"; // your LocaleProvider hook
 import { getMessages } from "@/lib/locale";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-interface EnhancedSKUTableProps {}
+type EnhancedSKUTableProps = Record<string, never>;
 
 export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
   const [search, setSearch] = useSearchQuery("q", 400);
@@ -66,6 +76,9 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   const [skuToDelete, setSKUToDelete] = useState<string | null>(null);
   const [selectedSKUIds, setSelectedSKUIds] = useState<string[]>([]);
+  const [printLabelsDialogOpen, setPrintLabelsDialogOpen] = useState(false);
+  const [skuToPrint, setSKUToPrint] = useState<ProductSKU | null>(null);
+  const [labelCount, setLabelCount] = useState(1);
 
   const { locale } = useLocale();
   const t = getMessages(locale);
@@ -155,6 +168,127 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
   const openDeleteDialog = (id: string) => {
     setSKUToDelete(id);
     setDeleteDialogOpen(true);
+  };
+
+  const handlePrintLabels = (sku: ProductSKU) => {
+    setSKUToPrint(sku);
+    setLabelCount(1);
+    setPrintLabelsDialogOpen(true);
+  };
+
+  const confirmPrintLabels = () => {
+    if (!skuToPrint) return;
+
+    // Generate barcode labels for printing
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast.error(t.pages.skus.components.skuTable.printLabels.allowPopupsMessage);
+      return;
+    }
+
+    // Create single label template for thermal printer (XP-360B - 80mm width, 203 dpi)
+    // The printer will handle multiple copies based on user's print settings
+    const labelTemplate = `
+      <div class="label" style="
+        width: 80mm;
+        padding: 8mm 4mm;
+        page-break-inside: avoid;
+        display: block;
+        box-sizing: border-box;
+      ">
+        <div style="
+          text-align: center;
+          font-size: 14px;
+          font-weight: bold;
+          font-family: 'Courier New', monospace;
+          margin-bottom: 4mm;
+          letter-spacing: 1px;
+        ">
+          ${skuToPrint.sku}
+        </div>
+        <div style="
+          text-align: center;
+          margin: 3mm 0;
+        ">
+          <svg id="barcode"></svg>
+        </div>
+        <div style="
+          text-align: center;
+          font-size: 11px;
+          font-family: 'Courier New', monospace;
+          color: #333;
+          margin-top: 2mm;
+        ">
+          ${skuToPrint.barcode || skuToPrint.sku}
+        </div>
+      </div>
+    `;
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Print Labels - ${skuToPrint.sku}</title>
+          <meta charset="UTF-8">
+          <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+
+            @page {
+              size: 80mm auto;
+              margin: 0;
+            }
+
+            @media print {
+              body {
+                margin: 0;
+                padding: 0;
+              }
+            }
+
+            body {
+              font-family: 'Courier New', monospace;
+              margin: 0;
+              padding: 0;
+              width: 80mm;
+            }
+          </style>
+        </head>
+        <body>
+          ${labelTemplate}
+          <script>
+            window.onload = function() {
+              // Generate barcode
+              JsBarcode("#barcode", "${skuToPrint.barcode || skuToPrint.sku}", {
+                format: "CODE128",
+                width: 2,
+                height: 50,
+                displayValue: false,
+                margin: 0,
+                fontSize: 14
+              });
+
+              // Open print dialog - user will set number of copies to ${labelCount}
+              setTimeout(() => {
+                window.print();
+              }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    setPrintLabelsDialogOpen(false);
+    toast.success(
+      t.pages.skus.components.skuTable.printLabels.printingMessage
+        .replace('{count}', labelCount.toString())
+        .replace('{sku}', skuToPrint.sku)
+    );
   };
 
   const formatPrice = (price: number) =>
@@ -271,7 +405,7 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
         return (
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
-              <Badge variant={stockStatus.color as any}>
+              <Badge variant={stockStatus.color as "default" | "destructive" | "outline" | "secondary"}>
                 {stockStatus.label}
               </Badge>
               {stockStatus.status === "low-stock" && (
@@ -364,6 +498,10 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
           <DropdownMenuItem onClick={() => handleEditSKU(sku)}>
             <Edit className="mr-2 h-4 w-4" />
             {t.pages.skus.components.skuTable.table.edit}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handlePrintLabels(sku)}>
+            <Printer className="mr-2 h-4 w-4" />
+            {t.pages.skus.components.skuTable.printLabels.menuItem}
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => openDeleteDialog(sku.id)}
@@ -498,6 +636,47 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
         onOpenChange={setIsEditDialogOpen}
         sku={editingSKU}
       />
+
+      {/* Print Labels Dialog */}
+      <Dialog open={printLabelsDialogOpen} onOpenChange={setPrintLabelsDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{t.pages.skus.components.skuTable.printLabels.dialogTitle}</DialogTitle>
+            <DialogDescription>
+              {t.pages.skus.components.skuTable.printLabels.dialogDescription.replace('{sku}', skuToPrint?.sku || '')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="quantity" className="text-right">
+                {t.pages.skus.components.skuTable.printLabels.quantity}
+              </Label>
+              <Input
+                id="quantity"
+                type="number"
+                min="1"
+                max="100"
+                value={labelCount}
+                onChange={(e) => setLabelCount(parseInt(e.target.value) || 1)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              <div className="font-medium mb-1">SKU: {skuToPrint?.sku}</div>
+              <div>Barcode: {skuToPrint?.barcode || skuToPrint?.sku}</div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPrintLabelsDialogOpen(false)}>
+              {t.pages.skus.components.skuTable.printLabels.cancel}
+            </Button>
+            <Button onClick={confirmPrintLabels}>
+              <Printer className="mr-2 h-4 w-4" />
+              {t.pages.skus.components.skuTable.printLabels.printButton.replace('{count}', labelCount.toString())}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

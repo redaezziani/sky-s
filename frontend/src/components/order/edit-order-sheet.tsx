@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -40,7 +40,7 @@ interface UpdateOrderPayload {
   customerName?: string;
   customerPhone?: string;
   customerEmail?: string;
-  customerAddress?: Record<string, any>;
+  customerAddress?: Record<string, string | number>;
   deliveryLat?: number;
   deliveryLng?: number;
   deliveryPlace?: string;
@@ -77,11 +77,11 @@ export default function UpdateOrderSheet({ order }: UpdateOrderSheetProps) {
     Partial<Record<keyof UpdateOrderPayload, string>>
   >({});
 
-  const handleChange = (field: keyof UpdateOrderPayload, value: any) => {
+  const handleChange = (field: keyof UpdateOrderPayload, value: unknown) => {
     setForm({ ...form, [field]: value });
   };
 
-  const handleItemChange = (idx: number, field: string, value: any) => {
+  const handleItemChange = (idx: number, field: string, value: unknown) => {
     setForm((prev) => ({
       ...prev,
       items: prev.items?.map((item, i) =>

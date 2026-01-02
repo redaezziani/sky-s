@@ -10,7 +10,6 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { Decimal } from '@prisma/client/runtime/library';
 import { QueryOrderDto } from './dto/query-order.dto';
 import { PdfService } from 'src/common/services/pdf.service';
-import { ImageKitService } from 'src/common/services/imagekit.service';
 import { PaymentService } from 'src/payments/payments.service';
 import { CreatePaymentDto } from 'src/payments/dto/create-payment.dto';
 import * as fs from 'fs';
@@ -25,7 +24,6 @@ export class OrdersService {
   constructor(
     private prisma: PrismaService,
     private pdfService: PdfService,
-    private imageKitService: ImageKitService,
     private paymentService: PaymentService,
   ) {}
 
@@ -61,6 +59,16 @@ export class OrdersService {
       throw new NotFoundException(`SKU(s) not found: ${missingIds.join(', ')}`);
     }
 
+    // Validate stock availability
+    for (const item of createOrderDto.items) {
+      const sku = skus.find((s) => s.id === item.skuId)!;
+      if (sku.stock < item.quantity) {
+        throw new BadRequestException(
+          `Insufficient stock for ${sku.variant.product.name} (${sku.sku}). Available: ${sku.stock}, Requested: ${item.quantity}`
+        );
+      }
+    }
+
     let subtotal = new Decimal(0);
 
     const itemsData = createOrderDto.items.map((item: OrderItemDto) => {
@@ -88,43 +96,60 @@ export class OrdersService {
       .plus(shippingAmount)
       .minus(discountAmount);
 
-    // Create the order
-    const order = await this.prisma.order.create({
-      data: {
-        orderNumber,
-        createdById: createdById ?? null,
-        confirmedById: createdById ?? null, // Initially confirmed by the creator
-        confirmedAt: new Date(), // Set confirmation time
-        subtotal,
-        taxAmount,
-        shippingAmount,
-        discountAmount,
-        totalAmount,
-        currency: 'USD',
-        language: createOrderDto.language || 'en', // Store the language
-        customerName: createOrderDto.customerName,
-        customerPhone: createOrderDto.customerPhone,
-        customerEmail: createOrderDto.customerEmail ?? null,
-        customerAddress: createOrderDto.customerAddress ?? undefined,
-        notes: createOrderDto.notes ?? null,
-        trackingNumber: createOrderDto.trackingNumber ?? null,
-        deliveryLat: createOrderDto.deliveryLat ?? null,
-        deliveryLng: createOrderDto.deliveryLng ?? null,
-        deliveryPlace: createOrderDto.deliveryPlace ?? null,
-        invoiceUrl: '',
-        invoiceFileId: '',
-        items: { create: itemsData },
-      },
-      include: {
-        items: true,
-        confirmedBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
+    // Create the order and decrement stock in a transaction
+    const order = await this.prisma.$transaction(async (tx) => {
+      // Create the order
+      const newOrder = await tx.order.create({
+        data: {
+          orderNumber,
+          createdById: createdById ?? null,
+          confirmedById: createdById ?? null, // Initially confirmed by the creator
+          confirmedAt: new Date(), // Set confirmation time
+          subtotal,
+          taxAmount,
+          shippingAmount,
+          discountAmount,
+          totalAmount,
+          currency: 'USD',
+          language: createOrderDto.language || 'en', // Store the language
+          customerName: createOrderDto.customerName,
+          customerPhone: createOrderDto.customerPhone,
+          customerEmail: createOrderDto.customerEmail ?? null,
+          customerAddress: createOrderDto.customerAddress ?? undefined,
+          notes: createOrderDto.notes ?? null,
+          trackingNumber: createOrderDto.trackingNumber ?? null,
+          deliveryLat: createOrderDto.deliveryLat ?? null,
+          deliveryLng: createOrderDto.deliveryLng ?? null,
+          deliveryPlace: createOrderDto.deliveryPlace ?? null,
+          invoiceUrl: '',
+          invoiceFileId: '',
+          items: { create: itemsData },
+        },
+        include: {
+          items: true,
+          confirmedBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-      },
+      });
+
+      // Decrement stock for each SKU
+      for (const item of createOrderDto.items) {
+        await tx.productSKU.update({
+          where: { id: item.skuId },
+          data: {
+            stock: {
+              decrement: item.quantity,
+            },
+          },
+        });
+      }
+
+      return newOrder;
     });
 
     // Generate PDF with language support
@@ -143,7 +168,13 @@ export class OrdersService {
 
     const updatedOrder = await this.prisma.order.update({
       where: { id: order.id },
-      data: { invoiceUrl: url, invoiceFileId: fileId },
+      data: {
+        invoiceUrl: url,
+        invoiceFileId: fileId,
+        status: 'DELIVERED', // Set status to DELIVERED since moderator is placing the order
+        paymentStatus: 'COMPLETED', // Set payment status to COMPLETED
+        deliveredAt: new Date(), // Set delivery timestamp
+      },
       include: {
         items: true,
         confirmedBy: {
@@ -298,6 +329,23 @@ export class OrdersService {
         );
       }
 
+      // Validate stock availability for new items
+      for (const item of updateOrderDto.items) {
+        const sku = skus.find((s) => s.id === item.skuId)!;
+
+        // Calculate the net change in quantity for this SKU
+        const oldItem = order.items.find((i) => i.skuId === item.skuId);
+        const oldQuantity = oldItem ? oldItem.quantity : 0;
+        const quantityDifference = item.quantity - oldQuantity;
+
+        // If we're adding more stock, check if it's available
+        if (quantityDifference > 0 && sku.stock < quantityDifference) {
+          throw new BadRequestException(
+            `Insufficient stock for ${sku.variant.product.name} (${sku.sku}). Available: ${sku.stock}, Needed: ${quantityDifference} more`
+          );
+        }
+      }
+
       let subtotal = new Decimal(0);
 
       const itemsData = updateOrderDto.items.map((item) => {
@@ -328,8 +376,38 @@ export class OrdersService {
       data.subtotal = subtotal;
       data.totalAmount = totalAmount;
 
-      // Replace existing items
-      await this.prisma.orderItem.deleteMany({ where: { orderId: id } });
+      // Update items and adjust stock in a transaction
+      await this.prisma.$transaction(async (tx) => {
+        // Restore stock for old items
+        for (const oldItem of order.items) {
+          await tx.productSKU.update({
+            where: { id: oldItem.skuId },
+            data: {
+              stock: {
+                increment: oldItem.quantity,
+              },
+            },
+          });
+        }
+
+        // Delete old items
+        await tx.orderItem.deleteMany({ where: { orderId: id } });
+
+        // Decrement stock for new items
+        if (updateOrderDto.items) {
+          for (const item of updateOrderDto.items) {
+            await tx.productSKU.update({
+              where: { id: item.skuId },
+              data: {
+                stock: {
+                  decrement: item.quantity,
+                },
+              },
+            });
+          }
+        }
+      });
+
       data.items = { create: itemsData };
     }
 
@@ -379,37 +457,151 @@ export class OrdersService {
   async remove(id: string): Promise<void> {
     const order = await this.prisma.order.findUnique({
       where: { id },
+      include: { items: true },
     });
     if (!order) throw new NotFoundException('Order not found');
-    await this.prisma.order.delete({ where: { id } });
-    if (order.invoiceFileId)
-      await this.imageKitService.deleteImage(order.invoiceFileId);
+
+    // Restore stock and delete order in a transaction
+    await this.prisma.$transaction(async (tx) => {
+      // Restore stock for each item (only if order wasn't cancelled, as cancelled orders already restored stock)
+      if (order.status !== 'CANCELLED') {
+        for (const item of order.items) {
+          await tx.productSKU.update({
+            where: { id: item.skuId },
+            data: {
+              stock: {
+                increment: item.quantity,
+              },
+            },
+          });
+        }
+      }
+
+      // Delete the order
+      await tx.order.delete({ where: { id } });
+    });
+
+    // Delete local PDF file if exists
+    if (order.invoiceFileId) {
+      try {
+        const pdfPath = path.resolve(
+          process.cwd(),
+          'public/pdfs/orders',
+          order.invoiceFileId,
+        );
+        if (fs.existsSync(pdfPath)) {
+          fs.unlinkSync(pdfPath);
+          console.log(`✅ Deleted PDF: ${pdfPath}`);
+        }
+      } catch (error) {
+        console.error('Error deleting PDF:', error);
+      }
+    }
   }
 
   async cancelOrder(dto: CancelOrderDto) {
     const order = await this.prisma.order.findUnique({
       where: { id: dto.orderId },
-      include: { payments: true },
+      include: {
+        payments: true,
+        items: true,
+      },
     });
 
     if (!order) {
       throw new NotFoundException('Order not found');
     }
 
-    // Cancel related payments (if any)
-    for (const payment of order.payments) {
-      await this.prisma.payment.update({
-        where: { id: payment.id },
-        data: { status: PaymentStatus.CANCELLED },
-      });
+    // Check if order is already cancelled
+    if (order.status === 'CANCELLED') {
+      throw new BadRequestException('Order is already cancelled');
     }
 
-    return this.prisma.order.update({
+    return this.prisma.$transaction(async (tx) => {
+      // Cancel related payments (if any)
+      for (const payment of order.payments) {
+        await tx.payment.update({
+          where: { id: payment.id },
+          data: { status: PaymentStatus.CANCELLED },
+        });
+      }
+
+      // Restore stock for each item
+      for (const item of order.items) {
+        await tx.productSKU.update({
+          where: { id: item.skuId },
+          data: {
+            stock: {
+              increment: item.quantity,
+            },
+          },
+        });
+      }
+
+      // Update order status
+      return tx.order.update({
+        where: { id: dto.orderId },
+        data: {
+          status: 'CANCELLED',
+          notes: dto.reason ? `${order.notes ?? ''}\nCancellation reason: ${dto.reason}`.trim() : order.notes,
+        },
+      });
+    });
+  }
+
+  async refundOrder(dto: CancelOrderDto) {
+    const order = await this.prisma.order.findUnique({
       where: { id: dto.orderId },
-      data: {
-        status: 'CANCELLED',
-        notes: dto.reason ? `${order.notes ?? ''}\nCancellation reason: ${dto.reason}`.trim() : order.notes,
+      include: {
+        payments: true,
+        items: true,
       },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    // Check if order is already refunded
+    if (order.status === 'REFUNDED') {
+      throw new BadRequestException('Order is already refunded');
+    }
+
+    // Check if order is cancelled
+    if (order.status === 'CANCELLED') {
+      throw new BadRequestException('Cannot refund a cancelled order');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      // Refund related payments (if any)
+      for (const payment of order.payments) {
+        await tx.payment.update({
+          where: { id: payment.id },
+          data: { status: PaymentStatus.REFUNDED },
+        });
+      }
+
+      // Restore stock for each item
+      for (const item of order.items) {
+        await tx.productSKU.update({
+          where: { id: item.skuId },
+          data: {
+            stock: {
+              increment: item.quantity,
+            },
+          },
+        });
+      }
+
+      // Update order status and payment status
+      return tx.order.update({
+        where: { id: dto.orderId },
+        data: {
+          status: 'REFUNDED',
+          paymentStatus: 'REFUNDED',
+          notes: dto.reason ? `${order.notes ?? ''}\nRefund reason: ${dto.reason}`.trim() : order.notes,
+        },
+      });
     });
   }
 

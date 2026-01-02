@@ -12,7 +12,6 @@ import {
   IconShoppingCart,
   IconStar,
   IconChartLine,
-  IconInnerShadowTop,
   IconTag,
   IconBoxSeam,
   IconClipboardList,
@@ -30,12 +29,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { useAuth } from '@/hooks/use-auth';
 
 import { useTranslations } from 'next-intl';
 import { useLocale } from '@/components/local-lang-swither';
 import {
-  publicRoutes,
   authenticatedRoutes,
   roleProtectedRoutes,
 } from '@/lib/routes';
@@ -58,6 +55,7 @@ export function AppSidebar({
     if (!allowedRoles) {
       return true;
     }
+    // @ts-expect-error - Role type mismatch between User.role and UserRole enum
     return allowedRoles.includes(user.role as UserRole);
   };
 
@@ -168,7 +166,7 @@ export function AppSidebar({
                   />
                 </svg> */}
                 <img src="/icon.png" alt="Store Manager" className="h-6" />
-                <span className="text-base font-semibold">
+                <span className="text-base text-primary font-semibold">
                   {t('storeManager')}
                 </span>
               </a>

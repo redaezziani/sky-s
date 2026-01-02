@@ -3,7 +3,7 @@
     "permissionDenied": "ليس لديك الصلاحية للوصول إلى هذا المورد"
   },
   "sidebar": {
-    "storeManager": "مدير المتجر",
+    "storeManager": " متجر كومودو",
     "user": "المستخدم",
     "links": {
       "dashboard": "لوحة التحكم",
@@ -133,6 +133,16 @@
             "inStock": "متوفر",
             "lowStock": "مخزون منخفض",
             "outOfStock": "نفذ المخزون"
+          },
+          "printLabels": {
+            "menuItem": "طباعة الملصقات",
+            "dialogTitle": "طباعة ملصقات الباركود",
+            "dialogDescription": "إنشاء ملصقات باركود قابلة للطباعة لـ {sku}",
+            "quantity": "الكمية",
+            "cancel": "إلغاء",
+            "printButton": "طباعة {count} ملصق(ات)",
+            "allowPopupsMessage": "يرجى السماح بالنوافذ المنبثقة لطباعة الملصقات",
+            "printingMessage": "جاري طباعة {count} ملصق(ات) لـ {sku}"
           }
         }
       },
@@ -688,7 +698,128 @@
     },
     "categories": {
       "title": "إدارة الفئات",
-      "description": "إدارة فئات المنتجات والهياكل التنظيمية"
+      "description": "إدارة فئات المنتجات والهياكل التنظيمية",
+      "components": {
+        "categoryTable": {
+          "title": "إدارة الفئات",
+          "table": {
+            "select": "اختيار",
+            "selectRow": "اختيار الفئة",
+            "name": "الاسم",
+            "slug": "الرابط",
+            "parent": "الفئة الأم",
+            "status": "الحالة",
+            "products": "المنتجات",
+            "subCategories": "الفئات الفرعية",
+            "order": "الترتيب",
+            "created": "تاريخ الإنشاء",
+            "actions": "الإجراءات",
+            "openMenu": "فتح القائمة",
+            "edit": "تعديل",
+            "activate": "تفعيل",
+            "deactivate": "إلغاء التفعيل",
+            "delete": "حذف",
+            "active": "نشط",
+            "inactive": "غير نشط",
+            "subCategory": "فئة فرعية",
+            "rootCategory": "فئة رئيسية",
+            "productsCount": "{count} منتجات",
+            "subCategoriesCount": "{count} فئات فرعية",
+            "searchPlaceholder": "البحث عن الفئات بالاسم أو الرابط أو الوصف...",
+            "empty": "لم يتم العثور على فئات",
+            "deleteSelected": "حذف المحدد ({0})"
+          },
+          "toast": {
+            "deleted": "تم حذف الفئة بنجاح",
+            "deleteFailed": "فشل في حذف الفئة",
+            "statusUpdated": "تم تحديث حالة الفئة بنجاح",
+            "statusUpdateFailed": "فشل في تحديث حالة الفئة",
+            "bulkDeleted": "تم حذف {0} فئات بنجاح",
+            "bulkDeleteFailed": "فشل في حذف الفئات"
+          },
+          "dialogs": {
+            "deleteTitle": "هل أنت متأكد؟",
+            "deleteDesc": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف الفئة وجميع الفئات الفرعية نهائيًا.",
+            "bulkDeleteTitle": "حذف {0} فئات؟",
+            "bulkDeleteDesc": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف الفئات المحددة وجميع الفئات الفرعية نهائيًا.",
+            "cancel": "إلغاء",
+            "delete": "حذف",
+            "deleteAll": "حذف الكل"
+          }
+        }
+      },
+      "dialogs": {
+        "createCategory": {
+          "trigger": "إضافة فئة",
+          "title": "إنشاء فئة جديدة",
+          "description": "أضف فئة منتج جديدة لتنظيم منتجاتك.",
+          "fields": {
+            "name": "اسم الفئة",
+            "slug": "الرابط",
+            "slugDescription": "نسخة صديقة لعنوان URL من الاسم. يتم إنشاؤه تلقائيًا إذا تُرك فارغًا.",
+            "description": "الوصف",
+            "parent": "الفئة الأم",
+            "sortOrder": "ترتيب الفرز",
+            "sortOrderDescription": "الأرقام الأقل تظهر أولاً",
+            "isActive": "حالة النشاط",
+            "isActiveDescription": "الفئات النشطة مرئية للعملاء"
+          },
+          "placeholders": {
+            "name": "إلكترونيات",
+            "slug": "electronics",
+            "description": "الأجهزة الإلكترونية والملحقات",
+            "parent": "اختر الفئة الأم (اختياري)"
+          },
+          "errors": {
+            "nameRequired": "اسم الفئة مطلوب",
+            "nameTooLong": "الاسم طويل جدًا (الحد الأقصى 255 حرفًا)",
+            "sortOrderNegative": "لا يمكن أن يكون ترتيب الفرز سالبًا"
+          },
+          "actions": {
+            "cancel": "إلغاء",
+            "create": "إنشاء الفئة",
+            "creating": "جارٍ الإنشاء..."
+          },
+          "toast": {
+            "success": "تم إنشاء الفئة بنجاح",
+            "failed": "فشل في إنشاء الفئة"
+          }
+        },
+        "editCategory": {
+          "title": "تعديل الفئة",
+          "description": "تحديث معلومات وإعدادات الفئة.",
+          "fields": {
+            "name": "اسم الفئة",
+            "slug": "الرابط",
+            "description": "الوصف",
+            "parent": "الفئة الأم",
+            "sortOrder": "ترتيب الفرز",
+            "sortOrderDescription": "الأرقام الأقل تظهر أولاً",
+            "isActive": "حالة النشاط",
+            "isActiveDescription": "الفئات النشطة مرئية للعملاء"
+          },
+          "placeholders": {
+            "name": "إلكترونيات",
+            "slug": "electronics",
+            "description": "الأجهزة الإلكترونية والملحقات",
+            "parent": "اختر الفئة الأم (اختياري)"
+          },
+          "errors": {
+            "nameRequired": "اسم الفئة مطلوب",
+            "nameTooLong": "الاسم طويل جدًا (الحد الأقصى 255 حرفًا)",
+            "sortOrderNegative": "لا يمكن أن يكون ترتيب الفرز سالبًا"
+          },
+          "actions": {
+            "cancel": "إلغاء",
+            "update": "تحديث الفئة",
+            "updating": "جارٍ التحديث..."
+          },
+          "toast": {
+            "success": "تم تحديث الفئة بنجاح",
+            "failed": "فشل في تحديث الفئة"
+          }
+        }
+      }
     },
     "products": {
       "title": "إدارة المنتجات",

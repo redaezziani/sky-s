@@ -18,7 +18,7 @@ export class CashPaymentStrategy implements PaymentStrategy {
         method: 'CASH',
         amount: dto.amount,
         currency: dto.currency,
-        status: 'PENDING', // mark as COMPLETED later
+        status: 'COMPLETED', // Mark as COMPLETED since moderator is placing order
         provider: 'cash',
       },
     });

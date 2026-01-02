@@ -32,12 +32,19 @@ export interface AuthTokens {
 
 
 
+export interface CartItem {
+  id: string;
+  productId: string;
+  quantity: number;
+  price: number;
+}
+
 export interface AuthResponse {
   user: User;
   tokens: AuthTokens;
-  device?: UserDevice; // added
+  device?: UserDevice;
   cart?: {
-    items: any[];
+    items: CartItem[];
     totalItems: number;
     subtotal: number;
   };

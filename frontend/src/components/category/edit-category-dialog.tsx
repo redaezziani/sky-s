@@ -25,6 +25,8 @@ import { Switch } from "@/components/ui/switch";
 import { useCategoriesStore, type Category, type UpdateCategoryPayload } from "@/stores/categories-store";
 import { toast } from "sonner";
 import { Loader } from "../loader";
+import { useLocale } from "@/components/local-lang-swither";
+import { getMessages } from "@/lib/locale";
 
 interface EditCategoryDialogProps {
   category: Category | null;
@@ -34,6 +36,9 @@ interface EditCategoryDialogProps {
 
 export function EditCategoryDialog({ category, open, onClose }: EditCategoryDialogProps) {
   const { updateCategory, categories, loading } = useCategoriesStore();
+  const { locale } = useLocale();
+  const lang = getMessages(locale);
+  const t = lang.pages?.categories?.dialogs?.editCategory || {};
 
   // Form state
   const [formData, setFormData] = useState({
@@ -85,15 +90,15 @@ export function EditCategoryDialog({ category, open, onClose }: EditCategoryDial
     };
 
     if (!formData.name.trim()) {
-      newErrors.name = "Category name is required";
+      newErrors.name = t.errors?.nameRequired || "Category name is required";
     }
 
     if (formData.name.length > 100) {
-      newErrors.name = "Name is too long";
+      newErrors.name = t.errors?.nameTooLong || "Name is too long";
     }
 
     if (formData.sortOrder < 0) {
-      newErrors.sortOrder = "Sort order cannot be negative";
+      newErrors.sortOrder = t.errors?.sortOrderNegative || "Sort order cannot be negative";
     }
 
     setErrors(newErrors);
@@ -113,10 +118,10 @@ export function EditCategoryDialog({ category, open, onClose }: EditCategoryDial
       };
 
       await updateCategory(category.id, payload);
-      toast.success("Category updated successfully");
+      toast.success(t.toast?.success || "Category updated successfully");
       onClose();
     } catch (error) {
-      toast.error("Failed to update category");
+      toast.error(t.toast?.failed || "Failed to update category");
     }
   };
 
@@ -138,17 +143,17 @@ export function EditCategoryDialog({ category, open, onClose }: EditCategoryDial
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Edit Category</DialogTitle>
+          <DialogTitle>{t.title || "Edit Category"}</DialogTitle>
           <DialogDescription>
-            Update the category information. Be careful when changing parent relationships.
+            {t.description || "Update the category information. Be careful when changing parent relationships."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Category Name</Label>
+            <Label htmlFor="name">{t.fields?.name || "Category Name"}</Label>
             <Input
               id="name"
-              placeholder="Electronics"
+              placeholder={t.placeholders?.name || "Electronics"}
               value={formData.name}
               onChange={(e) => {
                 setFormData(prev => ({ ...prev, name: e.target.value }));
@@ -164,10 +169,10 @@ export function EditCategoryDialog({ category, open, onClose }: EditCategoryDial
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t.fields?.description || "Description"}</Label>
             <Textarea
               id="description"
-              placeholder="Electronic devices and accessories"
+              placeholder={t.placeholders?.description || "Electronic devices and accessories"}
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               className="resize-none"
@@ -176,16 +181,16 @@ export function EditCategoryDialog({ category, open, onClose }: EditCategoryDial
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="parentId">Parent Category</Label>
+              <Label htmlFor="parentId">{t.fields?.parent || "Parent Category"}</Label>
               <Select
                 value={formData.parentId || "none"}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, parentId: value === "none" ? "" : value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select parent category" />
+                  <SelectValue placeholder={t.placeholders?.parent || "Select parent category"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">No Parent (Root Category)</SelectItem>
+                  <SelectItem value="none">{t.placeholders?.parent || "Select parent category (optional)"}</SelectItem>
                   {availableParents.map((cat) => (
                     <SelectItem key={cat.id} value={cat.id}>
                       {cat.name}
@@ -193,13 +198,10 @@ export function EditCategoryDialog({ category, open, onClose }: EditCategoryDial
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                Choose a parent to create a subcategory
-              </p>
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="sortOrder">Sort Order</Label>
+              <Label htmlFor="sortOrder">{t.fields?.sortOrder || "Sort Order"}</Label>
               <Input
                 id="sortOrder"
                 type="number"
@@ -215,7 +217,7 @@ export function EditCategoryDialog({ category, open, onClose }: EditCategoryDial
                 className={errors.sortOrder ? "border-destructive" : ""}
               />
               <p className="text-xs text-muted-foreground">
-                Lower numbers appear first
+                {t.fields?.sortOrderDescription || "Lower numbers appear first"}
               </p>
               {errors.sortOrder && (
                 <p className="text-sm text-destructive">{errors.sortOrder}</p>
@@ -225,9 +227,9 @@ export function EditCategoryDialog({ category, open, onClose }: EditCategoryDial
 
           <div className="flex items-center justify-between rounded-lg border p-4">
             <div className="space-y-0.5">
-              <Label className="text-base">Active Status</Label>
+              <Label className="text-base">{t.fields?.isActive || "Active Status"}</Label>
               <p className="text-sm text-muted-foreground">
-                Active categories are visible to customers
+                {t.fields?.isActiveDescription || "Active categories are visible to customers"}
               </p>
             </div>
             <Switch
@@ -242,16 +244,16 @@ export function EditCategoryDialog({ category, open, onClose }: EditCategoryDial
               variant="outline"
               onClick={onClose}
             >
-              Cancel
+              {t.actions?.cancel || "Cancel"}
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <>
                   <Loader className="mr-2 h-4 w-4" />
-                  Updating...
+                  {t.actions?.updating || "Updating..."}
                 </>
               ) : (
-                "Update Category"
+                t.actions?.update || "Update Category"
               )}
             </Button>
           </DialogFooter>

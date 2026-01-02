@@ -43,10 +43,10 @@ export function getTranslation(
 ): string {
   const locale = getCurrentLocale();
   const keys = path.split('.');
-  let value: any = translations[locale];
+  let value: unknown = translations[locale];
 
   for (const key of keys) {
-    value = value?.[key];
+    value = (value as Record<string, unknown>)?.[key];
   }
 
   if (typeof value !== 'string') {
@@ -66,27 +66,24 @@ export function getTranslation(
 const instance = axios.create({
   baseURL: 'http://localhost:8085/api',
   timeout: 10000,
-  withCredentials: true, // ✅ Key change: This tells axios to send cookies.
+  withCredentials: true,
 });
 
-// Track shown error toasts to prevent duplicates
 const shownErrors = new Set<string>();
-const ERROR_TOAST_TIMEOUT = 3000; // Clear error from set after 3 seconds
+const ERROR_TOAST_TIMEOUT = 3000;
 
-// Request interceptor: No changes needed here, as the browser handles the cookies.
 instance.interceptors.request.use(
   (config) => config,
   (error) => Promise.reject(error),
 );
 
-// Track if we're currently refreshing to prevent multiple refresh attempts
 let isRefreshing = false;
 let failedQueue: Array<{
-  resolve: (value?: any) => void;
-  reject: (reason?: any) => void;
+  resolve: (value?: unknown) => void;
+  reject: (reason?: unknown) => void;
 }> = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: Error | null, token: string | null = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
@@ -98,25 +95,19 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
-// Response interceptor
 instance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Handle 403 Forbidden (Insufficient permissions)
     if (error.response?.status === 403) {
-      // Use translated error message
       const errorMessage = getErrorMessage('permissionDenied');
-      // Use a generic key for all 403 errors to prevent multiple permission toasts
       const errorKey = '403-permission-denied';
 
-      // Only show toast if we haven't shown this error recently
       if (!shownErrors.has(errorKey)) {
         shownErrors.add(errorKey);
         toast.error(errorMessage);
 
-        // Clear from set after timeout
         setTimeout(() => {
           shownErrors.delete(errorKey);
         }, ERROR_TOAST_TIMEOUT);
@@ -125,16 +116,13 @@ instance.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Don't retry if this is the refresh endpoint itself
     if (originalRequest.url?.includes('/auth/refresh')) {
-      // Clear any auth-related storage and redirect
       if (typeof window !== 'undefined') {
         localStorage.clear();
         sessionStorage.clear();
         isRefreshing = false;
         processQueue(error, null);
 
-        // Redirect to login page
         const currentPath = window.location.pathname + window.location.search;
         const returnUrl = encodeURIComponent(currentPath);
         window.location.href = `/auth/login?returnUrl=${returnUrl}`;
@@ -142,19 +130,15 @@ instance.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Don't redirect to login on auth endpoints (login, register, etc.)
     const isAuthEndpoint =
       originalRequest.url?.includes('/auth/login') ||
       originalRequest.url?.includes('/auth/register');
-
-    // Handle expired session (401)
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
       !isAuthEndpoint
     ) {
       if (isRefreshing) {
-        // If already refreshing, queue this request
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -170,27 +154,22 @@ instance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // Call the refresh endpoint. The backend will read the refresh_token from the cookie.
         await instance.post('/auth/refresh');
         isRefreshing = false;
         processQueue(null, 'refreshed');
 
-        // Retry the original request with the new access token cookie.
         return instance(originalRequest);
       } catch (refreshError) {
         isRefreshing = false;
-        processQueue(refreshError, null);
+        processQueue(refreshError instanceof Error ? refreshError : new Error(String(refreshError)), null);
 
-        // Clear any auth-related storage
         if (typeof window !== 'undefined') {
           localStorage.clear();
           sessionStorage.clear();
 
-          // Save current path to return after login
           const currentPath = window.location.pathname + window.location.search;
           const returnUrl = encodeURIComponent(currentPath);
 
-          // Redirect to login page with return URL
           window.location.href = `/auth/login?returnUrl=${returnUrl}`;
         }
 
@@ -204,12 +183,6 @@ instance.interceptors.response.use(
 
 const fetcher = (url: string) => instance.get(url).then((res) => res.data);
 
-/**
- * Format currency to Moroccan Dirham (MAD)
- * @param amount - The amount to format
- * @param locale - Optional locale for formatting (defaults to 'ar-MA' for Moroccan Arabic)
- * @returns Formatted currency string
- */
 export const formatCurrency = (
   amount: number,
   locale: string = 'ar-MA',

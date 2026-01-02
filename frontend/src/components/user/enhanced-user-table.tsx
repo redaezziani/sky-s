@@ -21,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Trash2, Edit, UserPlus, Users } from "lucide-react";
+import { MoreHorizontal, Trash2 } from "lucide-react";
 import { useUsersStore, type User } from "@/stores/users-store";
 import { toast } from "sonner";
 import { CreateUserDialog } from "@/components/user/create-user-dialog";
@@ -32,9 +32,7 @@ import { useSearchQuery } from "@/hooks/use-search-query";
 import { useLocale } from "@/components/local-lang-swither";
 import { getMessages } from "@/lib/locale";
 
-interface EnhancedUserTableProps {
-  // Remove the callback props since we'll handle them internally
-}
+type EnhancedUserTableProps = Record<string, never>;
 
 export function EnhancedUserTable({}: EnhancedUserTableProps) {
      const [search, setSearch] = useSearchQuery("q", 400);

@@ -5,7 +5,7 @@ import * as JsBarcode from 'jsbarcode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { secrets } from '../../config/secrets';
-import { ArabicShaper } from 'arabic-persian-reshaper';
+import * as ArabicReshaper from 'arabic-persian-reshaper';
 import * as bidi from 'bidi-js';
 
 type SupportedLanguage = 'en' | 'ar' | 'fr' | 'es';
@@ -179,7 +179,7 @@ export class PdfService {
 
     try {
       // Step 1: Reshape Arabic characters to their proper forms
-      const reshaped = ArabicShaper(text);
+      const reshaped = ArabicReshaper.ArabicShaper(text);
 
       // Step 2: Apply bidirectional algorithm for proper RTL rendering
       const bidiText = bidi(reshaped);

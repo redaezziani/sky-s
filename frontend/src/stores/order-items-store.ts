@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { axiosInstance } from "@/lib/utils";
+import { AxiosError } from "axios";
 
 // Types based on your backend OrderItemResponseDto
 export interface SKU {
@@ -70,7 +71,7 @@ export const useOrderItemsStore = create<OrderItemsStore>((set, get) => ({
     try {
       set({ loading: true, error: null });
       const { currentPage, pageSize } = get();
-      const params: Record<string, any> = {
+      const params: Record<string, string | number> = {
         page: currentPage,
         limit: pageSize,
       };
@@ -85,9 +86,12 @@ export const useOrderItemsStore = create<OrderItemsStore>((set, get) => ({
         totalPages: res.data.totalPages,
         loading: false,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof AxiosError
+        ? err.response?.data?.message || "Failed to fetch order items"
+        : "Failed to fetch order items";
       set({
-        error: err.response?.data?.message || "Failed to fetch order items",
+        error: errorMessage,
         loading: false,
       });
     }
@@ -99,9 +103,12 @@ export const useOrderItemsStore = create<OrderItemsStore>((set, get) => ({
       const res = await axiosInstance.post<OrderItem>("/order-items", data);
       set({ items: [res.data, ...get().items], loading: false });
       return res.data;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof AxiosError
+        ? err.response?.data?.message || "Failed to create item"
+        : "Failed to create item";
       set({
-        error: err.response?.data?.message || "Failed to create item",
+        error: errorMessage,
         loading: false,
       });
       throw err;
@@ -120,9 +127,12 @@ export const useOrderItemsStore = create<OrderItemsStore>((set, get) => ({
         loading: false,
       });
       return res.data;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof AxiosError
+        ? err.response?.data?.message || "Failed to update item"
+        : "Failed to update item";
       set({
-        error: err.response?.data?.message || "Failed to update item",
+        error: errorMessage,
         loading: false,
       });
       throw err;
@@ -137,9 +147,12 @@ export const useOrderItemsStore = create<OrderItemsStore>((set, get) => ({
         items: get().items.filter((item) => item.id !== id),
         loading: false,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof AxiosError
+        ? err.response?.data?.message || "Failed to delete item"
+        : "Failed to delete item";
       set({
-        error: err.response?.data?.message || "Failed to delete item",
+        error: errorMessage,
         loading: false,
       });
       throw err;
@@ -157,9 +170,12 @@ export const useOrderItemsStore = create<OrderItemsStore>((set, get) => ({
         selectedItems: [],
         loading: false,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof AxiosError
+        ? err.response?.data?.message || "Failed to delete items"
+        : "Failed to delete items";
       set({
-        error: err.response?.data?.message || "Failed to delete items",
+        error: errorMessage,
         loading: false,
       });
       throw err;

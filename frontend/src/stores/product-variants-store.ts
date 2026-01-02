@@ -21,7 +21,7 @@ export interface ProductSKU {
   stock: number;
   lowStockAlert: number;
   weight?: number;
-  dimensions?: Record<string, any>;
+  dimensions?: Record<string, string | number | boolean>;
   coverImage?: string;
   isActive: boolean;
   createdAt: string;
@@ -32,7 +32,7 @@ export interface ProductSKU {
 export interface ProductVariant {
   id: string;
   name?: string;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, string | number | boolean>;
   isActive: boolean;
   sortOrder: number;
   createdAt: string;
@@ -65,7 +65,7 @@ export interface Product {
 
 export interface CreateProductVariantDto {
   name?: string;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, string | number | boolean>;
   isActive?: boolean;
   sortOrder?: number;
 }
@@ -79,7 +79,7 @@ export interface CreateProductSKUDto {
   stock: number; // ✅ always send number
   lowStockAlert?: number;
   weight?: number;
-  dimensions?: Record<string, any>;
+  dimensions?: Record<string, string | number | boolean>;
   coverImage?: string;
   isActive: boolean; // ✅ always send boolean
 }
@@ -338,8 +338,8 @@ const useProductVariantsStore = create<ProductVariantsState>()(
         try {
 
           console.log("Creating SKU with data:", data);
-          
-          let payload: any;
+
+          let payload: FormData | Record<string, unknown>;
           if (data instanceof FormData) {
             payload = data; // form data is sent as-is
           } else {

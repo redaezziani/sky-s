@@ -95,4 +95,11 @@ export class OrdersController {
   async cancelOrder(@Body() dto: CancelOrderDto) {
     return this.ordersService.cancelOrder(dto);
   }
+
+  @Post('refund')
+  @ApiOperation({ summary: 'Refund an order (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Order refunded successfully' })
+  async refundOrder(@Body() dto: CancelOrderDto) {
+    return this.ordersService.refundOrder(dto);
+  }
 }

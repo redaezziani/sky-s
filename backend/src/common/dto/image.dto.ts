@@ -73,19 +73,19 @@ export class ImageTransformationDto {
 export class ImageResponseDto {
   @ApiProperty({
     description: 'Image URL',
-    example: 'https://ik.imagekit.io/demo/medium_cafe_B1iTdD0C.jpg'
+    example: 'http://localhost:5000/images/products/product-image.jpg'
   })
   url: string;
 
   @ApiProperty({
     description: 'Thumbnail URL',
-    example: 'https://ik.imagekit.io/demo/tr:h-200,w-200/medium_cafe_B1iTdD0C.jpg'
+    example: 'http://localhost:5000/images/products/product-image.jpg'
   })
   thumbnailUrl: string;
 
   @ApiProperty({
     description: 'File ID for deletion',
-    example: '5e2a0b6d7b45a50012345678'
+    example: 'product-image.jpg'
   })
   fileId: string;
 
@@ -102,40 +102,8 @@ export class ImageResponseDto {
   size: number;
 
   @ApiProperty({
-    description: 'File path in ImageKit',
-    example: '/products/product-image.jpg'
+    description: 'File path in local storage',
+    example: '/images/products/product-image.jpg'
   })
   filePath: string;
-}
-
-export class ResponsiveImageUrlsDto {
-  @ApiProperty({
-    description: 'Thumbnail size (150x150)',
-    example: 'https://ik.imagekit.io/demo/tr:h-150,w-150/image.jpg'
-  })
-  thumbnail: string;
-
-  @ApiProperty({
-    description: 'Small size (300x300)',
-    example: 'https://ik.imagekit.io/demo/tr:h-300,w-300/image.jpg'
-  })
-  small: string;
-
-  @ApiProperty({
-    description: 'Medium size (600x600)',
-    example: 'https://ik.imagekit.io/demo/tr:h-600,w-600/image.jpg'
-  })
-  medium: string;
-
-  @ApiProperty({
-    description: 'Large size (1200x1200)',
-    example: 'https://ik.imagekit.io/demo/tr:h-1200,w-1200/image.jpg'
-  })
-  large: string;
-
-  @ApiProperty({
-    description: 'Original image',
-    example: 'https://ik.imagekit.io/demo/image.jpg'
-  })
-  original: string;
 }

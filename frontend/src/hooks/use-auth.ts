@@ -1,9 +1,7 @@
 // src/hooks/use-auth.ts
-import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import { useState } from 'react';
 import { User, AuthResponse, UserDevice } from '@/types/auth.types';
 import { AuthService } from '@/services/auth.service';
-import { useCartStore } from '@/stores/public/cart-store';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -35,10 +33,6 @@ export function useAuth() {
     saveUserData(authResponse.user);
     saveDeviceData(authResponse.device ?? null);
 
-    // Sync cart with database
-    const cartStore = useCartStore.getState();
-    await cartStore.setUser(authResponse.user.id, authResponse);
-
     // ✅ After successful login, trigger the profile fetch and redirect.
     // We'll let the redirect happen automatically on the successful login response.
   };
@@ -51,10 +45,6 @@ export function useAuth() {
       setUser(null);
       setDevice(null);
       setIsAuthenticated(false);
-
-      // Clear cart user
-      const cartStore = useCartStore.getState();
-      cartStore.setUser('');
     }
   };
 
@@ -66,10 +56,6 @@ export function useAuth() {
       setUser(null);
       setDevice(null);
       setIsAuthenticated(false);
-
-      // Clear cart user
-      const cartStore = useCartStore.getState();
-      cartStore.setUser('');
     }
   };
 

@@ -6,7 +6,7 @@ export interface Category {
   name: string;
   slug: string;
   description?: string;
-  info?: Record<string, any>;
+  info?: Record<string, string | number | boolean>;
   parentId?: string;
   isActive: boolean;
   sortOrder: number;
@@ -21,7 +21,7 @@ export interface CreateCategoryPayload {
   name: string;
   slug?: string;
   description?: string;
-  info?: Record<string, any>;
+  info?: Record<string, string | number | boolean>;
   parentId?: string;
   isActive?: boolean;
   sortOrder?: number;
@@ -30,7 +30,7 @@ export interface CreateCategoryPayload {
 export interface UpdateCategoryPayload {
   name?: string;
   description?: string;
-  info?: Record<string, any>;
+  info?: Record<string, string | number | boolean>;
   parentId?: string;
   isActive?: boolean;
   sortOrder?: number;
@@ -110,9 +110,9 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
       set({ loading: true, error: null });
 
       const { currentPage, pageSize } = get();
-      
+
       // Use axios params for backend filtering (no offset/limit since backend returns all)
-      const apiParams: any = {
+      const apiParams: Record<string, string | boolean | undefined> = {
         includeChildren: params.includeChildren ?? true,
         includeProductCount: params.includeProductCount ?? true,
       };
@@ -151,9 +151,12 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
         totalPages,
         loading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to fetch categories"
+        : "Failed to fetch categories";
       set({
-        error: error.response?.data?.message || "Failed to fetch categories",
+        error: errorMessage,
         loading: false,
       });
     }
@@ -170,9 +173,12 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
       await get().fetchCategories();
 
       set({ loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to create category"
+        : "Failed to create category";
       set({
-        error: error.response?.data?.message || "Failed to create category",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -190,9 +196,12 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
       await get().fetchCategories();
 
       set({ loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to update category"
+        : "Failed to update category";
       set({
-        error: error.response?.data?.message || "Failed to update category",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -212,9 +221,12 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
         categories: categories.filter((category) => category.id !== id),
         loading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to delete category"
+        : "Failed to delete category";
       set({
-        error: error.response?.data?.message || "Failed to delete category",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -224,7 +236,6 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
   // Bulk delete categories
   bulkDeleteCategories: async (categoryIds: string[]) => {
     try {
-      console.log("Bulk deleting categories:", categoryIds);
       set({ loading: true, error: null });
 
       // Since the backend doesn't have bulk delete, we'll delete one by one
@@ -239,9 +250,12 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
         selectedCategories: [],
         loading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to delete categories"
+        : "Failed to delete categories";
       set({
-        error: error.response?.data?.message || "Failed to delete categories",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -253,8 +267,11 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
     try {
       const response = await axiosInstance.get<Category>(`/categories/${id}`);
       return response.data;
-    } catch (error: any) {
-      set({ error: error.response?.data?.message || "Failed to fetch category" });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to fetch category"
+        : "Failed to fetch category";
+      set({ error: errorMessage });
       return null;
     }
   },
@@ -264,8 +281,11 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
     try {
       const response = await axiosInstance.get<Category>(`/categories/slug/${slug}`);
       return response.data;
-    } catch (error: any) {
-      set({ error: error.response?.data?.message || "Failed to fetch category" });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to fetch category"
+        : "Failed to fetch category";
+      set({ error: errorMessage });
       return null;
     }
   },
@@ -279,8 +299,8 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
       const { categories } = get();
       const category = categories.find(c => c.id === id);
       if (category) {
-        await axiosInstance.patch(`/categories/${id}`, { 
-          isActive: !category.isActive 
+        await axiosInstance.patch(`/categories/${id}`, {
+          isActive: !category.isActive
         });
       }
 
@@ -288,9 +308,12 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
       await get().fetchCategories();
 
       set({ loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to toggle category status"
+        : "Failed to toggle category status";
       set({
-        error: error.response?.data?.message || "Failed to toggle category status",
+        error: errorMessage,
         loading: false,
       });
       throw error;

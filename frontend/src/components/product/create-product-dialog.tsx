@@ -16,16 +16,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Upload, X } from "lucide-react";
-import Image from "next/image";
+import { Plus } from "lucide-react";
 import { MultiImageUploader } from "@/components/multy-image-file";
 import { useProductsStore, type CreateProductPayload } from "@/stores/products-store";
 import { useCategoriesStore } from "@/stores/categories-store";

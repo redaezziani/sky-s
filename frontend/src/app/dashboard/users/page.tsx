@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useUsersStore, type User } from '@/stores/users-store';
+import { useUsersStore } from '@/stores/users-store';
 import { EnhancedUserTable } from '@/components/user/enhanced-user-table';
 import { useLocale } from '@/components/local-lang-swither';
 import { getMessages } from '@/lib/locale';

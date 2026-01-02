@@ -101,10 +101,11 @@ export const LoginForm = memo<LoginFormProps>(({ className }) => {
         const redirectTo = returnUrl ? decodeURIComponent(returnUrl) : '/dashboard';
 
         router.push(redirectTo);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Login error:', error);
+        const errorMessage = error instanceof Error ? error.message : t('toast.invalid');
         toast.error(t('toast.failed'), {
-          description: error?.message || t('toast.invalid'),
+          description: errorMessage,
         });
       } finally {
         isSubmittingRef.current = false;

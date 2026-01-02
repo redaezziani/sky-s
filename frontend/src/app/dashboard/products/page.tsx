@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useProductsStore, type Product } from "@/stores/products-store";
+import { useProductsStore } from "@/stores/products-store";
 import { EnhancedProductTable } from "@/components/product/enhanced-product-table";
 import { useLocale } from "@/components/local-lang-swither";
 import { getMessages } from "@/lib/locale";

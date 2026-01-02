@@ -3,7 +3,7 @@
     "permissionDenied": "No tienes permiso para acceder a este recurso"
   },
   "sidebar": {
-    "storeManager": "Administrador de la tienda",
+    "storeManager": "  la tienda Comodo",
     "user": "Usuario",
     "links": {
       "dashboard": "Panel",
@@ -134,6 +134,16 @@
             "inStock": "En stock",
             "lowStock": "Stock bajo",
             "outOfStock": "Sin stock"
+          },
+          "printLabels": {
+            "menuItem": "Imprimir etiquetas",
+            "dialogTitle": "Imprimir etiquetas de código de barras",
+            "dialogDescription": "Generar etiquetas de código de barras imprimibles para {sku}",
+            "quantity": "Cantidad",
+            "cancel": "Cancelar",
+            "printButton": "Imprimir {count} etiqueta(s)",
+            "allowPopupsMessage": "Por favor, permita ventanas emergentes para imprimir etiquetas",
+            "printingMessage": "Imprimiendo {count} etiqueta(s) para {sku}"
           }
         }
       },
@@ -671,7 +681,128 @@
     },
     "categories": {
       "title": "Gestión de Categorías",
-      "description": "Administre sus categorías de productos y jerarquías"
+      "description": "Administre sus categorías de productos y jerarquías",
+      "components": {
+        "categoryTable": {
+          "title": "Gestión de Categorías",
+          "table": {
+            "select": "Seleccionar",
+            "selectRow": "Seleccionar categoría",
+            "name": "Nombre",
+            "slug": "Slug",
+            "parent": "Padre",
+            "status": "Estado",
+            "products": "Productos",
+            "subCategories": "Subcategorías",
+            "order": "Orden",
+            "created": "Creado",
+            "actions": "Acciones",
+            "openMenu": "Abrir menú",
+            "edit": "Editar",
+            "activate": "Activar",
+            "deactivate": "Desactivar",
+            "delete": "Eliminar",
+            "active": "Activo",
+            "inactive": "Inactivo",
+            "subCategory": "Subcategoría",
+            "rootCategory": "Categoría raíz",
+            "productsCount": "{count} productos",
+            "subCategoriesCount": "{count} subcategorías",
+            "searchPlaceholder": "Buscar categorías por nombre, slug o descripción...",
+            "empty": "No se encontraron categorías",
+            "deleteSelected": "Eliminar Seleccionados ({0})"
+          },
+          "toast": {
+            "deleted": "Categoría eliminada exitosamente",
+            "deleteFailed": "Error al eliminar la categoría",
+            "statusUpdated": "Estado de la categoría actualizado exitosamente",
+            "statusUpdateFailed": "Error al actualizar el estado de la categoría",
+            "bulkDeleted": "{0} categorías eliminadas exitosamente",
+            "bulkDeleteFailed": "Error al eliminar las categorías"
+          },
+          "dialogs": {
+            "deleteTitle": "¿Está seguro?",
+            "deleteDesc": "Esta acción no se puede deshacer. Esto eliminará permanentemente la categoría y todas sus subcategorías.",
+            "bulkDeleteTitle": "¿Eliminar {0} categorías?",
+            "bulkDeleteDesc": "Esta acción no se puede deshacer. Esto eliminará permanentemente las categorías seleccionadas y todas sus subcategorías.",
+            "cancel": "Cancelar",
+            "delete": "Eliminar",
+            "deleteAll": "Eliminar Todos"
+          }
+        }
+      },
+      "dialogs": {
+        "createCategory": {
+          "trigger": "Agregar Categoría",
+          "title": "Crear Nueva Categoría",
+          "description": "Agregue una nueva categoría de producto para organizar sus productos.",
+          "fields": {
+            "name": "Nombre de la Categoría",
+            "slug": "Slug",
+            "slugDescription": "Versión amigable para URL del nombre. Se genera automáticamente si se deja vacío.",
+            "description": "Descripción",
+            "parent": "Categoría Padre",
+            "sortOrder": "Orden de Clasificación",
+            "sortOrderDescription": "Los números más bajos aparecen primero",
+            "isActive": "Estado Activo",
+            "isActiveDescription": "Las categorías activas son visibles para los clientes"
+          },
+          "placeholders": {
+            "name": "Electrónica",
+            "slug": "electronica",
+            "description": "Dispositivos electrónicos y accesorios",
+            "parent": "Seleccionar categoría padre (opcional)"
+          },
+          "errors": {
+            "nameRequired": "El nombre de la categoría es obligatorio",
+            "nameTooLong": "El nombre es demasiado largo (máx. 255 caracteres)",
+            "sortOrderNegative": "El orden de clasificación no puede ser negativo"
+          },
+          "actions": {
+            "cancel": "Cancelar",
+            "create": "Crear Categoría",
+            "creating": "Creando..."
+          },
+          "toast": {
+            "success": "Categoría creada exitosamente",
+            "failed": "Error al crear la categoría"
+          }
+        },
+        "editCategory": {
+          "title": "Editar Categoría",
+          "description": "Actualice la información y configuración de la categoría.",
+          "fields": {
+            "name": "Nombre de la Categoría",
+            "slug": "Slug",
+            "description": "Descripción",
+            "parent": "Categoría Padre",
+            "sortOrder": "Orden de Clasificación",
+            "sortOrderDescription": "Los números más bajos aparecen primero",
+            "isActive": "Estado Activo",
+            "isActiveDescription": "Las categorías activas son visibles para los clientes"
+          },
+          "placeholders": {
+            "name": "Electrónica",
+            "slug": "electronica",
+            "description": "Dispositivos electrónicos y accesorios",
+            "parent": "Seleccionar categoría padre (opcional)"
+          },
+          "errors": {
+            "nameRequired": "El nombre de la categoría es obligatorio",
+            "nameTooLong": "El nombre es demasiado largo (máx. 255 caracteres)",
+            "sortOrderNegative": "El orden de clasificación no puede ser negativo"
+          },
+          "actions": {
+            "cancel": "Cancelar",
+            "update": "Actualizar Categoría",
+            "updating": "Actualizando..."
+          },
+          "toast": {
+            "success": "Categoría actualizada exitosamente",
+            "failed": "Error al actualizar la categoría"
+          }
+        }
+      }
     },
     "common": {
       "unknownProduct": "Producto desconocido",

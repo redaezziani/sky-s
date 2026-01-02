@@ -20,7 +20,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar1, CalendarIcon } from "lucide-react";
+import { Calendar1 } from "lucide-react";
 
 interface RangeDateProps {
   onDateChange?: (dateRange: DateRange | undefined) => void;

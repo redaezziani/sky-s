@@ -3,7 +3,7 @@
     "permissionDenied": "You don't have permission to access this resource"
   },
   "sidebar": {
-    "storeManager": "Store Manager",
+    "storeManager": "Comodo Store ",
     "user": "User",
     "links": {
       "dashboard": "Dashboard",
@@ -44,46 +44,46 @@
   },
   "pages": {
     "forgotPassword": {
-    "title": "Reset Password",
-    "description": {
-      "initial": "Enter your email address and we'll send you a reset link",
-      "success": "Check your email for a password reset link"
+      "title": "Reset Password",
+      "description": {
+        "initial": "Enter your email address and we'll send you a reset link",
+        "success": "Check your email for a password reset link"
+      },
+      "sending": "Sending reset link...",
+      "sent": "Email Sent!",
+      "sendLink": "Send Reset Link",
+      "email": "Email",
+      "toast": {
+        "successTitle": "Reset link sent!",
+        "successDescription": "If an account with that email exists, we've sent a password reset link.",
+        "failedTitle": "Failed to send reset link",
+        "failedDescription": "An error occurred. Please try again."
+      },
+      "messages": {
+        "sentTitle": "Reset link sent",
+        "sentDescription": "We've sent a password reset link to {email}. Please check your email and follow the instructions."
+      },
+      "actions": {
+        "sendAnotherLink": "Send Another Link",
+        "rememberPassword": "Remember your password?",
+        "signIn": "Sign in"
+      }
     },
-    "sending": "Sending reset link...",
-    "sent": "Email Sent!",
-    "sendLink": "Send Reset Link",
-    "email": "Email",
-    "toast": {
-      "successTitle": "Reset link sent!",
-      "successDescription": "If an account with that email exists, we've sent a password reset link.",
-      "failedTitle": "Failed to send reset link",
-      "failedDescription": "An error occurred. Please try again."
+    "login": {
+      "title": "Sign In",
+      "description": "Enter your email and password to access your account",
+      "loggingIn": "Logging in...",
+      "login": "Login",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot your password?",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "toast": {
+        "failed": "Login failed",
+        "invalid": "Invalid email or password."
+      }
     },
-    "messages": {
-      "sentTitle": "Reset link sent",
-      "sentDescription": "We've sent a password reset link to {email}. Please check your email and follow the instructions."
-    },
-    "actions": {
-      "sendAnotherLink": "Send Another Link",
-      "rememberPassword": "Remember your password?",
-      "signIn": "Sign in"
-    }
-  },
-     "login": {
-    "title": "Sign In",
-    "description": "Enter your email and password to access your account",
-    "loggingIn": "Logging in...",
-    "login": "Login",
-    "email": "Email",
-    "password": "Password",
-    "forgotPassword": "Forgot your password?",
-    "noAccount": "Don't have an account?",
-    "signUp": "Sign up",
-    "toast": {
-      "failed": "Login failed",
-      "invalid": "Invalid email or password."
-    }
-  },
     "skus": {
       "title": "SKU & Inventory Management",
       "description": "Manage product SKUs, pricing, and stock levels",
@@ -133,6 +133,16 @@
             "inStock": "In Stock",
             "lowStock": "Low Stock",
             "outOfStock": "Out of Stock"
+          },
+          "printLabels": {
+            "menuItem": "Print Labels",
+            "dialogTitle": "Print Barcode Labels",
+            "dialogDescription": "Generate printable barcode labels for {sku}",
+            "quantity": "Quantity",
+            "cancel": "Cancel",
+            "printButton": "Print {count} Label(s)",
+            "allowPopupsMessage": "Please allow popups to print labels",
+            "printingMessage": "Printing {count} label(s) for {sku}"
           }
         }
       },
@@ -689,7 +699,128 @@
     },
     "categories": {
       "title": "Categories Management",
-      "description": "Manage your product categories and hierarchies"
+      "description": "Manage your product categories and hierarchies",
+      "components": {
+        "categoryTable": {
+          "title": "Category Management",
+          "table": {
+            "select": "Select",
+            "selectRow": "Select category",
+            "name": "Name",
+            "slug": "Slug",
+            "parent": "Parent",
+            "status": "Status",
+            "products": "Products",
+            "subCategories": "Sub-categories",
+            "order": "Order",
+            "created": "Created",
+            "actions": "Actions",
+            "openMenu": "Open menu",
+            "edit": "Edit",
+            "activate": "Activate",
+            "deactivate": "Deactivate",
+            "delete": "Delete",
+            "active": "Active",
+            "inactive": "Inactive",
+            "subCategory": "Sub-category",
+            "rootCategory": "Root Category",
+            "productsCount": "{count} products",
+            "subCategoriesCount": "{count} sub-categories",
+            "searchPlaceholder": "Search categories by name, slug, or description...",
+            "empty": "No categories found",
+            "deleteSelected": "Delete Selected ({0})"
+          },
+          "toast": {
+            "deleted": "Category deleted successfully",
+            "deleteFailed": "Failed to delete category",
+            "statusUpdated": "Category status updated successfully",
+            "statusUpdateFailed": "Failed to update category status",
+            "bulkDeleted": "{0} categories deleted successfully",
+            "bulkDeleteFailed": "Failed to delete categories"
+          },
+          "dialogs": {
+            "deleteTitle": "Are you sure?",
+            "deleteDesc": "This action cannot be undone. This will permanently delete the category and all its subcategories.",
+            "bulkDeleteTitle": "Delete {0} categories?",
+            "bulkDeleteDesc": "This action cannot be undone. This will permanently delete the selected categories and all their subcategories.",
+            "cancel": "Cancel",
+            "delete": "Delete",
+            "deleteAll": "Delete All"
+          }
+        }
+      },
+      "dialogs": {
+        "createCategory": {
+          "trigger": "Add Category",
+          "title": "Create New Category",
+          "description": "Add a new product category to organize your products.",
+          "fields": {
+            "name": "Category Name",
+            "slug": "Slug",
+            "slugDescription": "URL-friendly version of the name. Auto-generated if left empty.",
+            "description": "Description",
+            "parent": "Parent Category",
+            "sortOrder": "Sort Order",
+            "sortOrderDescription": "Lower numbers appear first",
+            "isActive": "Active Status",
+            "isActiveDescription": "Active categories are visible to customers"
+          },
+          "placeholders": {
+            "name": "Electronics",
+            "slug": "electronics",
+            "description": "Electronic devices and accessories",
+            "parent": "Select parent category (optional)"
+          },
+          "errors": {
+            "nameRequired": "Category name is required",
+            "nameTooLong": "Name is too long (max 255 characters)",
+            "sortOrderNegative": "Sort order cannot be negative"
+          },
+          "actions": {
+            "cancel": "Cancel",
+            "create": "Create Category",
+            "creating": "Creating..."
+          },
+          "toast": {
+            "success": "Category created successfully",
+            "failed": "Failed to create category"
+          }
+        },
+        "editCategory": {
+          "title": "Edit Category",
+          "description": "Update the category information and settings.",
+          "fields": {
+            "name": "Category Name",
+            "slug": "Slug",
+            "description": "Description",
+            "parent": "Parent Category",
+            "sortOrder": "Sort Order",
+            "sortOrderDescription": "Lower numbers appear first",
+            "isActive": "Active Status",
+            "isActiveDescription": "Active categories are visible to customers"
+          },
+          "placeholders": {
+            "name": "Electronics",
+            "slug": "electronics",
+            "description": "Electronic devices and accessories",
+            "parent": "Select parent category (optional)"
+          },
+          "errors": {
+            "nameRequired": "Category name is required",
+            "nameTooLong": "Name is too long (max 255 characters)",
+            "sortOrderNegative": "Sort order cannot be negative"
+          },
+          "actions": {
+            "cancel": "Cancel",
+            "update": "Update Category",
+            "updating": "Updating..."
+          },
+          "toast": {
+            "success": "Category updated successfully",
+            "failed": "Failed to update category"
+          }
+        }
+      }
     },
     "products": {
       "title": "Products Management",

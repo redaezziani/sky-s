@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/card';
 import {
   ChartContainer,
-  ChartConfig,
   ChartTooltip,
 } from '@/components/ui/chart';
 import {
@@ -64,8 +63,14 @@ export function ChartCategoryPerformance() {
       totalProducts: number;
     };
 
+    type CategoryData = {
+      totalOrders: number;
+      totalRevenue: number;
+      totalProducts: number;
+    };
+
     const aggregatedData: { [category: string]: AggregatedCategory } = {};
-    rawData.forEach((day: Record<string, any>) => {
+    rawData.forEach((day: Record<string, unknown>) => {
       const categories = Object.keys(day).filter((key) => key !== 'date');
       categories.forEach((category) => {
         if (!aggregatedData[category]) {
@@ -77,9 +82,10 @@ export function ChartCategoryPerformance() {
             totalProducts: 0,
           };
         }
-        aggregatedData[category].totalOrders += day[category].totalOrders;
-        aggregatedData[category].totalRevenue += day[category].totalRevenue;
-        aggregatedData[category].totalProducts += day[category].totalProducts;
+        const categoryData = day[category] as CategoryData;
+        aggregatedData[category].totalOrders += categoryData.totalOrders;
+        aggregatedData[category].totalRevenue += categoryData.totalRevenue;
+        aggregatedData[category].totalProducts += categoryData.totalProducts;
       });
     });
 

@@ -43,7 +43,6 @@ export const LocaleSwitcher = ({ className }: LocaleSwitcherProps) => {
     (newLocale: Locale) => {
       startTransition(async () => {
         await setUserLocale(newLocale);
-        window.location.reload();
       });
     },
     []

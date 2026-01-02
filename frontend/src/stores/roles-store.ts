@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { axiosInstance } from "@/lib/utils";
+import { AxiosError } from "axios";
 
 export interface Role {
   id: number;
@@ -126,9 +127,12 @@ export const useRolesStore = create<RolesStore>((set, get) => ({
         totalPages,
         loading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof AxiosError
+        ? error.response?.data?.message || "Failed to fetch roles"
+        : "Failed to fetch roles";
       set({
-        error: error.response?.data?.message || "Failed to fetch roles",
+        error: errorMessage,
         loading: false,
       });
     }
@@ -145,9 +149,12 @@ export const useRolesStore = create<RolesStore>((set, get) => ({
       await get().fetchRoles();
 
       set({ loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof AxiosError
+        ? error.response?.data?.message || "Failed to create role"
+        : "Failed to create role";
       set({
-        error: error.response?.data?.message || "Failed to create role",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -165,9 +172,12 @@ export const useRolesStore = create<RolesStore>((set, get) => ({
       await get().fetchRoles();
 
       set({ loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof AxiosError
+        ? error.response?.data?.message || "Failed to update role"
+        : "Failed to update role";
       set({
-        error: error.response?.data?.message || "Failed to update role",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -187,9 +197,12 @@ export const useRolesStore = create<RolesStore>((set, get) => ({
         roles: roles.filter((role) => role.id !== id),
         loading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof AxiosError
+        ? error.response?.data?.message || "Failed to delete role"
+        : "Failed to delete role";
       set({
-        error: error.response?.data?.message || "Failed to delete role",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -214,9 +227,12 @@ export const useRolesStore = create<RolesStore>((set, get) => ({
       });
 
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof AxiosError
+        ? error.response?.data?.message || "Failed to delete roles"
+        : "Failed to delete roles";
       set({
-        error: error.response?.data?.message || "Failed to delete roles",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -228,8 +244,11 @@ export const useRolesStore = create<RolesStore>((set, get) => ({
     try {
       const response = await axiosInstance.get<Role>(`/roles/admin/${id}`);
       return response.data;
-    } catch (error: any) {
-      set({ error: error.response?.data?.message || "Failed to fetch role" });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof AxiosError
+        ? error.response?.data?.message || "Failed to fetch role"
+        : "Failed to fetch role";
+      set({ error: errorMessage });
       return null;
     }
   },

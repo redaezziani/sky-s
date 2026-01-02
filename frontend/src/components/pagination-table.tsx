@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 
 import { useTranslations } from "next-intl";
+import { useLocale } from "@/components/local-lang-swither";
 
 type PaginationProps = {
   currentPage: number;
@@ -43,6 +44,10 @@ export default function PaginationTable({
 }: PaginationProps) {
   const id = useId();
   const t = useTranslations('pagination');
+  const { locale } = useLocale();
+
+  // Check if the current locale is RTL (Arabic)
+  const isRTL = locale === 'ar';
 
   // Ensure current pageSize is in the options
   const pageSizeOptions = [10, 25, 50, 100];
@@ -112,7 +117,11 @@ export default function PaginationTable({
                   currentPage === 1 || totalPages <= 1 ? true : undefined
                 }
               >
-                <ChevronFirstIcon size={16} aria-hidden="true" />
+                {isRTL ? (
+                  <ChevronLastIcon size={16} aria-hidden="true" />
+                ) : (
+                  <ChevronFirstIcon size={16} aria-hidden="true" />
+                )}
               </PaginationLink>
             </PaginationItem>
 
@@ -126,7 +135,11 @@ export default function PaginationTable({
                   currentPage === 1 || totalPages <= 1 ? true : undefined
                 }
               >
-                <ChevronLeftIcon size={16} aria-hidden="true" />
+                {isRTL ? (
+                  <ChevronRightIcon size={16} aria-hidden="true" />
+                ) : (
+                  <ChevronLeftIcon size={16} aria-hidden="true" />
+                )}
               </PaginationLink>
             </PaginationItem>
 
@@ -142,7 +155,11 @@ export default function PaginationTable({
                     : undefined
                 }
               >
-                <ChevronRightIcon size={16} aria-hidden="true" />
+                {isRTL ? (
+                  <ChevronLeftIcon size={16} aria-hidden="true" />
+                ) : (
+                  <ChevronRightIcon size={16} aria-hidden="true" />
+                )}
               </PaginationLink>
             </PaginationItem>
 
@@ -158,7 +175,11 @@ export default function PaginationTable({
                     : undefined
                 }
               >
-                <ChevronLastIcon size={16} aria-hidden="true" />
+                {isRTL ? (
+                  <ChevronFirstIcon size={16} aria-hidden="true" />
+                ) : (
+                  <ChevronLastIcon size={16} aria-hidden="true" />
+                )}
               </PaginationLink>
             </PaginationItem>
           </PaginationContent>

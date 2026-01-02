@@ -62,7 +62,7 @@ interface UsersStore {
   loading: boolean;
   error: string | null;
   selectedUsers: string[];
-  
+
   // Pagination state
   currentPage: number;
   pageSize: number;
@@ -98,7 +98,7 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
   loading: false,
   error: null,
   selectedUsers: [],
-  
+
   // Pagination state
   currentPage: 1,
   pageSize: 13,
@@ -115,13 +115,13 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
       // Always send default values to ensure integers
       const finalOffset = Math.max(0, Math.floor(params.offset ?? offset));
       const finalLimit = Math.max(1, Math.floor(params.limit ?? pageSize));
-      
+
       // Use axios params instead of URLSearchParams for better type handling
-      const apiParams: any = {
+      const apiParams: Record<string, string | number | boolean | undefined> = {
         offset: finalOffset,
         limit: finalLimit,
       };
-      
+
       if (params.search && params.search.trim()) {
         apiParams.search = params.search.trim();
       }
@@ -150,9 +150,12 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
         totalPages,
         loading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to fetch users"
+        : "Failed to fetch users";
       set({
-        error: error.response?.data?.message || "Failed to fetch users",
+        error: errorMessage,
         loading: false,
       });
     }
@@ -169,9 +172,12 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
       await get().fetchUsers();
 
       set({ loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to create user"
+        : "Failed to create user";
       set({
-        error: error.response?.data?.message || "Failed to create user",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -189,9 +195,12 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
       await get().fetchUsers();
 
       set({ loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to update user"
+        : "Failed to update user";
       set({
-        error: error.response?.data?.message || "Failed to update user",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -211,9 +220,12 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
         users: users.filter((user) => user.id !== id),
         loading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to delete user"
+        : "Failed to delete user";
       set({
-        error: error.response?.data?.message || "Failed to delete user",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -223,7 +235,6 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
   // Bulk delete users (admin only)
   bulkDeleteUsers: async (userIds: string[]) => {
     try {
-      console.log("Bulk deleting users:", userIds);
       set({ loading: true, error: null });
 
       const response = await axiosInstance.delete("/users", {
@@ -239,9 +250,12 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
       });
 
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to delete users"
+        : "Failed to delete users";
       set({
-        error: error.response?.data?.message || "Failed to delete users",
+        error: errorMessage,
         loading: false,
       });
       throw error;
@@ -253,8 +267,11 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
     try {
       const response = await axiosInstance.get<User>(`/users/${id}`);
       return response.data;
-    } catch (error: any) {
-      set({ error: error.response?.data?.message || "Failed to fetch user" });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to fetch user"
+        : "Failed to fetch user";
+      set({ error: errorMessage });
       return null;
     }
   },
@@ -270,9 +287,12 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
       await get().fetchUsers();
 
       set({ loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to toggle user status"
+        : "Failed to toggle user status";
       set({
-        error: error.response?.data?.message || "Failed to toggle user status",
+        error: errorMessage,
         loading: false,
       });
       throw error;
