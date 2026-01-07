@@ -10,7 +10,7 @@ const BACKEND_API_URL = 'http://localhost:8085/api';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const accessToken = request.cookies.get("access_token")?.value;
+  const accessToken = request.cookies.get('access_token')?.value;
 
   let user: { role: UserRole } | null = null;
   let isAuthenticated = false;
@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
   if (accessToken) {
     try {
       const response = await fetch(`${BACKEND_API_URL}/auth/validate`, {
-        method: "GET",
+        method: 'GET',
         headers: {
           Cookie: `access_token=${accessToken}`,
         },
@@ -27,17 +27,21 @@ export async function middleware(request: NextRequest) {
       if (response.ok) {
         const data = await response.json();
         isAuthenticated = true;
-        user = data.user; 
+        user = data.user;
       }
     } catch (error) {
-      console.error("Backend token validation failed:", error);
+      console.error('Backend token validation failed:', error);
       isAuthenticated = false;
     }
   }
 
+  if (request.nextUrl.pathname === '/') {
+    return NextResponse.redirect(new URL('/auth/login', request.url));
+  }
+
   if (publicRoutes.includes(pathname)) {
     if (isAuthenticated) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
     return NextResponse.next();
   }
@@ -47,13 +51,13 @@ export async function middleware(request: NextRequest) {
 
   if (authenticatedRoutes.includes(pathname) || requiredRoles) {
     if (!isAuthenticated) {
-      return NextResponse.redirect(new URL("/auth/login", request.url));
+      return NextResponse.redirect(new URL('/auth/login', request.url));
     }
   }
 
   if (requiredRoles && user) {
     if (!requiredRoles.includes(user.role)) {
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
+      return NextResponse.redirect(new URL('/unauthorized', request.url));
     }
   }
 

@@ -17,6 +17,9 @@
       "orderItems": "Articles de commande",
       "reviews": "Avis",
       "analytics": "Analyses",
+      "logs": "Journaux d'activité",
+      "lots": "Gestion des Lots",
+      "lotArrivals": "Arrivées de Lots",
       "settings": "Paramètres"
     },
     "navUser": {
@@ -83,6 +86,13 @@
         "failed": "Échec de la connexion",
         "invalid": "Email ou mot de passe invalide."
       }
+    },
+    "unauthorized": {
+      "title": "Accès Refusé",
+      "description": "Vous n'avez pas la permission d'accéder à cette page",
+      "message": "Cette page est réservée aux utilisateurs ayant des rôles spécifiques. Veuillez contacter votre administrateur si vous pensez que vous devriez avoir accès.",
+      "goBack": "Retour",
+      "goToDashboard": "Aller au Tableau de Bord"
     },
     "skus": {
       "title": "Gestion des SKU & Stock",
@@ -550,6 +560,178 @@
         }
       }
     },
+    "logs": {
+      "title": "Journaux d'activité",
+      "description": "Afficher et surveiller les journaux d'activité du système",
+      "filters": {
+        "search": "Rechercher dans les journaux...",
+        "searchPlaceholder": "Rechercher par message, utilisateur ou entité",
+        "selectDate": "Sélectionner la date",
+        "selectType": "Type de journal",
+        "selectAction": "Action",
+        "selectEntity": "Entité",
+        "allActions": "Toutes les Actions",
+        "clearFilters": "Effacer les filtres"
+      },
+      "logTypes": {
+        "activity": "Activité",
+        "error": "Erreur",
+        "combined": "Tous les journaux"
+      },
+      "actions": {
+        "CREATE": "Créer",
+        "UPDATE": "Mettre à jour",
+        "DELETE": "Supprimer",
+        "CANCEL": "Annuler",
+        "REFUND": "Rembourser",
+        "RESTORE": "Restaurer",
+        "LOGIN": "Connexion",
+        "LOGOUT": "Déconnexion",
+        "VIEW": "Voir",
+        "EXPORT": "Exporter",
+        "IMPORT": "Importer"
+      },
+      "table": {
+        "timestamp": "Heure",
+        "user": "Utilisateur",
+        "action": "Action",
+        "entity": "Entité",
+        "description": "Description",
+        "details": "Détails",
+        "searchPlaceholder": "Rechercher dans les journaux par utilisateur, action, entité ou message...",
+        "noLogs": "Aucun journal trouvé",
+        "loading": "Chargement des journaux...",
+        "error": "Échec du chargement des journaux"
+      },
+      "stats": {
+        "title": "Statistiques des journaux",
+        "totalLogs": "Total des journaux",
+        "activityLogs": "Journaux d'activité",
+        "errorLogs": "Journaux d'erreur",
+        "topActions": "Principales actions",
+        "topEntities": "Principales entités",
+        "topUsers": "Principaux utilisateurs"
+      },
+      "details": {
+        "title": "Détails du journal",
+        "timestamp": "Horodatage",
+        "user": "Utilisateur",
+        "userId": "ID utilisateur",
+        "userName": "Nom d'utilisateur",
+        "userEmail": "E-mail de l'utilisateur",
+        "userRole": "Rôle de l'utilisateur",
+        "action": "Action",
+        "entity": "Type d'entité",
+        "entityId": "ID d'entité",
+        "description": "Description",
+        "metadata": "Données supplémentaires",
+        "ipAddress": "Adresse IP",
+        "userAgent": "Agent utilisateur",
+        "close": "Fermer"
+      }
+    },
+    "lots": {
+      "title": "Gestion des Lots",
+      "description": "Gérer les lots d'expédition et leurs détails",
+      "createLot": "Créer un Lot",
+      "editLot": "Modifier le Lot",
+      "createDetail": "Ajouter un Détail",
+      "lotDetails": "Détails du Lot",
+      "lot": "Lot",
+      "lotId": "ID du Lot",
+      "detailId": "ID du Détail",
+      "companyName": "Nom de l'Entreprise",
+      "companyCity": "Ville de l'Entreprise",
+      "companyNamePlaceholder": "ex: DHL Express",
+      "companyCityPlaceholder": "ex: New York",
+      "totalQuantity": "Quantité Totale",
+      "totalPrice": "Prix Total",
+      "quantity": "Quantité",
+      "price": "Prix",
+      "shippingCompany": "Entreprise d'Expédition",
+      "shippingCity": "Ville d'Expédition",
+      "pieces": "Pièces",
+      "pieceDetails": "Détails des Pièces",
+      "pieceName": "Nom",
+      "qty": "Qté",
+      "addPiece": "Ajouter une Pièce",
+      "notes": "Notes",
+      "notesPlaceholder": "Ajouter des notes supplémentaires...",
+      "createdAt": "Date de Création",
+      "searchPlaceholder": "Rechercher des lots par entreprise, ville ou ID de lot...",
+      "noData": "Aucun lot trouvé",
+      "noDetails": "Aucun détail ajouté à ce lot",
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce lot?",
+      "fetchError": "Échec du chargement des lots",
+      "fetchDetailsError": "Échec du chargement des détails du lot",
+      "createSuccess": "Lot créé avec succès",
+      "createError": "Échec de la création du lot",
+      "createDetailSuccess": "Détail du lot créé avec succès",
+      "createDetailError": "Échec de la création du détail du lot",
+      "updateSuccess": "Lot mis à jour avec succès",
+      "updateError": "Échec de la mise à jour du lot",
+      "deleteSuccess": "Lot supprimé avec succès",
+      "deleteError": "Échec de la suppression du lot",
+      "minQuantity": "La quantité doit être au moins 1",
+      "minPrice": "Le prix doit être au moins 0",
+      "status": {
+        "label": "Statut",
+        "pending": "En Attente",
+        "inTransit": "En Transit",
+        "arrived": "Arrivé",
+        "verified": "Vérifié",
+        "completed": "Terminé",
+        "cancelled": "Annulé"
+      },
+      "filters": {
+        "from": "De:",
+        "to": "À:",
+        "pickDate": "Choisir une date",
+        "clearFilters": "Effacer les filtres"
+      }
+    },
+    "lotArrivals": {
+      "title": "Arrivées de Lots",
+      "description": "Vérifier et gérer les arrivées de lots",
+      "arrivalId": "ID d'Arrivée",
+      "lotDetailId": "ID du Détail",
+      "quantity": "Quantité",
+      "price": "Prix",
+      "shippingCompany": "Entreprise d'Expédition",
+      "shippingCity": "Ville d'Expédition",
+      "pieceDetails": "Détails des Pièces",
+      "pieceName": "Nom",
+      "qty": "Qté",
+      "addPiece": "Ajouter une Pièce",
+      "notes": "Notes",
+      "notesPlaceholder": "Ajouter des notes sur les écarts ou problèmes...",
+      "verifiedAt": "Vérifié le",
+      "createdAt": "Créé le",
+      "verifyArrival": "Vérifier l'Arrivée",
+      "arrivalDetails": "Détails de l'Arrivée",
+      "verify": "Vérifier",
+      "filterByStatus": "Filtrer par Statut",
+      "allStatuses": "Tous les Statuts",
+      "total": "Total",
+      "noData": "Aucune arrivée trouvée",
+      "fetchError": "Échec du chargement des arrivées de lots",
+      "updateSuccess": "Arrivée de lot mise à jour avec succès",
+      "updateError": "Échec de la mise à jour de l'arrivée du lot",
+      "status": {
+        "label": "Statut",
+        "pending": "En Attente de Vérification",
+        "verified": "Vérifié",
+        "damaged": "Endommagé",
+        "incomplete": "Incomplet",
+        "excess": "Articles Excédentaires"
+      },
+      "filters": {
+        "from": "De:",
+        "to": "À:",
+        "pickDate": "Choisir une date",
+        "clearFilters": "Effacer les filtres"
+      }
+    },
     "settings": {
       "title": "Paramètres",
       "description": "Gérez les paramètres de votre application",
@@ -781,11 +963,21 @@
           }
         }
       }
-    },
-    "common": {
-      "unknownProduct": "Produit inconnu",
-      "noAttributes": "Aucun attribut"
     }
+  },
+  "common": {
+    "unknownProduct": "Produit inconnu",
+    "noAttributes": "Aucun attribut",
+    "loading": "Chargement...",
+    "actions": "Actions",
+    "cancel": "Annuler",
+    "create": "Créer",
+    "update": "Mettre à jour",
+    "creating": "Création...",
+    "updating": "Mise à jour...",
+    "required": "Ce champ est obligatoire",
+    "error": "Une erreur s'est produite. Veuillez réessayer.",
+    "search": "Rechercher..."
   },
   "app": {
     "title": "Sky's Store - Plateforme e-commerce open source",
@@ -826,7 +1018,8 @@
       "Inventory": "Inventaire",
       "Analytics": "Analytiques",
       "Settings": "Paramètres",
-      "Reviews": "Avis"
+      "Reviews": "Avis",
+      "Lots": "Lots et Arrivages"
     },
     "labels": {
       "product:create": "Créer des Produits",
@@ -865,7 +1058,20 @@
       "review:create": "Créer des Avis",
       "review:read": "Voir les Avis",
       "review:approve": "Approuver les Avis",
-      "review:delete": "Supprimer les Avis"
+      "review:delete": "Supprimer les Avis",
+      "lot:create": "Créer des Lots",
+      "lot:read": "Voir les Lots",
+      "lot:update": "Modifier les Lots",
+      "lot:delete": "Supprimer les Lots",
+      "lot_detail:create": "Créer des Détails de Lot",
+      "lot_detail:read": "Voir les Détails de Lot",
+      "lot_detail:update": "Modifier les Détails de Lot",
+      "lot_detail:delete": "Supprimer les Détails de Lot",
+      "lot_arrival:create": "Créer des Arrivages",
+      "lot_arrival:read": "Voir les Arrivages",
+      "lot_arrival:update": "Modifier les Arrivages",
+      "lot_arrival:verify": "Vérifier les Arrivages",
+      "lot_arrival:delete": "Supprimer les Arrivages"
     }
   }
 }

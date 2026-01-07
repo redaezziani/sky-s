@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { IconSearch, IconX } from '@tabler/icons-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useLocale } from '@/components/local-lang-swither';
 
 export interface TableColumn<T> {
@@ -55,6 +56,12 @@ export interface DataTableProps<T> {
   /** 👇 external control */
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+
+  /** 👇 expandable rows */
+  expandable?: boolean;
+  renderExpandedRow?: (item: T) => ReactNode;
+  onRowExpand?: (item: T) => void;
+  expandedRowKey?: string;
 }
 
 export function DataTable<T extends object>({
@@ -72,6 +79,10 @@ export function DataTable<T extends object>({
   customHeader,
   searchValue,
   onSearchChange,
+  expandable = false,
+  renderExpandedRow,
+  onRowExpand,
+  expandedRowKey = 'id',
 }: DataTableProps<T>) {
   const { locale } = useLocale();
   const isRTL = locale === 'ar';
@@ -83,6 +94,9 @@ export function DataTable<T extends object>({
   const [filterValues, setFilterValues] = useState<Record<string, string>>(
     filters.reduce((acc, filter) => ({ ...acc, [filter.key]: 'all' }), {}),
   );
+
+  // Expandable rows state
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   const getNestedValue = useCallback((obj: T, path: string): unknown => {
     return path.split('.').reduce((curr: unknown, key: string) => {
@@ -137,6 +151,20 @@ export function DataTable<T extends object>({
     const value = getNestedValue(item, column.key);
     if (value === null || value === undefined) return 'N/A';
     return String(value);
+  };
+
+  const toggleRow = (item: T) => {
+    const itemKey = String(getNestedValue(item, expandedRowKey));
+    const newExpandedRows = new Set(expandedRows);
+
+    if (expandedRows.has(itemKey)) {
+      newExpandedRows.delete(itemKey);
+    } else {
+      newExpandedRows.add(itemKey);
+      onRowExpand?.(item);
+    }
+
+    setExpandedRows(newExpandedRows);
   };
 
   return (
@@ -203,13 +231,19 @@ export function DataTable<T extends object>({
           <Table>
             <TableHeader>
               <TableRow>
+                {expandable && <TableHead className="w-12"></TableHead>}
                 {columns.map((column) => (
-                  <TableHead key={column.key} className={isRTL ? 'text-right' : ''}>
+                  <TableHead
+                    key={column.key}
+                    className={isRTL ? 'text-right' : ''}
+                  >
                     {column.label}
                   </TableHead>
                 ))}
                 {actions && (
-                  <TableHead className={isRTL ? 'text-left' : 'text-right'}>Actions</TableHead>
+                  <TableHead className={isRTL ? 'text-left' : 'text-right'}>
+                    Actions
+                  </TableHead>
                 )}
               </TableRow>
             </TableHeader>
@@ -217,7 +251,9 @@ export function DataTable<T extends object>({
               {filteredData.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={columns.length + (actions ? 1 : 0)}
+                    colSpan={
+                      columns.length + (actions ? 1 : 0) + (expandable ? 1 : 0)
+                    }
                     className="h-24 text-center"
                   >
                     {emptyMessage ||
@@ -227,34 +263,77 @@ export function DataTable<T extends object>({
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredData.map((item, index) => (
-                  <TableRow
-                    key={
-                      ('id' in item ? String((item as {id: string | number}).id) : undefined) ||
-                      `row-${index}`
-                    }
-                    className={
-                      onRowClick ? 'cursor-pointer hover:bg-muted/50' : ''
-                    }
-                    onClick={() => onRowClick?.(item)}
-                  >
-                    {columns.map((column) => (
-                      <TableCell
-                        key={column.key}
-                        className={column.key === 'id' ? 'font-medium' : ''}
+                filteredData.map((item, index) => {
+                  const itemKey = String(getNestedValue(item, expandedRowKey));
+                  const isExpanded = expandedRows.has(itemKey);
+
+                  return (
+                    <>
+                      <TableRow
+                        key={
+                          ('id' in item
+                            ? String((item as { id: string | number }).id)
+                            : undefined) || `row-${index}`
+                        }
+                        className={`${
+                          index % 2 === 0 ? 'bg-muted' : 'bg-background'
+                        } ${
+                          onRowClick
+                            ? 'cursor-pointer hover:bg-muted/50'
+                            : 'hover:bg-muted/30'
+                        }`}
+                        onClick={() => onRowClick?.(item)}
                       >
-                        {renderCell(item, column)}
-                      </TableCell>
-                    ))}
-                    {actions && (
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {actions(item)}
-                        </div>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))
+                        {expandable && (
+                          <TableCell
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleRow(item);
+                            }}
+                          >
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                            >
+                              {isExpanded ? (
+                                <ChevronDown className="h-4 w-4" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </TableCell>
+                        )}
+                        {columns.map((column) => (
+                          <TableCell
+                            key={column.key}
+                            className={column.key === 'id' ? 'font-medium' : ''}
+                          >
+                            {renderCell(item, column)}
+                          </TableCell>
+                        ))}
+                        {actions && (
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              {actions(item)}
+                            </div>
+                          </TableCell>
+                        )}
+                      </TableRow>
+
+                      {expandable && isExpanded && renderExpandedRow && (
+                        <TableRow>
+                          <TableCell
+                            colSpan={columns.length + (actions ? 1 : 0) + 1}
+                            className="bg-muted/30 p-0"
+                          >
+                            {renderExpandedRow(item)}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </>
+                  );
+                })
               )}
             </TableBody>
           </Table>

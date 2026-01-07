@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useOrdersStore } from "@/stores/orders-store";
 import { EnhancedOrderTable } from "@/components/order/enhanced-order-table";
-import { useLocale } from "@/components/local-lang-swither"; // your LocaleProvider hook
+import { useLocale } from "@/components/local-lang-swither"; 
 import { getMessages } from "@/lib/locale";
 
 export default function OrdersPage() {

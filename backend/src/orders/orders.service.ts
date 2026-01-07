@@ -18,6 +18,7 @@ import { console } from 'inspector';
 import { Logger } from '@nestjs/common';
 import { CancelOrderDto } from './dto/cancel-order.dto';
 import { PaymentStatus } from '@prisma/client';
+import { ActivityLoggerService, ActivityAction } from '../common/logger/activity-logger.service';
 @Injectable()
 export class OrdersService {
   private readonly logger = new Logger(OrdersService.name);
@@ -25,6 +26,7 @@ export class OrdersService {
     private prisma: PrismaService,
     private pdfService: PdfService,
     private paymentService: PaymentService,
+    private activityLogger: ActivityLoggerService,
   ) {}
 
   private async generateOrderNumber(): Promise<string> {
@@ -199,8 +201,24 @@ export class OrdersService {
 
       const payment = await this.paymentService.createPayment(paymentDto);
 
+      // Log activity
+      await this.logOrderActivity(
+        ActivityAction.CREATE,
+        updatedOrder,
+        createdById,
+        `Created order ${updatedOrder.orderNumber} for ${updatedOrder.customerName}`,
+      );
+
       return { ...this.formatOrderResponse(updatedOrder), payment };
     }
+
+    // Log activity
+    await this.logOrderActivity(
+      ActivityAction.CREATE,
+      updatedOrder,
+      createdById,
+      `Created order ${updatedOrder.orderNumber} for ${updatedOrder.customerName}`,
+    );
 
     return {
       ...this.formatOrderResponse(updatedOrder),
@@ -304,6 +322,7 @@ export class OrdersService {
   async update(
     id: string,
     updateOrderDto: UpdateOrderDto,
+    userId?: string,
   ): Promise<OrderResponseDto> {
     // 1. Fetch existing order with items
     const order = await this.prisma.order.findUnique({
@@ -446,20 +465,37 @@ export class OrdersService {
       },
       (updateOrderDto.language as any) || updatedOrder.language || 'en',
     );
-    await this.prisma.order.update({
+    const finalOrder = await this.prisma.order.update({
       where: { id: updatedOrder.id },
       data: { invoiceUrl: url, invoiceFileId: fileId },
+      include: { items: true },
     });
 
-    return this.formatOrderResponse(updatedOrder);
+    // Log activity
+    await this.logOrderActivity(
+      ActivityAction.UPDATE,
+      finalOrder,
+      userId,
+      `Updated order ${finalOrder.orderNumber}`,
+    );
+
+    return this.formatOrderResponse(finalOrder);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, userId?: string): Promise<void> {
     const order = await this.prisma.order.findUnique({
       where: { id },
       include: { items: true },
     });
     if (!order) throw new NotFoundException('Order not found');
+
+    // Log activity before deletion
+    await this.logOrderActivity(
+      ActivityAction.DELETE,
+      order,
+      userId,
+      `Deleted order ${order.orderNumber}`,
+    );
 
     // Restore stock and delete order in a transaction
     await this.prisma.$transaction(async (tx) => {
@@ -499,7 +535,7 @@ export class OrdersService {
     }
   }
 
-  async cancelOrder(dto: CancelOrderDto) {
+  async cancelOrder(dto: CancelOrderDto, userId?: string) {
     const order = await this.prisma.order.findUnique({
       where: { id: dto.orderId },
       include: {
@@ -517,7 +553,7 @@ export class OrdersService {
       throw new BadRequestException('Order is already cancelled');
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       // Cancel related payments (if any)
       for (const payment of order.payments) {
         await tx.payment.update({
@@ -545,11 +581,22 @@ export class OrdersService {
           status: 'CANCELLED',
           notes: dto.reason ? `${order.notes ?? ''}\nCancellation reason: ${dto.reason}`.trim() : order.notes,
         },
+        include: { items: true },
       });
     });
+
+    // Log activity
+    await this.logOrderActivity(
+      ActivityAction.CANCEL,
+      result,
+      userId,
+      `Cancelled order ${result.orderNumber}${dto.reason ? `. Reason: ${dto.reason}` : ''}`,
+    );
+
+    return result;
   }
 
-  async refundOrder(dto: CancelOrderDto) {
+  async refundOrder(dto: CancelOrderDto, userId?: string) {
     const order = await this.prisma.order.findUnique({
       where: { id: dto.orderId },
       include: {
@@ -572,7 +619,7 @@ export class OrdersService {
       throw new BadRequestException('Cannot refund a cancelled order');
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       // Refund related payments (if any)
       for (const payment of order.payments) {
         await tx.payment.update({
@@ -601,8 +648,19 @@ export class OrdersService {
           paymentStatus: 'REFUNDED',
           notes: dto.reason ? `${order.notes ?? ''}\nRefund reason: ${dto.reason}`.trim() : order.notes,
         },
+        include: { items: true },
       });
     });
+
+    // Log activity
+    await this.logOrderActivity(
+      ActivityAction.REFUND,
+      result,
+      userId,
+      `Refunded order ${result.orderNumber}${dto.reason ? `. Reason: ${dto.reason}` : ''}`,
+    );
+
+    return result;
   }
 
   private formatOrderResponse(order: any): OrderResponseDto {
@@ -646,5 +704,43 @@ export class OrdersService {
         totalPrice: item.totalPrice.toNumber(),
       })),
     };
+  }
+
+  /**
+   * Helper method to log order activities
+   */
+  private async logOrderActivity(
+    action: ActivityAction,
+    order: any,
+    userId?: string,
+    description?: string,
+  ): Promise<void> {
+    let user: { id: string; name: string | null; email: string; role: any } | null = null;
+    if (userId) {
+      user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, name: true, email: true, role: true },
+      });
+    }
+
+    this.activityLogger.logActivity({
+      userId: user?.id,
+      userName: user?.name || undefined,
+      userEmail: user?.email,
+      userRole: user?.role,
+      action,
+      entity: 'Order',
+      entityId: order.id,
+      description: description || `${action} order ${order.orderNumber}`,
+      metadata: {
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        customerPhone: order.customerPhone,
+        totalAmount: order.totalAmount?.toNumber ? order.totalAmount.toNumber() : order.totalAmount,
+        status: order.status,
+        paymentStatus: order.paymentStatus,
+        itemsCount: order.items?.length || 0,
+      },
+    });
   }
 }

@@ -54,6 +54,25 @@ const DEFAULT_PERMISSIONS = {
     Permission.REVIEW_READ,
     Permission.REVIEW_APPROVE,
     Permission.REVIEW_DELETE,
+
+    // Lot permissions
+    Permission.LOT_CREATE,
+    Permission.LOT_READ,
+    Permission.LOT_UPDATE,
+    Permission.LOT_DELETE,
+
+    // Lot Detail permissions
+    Permission.LOT_DETAIL_CREATE,
+    Permission.LOT_DETAIL_READ,
+    Permission.LOT_DETAIL_UPDATE,
+    Permission.LOT_DETAIL_DELETE,
+
+    // Lot Arrival permissions
+    Permission.LOT_ARRIVAL_CREATE,
+    Permission.LOT_ARRIVAL_READ,
+    Permission.LOT_ARRIVAL_UPDATE,
+    Permission.LOT_ARRIVAL_VERIFY,
+    Permission.LOT_ARRIVAL_DELETE,
   ],
 
   [UserRole.USER]: [

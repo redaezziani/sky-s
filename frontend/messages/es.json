@@ -17,6 +17,9 @@
       "orderItems": "Artículos del pedido",
       "reviews": "Reseñas",
       "analytics": "Analíticas",
+      "logs": "Registros de Actividad",
+      "lots": "Gestión de Lotes",
+      "lotArrivals": "Llegadas de Lotes",
       "settings": "Configuración"
     },
     "navUser": {
@@ -84,6 +87,13 @@
         "failed": "Error al iniciar sesión",
         "invalid": "Correo electrónico o contraseña inválidos."
       }
+    },
+    "unauthorized": {
+      "title": "Acceso Denegado",
+      "description": "No tienes permiso para acceder a esta página",
+      "message": "Esta página está restringida a usuarios con roles específicos. Por favor, contacta con tu administrador si crees que deberías tener acceso.",
+      "goBack": "Volver",
+      "goToDashboard": "Ir al Panel de Control"
     },
     "skus": {
       "title": "Gestión de SKU e inventario",
@@ -554,6 +564,178 @@
         }
       }
     },
+    "logs": {
+      "title": "Registros de Actividad",
+      "description": "Ver y monitorear los registros de actividad del sistema",
+      "filters": {
+        "search": "Buscar registros...",
+        "searchPlaceholder": "Buscar por mensaje, usuario o entidad",
+        "selectDate": "Seleccionar fecha",
+        "selectType": "Tipo de registro",
+        "selectAction": "Acción",
+        "selectEntity": "Entidad",
+        "allActions": "Todas las Acciones",
+        "clearFilters": "Limpiar filtros"
+      },
+      "logTypes": {
+        "activity": "Actividad",
+        "error": "Error",
+        "combined": "Todos los registros"
+      },
+      "actions": {
+        "CREATE": "Crear",
+        "UPDATE": "Actualizar",
+        "DELETE": "Eliminar",
+        "CANCEL": "Cancelar",
+        "REFUND": "Reembolsar",
+        "RESTORE": "Restaurar",
+        "LOGIN": "Iniciar sesión",
+        "LOGOUT": "Cerrar sesión",
+        "VIEW": "Ver",
+        "EXPORT": "Exportar",
+        "IMPORT": "Importar"
+      },
+      "table": {
+        "timestamp": "Hora",
+        "user": "Usuario",
+        "action": "Acción",
+        "entity": "Entidad",
+        "description": "Descripción",
+        "details": "Detalles",
+        "searchPlaceholder": "Buscar registros por usuario, acción, entidad o mensaje...",
+        "noLogs": "No se encontraron registros",
+        "loading": "Cargando registros...",
+        "error": "Error al cargar registros"
+      },
+      "stats": {
+        "title": "Estadísticas de Registros",
+        "totalLogs": "Total de Registros",
+        "activityLogs": "Registros de Actividad",
+        "errorLogs": "Registros de Error",
+        "topActions": "Principales Acciones",
+        "topEntities": "Principales Entidades",
+        "topUsers": "Principales Usuarios"
+      },
+      "details": {
+        "title": "Detalles del Registro",
+        "timestamp": "Marca de tiempo",
+        "user": "Usuario",
+        "userId": "ID de Usuario",
+        "userName": "Nombre de Usuario",
+        "userEmail": "Email del Usuario",
+        "userRole": "Rol del Usuario",
+        "action": "Acción",
+        "entity": "Tipo de Entidad",
+        "entityId": "ID de Entidad",
+        "description": "Descripción",
+        "metadata": "Datos Adicionales",
+        "ipAddress": "Dirección IP",
+        "userAgent": "Agente de Usuario",
+        "close": "Cerrar"
+      }
+    },
+    "lots": {
+      "title": "Gestión de Lotes",
+      "description": "Administrar lotes de envío y sus detalles",
+      "createLot": "Crear Lote",
+      "editLot": "Editar Lote",
+      "createDetail": "Agregar Detalle",
+      "lotDetails": "Detalles del Lote",
+      "lot": "Lote",
+      "lotId": "ID de Lote",
+      "detailId": "ID de Detalle",
+      "companyName": "Nombre de la Empresa",
+      "companyCity": "Ciudad de la Empresa",
+      "companyNamePlaceholder": "ej: DHL Express",
+      "companyCityPlaceholder": "ej: Nueva York",
+      "totalQuantity": "Cantidad Total",
+      "totalPrice": "Precio Total",
+      "quantity": "Cantidad",
+      "price": "Precio",
+      "shippingCompany": "Empresa de Envío",
+      "shippingCity": "Ciudad de Envío",
+      "pieces": "Piezas",
+      "pieceDetails": "Detalles de Piezas",
+      "pieceName": "Nombre",
+      "qty": "Cant",
+      "addPiece": "Agregar Pieza",
+      "notes": "Notas",
+      "notesPlaceholder": "Agregar notas adicionales...",
+      "createdAt": "Fecha de Creación",
+      "searchPlaceholder": "Buscar lotes por empresa, ciudad o ID de lote...",
+      "noData": "No se encontraron lotes",
+      "noDetails": "No se agregaron detalles a este lote",
+      "confirmDelete": "¿Está seguro de que desea eliminar este lote?",
+      "fetchError": "Error al cargar los lotes",
+      "fetchDetailsError": "Error al cargar los detalles del lote",
+      "createSuccess": "Lote creado exitosamente",
+      "createError": "Error al crear el lote",
+      "createDetailSuccess": "Detalle del lote creado exitosamente",
+      "createDetailError": "Error al crear el detalle del lote",
+      "updateSuccess": "Lote actualizado exitosamente",
+      "updateError": "Error al actualizar el lote",
+      "deleteSuccess": "Lote eliminado exitosamente",
+      "deleteError": "Error al eliminar el lote",
+      "minQuantity": "La cantidad debe ser al menos 1",
+      "minPrice": "El precio debe ser al menos 0",
+      "status": {
+        "label": "Estado",
+        "pending": "Pendiente",
+        "inTransit": "En Tránsito",
+        "arrived": "Llegado",
+        "verified": "Verificado",
+        "completed": "Completado",
+        "cancelled": "Cancelado"
+      },
+      "filters": {
+        "from": "Desde:",
+        "to": "Hasta:",
+        "pickDate": "Seleccionar fecha",
+        "clearFilters": "Limpiar filtros"
+      }
+    },
+    "lotArrivals": {
+      "title": "Llegadas de Lotes",
+      "description": "Verificar y administrar las llegadas de lotes",
+      "arrivalId": "ID de Llegada",
+      "lotDetailId": "ID de Detalle",
+      "quantity": "Cantidad",
+      "price": "Precio",
+      "shippingCompany": "Empresa de Envío",
+      "shippingCity": "Ciudad de Envío",
+      "pieceDetails": "Detalles de Piezas",
+      "pieceName": "Nombre",
+      "qty": "Cant",
+      "addPiece": "Agregar Pieza",
+      "notes": "Notas",
+      "notesPlaceholder": "Agregar notas sobre discrepancias o problemas...",
+      "verifiedAt": "Verificado el",
+      "createdAt": "Creado el",
+      "verifyArrival": "Verificar Llegada",
+      "arrivalDetails": "Detalles de Llegada",
+      "verify": "Verificar",
+      "filterByStatus": "Filtrar por Estado",
+      "allStatuses": "Todos los Estados",
+      "total": "Total",
+      "noData": "No se encontraron llegadas",
+      "fetchError": "Error al cargar las llegadas de lotes",
+      "updateSuccess": "Llegada de lote actualizada exitosamente",
+      "updateError": "Error al actualizar la llegada del lote",
+      "status": {
+        "label": "Estado",
+        "pending": "Pendiente de Verificación",
+        "verified": "Verificado",
+        "damaged": "Dañado",
+        "incomplete": "Incompleto",
+        "excess": "Artículos Excedentes"
+      },
+      "filters": {
+        "from": "Desde:",
+        "to": "Hasta:",
+        "pickDate": "Seleccionar fecha",
+        "clearFilters": "Limpiar filtros"
+      }
+    },
     "settings": {
       "title": "Configuración",
       "description": "Administra la configuración de la aplicación",
@@ -803,11 +985,21 @@
           }
         }
       }
-    },
-    "common": {
-      "unknownProduct": "Producto desconocido",
-      "noAttributes": "Sin atributos"
     }
+  },
+  "common": {
+    "unknownProduct": "Producto desconocido",
+    "noAttributes": "Sin atributos",
+    "loading": "Cargando...",
+    "actions": "Acciones",
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "creating": "Creando...",
+    "updating": "Actualizando...",
+    "required": "Este campo es obligatorio",
+    "error": "Ocurrió un error. Por favor, inténtalo de nuevo.",
+    "search": "Buscar..."
   },
   "app": {
     "title": "Sky's Store - Plataforma de comercio electrónico de código abierto",
@@ -848,7 +1040,8 @@
       "Inventory": "Inventario",
       "Analytics": "Analíticas",
       "Settings": "Configuración",
-      "Reviews": "Reseñas"
+      "Reviews": "Reseñas",
+      "Lots": "Lotes y Llegadas"
     },
     "labels": {
       "product:create": "Crear Productos",
@@ -887,7 +1080,20 @@
       "review:create": "Crear Reseñas",
       "review:read": "Ver Reseñas",
       "review:approve": "Aprobar Reseñas",
-      "review:delete": "Eliminar Reseñas"
+      "review:delete": "Eliminar Reseñas",
+      "lot:create": "Crear Lotes",
+      "lot:read": "Ver Lotes",
+      "lot:update": "Editar Lotes",
+      "lot:delete": "Eliminar Lotes",
+      "lot_detail:create": "Crear Detalles de Lote",
+      "lot_detail:read": "Ver Detalles de Lote",
+      "lot_detail:update": "Editar Detalles de Lote",
+      "lot_detail:delete": "Eliminar Detalles de Lote",
+      "lot_arrival:create": "Crear Llegadas de Lote",
+      "lot_arrival:read": "Ver Llegadas de Lote",
+      "lot_arrival:update": "Editar Llegadas de Lote",
+      "lot_arrival:verify": "Verificar Llegadas de Lote",
+      "lot_arrival:delete": "Eliminar Llegadas de Lote"
     }
   }
 }

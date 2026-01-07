@@ -1,6 +1,6 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
-import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AnalyticsQueryDto, AnalyticsCardDto } from './dto/analytics.dto';
 import { AnalyticsChartDataDto } from './dto/analytics-chart-response.dto';
 import { AnalyticsChartQueryDto } from './dto/analytics-chart.dto';
@@ -9,12 +9,20 @@ import { AnalyticsTopProductsQueryDto } from './dto/analytics-top-products-query
 import { TopProductsMetricsDto } from './dto/analytics-top-products-metrics.dto';
 import { AnalyticsTopProductsMetricsQueryDto } from './dto/analytics-top-products-metrics-query.dto';
 import { AnalyticsCategoryPerformanceQueryDto, DailyCategoryPerformanceDto } from './dto/analytics-category-performance-query';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
+import { Permissions } from '../auth/decorators/permissions.decorator';
+import { Permission } from '../auth/permissions/permissions.enum';
+
 @ApiTags('Analytics')
 @Controller('analytics')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+@ApiBearerAuth()
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
   @Get('cards')
+  @Permissions(Permission.ANALYTICS_READ)
   @ApiOperation({ summary: 'Get key analytics cards' })
   @ApiQuery({
     name: 'period',
@@ -33,6 +41,7 @@ export class AnalyticsController {
   }
 
   @Get('chart')
+  @Permissions(Permission.ANALYTICS_READ)
   @ApiOperation({
     summary: 'Get daily chart data for orders, revenue, and products',
   })
@@ -49,6 +58,7 @@ export class AnalyticsController {
 
   // New endpoint for top 10 products
   @Get('top-products')
+  @Permissions(Permission.ANALYTICS_READ)
   @ApiOperation({ summary: 'Get top 10 ordered products for a period' })
   @ApiQuery({
     name: 'period',
@@ -67,6 +77,7 @@ export class AnalyticsController {
   }
 
   @Get('top-products-metrics')
+  @Permissions(Permission.ANALYTICS_READ)
   @ApiOperation({ summary: 'Get top products metrics for charting' })
   @ApiQuery({
     name: 'period',
@@ -86,6 +97,7 @@ export class AnalyticsController {
   }
 
   @Get('category-performance')
+  @Permissions(Permission.ANALYTICS_READ)
   @ApiOperation({ summary: 'Get category performance metrics for charting' })
   @ApiQuery({
     name: 'period',

@@ -85,7 +85,45 @@ export class OrderItemsService {
   }
 
   async remove(id: string): Promise<void> {
-    await this.prisma.orderItem.delete({ where: { id } });
+    // First, get the order item to retrieve the quantity and skuId
+    const orderItem = await this.prisma.orderItem.findUnique({
+      where: { id },
+      include: {
+        sku: true,
+      },
+    });
+
+    if (!orderItem) {
+      throw new NotFoundException('Order item not found');
+    }
+
+    // Return the quantity back to stock
+    const sku = orderItem.sku;
+    const previousStock = sku.stock;
+    const newStock = previousStock + orderItem.quantity;
+
+    // Update the SKU stock and create inventory movement in a transaction
+    await this.prisma.$transaction([
+      // Update SKU stock
+      this.prisma.productSKU.update({
+        where: { id: orderItem.skuId },
+        data: { stock: newStock },
+      }),
+      // Create inventory movement record
+      this.prisma.inventoryMovement.create({
+        data: {
+          skuId: orderItem.skuId,
+          type: 'IN',
+          quantity: orderItem.quantity,
+          reason: 'Order item deleted',
+          reference: orderItem.orderId,
+          previousStock: previousStock,
+          newStock: newStock,
+        },
+      }),
+      // Delete the order item
+      this.prisma.orderItem.delete({ where: { id } }),
+    ]);
   }
 
   private format(item: any): OrderItemResponseDto {

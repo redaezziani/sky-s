@@ -53,4 +53,23 @@ export enum Permission {
   REVIEW_READ = 'review:read',
   REVIEW_APPROVE = 'review:approve',
   REVIEW_DELETE = 'review:delete',
+
+  // Lot permissions
+  LOT_CREATE = 'lot:create',
+  LOT_READ = 'lot:read',
+  LOT_UPDATE = 'lot:update',
+  LOT_DELETE = 'lot:delete',
+
+  // Lot Detail permissions
+  LOT_DETAIL_CREATE = 'lot_detail:create',
+  LOT_DETAIL_READ = 'lot_detail:read',
+  LOT_DETAIL_UPDATE = 'lot_detail:update',
+  LOT_DETAIL_DELETE = 'lot_detail:delete',
+
+  // Lot Arrival permissions
+  LOT_ARRIVAL_CREATE = 'lot_arrival:create',
+  LOT_ARRIVAL_READ = 'lot_arrival:read',
+  LOT_ARRIVAL_UPDATE = 'lot_arrival:update',
+  LOT_ARRIVAL_VERIFY = 'lot_arrival:verify',
+  LOT_ARRIVAL_DELETE = 'lot_arrival:delete',
 }

@@ -17,6 +17,9 @@
       "orderItems": "عناصر الطلبات",
       "reviews": "التقييمات",
       "analytics": "التحليلات",
+      "logs": "سجلات النشاط",
+      "lots": "إدارة الدفعات",
+      "lotArrivals": "وصول الدفعات",
       "settings": "الإعدادات"
     },
     "navUser": {
@@ -83,6 +86,13 @@
         "failed": "فشل تسجيل الدخول",
         "invalid": "البريد الإلكتروني أو كلمة المرور غير صحيحة."
       }
+    },
+    "unauthorized": {
+      "title": "الوصول مرفوض",
+      "description": "ليس لديك صلاحية للوصول إلى هذه الصفحة",
+      "message": "هذه الصفحة مقيدة للمستخدمين ذوي الأدوار المحددة. يرجى الاتصال بالمسؤول إذا كنت تعتقد أنه يجب أن يكون لديك حق الوصول.",
+      "goBack": "العودة",
+      "goToDashboard": "الذهاب إلى لوحة التحكم"
     },
     "skus": {
       "title": "إدارة الأكواد والمخزون",
@@ -552,6 +562,178 @@
             "totalProducts": "إجمالي المنتجات"
           }
         }
+      }
+    },
+    "logs": {
+      "title": "سجلات النشاط",
+      "description": "عرض ومراقبة سجلات نشاط النظام",
+      "filters": {
+        "search": "البحث في السجلات...",
+        "searchPlaceholder": "البحث حسب الرسالة أو المستخدم أو الكيان",
+        "selectDate": "اختر التاريخ",
+        "selectType": "نوع السجل",
+        "selectAction": "الإجراء",
+        "selectEntity": "الكيان",
+        "allActions": "جميع الإجراءات",
+        "clearFilters": "مسح الفلاتر"
+      },
+      "logTypes": {
+        "activity": "النشاط",
+        "error": "الخطأ",
+        "combined": "جميع السجلات"
+      },
+      "actions": {
+        "CREATE": "إنشاء",
+        "UPDATE": "تحديث",
+        "DELETE": "حذف",
+        "CANCEL": "إلغاء",
+        "REFUND": "استرداد",
+        "RESTORE": "استعادة",
+        "LOGIN": "تسجيل الدخول",
+        "LOGOUT": "تسجيل الخروج",
+        "VIEW": "عرض",
+        "EXPORT": "تصدير",
+        "IMPORT": "استيراد"
+      },
+      "table": {
+        "timestamp": "الوقت",
+        "user": "المستخدم",
+        "action": "الإجراء",
+        "entity": "الكيان",
+        "description": "الوصف",
+        "details": "التفاصيل",
+        "searchPlaceholder": "البحث في السجلات حسب المستخدم أو الإجراء أو الكيان أو الرسالة...",
+        "noLogs": "لم يتم العثور على سجلات",
+        "loading": "جاري تحميل السجلات...",
+        "error": "فشل تحميل السجلات"
+      },
+      "stats": {
+        "title": "إحصائيات السجلات",
+        "totalLogs": "إجمالي السجلات",
+        "activityLogs": "سجلات النشاط",
+        "errorLogs": "سجلات الأخطاء",
+        "topActions": "أهم الإجراءات",
+        "topEntities": "أهم الكيانات",
+        "topUsers": "أهم المستخدمين"
+      },
+      "details": {
+        "title": "تفاصيل السجل",
+        "timestamp": "الطابع الزمني",
+        "user": "المستخدم",
+        "userId": "معرف المستخدم",
+        "userName": "اسم المستخدم",
+        "userEmail": "البريد الإلكتروني للمستخدم",
+        "userRole": "دور المستخدم",
+        "action": "الإجراء",
+        "entity": "نوع الكيان",
+        "entityId": "معرف الكيان",
+        "description": "الوصف",
+        "metadata": "بيانات إضافية",
+        "ipAddress": "عنوان IP",
+        "userAgent": "وكيل المستخدم",
+        "close": "إغلاق"
+      }
+    },
+    "lots": {
+      "title": "إدارة الدفعات",
+      "description": "إدارة دفعات الشحن وتفاصيلها",
+      "createLot": "إنشاء دفعة",
+      "editLot": "تحرير الدفعة",
+      "createDetail": "إضافة تفاصيل",
+      "lotDetails": "تفاصيل الدفعة",
+      "lot": "دفعة",
+      "lotId": "رقم الدفعة",
+      "detailId": "رقم التفاصيل",
+      "companyName": "اسم الشركة",
+      "companyCity": "مدينة الشركة",
+      "companyNamePlaceholder": "مثال: DHL Express",
+      "companyCityPlaceholder": "مثال: نيويورك",
+      "totalQuantity": "الكمية الإجمالية",
+      "totalPrice": "السعر الإجمالي",
+      "quantity": "الكمية",
+      "price": "السعر",
+      "shippingCompany": "شركة الشحن",
+      "shippingCity": "مدينة الشحن",
+      "pieces": "القطع",
+      "pieceDetails": "تفاصيل القطع",
+      "pieceName": "الاسم",
+      "qty": "الكمية",
+      "addPiece": "إضافة قطعة",
+      "notes": "ملاحظات",
+      "notesPlaceholder": "أضف أي ملاحظات إضافية...",
+      "createdAt": "تاريخ الإنشاء",
+      "searchPlaceholder": "البحث في الدفعات حسب الشركة أو المدينة أو رقم الدفعة...",
+      "noData": "لا توجد دفعات",
+      "noDetails": "لم تتم إضافة تفاصيل لهذه الدفعة",
+      "confirmDelete": "هل أنت متأكد من حذف هذه الدفعة؟",
+      "fetchError": "فشل تحميل الدفعات",
+      "fetchDetailsError": "فشل تحميل تفاصيل الدفعة",
+      "createSuccess": "تم إنشاء الدفعة بنجاح",
+      "createError": "فشل إنشاء الدفعة",
+      "createDetailSuccess": "تم إنشاء تفاصيل الدفعة بنجاح",
+      "createDetailError": "فشل إنشاء تفاصيل الدفعة",
+      "updateSuccess": "تم تحديث الدفعة بنجاح",
+      "updateError": "فشل تحديث الدفعة",
+      "deleteSuccess": "تم حذف الدفعة بنجاح",
+      "deleteError": "فشل حذف الدفعة",
+      "minQuantity": "يجب أن تكون الكمية 1 على الأقل",
+      "minPrice": "يجب أن يكون السعر 0 على الأقل",
+      "status": {
+        "label": "الحالة",
+        "pending": "قيد الانتظار",
+        "inTransit": "قيد النقل",
+        "arrived": "وصلت",
+        "verified": "تم التحقق",
+        "completed": "مكتمل",
+        "cancelled": "ملغي"
+      },
+      "filters": {
+        "from": "من:",
+        "to": "إلى:",
+        "pickDate": "اختر التاريخ",
+        "clearFilters": "مسح الفلاتر"
+      }
+    },
+    "lotArrivals": {
+      "title": "وصول الدفعات",
+      "description": "التحقق من وصول الدفعات وإدارتها",
+      "arrivalId": "رقم الوصول",
+      "lotDetailId": "رقم التفاصيل",
+      "quantity": "الكمية",
+      "price": "السعر",
+      "shippingCompany": "شركة الشحن",
+      "shippingCity": "مدينة الشحن",
+      "pieceDetails": "تفاصيل القطع",
+      "pieceName": "الاسم",
+      "qty": "الكمية",
+      "addPiece": "إضافة قطعة",
+      "notes": "ملاحظات",
+      "notesPlaceholder": "أضف ملاحظات حول الاختلافات أو المشاكل...",
+      "verifiedAt": "تاريخ التحقق",
+      "createdAt": "تاريخ الإنشاء",
+      "verifyArrival": "التحقق من الوصول",
+      "arrivalDetails": "تفاصيل الوصول",
+      "verify": "تحقق",
+      "filterByStatus": "تصفية حسب الحالة",
+      "allStatuses": "جميع الحالات",
+      "total": "الإجمالي",
+      "noData": "لا توجد وصولات",
+      "fetchError": "فشل تحميل وصول الدفعات",
+      "updateSuccess": "تم تحديث وصول الدفعة بنجاح",
+      "updateError": "فشل تحديث وصول الدفعة",
+      "status": {
+        "label": "الحالة",
+        "pending": "في انتظار التحقق",
+        "verified": "تم التحقق",
+        "damaged": "تالف",
+        "incomplete": "غير مكتمل",
+        "excess": "عناصر زائدة"
+      },
+      "filters": {
+        "from": "من:",
+        "to": "إلى:",
+        "pickDate": "اختر التاريخ",
+        "clearFilters": "مسح الفلاتر"
       }
     },
     "settings": {
@@ -1134,11 +1316,21 @@
           }
         }
       }
-    },
-    "common": {
-      "unknownProduct": "منتج غير معروف",
-      "noAttributes": "لا توجد خصائص"
     }
+  },
+  "common": {
+    "unknownProduct": "منتج غير معروف",
+    "noAttributes": "لا توجد خصائص",
+    "loading": "جاري التحميل...",
+    "actions": "الإجراءات",
+    "cancel": "إلغاء",
+    "create": "إنشاء",
+    "update": "تحديث",
+    "creating": "جاري الإنشاء...",
+    "updating": "جاري التحديث...",
+    "required": "هذا الحقل مطلوب",
+    "error": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+    "search": "بحث..."
   },
   "app": {
     "title": "متجر سكاي - منصة تجارة إلكترونية مفتوحة المصدر",
@@ -1179,7 +1371,8 @@
       "Inventory": "المخزون",
       "Analytics": "التحليلات",
       "Settings": "الإعدادات",
-      "Reviews": "التقييمات"
+      "Reviews": "التقييمات",
+      "Lots": "الشحنات والوصول"
     },
     "labels": {
       "product:create": "إنشاء المنتجات",
@@ -1218,7 +1411,20 @@
       "review:create": "إنشاء التقييمات",
       "review:read": "عرض التقييمات",
       "review:approve": "الموافقة على التقييمات",
-      "review:delete": "حذف التقييمات"
+      "review:delete": "حذف التقييمات",
+      "lot:create": "إنشاء الشحنات",
+      "lot:read": "عرض الشحنات",
+      "lot:update": "تعديل الشحنات",
+      "lot:delete": "حذف الشحنات",
+      "lot_detail:create": "إنشاء تفاصيل الشحنة",
+      "lot_detail:read": "عرض تفاصيل الشحنة",
+      "lot_detail:update": "تعديل تفاصيل الشحنة",
+      "lot_detail:delete": "حذف تفاصيل الشحنة",
+      "lot_arrival:create": "إنشاء وصول الشحنة",
+      "lot_arrival:read": "عرض وصول الشحنة",
+      "lot_arrival:update": "تعديل وصول الشحنة",
+      "lot_arrival:verify": "التحقق من وصول الشحنة",
+      "lot_arrival:delete": "حذف وصول الشحنة"
     }
   }
 }

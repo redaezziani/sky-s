@@ -16,6 +16,9 @@ import {
   IconBoxSeam,
   IconClipboardList,
   IconSettings,
+  IconFileText,
+  IconTruckDelivery,
+  IconPackageImport,
 } from '@tabler/icons-react';
 
 import { NavMain } from '@/components/nav-main';
@@ -125,6 +128,24 @@ export function AppSidebar({
       url: '/dashboard/analytics',
       icon: IconChartLine,
       active: isRouteAccessible('/dashboard/analytics'),
+    },
+    {
+      title: t('links.logs'),
+      url: '/dashboard/logs',
+      icon: IconFileText,
+      active: isRouteAccessible('/dashboard/logs'),
+    },
+    {
+      title: t('links.lots'),
+      url: '/dashboard/lots',
+      icon: IconTruckDelivery,
+      active: isRouteAccessible('/dashboard/lots'),
+    },
+    {
+      title: t('links.lotArrivals'),
+      url: '/dashboard/lot-arrivals',
+      icon: IconPackageImport,
+      active: isRouteAccessible('/dashboard/lot-arrivals'),
     },
     {
       title: t('links.settings'),

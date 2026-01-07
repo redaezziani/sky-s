@@ -38,12 +38,13 @@ import { RequestUser } from '../auth/types/auth.types';
 
 @ApiTags('users')
 @Controller('users')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
+  @Permissions(Permission.USER_READ_ALL)
   @ApiOperation({ summary: 'Get all users with filtering and pagination' })
   @ApiResponse({
     status: 200,
@@ -62,6 +63,7 @@ export class UsersController {
   }
 
   @Get(':id')
+  @Permissions(Permission.USER_READ)
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiResponse({
     status: 200,
@@ -75,6 +77,7 @@ export class UsersController {
   }
 
   @Post()
+  @Permissions(Permission.USER_CREATE)
   @ApiOperation({ summary: 'Create a new user (Admin only)' })
   @ApiResponse({
     status: 201,
@@ -88,6 +91,7 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @Permissions(Permission.USER_UPDATE)
   @ApiOperation({ summary: 'Update user by ID (Admin only)' })
   @ApiResponse({
     status: 200,
@@ -106,6 +110,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @Permissions(Permission.USER_DELETE)
   @ApiOperation({ summary: 'Soft delete user by ID (Admin only)' })
   @ApiResponse({ status: 200, description: 'User deleted successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
@@ -117,6 +122,7 @@ export class UsersController {
   }
 
   @Delete()
+  @Permissions(Permission.USER_DELETE)
   @ApiOperation({ summary: 'Bulk delete users (Admin only)' })
   @ApiResponse({ status: 200, description: 'Users deleted successfully' })
   @ApiResponse({ status: 403, description: 'Forbidden - Cannot delete own account' })

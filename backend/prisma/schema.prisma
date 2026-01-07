@@ -425,3 +425,94 @@ model RolePermission {
   @@index([permission])
   @@index([isActive])
 }
+
+enum LotStatus {
+  PENDING
+  IN_TRANSIT
+  ARRIVED
+  VERIFIED
+  COMPLETED
+  CANCELLED
+}
+
+// Main shipping lot
+model Lot {
+  id            String    @id @default(uuid())
+  lotId         Int       @unique @default(autoincrement()) // Human-readable ID: 1, 2, 3, 4...
+  totalPrice    Decimal   @db.Decimal(10, 2)
+  totalQuantity Int
+  companyName   String    @db.VarChar(200)
+  companyCity   String    @db.VarChar(100)
+  status        LotStatus @default(PENDING)
+  notes         String?   @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  // Relations
+  details  LotDetail[]
+  arrivals LotArrival[]
+
+  @@index([lotId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// Details of what's IN the lot (what was sent)
+model LotDetail {
+  id                  String    @id @default(uuid())
+  detailId            Int       @unique @default(autoincrement()) // Human-readable ID
+  lotId               String
+  quantity            Int
+  price               Decimal   @db.Decimal(10, 2)
+  shippingCompany     String    @db.VarChar(200)
+  shippingCompanyCity String    @db.VarChar(100)
+  pieceDetails        Json // {name: string, quantity: number, status: string}[]
+  notes               String?   @db.Text
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  deletedAt           DateTime?
+
+  // Relations
+  lot      Lot          @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  arrivals LotArrival[]
+
+  @@index([detailId])
+  @@index([lotId])
+}
+
+enum ArrivalStatus {
+  PENDING      // Not yet verified
+  VERIFIED     // All good
+  DAMAGED      // Some items damaged
+  INCOMPLETE   // Missing items
+  EXCESS       // More than expected
+}
+
+// What ACTUALLY arrived (created automatically, updated by admin)
+model LotArrival {
+  id                  String        @id @default(uuid())
+  arrivalId           Int           @unique @default(autoincrement()) // Human-readable ID
+  lotId               String
+  lotDetailId         String // Link to compare expected vs actual
+  quantity            Int
+  price               Decimal       @db.Decimal(10, 2)
+  shippingCompany     String        @db.VarChar(200)
+  shippingCompanyCity String        @db.VarChar(100)
+  pieceDetails        Json // {name: string, quantity: number, status: string}[]
+  status              ArrivalStatus @default(PENDING)
+  notes               String?       @db.Text
+  verifiedAt          DateTime? // When admin verified/updated
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  deletedAt           DateTime?
+
+  // Relations
+  lot       Lot       @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  lotDetail LotDetail @relation(fields: [lotDetailId], references: [id], onDelete: Cascade)
+
+  @@index([arrivalId])
+  @@index([lotId])
+  @@index([lotDetailId])
+  @@index([status])
+}

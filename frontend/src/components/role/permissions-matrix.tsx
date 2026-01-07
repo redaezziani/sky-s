@@ -69,9 +69,9 @@ function SortableRoleCard({
   editedPermissions: Record<UserRole, Set<string>>;
   togglePermission: (role: UserRole, permission: string) => void;
   loading: boolean;
-  tRoles: unknown;
-  tCategories: unknown;
-  tLabels: unknown;
+  tRoles: (key: string) => string;
+  tCategories: (key: string) => string;
+  tLabels: (key: string) => string;
   collapsedState: Record<UserRole, boolean>;
   onToggleCollapse: (role: UserRole) => void;
 }) {
@@ -113,7 +113,7 @@ function SortableRoleCard({
               <div className="p-2 rounded-lg bg-primary/10 shrink-0">
                 <Icon className="h-5 w-5 text-primary" />
               </div>
-              <CardTitle className="text-lg truncate">{(tRoles as { [key: string]: string })[role]}</CardTitle>
+              <CardTitle className="text-lg truncate">{tRoles(role)}</CardTitle>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
@@ -151,7 +151,7 @@ function SortableRoleCard({
                     <div key={category} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <h4 className="text-sm font-medium text-muted-foreground">
-                          {(tCategories as { [key: string]: string })[category]}
+                          {tCategories(category)}
                         </h4>
                         <Badge variant="secondary" className="text-xs">
                           {
@@ -163,27 +163,32 @@ function SortableRoleCard({
                         </Badge>
                       </div>
                       <div className="space-y-2 ps-2">
-                        {permissions.map((permission) => (
-                          <div
-                            key={permission}
-                            className="flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-muted/50 transition-colors"
-                          >
-                            <label
-                              htmlFor={`${role}-${permission}`}
-                              className="text-sm cursor-pointer flex-1"
+                        {permissions.map((permission) => {
+                          // permission is a string like "product:create"
+                          const label = tLabels(permission) || permission;
+
+                          return (
+                            <div
+                              key={permission}
+                              className="flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-muted/50 transition-colors"
                             >
-                              {(tLabels as { [key: string]: string })[permission]}
-                            </label>
-                            <Switch
-                              id={`${role}-${permission}`}
-                              checked={editedPermissions[role]?.has(permission)}
-                              onCheckedChange={() =>
-                                togglePermission(role, permission)
-                              }
-                              disabled={loading}
-                            />
-                          </div>
-                        ))}
+                              <label
+                                htmlFor={`${role}-${permission}`}
+                                className="text-sm cursor-pointer flex-1"
+                              >
+                                {label}
+                              </label>
+                              <Switch
+                                id={`${role}-${permission}`}
+                                checked={editedPermissions[role]?.has(permission)}
+                                onCheckedChange={() =>
+                                  togglePermission(role, permission)
+                                }
+                                disabled={loading}
+                              />
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   );
