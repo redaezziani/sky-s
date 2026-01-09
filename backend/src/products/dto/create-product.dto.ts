@@ -145,18 +145,6 @@ export class CreateProductSKUDto {
   price: number;
 
   @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  @Type(() => Number)
-  comparePrice?: number;
-
-  @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  @Type(() => Number)
-  costPrice?: number;
-
-  @IsOptional()
   @IsNumber()
   @Min(0)
   @Type(() => Number)
@@ -296,20 +284,6 @@ export class UpdateProductSKUDto {
   @Min(0)
   @Type(() => Number)
   price?: number;
-
-  @ApiPropertyOptional({ description: 'Compare price', example: 129.99 })
-  @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  @Type(() => Number)
-  comparePrice?: number;
-
-  @ApiPropertyOptional({ description: 'Cost price', example: 50 })
-  @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  @Type(() => Number)
-  costPrice?: number;
 
   @ApiPropertyOptional({ description: 'Stock quantity' })
   @IsOptional()

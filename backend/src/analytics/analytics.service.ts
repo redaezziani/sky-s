@@ -1,10 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AnalyticsCardDto } from './dto/analytics.dto';
-import { subDays, format } from 'date-fns';
+import { subDays, format, startOfDay, endOfDay, startOfHour, differenceInDays } from 'date-fns';
 import { TopProductsDto } from './dto/analytics-top-products.dto';
 import { TopProductsMetricsDto } from './dto/analytics-top-products-metrics.dto';
 import { DailyCategoryPerformanceDto } from './dto/analytics-category-performance-query';
+import { PaymentMethodBreakdownDto } from './dto/payment-method-analytics.dto';
+import { RealtimeDashboardDto } from './dto/realtime-dashboard.dto';
+import { HourlySalesDto } from './dto/hourly-sales.dto';
+import { TransactionMetricsDto } from './dto/transaction-metrics.dto';
+import { EmployeePerformanceDto } from './dto/employee-performance.dto';
+import { InventoryAnalyticsDto, LowStockProductDto } from './dto/inventory-analytics.dto';
+import { LotAnalyticsDto } from './dto/lot-analytics.dto';
+import { WeeklyPatternDto } from './dto/weekly-pattern.dto';
+
 @Injectable()
 export class AnalyticsService {
   constructor(private prisma: PrismaService) {}

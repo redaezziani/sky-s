@@ -5,6 +5,7 @@ export const metadata = {
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider as CustomThemeProvider } from '@/contexts/theme-context';
 import { Toaster } from '@/components/ui/sonner';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { getUserLocale } from '@/services/locale';
@@ -30,8 +31,10 @@ export default async function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {children}
-            <Toaster />
+            <CustomThemeProvider>
+              {children}
+              <Toaster />
+            </CustomThemeProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

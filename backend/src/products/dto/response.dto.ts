@@ -58,18 +58,6 @@ export class ProductSKUResponseDto {
   })
   price: number;
 
-  @ApiPropertyOptional({
-    description: 'Compare at price',
-    example: 249.99
-  })
-  comparePrice?: number;
-
-  @ApiPropertyOptional({
-    description: 'Cost price',
-    example: 89.99
-  })
-  costPrice?: number;
-
   @ApiProperty({
     description: 'Current stock',
     example: 50

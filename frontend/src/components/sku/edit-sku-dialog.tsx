@@ -45,8 +45,6 @@ const editSKUSchema = z.object({
   sku: z.string().min(1),
   barcode: z.string().optional(),
   price: z.number().min(0),
-  comparePrice: z.number().optional(),
-  costPrice: z.number().optional(),
   stock: z.number().min(0),
   lowStockAlert: z.number().min(0),
   weight: z.number().optional(),
@@ -88,8 +86,6 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
       sku: '',
       barcode: '',
       price: 0,
-      comparePrice: undefined,
-      costPrice: undefined,
       stock: 0,
       lowStockAlert: 5,
       weight: undefined,
@@ -115,8 +111,6 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
         sku: sku.sku,
         barcode: sku.barcode || '',
         price: sku.price,
-        comparePrice: sku.comparePrice || undefined,
-        costPrice: sku.costPrice || undefined,
         stock: sku.stock,
         lowStockAlert: sku.lowStockAlert,
         weight: sku.weight || undefined,
@@ -136,10 +130,6 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
       formData.append('sku', data.sku);
       if (data.barcode) formData.append('barcode', data.barcode);
       formData.append('price', String(data.price));
-      if (data.comparePrice !== undefined)
-        formData.append('comparePrice', String(data.comparePrice));
-      if (data.costPrice !== undefined)
-        formData.append('costPrice', String(data.costPrice));
       formData.append('stock', String(data.stock));
       formData.append('lowStockAlert', String(data.lowStockAlert));
       if (data.weight !== undefined)
@@ -268,8 +258,8 @@ export function EditSKUDialog({ open, onOpenChange, sku }: EditSKUDialogProps) {
             </div>
 
             {/* Pricing */}
-            <div className="grid grid-cols-3 gap-4">
-              {['price', 'comparePrice', 'costPrice'].map((name) => (
+            <div className="grid grid-cols-1 gap-4">
+              {['price'].map((name) => (
                 <FormField
                   key={name}
                   control={form.control}

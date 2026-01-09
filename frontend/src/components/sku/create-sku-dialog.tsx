@@ -43,8 +43,6 @@ const createSKUSchema = z.object({
   sku: z.string().optional(),
   barcode: z.string().optional(),
   price: z.number().min(0),
-  comparePrice: z.number().optional(),
-  costPrice: z.number().optional(),
   stock: z.number().min(0),
   lowStockAlert: z.number().min(0),
   weight: z.number().optional(),
@@ -74,8 +72,6 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
       sku: '',
       barcode: '',
       price: 0,
-      comparePrice: undefined,
-      costPrice: undefined,
       stock: 0,
       lowStockAlert: 5,
       weight: undefined,
@@ -100,10 +96,6 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
       if (data.sku) formData.append('sku', data.sku);
       if (data.barcode) formData.append('barcode', data.barcode);
       formData.append('price', String(data.price));
-      if (data.comparePrice !== undefined)
-        formData.append('comparePrice', String(data.comparePrice));
-      if (data.costPrice !== undefined)
-        formData.append('costPrice', String(data.costPrice));
       formData.append('stock', String(data.stock));
       formData.append('lowStockAlert', String(data.lowStockAlert));
       if (data.weight !== undefined)
@@ -213,9 +205,9 @@ export function CreateSKUDialog({ open, onOpenChange }: CreateSKUDialogProps) {
               ))}
             </div>
 
-            {/* Price, Compare, Cost */}
-            <div className="grid grid-cols-3 gap-4">
-              {['price', 'comparePrice', 'costPrice'].map((name) => (
+            {/* Price */}
+            <div className="grid grid-cols-1 gap-4">
+              {['price'].map((name) => (
                 <FormField
                   key={name}
                   control={form.control}

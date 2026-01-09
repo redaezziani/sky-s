@@ -383,17 +383,6 @@ export function EnhancedSKUTable({}: EnhancedSKUTableProps) {
           <div className="flex items-center space-x-1">
             <span className="font-medium">{formatPrice(sku.price)}</span>
           </div>
-          {sku.comparePrice && sku.comparePrice > sku.price && (
-            <div className="text-xs text-muted-foreground line-through">
-              {formatPrice(sku.comparePrice)}
-            </div>
-          )}
-          {sku.costPrice && (
-            <div className="text-xs text-muted-foreground">
-              {t.pages.skus.components.skuTable.table.cost}:{" "}
-              {formatPrice(sku.costPrice)}
-            </div>
-          )}
         </div>
       ),
     },

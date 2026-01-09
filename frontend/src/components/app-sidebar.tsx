@@ -17,12 +17,14 @@ import {
   IconClipboardList,
   IconSettings,
   IconFileText,
-  IconTruckDelivery,
-  IconPackageImport,
 } from '@tabler/icons-react';
+
+const SpainIcon = () => <img src="/svgs/spain.webp" alt="Spain flag" className="w-7 aspect-video" />;
+const MoroccoIcon = () => <img src="/svgs/morocco.webp" alt="Morocco flag" className="w-7 aspect-video" />;
 
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { ThemeSwitcher } from '@/components/theme/theme-switcher';
 import {
   Sidebar,
   SidebarContent,
@@ -138,13 +140,13 @@ export function AppSidebar({
     {
       title: t('links.lots'),
       url: '/dashboard/lots',
-      icon: IconTruckDelivery,
+      icon: SpainIcon,
       active: isRouteAccessible('/dashboard/lots'),
     },
     {
       title: t('links.lotArrivals'),
       url: '/dashboard/lot-arrivals',
-      icon: IconPackageImport,
+      icon: MoroccoIcon,
       active: isRouteAccessible('/dashboard/lot-arrivals'),
     },
     {
@@ -201,6 +203,9 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter>
+        <div className="flex items-center justify-between px-2 py-2">
+          <ThemeSwitcher />
+        </div>
         <NavUser
           user={
             user

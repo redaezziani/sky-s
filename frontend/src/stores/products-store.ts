@@ -6,8 +6,6 @@ export interface ProductSKU {
   sku: string;
   barcode?: string;
   price: number;
-  comparePrice?: number;
-  costPrice?: number;
   stock: number;
   lowStockAlert: number;
   weight?: number;

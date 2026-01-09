@@ -2,6 +2,18 @@
   "errors": {
     "permissionDenied": "You don't have permission to access this resource"
   },
+  "theme": {
+    "selectColor": "Select color theme",
+    "colorScheme": "Color Scheme",
+    "toggleMode": "Toggle theme mode",
+    "colors": {
+      "default": "Orange",
+      "blue": "Blue",
+      "green": "Green",
+      "purple": "Purple",
+      "rose": "Rose"
+    }
+  },
   "sidebar": {
     "storeManager": "Comodo Store ",
     "user": "User",

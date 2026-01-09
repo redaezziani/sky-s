@@ -37,7 +37,7 @@ export function ViewArrivalDialog({ open, onOpenChange, arrival }: ViewArrivalDi
               <p className="text-sm font-medium text-muted-foreground">
                 {t.pages.lotArrivals.price}
               </p>
-              <p className="text-lg">${Number(arrival.price).toFixed(2)}</p>
+              <p className="text-lg">{Number(arrival.price).toFixed(2)} MAD</p>
             </div>
           </div>
 

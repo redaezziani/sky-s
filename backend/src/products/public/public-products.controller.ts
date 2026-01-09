@@ -1,24 +1,34 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { PublicProductsService } from './public-products.service';
 import { PaginatedPublicProductsResponseDto, ProductDetailsDto, PublicProductDetailDto, PublicProductQueryDto } from '../dto/public-products.dto';
 import { RelatedProductsQueryDto } from '../dto/related-products';
-@ApiTags('Public Products')
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../auth/guards/permissions.guard';
+import { Permissions } from '../../auth/decorators/permissions.decorator';
+import { Permission } from '../../auth/permissions/permissions.enum';
+
+@ApiTags('Products')
 @Controller('public/products')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+@ApiBearerAuth()
 export class PublicProductsController {
   constructor(private readonly publicProductsService: PublicProductsService) {}
 
   @Get('latest')
+  @Permissions(Permission.PRODUCT_READ)
   @ApiOperation({
-    summary: 'Get latest products (public endpoint)',
+    summary: 'Get latest products',
     description:
-      'Get the latest products with minimal information for storefront display',
+      'Get the latest products with minimal information for display',
   })
   @ApiResponse({
     status: 200,
     description: 'Latest products retrieved successfully',
     type: PaginatedPublicProductsResponseDto,
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
   @ApiQuery({
     name: 'page',
     required: false,
@@ -84,16 +94,19 @@ export class PublicProductsController {
   }
 
     @Get('best')
+@Permissions(Permission.PRODUCT_READ)
 @ApiOperation({
-  summary: 'Get best products (public endpoint)',
+  summary: 'Get best products',
   description:
-    'Get the best-selling or highest-rated products for storefront display',
+    'Get the best-selling or highest-rated products for display',
 })
 @ApiResponse({
   status: 200,
   description: 'Best products retrieved successfully',
   type: PaginatedPublicProductsResponseDto,
 })
+@ApiResponse({ status: 401, description: 'Unauthorized' })
+@ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
 @ApiQuery({
   name: 'page',
   required: false,
@@ -122,8 +135,9 @@ async getBestProducts(
 }
 
   @Get('/:identifier/related')
+@Permissions(Permission.PRODUCT_READ)
 @ApiOperation({
-  summary: 'Get related products (public endpoint)',
+  summary: 'Get related products',
   description:
     'Fetch products related to the given product based on categories, price, and popularity',
 })
@@ -143,6 +157,8 @@ async getBestProducts(
   description: 'Related products retrieved successfully',
   type: PaginatedPublicProductsResponseDto,
 })
+@ApiResponse({ status: 401, description: 'Unauthorized' })
+@ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
 async getRelatedProducts(
   @Param('identifier') identifier: string,
   @Query() { limit }: RelatedProductsQueryDto,
@@ -151,8 +167,9 @@ async getRelatedProducts(
 }
 
   @Get('/:identifier')
+  @Permissions(Permission.PRODUCT_READ)
   @ApiOperation({
-    summary: 'Get product details by ID or slug (public endpoint)',
+    summary: 'Get product details by ID or slug',
     description: 'Get detailed product information including variants and SKUs',
   })
   @ApiParam({
@@ -169,6 +186,8 @@ async getRelatedProducts(
     status: 404,
     description: 'Product not found',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
   async getPublicProductDetails(
     @Param('identifier') identifier: string,
   ): Promise<ProductDetailsDto> {

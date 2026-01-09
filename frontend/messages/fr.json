@@ -2,6 +2,18 @@
   "errors": {
     "permissionDenied": "Vous n'avez pas la permission d'accéder à cette ressource"
   },
+  "theme": {
+    "selectColor": "Sélectionner le thème de couleur",
+    "colorScheme": "Schéma de Couleur",
+    "toggleMode": "Changer le mode du thème",
+    "colors": {
+      "default": "Orange",
+      "blue": "Bleu",
+      "green": "Vert",
+      "purple": "Violet",
+      "rose": "Rose"
+    }
+  },
   "sidebar": {
     "storeManager": "  la boutique Comodo",
     "user": "Utilisateur",

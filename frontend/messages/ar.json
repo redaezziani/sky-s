@@ -2,6 +2,18 @@
   "errors": {
     "permissionDenied": "ليس لديك الصلاحية للوصول إلى هذا المورد"
   },
+  "theme": {
+    "selectColor": "اختر لون المظهر",
+    "colorScheme": "نظام الألوان",
+    "toggleMode": "تبديل وضع المظهر",
+    "colors": {
+      "default": "برتقالي",
+      "blue": "أزرق",
+      "green": "أخضر",
+      "purple": "بنفسجي",
+      "rose": "وردي"
+    }
+  },
   "sidebar": {
     "storeManager": " متجر كومودو",
     "user": "المستخدم",

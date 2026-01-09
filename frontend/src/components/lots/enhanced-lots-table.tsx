@@ -167,6 +167,57 @@ export function EnhancedLotsTable({ startDate, endDate, initialSearch }: Enhance
     }
   };
 
+  const getDetailStatus = (detail: LotDetail) => {
+    // Check if there are any arrivals for this detail
+    if (detail.arrivals && detail.arrivals.length > 0) {
+      const latestArrival = detail.arrivals[0]; // Assuming first is latest
+      return latestArrival.status;
+    }
+
+    // Check piece details statuses
+    if (detail.pieceDetails && detail.pieceDetails.length > 0) {
+      const hasVerified = detail.pieceDetails.some(p => p.status === 'verified');
+      const hasDamaged = detail.pieceDetails.some(p => p.status === 'damaged');
+      const hasIncomplete = detail.pieceDetails.some(p => p.status === 'incomplete');
+      const hasExcess = detail.pieceDetails.some(p => p.status === 'excess');
+
+      if (hasDamaged) return 'DAMAGED';
+      if (hasIncomplete) return 'INCOMPLETE';
+      if (hasExcess) return 'EXCESS';
+      if (hasVerified) return 'VERIFIED';
+    }
+
+    return 'PENDING';
+  };
+
+  const getDetailStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { className: string; label: string }> = {
+      PENDING: {
+        className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+        label: t.pages.lotArrivals.status.pending,
+      },
+      VERIFIED: {
+        className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border-green-200 dark:border-green-800',
+        label: t.pages.lotArrivals.status.verified,
+      },
+      DAMAGED: {
+        className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border-red-200 dark:border-red-800',
+        label: t.pages.lotArrivals.status.damaged,
+      },
+      INCOMPLETE: {
+        className: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300 border-orange-200 dark:border-orange-800',
+        label: t.pages.lotArrivals.status.incomplete,
+      },
+      EXCESS: {
+        className: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+        label: t.pages.lotArrivals.status.excess,
+      },
+    };
+
+    const config = statusConfig[status] || statusConfig.PENDING;
+    return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
+  };
+
   const renderExpandedRow = (lot: Lot) => {
     const details = lotDetails[lot.id];
 
@@ -184,7 +235,7 @@ export function EnhancedLotsTable({ startDate, endDate, initialSearch }: Enhance
                 key={detail.id}
                 className="border rounded p-3 bg-background"
               >
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-sm">
                   <div>
                     <span className="font-medium">
                       {t.pages.lots.detailId}:
@@ -201,13 +252,19 @@ export function EnhancedLotsTable({ startDate, endDate, initialSearch }: Enhance
                     <span className="font-medium">
                       {t.pages.lots.price}:
                     </span>{' '}
-                    ${Number(detail.price).toFixed(2)}
+                    {Number(detail.price).toFixed(2)} MAD
                   </div>
                   <div>
                     <span className="font-medium">
                       {t.pages.lots.shippingCompany}:
                     </span>{' '}
                     {detail.shippingCompany}
+                  </div>
+                  <div>
+                    <span className="font-medium">
+                      {t.pages.lotArrivals.status.label}:
+                    </span>{' '}
+                    {getDetailStatusBadge(getDetailStatus(detail))}
                   </div>
                 </div>
                 {detail.pieceDetails && detail.pieceDetails.length > 0 && (
@@ -262,7 +319,7 @@ export function EnhancedLotsTable({ startDate, endDate, initialSearch }: Enhance
     {
       key: 'totalPrice',
       label: t.pages.lots.totalPrice,
-      render: (lot) => `$${Number(lot.totalPrice).toFixed(2)}`,
+      render: (lot) => `${Number(lot.totalPrice).toFixed(2)} MAD`,
     },
     {
       key: 'status',

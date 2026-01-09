@@ -158,8 +158,6 @@ model ProductSKU {
   sku           String    @unique @db.VarChar(100)
   barcode       String?   @unique @db.VarChar(100)
   price         Decimal   @db.Decimal(10, 2)
-  comparePrice  Decimal?  @db.Decimal(10, 2) // Original price for discounts
-  costPrice     Decimal?  @db.Decimal(10, 2) // Cost for profit calculation
   stock         Int       @default(0)
   lowStockAlert Int       @default(5)
   weight        Decimal?  @db.Decimal(8, 2) // in grams

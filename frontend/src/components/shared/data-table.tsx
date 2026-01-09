@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, ReactNode } from 'react';
+import { useState, useMemo, useCallback, ReactNode, Fragment } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -266,15 +266,13 @@ export function DataTable<T extends object>({
                 filteredData.map((item, index) => {
                   const itemKey = String(getNestedValue(item, expandedRowKey));
                   const isExpanded = expandedRows.has(itemKey);
+                  const rowKey = ('id' in item
+                    ? String((item as { id: string | number }).id)
+                    : undefined) || `row-${index}`;
 
                   return (
-                    <>
+                    <Fragment key={rowKey}>
                       <TableRow
-                        key={
-                          ('id' in item
-                            ? String((item as { id: string | number }).id)
-                            : undefined) || `row-${index}`
-                        }
                         className={`${
                           index % 2 === 0 ? 'bg-muted' : 'bg-background'
                         } ${
@@ -331,7 +329,7 @@ export function DataTable<T extends object>({
                           </TableCell>
                         </TableRow>
                       )}
-                    </>
+                    </Fragment>
                   );
                 })
               )}

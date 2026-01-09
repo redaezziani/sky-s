@@ -16,8 +16,6 @@ export interface ProductSKU {
   sku: string;
   barcode?: string;
   price: number;
-  comparePrice?: number;
-  costPrice?: number;
   stock: number;
   lowStockAlert: number;
   weight?: number;
@@ -74,8 +72,6 @@ export interface CreateProductSKUDto {
   sku?: string;
   barcode?: string;
   price: number; // required
-  comparePrice?: number;
-  costPrice?: number;
   stock: number; // ✅ always send number
   lowStockAlert?: number;
   weight?: number;
@@ -347,14 +343,6 @@ const useProductVariantsStore = create<ProductVariantsState>()(
             payload = {
               ...data,
               price: Number(data.price ?? 0),
-              comparePrice:
-                data.comparePrice !== undefined
-                  ? Number(data.comparePrice)
-                  : undefined,
-              costPrice:
-                data.costPrice !== undefined
-                  ? Number(data.costPrice)
-                  : undefined,
               stock: Number(data.stock ?? 0),
               lowStockAlert:
                 data.lowStockAlert !== undefined
@@ -436,8 +424,6 @@ updateSKU: async (skuId: string, data: Partial<CreateProductSKUDto> | FormData) 
       const payload: Partial<CreateProductSKUDto> = {
         ...data,
         price: data.price !== undefined ? Number(data.price) : undefined,
-        comparePrice: data.comparePrice !== undefined ? Number(data.comparePrice) : undefined,
-        costPrice: data.costPrice !== undefined ? Number(data.costPrice) : undefined,
         stock: data.stock !== undefined ? Number(data.stock) : undefined,
         lowStockAlert: data.lowStockAlert !== undefined ? Number(data.lowStockAlert) : undefined,
         weight: data.weight !== undefined ? Number(data.weight) : undefined,
