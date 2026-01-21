@@ -6,8 +6,10 @@ import { CashPaymentStrategy } from './strategies/cash.strategy';
 import { PaymentController } from './payments.controller';
 import { PaymentEvent } from './payments.event';
 import { EmailService } from 'src/common/services/email.service';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
+  imports: [AuthModule],
   providers: [
     PrismaService,
     CashPaymentStrategy,

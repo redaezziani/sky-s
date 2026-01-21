@@ -11,7 +11,6 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { PaymentsModule } from './payments/payments.module';
 import { SettingsModule } from './settings/settings.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { CartModule } from './cart/cart.module';
 import { LogsModule } from './logs/logs.module';
 import { LotsModule } from './lots/lots.module';
 import { LotDetailsModule } from './lot-details/lot-details.module';
@@ -31,7 +30,6 @@ import { LotArrivalsModule } from './lot-arrivals/lot-arrivals.module';
     PaymentsModule,
     SettingsModule,
     EventEmitterModule.forRoot(),
-    CartModule,
     LogsModule,
     LotsModule,
     LotDetailsModule,

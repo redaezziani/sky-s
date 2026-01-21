@@ -1,38 +1,46 @@
-# Stage 1: build
+FROM node:22-alpine AS deps
+WORKDIR /app
+
+RUN apk add --no-cache libc6-compat
+
+COPY package*.json ./
+RUN npm ci
+
 FROM node:22-alpine AS builder
 WORKDIR /app
 
-# Install dependencies needed to build native modules
-RUN apk add --no-cache python3 make g++ libc6-compat cairo-dev pango-dev giflib-dev jpeg-dev libpng-dev musl-dev bash
+COPY --from=deps /app/node_modules ./node_modules
 
-# Copy package files and install
-COPY package*.json ./
-RUN npm install
-
-# Copy source code
 COPY . .
 
-# Generate Prisma client
-RUN npx prisma generate
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 
-# Build the project
 RUN npm run build
 
-# Stage 2: runtime
-FROM node:22-alpine
+FROM node:22-alpine AS runner
 WORKDIR /app
 
-# Copy package files and installed dependencies
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
 
-# Copy compiled app
-COPY --from=builder /app/dist ./dist
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Copy prisma folder
-COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
-# Copy generated Prisma client
-COPY --from=builder /app/generated ./generated
+RUN chown -R nextjs:nodejs /app
 
-CMD ["node", "dist/main.js"]
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+CMD ["node", "server.js"]

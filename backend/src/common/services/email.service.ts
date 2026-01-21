@@ -11,7 +11,7 @@ export class EmailService {
   async sendTestEmail(
     to: string,
     subject = 'Test Email',
-    text = 'Hello from MailHog!',
+    text = 'Test email from Sky-S Application',
   ) {
     try {
       await this.mailerService.sendMail({
